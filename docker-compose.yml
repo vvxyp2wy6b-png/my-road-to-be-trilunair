@@ -1,0 +1,31 @@
+# ==============================================================================
+# تكوين Docker Compose للنشر المتكامل
+# My Road to be Trilunair Dr.MaJoOoOoOoD
+# ==============================================================================
+
+services:
+  trilunair-command-center:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trilunair-command-center
+    ports:
+      - "8000:8000"
+    environment:
+      - TRILUNAIR_DEFAULT_MODE=PAPER
+      - TRILUNAIR_ADMIN_PIN=${TRILUNAIR_ADMIN_PIN:-7777}
+      - TRILUNAIR_DB_PATH=/app/backend/data/trilunair.db
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY:-}
+    volumes:
+      - trilunair_sqlite_data:/app/backend/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/api/system/status"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  trilunair_sqlite_data:
