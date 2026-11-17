@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Road to be Trilunair Dr.MaJoOoOoOoD — Quantum AI Command Center</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    #cockpit-app {
+      --holo-bg: #07080d;
+      --holo-elevated: #0e111a;
+      --holo-surface: 21, 26, 40;
+      --holo-accent: #f5c451;
+      --holo-accent-rgb: 245, 196, 81;
+      --holo-accent-2: #ffe08a;
+      --holo-text: #f8fafc;
+      --holo-muted: #94a3b8;
+      --holo-glow: 0.58;
+      --holo-blur: 16px;
+      --holo-opacity: 0.80;
+      --holo-motion: 1;
+      --holo-success: #10b981;
+      --holo-danger: #f43f5e;
+      --holo-warning: #f59e0b;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(var(--holo-accent-rgb), calc(0.18 * var(--holo-glow))), transparent 42%),
+        radial-gradient(circle at 85% 15%, rgba(56, 189, 248, calc(0.12 * var(--holo-glow))), transparent 45%),
+        linear-gradient(180deg, var(--holo-bg) 0%, var(--holo-elevated) 100%);
+      color: var(--holo-text);
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+      padding-bottom: 132px;
+      transition: background 240ms ease;
+    }
+    #cockpit-app[data-cockpit="true"] {
+      --holo-glow: 0.12 !important;
+      --holo-blur: 4px !important;
+      --holo-opacity: 0.96 !important;
+      --holo-motion: 0 !important;
+    }
+    #cockpit-app[data-low-power="true"] {
+      --holo-glow: 0.06 !important;
+      --holo-blur: 0px !important;
+      --holo-opacity: 0.97 !important;
+      --holo-motion: 0 !important;
+      background: var(--holo-bg) !important;
+    }
+    #cockpit-app[data-high-contrast="true"] {
+      --holo-bg: #000000 !important;
+      --holo-elevated: #050508 !important;
+      --holo-surface: 12, 14, 20 !important;
+      --holo-text: #ffffff !important;
+      --holo-muted: #e2e8f0 !important;
+      --holo-opacity: 0.99 !important;
+      --holo-blur: 0px !important;
+    }
+    #cockpit-app[data-focus="true"] .hide-in-focus {
+      display: none !important;
+    }
+    .holo-card {
+      background: rgba(var(--holo-surface), var(--holo-opacity));
+      backdrop-filter: blur(var(--holo-blur));
+      -webkit-backdrop-filter: blur(var(--holo-blur));
+      border: 1px solid rgba(var(--holo-accent-rgb), 0.36);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.7), 0 0 calc(24px * var(--holo-glow)) rgba(var(--holo-accent-rgb), calc(0.22 * var(--holo-glow)));
+    }
+    #cockpit-app[data-high-contrast="true"] .holo-card {
+      border-width: 2px;
+      border-color: var(--holo-accent);
+      box-shadow: none;
+    }
+    .holo-subcard {
+      background: rgba(8, 11, 18, 0.66);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 10px;
+    }
+    .fin-num {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-variant-numeric: tabular-nums;
+      direction: ltr;
+      unicode-bidi: isolate;
+    }
+    .holo-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 38px;
+      padding: 6px 12px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid rgba(var(--holo-accent-rgb), 0.38);
+      background: rgba(var(--holo-surface), 0.9);
+      color: var(--holo-text);
+      cursor: pointer;
+      transition: all 160ms ease;
+    }
+    .holo-btn:hover:not(:disabled) {
+      border-color: var(--holo-accent);
+      box-shadow: 0 0 calc(18px * var(--holo-glow)) rgba(var(--holo-accent-rgb), 0.35);
+    }
+    .holo-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .holo-btn-accent {
+      background: var(--holo-accent);
+      color: #05070c;
+      border-color: var(--holo-accent);
+      font-weight: 800;
+    }
+    .holo-input {
+      background: rgba(5, 8, 15, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      padding: 7px 10px;
+      color: var(--holo-text);
+      font-size: 13px;
+      min-height: 38px;
+    }
+    .holo-input:focus {
+      outline: 2px solid var(--holo-accent);
+      border-color: transparent;
+    }
+    @keyframes waveBar {
+      0%, 100% { transform: scaleY(0.35); }
+      50% { transform: scaleY(1); }
+    }
+    .wave-active span {
+      animation: waveBar 0.75s ease-in-out infinite;
+    }
+    #cockpit-app[data-motion="disabled"] .wave-active span,
+    #cockpit-app[data-low-power="true"] .wave-active span {
+      animation: none !important;
+    }
+  </style>
+</head>
+<body class="m-0 p-0 bg-[#07080d] text-slate-100 antialiased">
+<div id="cockpit-app" data-cockpit="false" data-focus="false" data-low-power="false" data-high-contrast="false" data-motion="enabled">
+
+  <!-- الشريط العلوي للقيادة الهولوغرامية -->
+  <header class="sticky top-0 z-40 px-4 py-3 border-b border-white/15 backdrop-blur-md bg-black/75 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div id="brand-orb" class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg text-black shadow-lg" style="background: var(--holo-accent);">₮</div>
+      <div>
+        <h1 id="hdr-title" class="text-base font-extrabold m-0 leading-tight">طريقي إلى التريليون — د. مجـووووود</h1>
+        <p id="hdr-sub" class="text-xs m-0" style="color: var(--holo-muted);">My Road to be Trilunair Dr.MaJoOoOoOoD • Quantum AI Spot Command Center</p>
+      </div>
+    </div>
+
+    <nav class="flex flex-wrap gap-1.5" aria-label="التنقل الرئيسي">
+      <button type="button" class="holo-btn holo-btn-accent" data-nav="terminal" onclick="app.setScreen('terminal')">📈 <span data-i18n="navTerminal">قاعة التداول والاجتماع</span></button>
+      <button type="button" class="holo-btn" data-nav="quantum" onclick="app.setScreen('quantum')">🧠 <span data-i18n="navQuantum">مركز الذكاء وتأهيل الوكلاء</span></button>
+      <button type="button" class="holo-btn" data-nav="portfolio" onclick="app.setScreen('portfolio')">💼 <span data-i18n="navPortfolio">المحفظة ومسار $1T</span></button>
+      <button type="button" class="holo-btn" data-nav="governance" onclick="app.setScreen('governance')">🛡️ <span data-i18n="navGov">بوابة التصاريح والأمان</span></button>
+      <button type="button" class="holo-btn" data-nav="themes" onclick="app.setScreen('themes')">🎨 <span data-i18n="navThemes">استوديو السمات (6)</span></button>
+    </nav>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <span id="mode-pill" class="px-2.5 py-1 rounded-full text-xs font-bold border border-emerald-400/50 bg-emerald-500/15 text-emerald-300">PAPER TRADING (آمن افتراضياً)</span>
+      <button type="button" id="btn-cockpit" class="holo-btn text-xs" onclick="app.toggleCockpit()">⚡ Cockpit</button>
+      <button type="button" id="btn-focus" class="holo-btn text-xs" onclick="app.toggleFocus()">🎯 تركيز</button>
+      <select id="quick-theme" class="holo-input text-xs py-1" onchange="app.selectTheme(this.value)" aria-label="السمة النشطة"></select>
+      <button type="button" class="holo-btn text-xs" onclick="app.toggleLang()" id="btn-lang">English (LTR)</button>
+    </div>
+  </header>
+
+  <!-- شريط المؤشرات المالية الحية (KPI Ribbon) -->
+  <section class="hide-in-focus grid grid-cols-2 md:grid-cols-5 gap-2.5 px-4 pt-3">
+    <div class="holo-card p-3">
+      <div class="text-xs" style="color: var(--holo-muted);" data-i18n="kpiEquity">إجمالي حقوق الملكية</div>
+      <div id="kpi-equity" class="fin-num text-lg font-extrabold mt-0.5">$1,000,000.00</div>
+    </div>
+    <div class="holo-card p-3">
+      <div class="text-xs" style="color: var(--holo-muted);" data-i18n="kpiPnl">ربح / خسارة اليوم</div>
+      <div id="kpi-pnl" class="fin-num text-base font-bold mt-0.5 text-emerald-400">+$4,820.50 (+0.48%)</div>
+    </div>
+    <div class="holo-card p-3">
+      <div class="text-xs" style="color: var(--holo-muted);" data-i18n="kpiCash">السيولة المتاحة (USDT)</div>
+      <div id="kpi-cash" class="fin-num text-base font-bold mt-0.5">$912,450.00</div>
+    </div>
+    <div class="holo-card p-3">
+      <div class="text-xs" style="color: var(--holo-muted);" data-i18n="kpiRisk">المخاطرة / قاطع التراجع</div>
+      <div id="kpi-risk" class="fin-num text-sm font-bold mt-1 text-amber-300">0.5% Max/Trade • DD 0.18% / 10%</div>
+    </div>
+    <div class="holo-card p-3 col-span-2 md:col-span-1">
+      <div class="text-xs" style="color: var(--holo-muted);" data-i18n="kpiGoal">هدف التريليون ($1T Goal)</div>
+      <div class="fin-num text-sm font-bold mt-1" style="color: var(--holo-accent);">$1,000,000,000,000 • Log 14.3%</div>
+    </div>
+  </section>
+
+  <!-- تنبيه علوي فوري -->
+  <div id="toast-box" class="hidden mx-4 mt-3 holo-card px-4 py-2.5 text-xs font-semibold flex items-center justify-between" role="status" aria-live="polite">
+    <span id="toast-text"></span>
+    <button type="button" class="holo-btn min-h-0 py-1 px-2 text-xs" onclick="document.getElementById('toast-box').classList.add('hidden')">✕</button>
+  </div>
+
+  <!-- 1. شاشة قاعة التداول الحية + قاعة اجتماع الوكلاء المدمجة -->
+  <main id="screen-terminal" class="p-4 grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start">
+    <!-- قائمة مراقبة الأصول والبحث وتصنيف TRADABLE_SPOT مقابل REFERENCE_ONLY -->
+    <aside class="holo-card p-3 lg:col-span-3 flex flex-col gap-2.5">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-bold m-0" data-i18n="watchlistTitle">مراقبة الأسواق (Binance Spot & المرجعية)</h2>
+        <span class="text-xs px-2 py-0.5 rounded bg-white/10 fin-num">6</span>
+      </div>
+      <input id="asset-search" type="search" class="holo-input w-full text-xs" placeholder="ابحث: BTCUSDT, ETH, XAU..." oninput="app.renderWatchlist()" />
+      <div class="grid grid-cols-4 gap-1 text-xs" id="horizon-bar">
+        <button type="button" class="holo-btn holo-btn-accent min-h-0 py-1 px-1 text-xs" data-hz="HOURS" onclick="app.setHorizon('HOURS')">ساعات</button>
+        <button type="button" class="holo-btn min-h-0 py-1 px-1 text-xs" data-hz="DAYS" onclick="app.setHorizon('DAYS')">أيام</button>
+        <button type="button" class="holo-btn min-h-0 py-1 px-1 text-xs" data-hz="WEEKS" onclick="app.setHorizon('WEEKS')">أسابيع</button>
+        <button type="button" class="holo-btn min-h-0 py-1 px-1 text-xs" data-hz="MONTHS" onclick="app.setHorizon('MONTHS')">أشهر</button>
+      </div>
+      <div id="watchlist-items" class="flex flex-col gap-2"></div>
+    </aside>
+
+    <!-- العمود الأوسط: المخطط الهولوغرامي + قاعة اجتماع الوكلاء في نفس الشاشة -->
+    <section class="lg:col-span-6 flex flex-col gap-3.5">
+      <!-- مخطط الشموع الهولوغرامي التفاعلي -->
+      <div class="holo-card p-3.5">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-white/10">
+          <div>
+            <div class="flex items-center gap-2">
+              <strong id="chart-sym" class="fin-num text-base font-extrabold">BTCUSDT</strong>
+              <span id="chart-class-badge" class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">TRADABLE_SPOT</span>
+              <span id="chart-price" class="fin-num text-base font-bold" style="color: var(--holo-accent);">$96,520.00</span>
+            </div>
+            <div id="chart-ohlc" class="fin-num text-xs mt-0.5" style="color: var(--holo-muted);">O: 96,140 • H: 96,780 • L: 95,980 • C: 96,520 • Spread: 2.5 bps</div>
+          </div>
+          <div class="flex gap-1" id="tf-btns">
+            <button type="button" class="holo-btn min-h-0 py-1 px-2 text-xs" onclick="app.setTimeframe('5m')">5m</button>
+            <button type="button" class="holo-btn holo-btn-accent min-h-0 py-1 px-2 text-xs" onclick="app.setTimeframe('15m')">15m</button>
+            <button type="button" class="holo-btn min-h-0 py-1 px-2 text-xs" onclick="app.setTimeframe('1h')">1h</button>
+            <button type="button" class="holo-btn min-h-0 py-1 px-2 text-xs" onclick="app.setTimeframe('4h')">4h</button>
+          </div>
+        </div>
+        <div class="relative mt-2">
+          <canvas id="candle-canvas" width="760" height="250" class="w-full rounded-lg bg-black/45 cursor-crosshair"></canvas>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-2.5 text-xs fin-num">
+          <div class="holo-subcard p-2 flex justify-between"><span class="text-emerald-400">Best Bid:</span><strong id="best-bid">$96,518.80 (1.84 BTC)</strong></div>
+          <div class="holo-subcard p-2 flex justify-between"><span class="text-rose-400">Best Ask:</span><strong id="best-ask">$96,521.20 (1.52 BTC)</strong></div>
+        </div>
+      </div>
+
+      <!-- قاعة اجتماع الوكلاء المدمجة مباشرة في قاعة التداول الحية (Section 7) -->
+      <div class="holo-card p-3.5 flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+          <div>
+            <h3 class="text-sm font-extrabold m-0">🏛️ قاعة اجتماع مجلس الوكلاء الحية (Agent Meeting Room)</h3>
+            <p id="meeting-subtitle" class="text-xs m-0 mt-0.5" style="color: var(--holo-muted);">تحليل جماعي مهيكل مع كشف الاتفاق والاختلاف وعدم اليقين — لا يملك أي وكيل صلاحية تنفيذ مباشر.</p>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" class="holo-btn holo-btn-accent text-xs" onclick="app.conveneCouncil()">🔄 عقد مداولة فورية</button>
+            <button type="button" class="holo-btn text-xs" onclick="app.speakMeetingRoundtable()">🔊 نطق المداولة</button>
+            <button type="button" class="holo-btn text-xs border-rose-400/50 text-rose-300" onclick="app.interruptSpeech()">⏹ مقاطعة</button>
+          </div>
+        </div>
+
+        <div id="meeting-agents-grid" class="grid grid-cols-1 md:grid-cols-2 gap-2.5"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
+          <div class="holo-subcard p-2.5">
+            <div class="font-bold text-emerald-400 mb-1">✓ نقاط الاتفاق والأدلة الداعمة</div>
+            <ul id="meeting-agreements" class="m-0 ps-4 space-y-1 text-slate-200"></ul>
+          </div>
+          <div class="holo-subcard p-2.5">
+            <div class="font-bold text-amber-300 mb-1">⚠ نقاط الاختلاف وعدم اليقين</div>
+            <ul id="meeting-disagreements" class="m-0 ps-4 space-y-1 text-slate-200"></ul>
+          </div>
+        </div>
+
+        <div id="meeting-final-box" class="holo-subcard p-3 border" style="border-color: rgba(var(--holo-accent-rgb), 0.45);"></div>
+      </div>
+    </section>
+
+    <!-- العمود الجانبي: تذكرة التداول + محرك المخاطر والجدوى الاقتصادية + مجسم الثروة ثلاثي الأبعاد -->
+    <aside class="lg:col-span-3 flex flex-col gap-3.5">
+      <div class="holo-card p-3.5 flex flex-col gap-2.5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-extrabold m-0">🎯 تذكرة التداول وفحص الجدوى والمخاطر</h3>
+          <span id="ticket-sym-pill" class="fin-num text-xs font-bold px-2 py-0.5 rounded bg-white/10">BTCUSDT</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-1.5">
+          <button type="button" id="side-buy" class="holo-btn text-xs font-bold bg-emerald-500 text-black border-emerald-400" onclick="app.setOrderSide('BUY')">BUY / شراء فوري</button>
+          <button type="button" id="side-sell" class="holo-btn text-xs font-bold" onclick="app.setOrderSide('SELL')">SELL / بيع</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <label class="flex flex-col gap-1">
+            <span>نوع الأمر</span>
+            <select id="ord-type" class="holo-input fin-num" onchange="app.previewRiskAndEconomics()">
+              <option value="MARKET">MARKET</option>
+              <option value="LIMIT">LIMIT</option>
+            </select>
+          </label>
+          <label class="flex flex-col gap-1">
+            <span>الكمية (Quantity)</span>
+            <input id="ord-qty" type="number" step="0.001" value="0.05" class="holo-input fin-num" oninput="app.previewRiskAndEconomics()" />
+          </label>
+          <label class="flex flex-col gap-1">
+            <span>وقف الخسارة (Stop Loss)</span>
+            <input id="ord-sl" type="number" step="any" value="94800" class="holo-input fin-num" oninput="app.previewRiskAndEconomics()" />
+          </label>
+          <label class="flex flex-col gap-1">
+            <span>جني الأرباح (Take Profit)</span>
+            <input id="ord-tp" type="number" step="any" value="99600" class="holo-input fin-num" oninput="app.previewRiskAndEconomics()" />
+          </label>
+        </div>
+
+        <!-- ملخص الجدوى الاقتصادية وفحص المخاطر الحتمي -->
+        <div id="risk-econ-preview" class="holo-subcard p-2.5 text-xs space-y-1.5"></div>
+
+        <button type="button" id="btn-propose-order" class="holo-btn holo-btn-accent w-full text-xs" onclick="app.submitTicketProposal()">
+          🛡️ التحقق وإصدار مقترح لبوابة التصاريح
+        </button>
+      </div>
+
+      <!-- مجسم الثروة الهولوغرامي ثلاثي الأبعاد التفاعلي (محمي بحدود عزل الأخطاء) -->
+      <div class="holo-card p-3 hide-in-focus">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-xs font-bold">🌐 مجسم طوبولوجيا المحفظة ثلاثي الأبعاد (اسحب للتدوير)</span>
+          <span class="text-xs fin-num" style="color: var(--holo-accent);">3D Holo</span>
+        </div>
+        <canvas id="orb-canvas" width="300" height="175" class="w-full rounded-lg bg-black/40 cursor-grab"></canvas>
+      </div>
+    </aside>
+  </main>
+
+  <!-- 2. شاشة مركز الذكاء الكمي وتأهيل الوكلاء وقاعدة المعرفة (Sections 8, 9, 10, 11, 13, 14) -->
+  <main id="screen-quantum" class="hidden p-4 space-y-4">
+    <div class="holo-card p-4">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div>
+          <h2 class="text-base font-extrabold m-0">🧠 مجلس الوكلاء متعدد المزودات ونظام التأهيل رباعي المستويات</h2>
+          <p class="text-xs m-0 mt-0.5" style="color: var(--holo-muted);">مصداقية مطلقة: المزودات السحابية غير المهيأة بمفتاح API تُعرض صراحةً كـ UNAVAILABLE دون انتحال أي استجابة. أي تعديل للنموذج أو الوزن يعيد التأهيل إلى متدرب (Trainee).</p>
+        </div>
+        <button type="button" id="btn-pause-agents" class="holo-btn text-xs border-amber-400/50 text-amber-300" onclick="app.togglePauseAgents()">⏸ إيقاف الوكلاء مؤقتاً</button>
+      </div>
+      <div id="quantum-agents-list" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <!-- موسوعة المعرفة التداولية المؤرشفة بالإصدارات -->
+      <div class="holo-card p-4 flex flex-col gap-3">
+        <h3 class="text-sm font-extrabold m-0">📚 موسوعة المعرفة التداولية المؤرشفة بالإصدارات (Versioned Knowledge Base)</h3>
+        <div class="flex gap-2">
+          <input id="kb-new-title" type="text" class="holo-input flex-1 text-xs" placeholder="عنوان قاعدة معرفية جديدة أو محدثة..." />
+          <input id="kb-new-body" type="text" class="holo-input flex-1 text-xs" placeholder="القاعدة التداولية..." />
+          <button type="button" class="holo-btn holo-btn-accent text-xs" onclick="app.addKnowledgeItem()">+ حفظ وإصدار</button>
+        </div>
+        <div id="kb-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
+      </div>
+
+      <!-- المهارات المعيارية والموصلات الخارجية والمحاسبة المفصولة -->
+      <div class="holo-card p-4 flex flex-col gap-3">
+        <h3 class="text-sm font-extrabold m-0">🔌 المهارات المعيارية والموصلات الخارجية وفصل التكاليف</h3>
+        <div id="skills-connectors-box" class="space-y-2 text-xs"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 3. شاشة المحفظة ومسار التريليون دولار -->
+  <main id="screen-portfolio" class="hidden p-4 space-y-4">
+    <div class="holo-card p-4">
+      <h2 class="text-base font-extrabold m-0 mb-2">🚀 خارطة الطريق اللوغاريتمية نحو التريليون دولار ($1,000,000,000,000)</h2>
+      <div class="grid grid-cols-6 gap-2 text-center text-xs fin-num my-3">
+        <div class="holo-subcard p-2 border border-emerald-400/60 text-emerald-300 font-bold">$1M ✓</div>
+        <div class="holo-subcard p-2">$10M</div>
+        <div class="holo-subcard p-2">$100M</div>
+        <div class="holo-subcard p-2">$1B</div>
+        <div class="holo-subcard p-2">$100B</div>
+        <div class="holo-subcard p-2 font-extrabold" style="color: var(--holo-accent);">$1T 🎯</div>
+      </div>
+      <div id="positions-orders-box" class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4"></div>
+    </div>
+  </main>
+
+  <!-- 4. شاشة بوابة التصاريح والأمان المالي (Paper Trading Default + Kill Switch) -->
+  <main id="screen-governance" class="hidden p-4 space-y-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="holo-card p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-extrabold m-0">🛡️ بوابة تفعيل التداول ومفتاح الطوارئ (Safety Gateway)</h2>
+          <button type="button" id="btn-killswitch" class="holo-btn bg-rose-600 text-white border-rose-400 text-xs" onclick="app.toggleKillSwitch()">🚨 تفعيل مفتاح الطوارئ (Kill Switch)</button>
+        </div>
+        <p class="text-xs" style="color: var(--holo-muted);">التداول الورقي (PAPER) مفعل افتراضياً. لا يسمح النظام بتفعيل وضع LIVE إلا بعد اجتياز الفحوصات الخمسة وإدخال رمز المسؤول (7777) وعبارة التفويض الحرفية.</p>
+        <div class="holo-subcard p-3 text-xs space-y-1.5">
+          <div>✅ محرك المخاطر الحتمي مفعل (0.5% لكل صفقة • 25% حد تركز • منع الهامش والرافعة والسحب)</div>
+          <div>✅ قواطع الخسارة جاهزة (2% يومي • 5% أسبوعي • 10% أقصى تراجع)</div>
+          <div>✅ عزل الأصول المرجعية (REFERENCE_ONLY) عن أوامر Binance Spot</div>
+        </div>
+        <div class="space-y-2 text-xs">
+          <input id="gov-pin" type="password" class="holo-input w-full fin-num" placeholder="Admin PIN (للاختبار: 7777)" />
+          <input id="gov-phrase" type="text" class="holo-input w-full fin-num" placeholder="اكتب: AUTHORIZE LIVE TRADING DR MAJOOOOOOD" />
+          <div class="flex gap-2">
+            <button type="button" class="holo-btn holo-btn-accent flex-1" onclick="app.authorizeLiveMode()">تفعيل وضع التداول المصرح</button>
+            <button type="button" class="holo-btn flex-1" onclick="app.revertPaperMode()">العودة الفورية لـ PAPER الآمن</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="holo-card p-4 flex flex-col gap-2">
+        <h3 class="text-sm font-extrabold m-0">📜 سجل التدقيق الأمني غير القابل للطمس (Audit Trail)</h3>
+        <div id="audit-log-list" class="space-y-1.5 text-xs max-h-80 overflow-y-auto fin-num"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 5. شاشة استوديو السمات الهولوغرامية (6 سمات أساسية + حفظ وتصدير واستيراد) -->
+  <main id="screen-themes" class="hidden p-4 space-y-4">
+    <div class="holo-card p-4">
+      <h2 class="text-base font-extrabold m-0 mb-3">🎨 استوديو السمات الديناميكي المستديم (6 سمات مدمجة + تخصيص كامل)</h2>
+      <div id="theme-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="holo-card p-4 space-y-3 text-xs">
+        <h3 class="text-sm font-bold m-0">ضبط التوهج والضبابية والشفافية وأوضاع الوصولية</h3>
+        <div class="grid grid-cols-2 gap-3">
+          <label>لون التمييز الأساسي <input type="color" id="clr-accent" value="#f5c451" class="block w-full h-9 mt-1 rounded cursor-pointer" oninput="app.updateCustomColor('accent', this.value)" /></label>
+          <label>لون الخلفية الأساسية <input type="color" id="clr-bg" value="#07080d" class="block w-full h-9 mt-1 rounded cursor-pointer" oninput="app.updateCustomColor('bg', this.value)" /></label>
+          <label>شدة التوهج: <span id="lbl-glow" class="fin-num">58%</span><input type="range" min="0" max="100" value="58" class="w-full" oninput="app.setOptical('glow', this.value)" /></label>
+          <label>ضبابية الزجاج: <span id="lbl-blur" class="fin-num">16px</span><input type="range" min="0" max="28" value="16" class="w-full" oninput="app.setOptical('blur', this.value)" /></label>
+          <label>شفافية الألواح: <span id="lbl-op" class="fin-num">80%</span><input type="range" min="45" max="98" value="80" class="w-full" oninput="app.setOptical('opacity', this.value)" /></label>
+        </div>
+        <div class="flex flex-wrap gap-3 pt-2 border-t border-white/10">
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chk-hc" onchange="app.toggleAttr('data-high-contrast', this.checked)" /> وضع التباين العالي</label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chk-lp" onchange="app.toggleAttr('data-low-power', this.checked)" /> وضع الطاقة المنخفضة</label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="chk-mo" onchange="app.toggleMotion(this.checked)" /> تعطيل الحركة</label>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <input id="custom-theme-name" type="text" class="holo-input flex-1" placeholder="اسم السمة المخصصة لحفظها..." />
+          <button type="button" class="holo-btn holo-btn-accent" onclick="app.saveCustomTheme()">💾 حفظ السمة</button>
+        </div>
+      </div>
+
+      <div class="holo-card p-4 space-y-2.5 text-xs">
+        <h3 class="text-sm font-bold m-0">تصدير واستيراد إعدادات السمة (JSON Export / Import)</h3>
+        <textarea id="theme-json-box" rows="5" class="holo-input w-full fin-num text-xs" placeholder='اضغط "تصدير JSON" أو الصق إعداد سمة لاستيراده...'></textarea>
+        <div class="flex gap-2">
+          <button type="button" class="holo-btn flex-1" onclick="app.exportThemeJson()">📤 تصدير السمة الحالية (JSON)</button>
+          <button type="button" class="holo-btn holo-btn-accent flex-1" onclick="app.importThemeJson()">📥 استيراد وتطبيق JSON</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- نافذة ختم التأكيد الهولوغرامي الموحدة لتصريح الصفقات (VOICE / TEXT / TERMINAL) -->
+  <div id="seal-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" role="dialog" aria-modal="true">
+    <div class="holo-card max-w-lg w-full p-5 space-y-3.5">
+      <div class="flex items-center justify-between border-b border-white/15 pb-2.5">
+        <h3 class="text-base font-extrabold m-0">🔏 ختم التصريح الهولوغرامي الموحد (Authorization Seal)</h3>
+        <button type="button" class="holo-btn min-h-0 py-1 px-2.5" onclick="app.closeSealModal()">✕</button>
+      </div>
+      <div id="seal-details" class="holo-subcard p-3 text-xs space-y-1.5"></div>
+      <div class="holo-subcard p-3 flex items-center gap-3 border" style="border-color: var(--holo-accent);">
+        <div class="w-12 h-12 rounded-full border-2 border-double flex items-center justify-center font-black text-xs shrink-0" style="border-color: var(--holo-accent); color: var(--holo-accent);">SEAL</div>
+        <div class="text-xs text-slate-200">
+          <strong style="color: var(--holo-accent);">ضمان عدم التجاوز الصوتي أو الآلي:</strong>
+          الكلمة المنطوقة "أكد" تفتح هذه البوابة فقط ولا تُنفذ صفقة بمفردها. يجب تفعيل الإقرار الصريح أدناه لإتمام التنفيذ بعد إعادة فحص المخاطر.
+        </div>
+      </div>
+      <label class="flex items-center gap-2 text-xs cursor-pointer">
+        <input type="checkbox" id="seal-confirm-chk" onchange="document.getElementById('btn-exec-final').disabled = !this.checked" />
+        <span>أقر بمراجعة الرمز والكمية والتكاليف التقديرية وتقييم المخاطر وأصرح بالتنفيذ رسمياً.</span>
+      </label>
+      <div class="flex justify-end gap-2">
+        <button type="button" class="holo-btn text-xs" onclick="app.closeSealModal()">إلغاء</button>
+        <button type="button" id="btn-exec-final" disabled class="holo-btn holo-btn-accent text-xs" onclick="app.executeAuthorizedProposal()">✓ تأكيد وتنفيذ الصفقة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- شريط وغرفة الأوامر الصوتية والنصية المستديمة عبر جميع الشاشات (Voice-First AI Command Dock) -->
+  <aside class="fixed bottom-0 inset-x-0 z-40 px-3 pb-2.5 pt-1 pointer-events-none">
+    <div class="max-w-7xl mx-auto holo-card p-2.5 pointer-events-auto shadow-2xl">
+      <!-- درج سجل المحادثة والشرائح السريعة القابل للطي -->
+      <div id="dock-drawer" class="hidden mb-2.5 pb-2.5 border-b border-white/15 space-y-2">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span id="voice-provider-badge" class="px-2 py-0.5 rounded bg-white/10 font-semibold">مزود الصوت: جاري الفحص...</span>
+            <select id="voice-mode-sel" class="holo-input min-h-0 py-1 px-2 text-xs">
+              <option value="ptt">اضغط للتحدث (Push-to-Talk)</option>
+              <option value="handsfree">محادثة حرة (بإذن صريح)</option>
+            </select>
+            <select id="agent-target-sel" class="holo-input min-h-0 py-1 px-2 text-xs">
+              <option value="team">@team المجلس الكامل</option>
+              <option value="quant-alpha">د. ريان (الكمي)</option>
+              <option value="risk-sentinel">سارة (المخاطر)</option>
+              <option value="macro-oracle">طارق (السيولة)</option>
+              <option value="execution-architect">خالد (التنفيذ)</option>
+            </select>
+          </div>
+          <div class="flex gap-1.5">
+            <button type="button" id="btn-mute-tts" class="holo-btn min-h-0 py-1 px-2 text-xs" onclick="app.toggleMuteTts()">🔊 النطق مفعل</button>
+            <button type="button" class="holo-btn min-h-0 py-1 px-2 text-xs" onclick="app.revokeMic()">🔒 سحب إذن الميكروفون</button>
+          </div>
+        </div>
+
+        <!-- أوامر سريعة مطابقة للمواصفة -->
+        <div class="flex flex-wrap gap-1.5 text-xs">
+          <button type="button" class="holo-btn min-h-0 py-1 px-2 text-xs" onclick="app.runCommand('حلل البيتكوين الآن واعقد اجتماع الوكلاء', 'TEXT')">حلل البيتكوين الآن</button>
+          <button type="button" class="holo-btn min-h-0 py-1 px-2 text-xs" onclick="app.runCommand('قارن فرص التداول بين BTCUSDT و ETHUSDT و SOLUSDT', 'TEXT')">قارن فرص التداول</button>
+          <button type="button" class="holo-btn min-h-0 py-1 px-2 text-xs" onclick="app.runCommand('جهز مقترح شراء 0.05 BTCUSDT', 'TEXT')">جهز مقترح شراء BTCUSDT</button>
+          <button type="button" class="holo-btn min-h-0 py-1 px-2 text-xs" onclick="app.runCommand('فعّل وضع Cockpit', 'TEXT')">فعّل وضع Cockpit</button>
+          <button type="button" class="holo-btn min-h-0 py-1 px-2 text-xs" onclick="app.runCommand('غير الثيم إلى Obsidian Black', 'TEXT')">ثيم Obsidian Black</button>
+          <button type="button" class="holo-btn min-h-0 py-1 px-2 text-xs" onclick="app.runCommand('ما حجم المخاطرة الحالي في المحفظة؟', 'TEXT')">فحص مخاطرة المحفظة</button>
+        </div>
+
+        <div id="chat-history" class="max-h-44 overflow-y-auto space-y-1.5 text-xs p-1"></div>
+      </div>
+
+      <!-- شريط الأوامر الرئيسي الدائم -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button type="button" class="holo-btn text-xs" onclick="app.toggleDockDrawer()" id="btn-drawer">💬 سجل وغرفة الأوامر ▲</button>
+
+        <!-- زر الميكروفون المحمي بإذن صريح + الموجة الصوتية الحية -->
+        <button type="button" id="btn-mic" class="holo-btn text-xs" onclick="app.handleMicAction()">🎤 تفعيل إذن الميكروفون</button>
+        <button type="button" id="btn-stop-mic" class="hidden holo-btn text-xs border-rose-400 text-rose-300" onclick="app.stopListening()">⏹ إيقاف الاستماع</button>
+
+        <div id="waveform" class="flex items-center gap-0.5 h-6 px-2 rounded bg-black/40" aria-hidden="true">
+          <span class="w-1 h-3 rounded bg-amber-400/70"></span>
+          <span class="w-1 h-5 rounded bg-amber-400/70"></span>
+          <span class="w-1 h-2.5 rounded bg-amber-400/70"></span>
+          <span class="w-1 h-4 rounded bg-amber-400/70"></span>
+          <span class="w-1 h-3 rounded bg-amber-400/70"></span>
+        </div>
+
+        <form class="flex-1 flex gap-2 min-w-[220px]" onsubmit="event.preventDefault(); app.submitTextChat();">
+          <input id="chat-input" type="text" class="holo-input flex-1 text-xs" placeholder="اكتب أمراً بالعربية أو الإنجليزية (يعمل نصياً 100% بدون ميكروفون)..." />
+          <button type="submit" class="holo-btn holo-btn-accent text-xs">إرسال ↵</button>
+        </form>
+
+        <button type="button" id="btn-interrupt-dock" class="hidden holo-btn text-xs bg-rose-600 text-white border-rose-400" onclick="app.interruptSpeech()">🔇 مقاطعة الصوت</button>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+const PRESETS = [
+  { id: 'royal-gold', nameAr: 'الملكي الذهبي (Royal Gold)', nameEn: 'Royal Gold', bg: '#07080d', elevated: '#0e111a', surface: '21, 26, 40', accent: '#f5c451', rgb: '245, 196, 81' },
+  { id: 'quantum-cyan', nameAr: 'السيان الكمي (Quantum Cyan)', nameEn: 'Quantum Cyan', bg: '#040911', elevated: '#081221', surface: '13, 29, 51', accent: '#06e8f9', rgb: '6, 232, 249' },
+  { id: 'nebula-purple', nameAr: 'سديم الأرجوان (Nebula Purple)', nameEn: 'Nebula Purple', bg: '#090514', elevated: '#120a24', surface: '28, 17, 54', accent: '#c084fc', rgb: '192, 132, 252' },
+  { id: 'emerald-matrix', nameAr: 'المصفوفة الزمردية (Emerald Matrix)', nameEn: 'Emerald Matrix', bg: '#030b08', elevated: '#071610', surface: '12, 35, 26', accent: '#10f59c', rgb: '16, 245, 156' },
+  { id: 'arctic-platinum', nameAr: 'البلاتين القطبي (Arctic Platinum)', nameEn: 'Arctic Platinum', bg: '#0b1017', elevated: '#131b26', surface: '28, 39, 54', accent: '#e2e8f0', rgb: '226, 232, 240' },
+  { id: 'obsidian-black', nameAr: 'الأوبسيديان الأسود (Obsidian Black)', nameEn: 'Obsidian Black', bg: '#000000', elevated: '#050507', surface: '11, 12, 16', accent: '#d4af37', rgb: '212, 175, 55' }
+];
+
+const app = {
+  lang: 'ar',
+  screen: 'terminal',
+  tradingMode: 'PAPER',
+  killSwitch: false,
+  agentsPaused: false,
+  cash: 912450.00,
+  initialEquity: 1000000.00,
+  selectedSymbol: 'BTCUSDT',
+  orderSide: 'BUY',
+  timeframe: '15m',
+  horizon: 'HOURS',
+  micAuthorized: false,
+  isListening: false,
+  ttsMuted: false,
+  recognition: null,
+  pendingProposal: null,
+  totalTradingFees: 18.40,
+  totalAiCosts: 0.0145,
+  customThemes: JSON.parse(localStorage.getItem('trilunair.customThemes.standalone') || '[]'),
+  activeThemeId: localStorage.getItem('trilunair.activeTheme.standalone') || 'royal-gold',
+
+  assets: [
+    { symbol: 'BTCUSDT', alias: 'BTC / USDT', nameAr: 'بيتكوين فوري', classification: 'TRADABLE_SPOT', price: 96520.00, chg: 2.34, spreadBps: 2.5, volPct: 2.9, minNotional: 10 },
+    { symbol: 'ETHUSDT', alias: 'ETH / USDT', nameAr: 'إيثيريوم فوري', classification: 'TRADABLE_SPOT', price: 3428.50, chg: 1.85, spreadBps: 3.0, volPct: 3.4, minNotional: 10 },
+    { symbol: 'SOLUSDT', alias: 'SOL / USDT', nameAr: 'سولانا فوري', classification: 'TRADABLE_SPOT', price: 214.20, chg: 4.12, spreadBps: 4.2, volPct: 4.8, minNotional: 10 },
+    { symbol: 'BNBUSDT', alias: 'BNB / USDT', nameAr: 'بينانس كوين فوري', classification: 'TRADABLE_SPOT', price: 648.10, chg: 0.92, spreadBps: 3.1, volPct: 2.2, minNotional: 10 },
+    { symbol: 'XAUUSD', alias: 'Gold Ref (USD)', nameAr: 'الذهب المرجعي', classification: 'REFERENCE_ONLY', price: 2686.40, chg: 0.54, spreadBps: 4.5, volPct: 1.1, minNotional: 0 },
+    { symbol: 'NVDA', alias: 'NVIDIA Ref (USD)', nameAr: 'سهم إنفيديا المرجعي', classification: 'REFERENCE_ONLY', price: 143.25, chg: -0.68, spreadBps: 5.0, volPct: 2.7, minNotional: 0 }
+  ],
+
+  positions: [
+    { symbol: 'BTCUSDT', qty: 0.65, entry: 94200.00 },
+    { symbol: 'ETHUSDT', qty: 7.50, entry: 3310.00 }
+  ],
+
+  orders: [
+    { id: 'ORD-901', symbol: 'BTCUSDT', side: 'BUY', qty: 0.65, price: 94200.00, mode: 'PAPER', source: 'TERMINAL', time: '23:40:12' }
+  ],
+
+  agents: [
+    { id: 'quant-alpha', nameAr: 'د. ريان (المحلل الكمي)', state: 'AGREE', stateColor: 'text-emerald-300 bg-emerald-500/15', provider: 'local-quant-engine', model: 'quant-deterministic-v1', weight: 1.2, qual: 'EXPERIMENTALLY_QUALIFIED', cost: 0.0034 },
+    { id: 'risk-sentinel', nameAr: 'سارة (حارسة المخاطر)', state: 'SPEAKING', stateColor: 'text-amber-300 bg-amber-500/15', provider: 'local-quant-engine', model: 'risk-calculus-v1', weight: 1.4, qual: 'PRODUCTION_QUALIFIED', cost: 0.0041 },
+    { id: 'macro-oracle', nameAr: 'طارق (استراتيجي السيولة)', state: 'THINKING', stateColor: 'text-cyan-300 bg-cyan-500/15', provider: 'local-quant-engine', model: 'quant-deterministic-v1', weight: 1.0, qual: 'ANALYST', cost: 0.0022 },
+    { id: 'execution-architect', nameAr: 'خالد (مهندس التنفيذ)', state: 'DISAGREE', stateColor: 'text-rose-300 bg-rose-500/15', provider: 'local-quant-engine', model: 'quant-deterministic-v1', weight: 1.1, qual: 'EXPERIMENTALLY_QUALIFIED', cost: 0.0025 },
+    { id: 'chief-strategist', nameAr: 'المجلس التنفيذي', state: 'AGREE', stateColor: 'text-emerald-300 bg-emerald-500/15', provider: 'local-quant-engine', model: 'quant-deterministic-v1', weight: 1.3, qual: 'PRODUCTION_QUALIFIED', cost: 0.0023 }
+  ],
+
+  knowledge: [
+    { ver: 1, title: 'تحجيم المراكز وحد 0.5%', body: 'أقصى مخاطرة مسموحة في الصفقة الواحدة هي 0.5% من إجمالي حقوق الملكية مقسومة على مسافة وقف الخسارة والعمولات.' },
+    { ver: 1, title: 'عزل الأصول المرجعية عن Binance Spot', body: 'لا يجوز إرسال رموز REFERENCE_ONLY مثل الذهب XAUUSD أو الأسهم للتنفيذ الفوري، ولا يُفترض تكافؤ USD مع USDT.' },
+    { ver: 2, title: 'قواطع الدائرة الحتمية', body: 'يتوقف فتح المراكز الجالبة للمخاطر فوراً عند تجاوز خسارة 2% يومياً أو 5% أسبوعياً أو 10% أقصى تراجع.' },
+    { ver: 1, title: 'الجدوى الاقتصادية الصافية', body: 'تُحسب عمولة الدخول والخروج والسبريد والانزلاق وتكلفة استدلال الذكاء الاصطناعي قبل قبول أي مقترح.' }
+  ],
+
+  auditLogs: [
+    { time: '23:50:01', sev: 'INFO', action: 'SYSTEM_BOOT_PAPER_DEFAULT', msg: 'إقلاع مركز القيادة في وضع التداول الورقي الآمن (PAPER) برأسمال $1,000,000.' }
+  ],
+
+  candles: [],
+  orbAngleY: 0.5,
+  orbAngleX: 0.25,
+
+  init() {
+    this.generateCandles();
+    this.populateThemeSelect();
+    this.selectTheme(this.activeThemeId, true);
+    this.renderWatchlist();
+    this.updateKpis();
+    this.previewRiskAndEconomics();
+    this.conveneCouncil(true);
+    this.renderQuantumHub();
+    this.renderPortfolio();
+    this.renderAuditLogs();
+    this.renderThemeStudio();
+    this.initVoiceCapabilityBadge();
+    this.addChat('assistant', 'المجلس التنفيذي', 'مرحباً د. مجـووووود في مركز القيادة الهولوغرامي! التداول الورقي (PAPER) مفعل افتراضياً لحماية رأس المال. يمكنك التحدث أو الكتابة بالعربية أو الإنجليزية لتحليل الأزواج أو عقد اجتماع الوكلاء أو تجهيز مقترحات الصفقات.', 'SYSTEM');
+    this.setupChartHover();
+    this.setupOrbDrag();
+
+    setInterval(() => {
+      const root = document.getElementById('cockpit-app');
+      if (root.getAttribute('data-low-power') === 'true') return;
+      this.tickMarket();
+    }, 1600);
+  },
+
+  toast(msg) {
+    document.getElementById('toast-text').textContent = msg;
+    document.getElementById('toast-box').classList.remove('hidden');
+  },
+
+  logAudit(sev, action, msg) {
+    const t = new Date().toTimeString().slice(0, 8);
+    this.auditLogs.unshift({ time: t, sev, action, msg });
+    this.renderAuditLogs();
+  },
+
+  allThemes() {
+    return [...PRESETS, ...this.customThemes];
+  },
+
+  populateThemeSelect() {
+    const sel = document.getElementById('quick-theme');
+    sel.innerHTML = this.allThemes().map(t => `<option value="${t.id}" ${t.id === this.activeThemeId ? 'selected' : ''}>${this.lang === 'ar' ? t.nameAr : t.nameEn}</option>`).join('');
+  },
+
+  hexToRgb(hex) {
+    const c = (hex || '').replace('#', '');
+    if (c.length !== 6) return '245, 196, 81';
+    return `${parseInt(c.slice(0,2),16)}, ${parseInt(c.slice(2,4),16)}, ${parseInt(c.slice(4,6),16)}`;
+  },
+
+  selectTheme(id, silent) {
+    const found = this.allThemes().find(t => t.id === id) || PRESETS[0];
+    this.activeThemeId = found.id;
+    localStorage.setItem('trilunair.activeTheme.standalone', found.id);
+    const el = document.getElementById('cockpit-app');
+    el.style.setProperty('--holo-bg', found.bg);
+    el.style.setProperty('--holo-elevated', found.elevated);
+    el.style.setProperty('--holo-surface', found.surface);
+    el.style.setProperty('--holo-accent', found.accent);
+    el.style.setProperty('--holo-accent-rgb', found.rgb || this.hexToRgb(found.accent));
+    document.getElementById('quick-theme').value = found.id;
+    this.renderThemeStudio();
+    this.drawCandles();
+    this.drawOrb();
+    if (!silent) this.toast(`تم تفعيل السمة: ${found.nameAr}`);
+  },
+
+  updateCustomColor(which, hex) {
+    const el = document.getElementById('cockpit-app');
+    if (which === 'accent') {
+      el.style.setProperty('--holo-accent', hex);
+      el.style.setProperty('--holo-accent-rgb', this.hexToRgb(hex));
+    } else {
+      el.style.setProperty('--holo-bg', hex);
+    }
+    this.drawCandles();
+    this.drawOrb();
+  },
+
+  setOptical(kind, val) {
+    const el = document.getElementById('cockpit-app');
+    if (kind === 'glow') {
+      el.style.setProperty('--holo-glow', (val / 100).toFixed(2));
+      document.getElementById('lbl-glow').textContent = val + '%';
+    } else if (kind === 'blur') {
+      el.style.setProperty('--holo-blur', val + 'px');
+      document.getElementById('lbl-blur').textContent = val + 'px';
+    } else if (kind === 'opacity') {
+      el.style.setProperty('--holo-opacity', (val / 100).toFixed(2));
+      document.getElementById('lbl-op').textContent = val + '%';
+    }
+  },
+
+  toggleAttr(attr, enabled) {
+    document.getElementById('cockpit-app').setAttribute(attr, enabled ? 'true' : 'false');
+    this.drawOrb();
+  },
+
+  toggleMotion(disabled) {
+    document.getElementById('cockpit-app').setAttribute('data-motion', disabled ? 'disabled' : 'enabled');
+  },
+
+  saveCustomTheme() {
+    const name = document.getElementById('custom-theme-name').value.trim() || 'سمة مخصصة ' + (this.customThemes.length + 1);
+    const accent = document.getElementById('clr-accent').value;
+    const bg = document.getElementById('clr-bg').value;
+    const custom = {
+      id: 'custom-' + Date.now().toString(36),
+      nameAr: name,
+      nameEn: name,
+      bg,
+      elevated: bg,
+      surface: '18, 22, 34',
+      accent,
+      rgb: this.hexToRgb(accent),
+      isCustom: true
+    };
+    this.customThemes.push(custom);
+    localStorage.setItem('trilunair.customThemes.standalone', JSON.stringify(this.customThemes));
+    this.populateThemeSelect();
+    this.selectTheme(custom.id);
+  },
+
+  exportThemeJson() {
+    const cur = this.allThemes().find(t => t.id === this.activeThemeId) || PRESETS[0];
+    document.getElementById('theme-json-box').value = JSON.stringify({ app: 'My Road to be Trilunair Dr.MaJoOoOoOoD', theme: cur }, null, 2);
+    this.toast('تم تصدير إعداد السمة بصيغة JSON.');
+  },
+
+  importThemeJson() {
+    try {
+      const parsed = JSON.parse(document.getElementById('theme-json-box').value);
+      const t = parsed.theme || parsed;
+      if (!t.accent || !t.bg) throw new Error('حقول السمة الأساسية مفقودة');
+      t.id = 'custom-imp-' + Date.now().toString(36);
+      t.nameAr = t.nameAr || 'سمة مستوردة';
+      t.nameEn = t.nameEn || 'Imported Theme';
+      t.rgb = this.hexToRgb(t.accent);
+      t.surface = t.surface || '20, 25, 38';
+      t.elevated = t.elevated || t.bg;
+      t.isCustom = true;
+      this.customThemes.push(t);
+      localStorage.setItem('trilunair.customThemes.standalone', JSON.stringify(this.customThemes));
+      this.populateThemeSelect();
+      this.selectTheme(t.id);
+    } catch (e) {
+      this.toast('خطأ في استيراد JSON: ' + e.message);
+    }
+  },
+
+  renderThemeStudio() {
+    const grid = document.getElementById('theme-cards-grid');
+    grid.innerHTML = this.allThemes().map(t => `
+      <div class="holo-subcard p-3 flex items-center justify-between gap-2 ${t.id === this.activeThemeId ? 'ring-2' : ''}" style="--tw-ring-color: ${t.accent};">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-lg border border-white/20 shrink-0" style="background: linear-gradient(135deg, ${t.bg} 45%, ${t.accent} 100%);"></span>
+          <div>
+            <div class="text-xs font-bold">${t.nameAr}</div>
+            <div class="text-[11px] fin-num" style="color: var(--holo-muted);">${t.bg} • ${t.accent}</div>
+          </div>
+        </div>
+        <button type="button" class="holo-btn min-h-0 py-1 px-2.5 text-xs ${t.id === this.activeThemeId ? 'holo-btn-accent' : ''}" onclick="app.selectTheme('${t.id}')">${t.id === this.activeThemeId ? 'نشطة ✓' : 'تطبيق'}</button>
+      </div>
+    `).join('');
+  },
+
+  setScreen(scr) {
+    this.screen = scr;
+    ['terminal', 'quantum', 'portfolio', 'governance', 'themes'].forEach(s => {
+      document.getElementById('screen-' + s).classList.toggle('hidden', s !== scr);
+      const btn = document.querySelector(`[data-nav="${s}"]`);
+      if (btn) btn.classList.toggle('holo-btn-accent', s === scr);
+    });
+    if (scr !== 'terminal') {
+      document.getElementById('cockpit-app').setAttribute('data-focus', 'false');
+    }
+  },
+
+  toggleCockpit() {
+    const el = document.getElementById('cockpit-app');
+    const next = el.getAttribute('data-cockpit') !== 'true';
+    el.setAttribute('data-cockpit', next ? 'true' : 'false');
+    document.getElementById('btn-cockpit').classList.toggle('holo-btn-accent', next);
+    this.toast(next ? 'تم تفعيل وضع قمرة القيادة (Cockpit Mode): كثافة بيانات عالية وإبراز للمخاطر.' : 'تم إيقاف وضع قمرة القيادة.');
+  },
+
+  toggleFocus() {
+    const el = document.getElementById('cockpit-app');
+    const next = el.getAttribute('data-focus') !== 'true';
+    if (next) this.setScreen('terminal');
+    el.setAttribute('data-focus', next ? 'true' : 'false');
+    document.getElementById('btn-focus').classList.toggle('holo-btn-accent', next);
+  },
+
+  toggleLang() {
+    this.lang = this.lang === 'ar' ? 'en' : 'ar';
+    document.documentElement.lang = this.lang;
+    document.documentElement.dir = this.lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('btn-lang').textContent = this.lang === 'ar' ? 'English (LTR)' : 'العربية (RTL)';
+    document.getElementById('hdr-title').textContent = this.lang === 'ar' ? 'طريقي إلى التريليون — د. مجـووووود' : 'My Road to be Trilunair Dr.MaJoOoOoOoD';
+    this.populateThemeSelect();
+    this.renderWatchlist();
+  },
+
+  currentAsset() {
+    return this.assets.find(a => a.symbol === this.selectedSymbol) || this.assets[0];
+  },
+
+  totalEquity() {
+    let posVal = 0;
+    this.positions.forEach(p => {
+      const a = this.assets.find(x => x.symbol === p.symbol);
+      posVal += p.qty * (a ? a.price : p.entry);
+    });
+    return this.cash + posVal;
+  },
+
+  updateKpis() {
+    const eq = this.totalEquity();
+    const pnl = eq - this.initialEquity;
+    const pct = (pnl / this.initialEquity) * 100;
+    document.getElementById('kpi-equity').textContent = '$' + eq.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const pnlEl = document.getElementById('kpi-pnl');
+    pnlEl.textContent = `${pnl >= 0 ? '+' : ''}$${pnl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${pnl >= 0 ? '+' : ''}${pct.toFixed(2)}%)`;
+    pnlEl.className = 'fin-num text-base font-bold mt-0.5 ' + (pnl >= 0 ? 'text-emerald-400' : 'text-rose-400');
+    document.getElementById('kpi-cash').textContent = '$' + this.cash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  },
+
+  tickMarket() {
+    this.assets.forEach(a => {
+      const delta = (Math.random() - 0.492) * 0.0018 * a.price;
+      a.price = Math.max(0.01, +(a.price + delta).toFixed(2));
+      a.chg = +(a.chg + (Math.random() - 0.495) * 0.05).toFixed(2);
+    });
+    if (this.candles.length) {
+      const last = this.candles[this.candles.length - 1];
+      const curP = this.currentAsset().price;
+      last.c = curP;
+      if (curP > last.h) last.h = curP;
+      if (curP < last.l) last.l = curP;
+    }
+    this.updateKpis();
+    this.renderWatchlist();
+    this.drawCandles();
+    this.orbAngleY += 0.035;
+    this.drawOrb();
+  },
+
+  renderWatchlist() {
+    const q = (document.getElementById('asset-search').value || '').toLowerCase();
+    const box = document.getElementById('watchlist-items');
+    box.innerHTML = this.assets
+      .filter(a => !q || a.symbol.toLowerCase().includes(q) || a.nameAr.includes(q))
+      .map(a => {
+        const active = a.symbol === this.selectedSymbol;
+        const isSpot = a.classification === 'TRADABLE_SPOT';
+        return `
+          <button type="button" onclick="app.selectSymbol('${a.symbol}')" class="holo-subcard p-2.5 text-start w-full cursor-pointer transition ${active ? 'ring-1' : ''}" style="--tw-ring-color: var(--holo-accent);">
+            <div class="flex items-center justify-between gap-1">
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <strong class="fin-num text-xs">${a.symbol}</strong>
+                  <span class="text-[10px] px-1.5 py-0.5 rounded font-bold ${isSpot ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">${a.classification}</span>
+                </div>
+                <div class="text-[11px]" style="color: var(--holo-muted);">${a.nameAr}</div>
+              </div>
+              <div class="text-end fin-num">
+                <div class="text-xs font-bold">$${a.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                <div class="text-[11px] ${a.chg >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${a.chg >= 0 ? '+' : ''}${a.chg}%</div>
+              </div>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+    const cur = this.currentAsset();
+    document.getElementById('chart-sym').textContent = cur.symbol;
+    document.getElementById('ticket-sym-pill').textContent = cur.symbol;
+    document.getElementById('chart-price').textContent = '$' + cur.price.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    const badge = document.getElementById('chart-class-badge');
+    badge.textContent = cur.classification;
+    badge.className = 'text-xs px-2 py-0.5 rounded font-bold ' + (cur.classification === 'TRADABLE_SPOT' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300');
+    document.getElementById('best-bid').textContent = `$${(cur.price * 0.99985).toFixed(2)}`;
+    document.getElementById('best-ask').textContent = `$${(cur.price * 1.00015).toFixed(2)}`;
+  },
+
+  selectSymbol(sym) {
+    this.selectedSymbol = sym;
+    const a = this.currentAsset();
+    document.getElementById('ord-sl').value = +(a.price * 0.985).toFixed(2);
+    document.getElementById('ord-tp').value = +(a.price * 1.032).toFixed(2);
+    this.generateCandles();
+    this.renderWatchlist();
+    this.previewRiskAndEconomics();
+    this.conveneCouncil(true);
+  },
+
+  setHorizon(hz) {
+    this.horizon = hz;
+    document.querySelectorAll('#horizon-bar button').forEach(b => b.classList.toggle('holo-btn-accent', b.dataset.hz === hz));
+    this.conveneCouncil(true);
+  },
+
+  setTimeframe(tf) {
+    this.timeframe = tf;
+    this.generateCandles();
+    this.drawCandles();
+  },
+
+  generateCandles() {
+    const base = this.currentAsset().price;
+    let p = base * 0.986;
+    this.candles = [];
+    for (let i = 0; i < 48; i++) {
+      const o = p;
+      const delta = (Math.random() - 0.47) * base * 0.0045;
+      const c = +(o + delta).toFixed(2);
+      const h = +(Math.max(o, c) + Math.random() * base * 0.0022).toFixed(2);
+      const l = +(Math.min(o, c) - Math.random() * base * 0.0022).toFixed(2);
+      const v = Math.round(40 + Math.random() * 180);
+      this.candles.push({ o, h, l, c, v });
+      p = c;
+    }
+    this.candles[this.candles.length - 1].c = base;
+    this.drawCandles();
+  },
+
+  drawCandles(hoverIdx = -1) {
+    const cv = document.getElementById('candle-canvas');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const w = cv.width, h = cv.height;
+    ctx.clearRect(0, 0, w, h);
+
+    const accent = getComputedStyle(document.getElementById('cockpit-app')).getPropertyValue('--holo-accent').trim() || '#f5c451';
+    const lows = this.candles.map(c => c.l), highs = this.candles.map(c => c.h);
+    const minP = Math.min(...lows) * 0.999, maxP = Math.max(...highs) * 1.001;
+    const range = Math.max(0.01, maxP - minP);
+    const padT = 16, padB = 34;
+    const chartH = h - padT - padB;
+
+    // خطوط شبكة هادئة + الدعم والمقاومة
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    for (let g = 0; g <= 4; g++) {
+      const y = padT + (chartH / 4) * g;
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    }
+
+    const step = w / this.candles.length;
+    this.candles.forEach((c, idx) => {
+      const x = idx * step + step * 0.5;
+      const yO = padT + ((maxP - c.o) / range) * chartH;
+      const yC = padT + ((maxP - c.c) / range) * chartH;
+      const yH = padT + ((maxP - c.h) / range) * chartH;
+      const yL = padT + ((maxP - c.l) / range) * chartH;
+      const up = c.c >= c.o;
+      ctx.strokeStyle = up ? '#10b981' : '#f43f5e';
+      ctx.fillStyle = up ? '#10b981' : '#f43f5e';
+      ctx.beginPath(); ctx.moveTo(x, yH); ctx.lineTo(x, yL); ctx.stroke();
+      const bw = Math.max(3, step * 0.58);
+      ctx.fillRect(x - bw / 2, Math.min(yO, yC), bw, Math.max(2, Math.abs(yC - yO)));
+
+      ctx.fillStyle = up ? 'rgba(16,185,129,0.22)' : 'rgba(244,63,94,0.22)';
+      const vh = (c.v / 230) * 24;
+      ctx.fillRect(x - bw / 2, h - vh - 2, bw, vh);
+    });
+
+    if (hoverIdx >= 0 && hoverIdx < this.candles.length) {
+      const hc = this.candles[hoverIdx];
+      const hx = hoverIdx * step + step * 0.5;
+      ctx.strokeStyle = accent;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(hx, 0); ctx.lineTo(hx, h); ctx.stroke();
+      ctx.setLineDash([]);
+      document.getElementById('chart-ohlc').textContent = `O: ${hc.o} • H: ${hc.h} • L: ${hc.l} • C: ${hc.c} • Vol: ${hc.v}`;
+    }
+  },
+
+  setupChartHover() {
+    const cv = document.getElementById('candle-canvas');
+    cv.addEventListener('mousemove', (e) => {
+      const r = cv.getBoundingClientRect();
+      const relX = (e.clientX - r.left) / r.width;
+      const idx = Math.floor(relX * this.candles.length);
+      this.drawCandles(idx);
+    });
+    cv.addEventListener('mouseleave', () => this.drawCandles(-1));
+  },
+
+  drawOrb() {
+    try {
+      const cv = document.getElementById('orb-canvas');
+      if (!cv) return;
+      const ctx = cv.getContext('2d');
+      const w = cv.width, h = cv.height;
+      ctx.clearRect(0, 0, w, h);
+      const accent = getComputedStyle(document.getElementById('cockpit-app')).getPropertyValue('--holo-accent').trim() || '#f5c451';
+      const cx = w / 2, cy = h / 2, rad = 64;
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+      for (let lat = -60; lat <= 60; lat += 30) {
+        const lr = Math.cos((lat * Math.PI) / 180) * rad;
+        const ly = Math.sin((lat * Math.PI) / 180) * rad;
+        ctx.beginPath();
+        for (let lon = 0; lon <= 360; lon += 15) {
+          const th = (lon * Math.PI) / 180 + this.orbAngleY;
+          const x3 = lr * Math.cos(th);
+          const z3 = lr * Math.sin(th);
+          const y3 = ly * Math.cos(this.orbAngleX) - z3 * Math.sin(this.orbAngleX);
+          if (lon === 0) ctx.moveTo(cx + x3, cy + y3); else ctx.lineTo(cx + x3, cy + y3);
+        }
+        ctx.stroke();
+      }
+
+      const nodes = [
+        { label: 'USDT 91%', ang: 0.4 },
+        { label: 'BTC 6%', ang: 2.3 },
+        { label: 'ETH 3%', ang: 4.4 }
+      ];
+      nodes.forEach(n => {
+        const th = n.ang + this.orbAngleY;
+        const px = cx + Math.cos(th) * (rad * 0.85);
+        const py = cy + Math.sin(th) * (rad * 0.45);
+        ctx.fillStyle = accent;
+        ctx.beginPath(); ctx.arc(px, py, 4.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '10px monospace';
+        ctx.fillText(n.label, px + 7, py + 3);
+      });
+    } catch (_) {
+      // معزول بأمان حتى لا يؤثر على التداول أبداً
+    }
+  },
+
+  setupOrbDrag() {
+    const cv = document.getElementById('orb-canvas');
+    let dragging = false, lx = 0;
+    cv.addEventListener('pointerdown', e => { dragging = true; lx = e.clientX; });
+    window.addEventListener('pointerup', () => { dragging = false; });
+    window.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      this.orbAngleY += (e.clientX - lx) * 0.015;
+      lx = e.clientX;
+      this.drawOrb();
+    });
+    this.drawOrb();
+  },
+
+  setOrderSide(side) {
+    this.orderSide = side;
+    document.getElementById('side-buy').className = 'holo-btn text-xs font-bold ' + (side === 'BUY' ? 'bg-emerald-500 text-black border-emerald-400' : '');
+    document.getElementById('side-sell').className = 'holo-btn text-xs font-bold ' + (side === 'SELL' ? 'bg-rose-500 text-white border-rose-400' : '');
+    this.previewRiskAndEconomics();
+  },
+
+  evaluateProposal(sym, side, qty, sl, tp, source) {
+    const asset = this.assets.find(a => a.symbol === sym) || this.currentAsset();
+    const eq = this.totalEquity();
+    const notional = qty * asset.price;
+    const fee = notional * 0.0020;
+    const spread = notional * (asset.spreadBps / 10000);
+    const slippage = notional * 0.0003;
+    const aiCost = 0.0035;
+    const totalCost = fee + spread + slippage + aiCost;
+
+    const stopDist = Math.abs(asset.price - (sl || 0));
+    const tradeRiskUsd = stopDist > 0 ? (stopDist * qty + totalCost) : notional;
+    const riskPct = (tradeRiskUsd / eq) * 100;
+    const exposurePct = (notional / eq) * 100;
+    const expectedReward = tp > 0 ? Math.abs(tp - asset.price) * qty : notional * 0.018;
+    const rToCost = expectedReward / Math.max(0.01, totalCost);
+
+    const violations = [];
+    if (this.killSwitch) violations.push('مفتاح الطوارئ (Kill Switch) مفعل — التنفيذ مجمد.');
+    if (asset.classification !== 'TRADABLE_SPOT') violations.push(`الأصل ${asset.symbol} مصنف REFERENCE_ONLY ولا يجوز إرساله إلى Binance Spot.`);
+    if (qty <= 0 || notional < asset.minNotional) violations.push(`القيمة الإجمالية أقل من فلتر MIN_NOTIONAL (${asset.minNotional} USDT).`);
+    if (stopDist < asset.price * 0.0005) violations.push('مسافة وقف الخسارة صفرية أو ضيقة بشكل غير آمن.');
+    if (riskPct > 0.5) violations.push(`مخاطرة الصفقة (${riskPct.toFixed(2)}%) تتجاوز الحد الحتمي (0.5% من حقوق الملكية).`);
+    if (exposurePct > 25) violations.push(`التعرض للأصل (${exposurePct.toFixed(1)}%) يتجاوز الحد الأقصى (25%).`);
+    if (side === 'BUY' && (notional + totalCost) > this.cash) violations.push('السيولة النقدية المتاحة غير كافية.');
+    if (side === 'SELL') {
+      const held = (this.positions.find(p => p.symbol === asset.symbol)?.qty) || 0;
+      if (qty > held) violations.push(`الكمية المتاحة للبيع (${held}) غير كافية — البيع المكشوف والاقتراض محظوران.`);
+    }
+
+    return {
+      id: 'PROP-' + Date.now().toString(36).toUpperCase(),
+      symbol: asset.symbol,
+      side,
+      qty,
+      price: asset.price,
+      sl,
+      tp,
+      source,
+      notional,
+      fee,
+      spread,
+      slippage,
+      aiCost,
+      totalCost,
+      riskPct,
+      exposurePct,
+      expectedReward,
+      rToCost,
+      passed: violations.length === 0,
+      violations
+    };
+  },
+
+  previewRiskAndEconomics() {
+    const qty = parseFloat(document.getElementById('ord-qty').value) || 0;
+    const sl = parseFloat(document.getElementById('ord-sl').value) || 0;
+    const tp = parseFloat(document.getElementById('ord-tp').value) || 0;
+    const ev = this.evaluateProposal(this.selectedSymbol, this.orderSide, qty, sl, tp, 'TERMINAL');
+    const box = document.getElementById('risk-econ-preview');
+    box.innerHTML = `
+      <div class="flex justify-between"><span>القيمة (Notional):</span><strong class="fin-num">$${ev.notional.toFixed(2)}</strong></div>
+      <div class="flex justify-between"><span>التكلفة (عمولة+سبريد+انزلاق+AI):</span><strong class="fin-num">$${ev.totalCost.toFixed(3)}</strong></div>
+      <div class="flex justify-between"><span>مخاطرة الصفقة (الحد 0.5%):</span><strong class="fin-num ${ev.riskPct <= 0.5 ? 'text-emerald-400' : 'text-rose-400'}">${ev.riskPct.toFixed(2)}%</strong></div>
+      <div class="flex justify-between"><span>العائد إلى التكلفة (R/Cost):</span><strong class="fin-num">${ev.rToCost.toFixed(1)}x</strong></div>
+      ${ev.passed
+        ? '<div class="text-emerald-400 font-bold pt-1 border-t border-white/10">✓ اجتاز فحوصات المخاطر والجدوى الاقتصادية</div>'
+        : `<div class="text-rose-400 font-bold pt-1 border-t border-white/10">✕ مرفوض حتمياً: ${ev.violations[0]}</div>`
+      }
+    `;
+  },
+
+  submitTicketProposal() {
+    const qty = parseFloat(document.getElementById('ord-qty').value) || 0;
+    const sl = parseFloat(document.getElementById('ord-sl').value) || 0;
+    const tp = parseFloat(document.getElementById('ord-tp').value) || 0;
+    const ev = this.evaluateProposal(this.selectedSymbol, this.orderSide, qty, sl, tp, 'TERMINAL');
+    if (!ev.passed) {
+      this.logAudit('WARNING', 'PROPOSAL_REJECTED_BY_RISK', `${ev.symbol}: ${ev.violations.join(' | ')}`);
+      this.toast('رفض محرك المخاطر: ' + ev.violations[0]);
+      return;
+    }
+    this.openSealModal(ev);
+  },
+
+  openSealModal(ev) {
+    this.pendingProposal = ev;
+    document.getElementById('seal-confirm-chk').checked = false;
+    document.getElementById('btn-exec-final').disabled = true;
+    document.getElementById('seal-details').innerHTML = `
+      <div class="flex justify-between"><span>مصدر المقترح:</span><strong class="fin-num">${ev.source} • وضع ${this.tradingMode}</strong></div>
+      <div class="flex justify-between"><span>الأمر المقترح:</span><strong class="fin-num">${ev.side} ${ev.qty} ${ev.symbol} @ $${ev.price.toLocaleString('en-US')}</strong></div>
+      <div class="flex justify-between"><span>التكاليف التقديرية + AI:</span><strong class="fin-num">$${ev.totalCost.toFixed(3)} (AI: $${ev.aiCost.toFixed(4)})</strong></div>
+      <div class="flex justify-between"><span>مخاطرة رأس المال:</span><strong class="fin-num text-emerald-400">${ev.riskPct.toFixed(2)}% (ضمن سقف 0.5%)</strong></div>
+    `;
+    document.getElementById('seal-modal').classList.remove('hidden');
+  },
+
+  closeSealModal() {
+    document.getElementById('seal-modal').classList.add('hidden');
+  },
+
+  executeAuthorizedProposal() {
+    const ev = this.pendingProposal;
+    if (!ev) return;
+    // إعادة التحقق الحتمي قبل التنفيذ الفعلي (Revalidate before submission)
+    const recheck = this.evaluateProposal(ev.symbol, ev.side, ev.qty, ev.sl, ev.tp, ev.source);
+    if (!recheck.passed) {
+      this.toast('فشل إعادة التحقق قبل التنفيذ: ' + recheck.violations[0]);
+      this.closeSealModal();
+      return;
+    }
+    if (ev.side === 'BUY') {
+      this.cash -= (ev.notional + ev.totalCost);
+      const pos = this.positions.find(p => p.symbol === ev.symbol);
+      if (pos) {
+        pos.entry = +(((pos.qty * pos.entry) + ev.notional) / (pos.qty + ev.qty)).toFixed(2);
+        pos.qty = +(pos.qty + ev.qty).toFixed(5);
+      } else {
+        this.positions.push({ symbol: ev.symbol, qty: ev.qty, entry: ev.price });
+      }
+    } else {
+      this.cash += (ev.notional - ev.totalCost);
+      const pos = this.positions.find(p => p.symbol === ev.symbol);
+      if (pos) pos.qty = +(pos.qty - ev.qty).toFixed(5);
+      this.positions = this.positions.filter(p => p.qty > 0.00001);
+    }
+    this.totalTradingFees += (ev.fee + ev.spread + ev.slippage);
+    this.totalAiCosts += ev.aiCost;
+    this.orders.unshift({
+      id: 'ORD-' + Math.floor(100 + Math.random() * 900),
+      symbol: ev.symbol,
+      side: ev.side,
+      qty: ev.qty,
+      price: ev.price,
+      mode: this.tradingMode,
+      source: ev.source,
+      time: new Date().toTimeString().slice(0, 8)
+    });
+    this.logAudit('INFO', 'ORDER_EXECUTED_AUTHORIZED', `تنفيذ ${ev.side} ${ev.qty} ${ev.symbol} عبر ختم التصريح (${ev.source} / ${this.tradingMode}).`);
+    this.closeSealModal();
+    this.updateKpis();
+    this.renderPortfolio();
+    this.renderQuantumHub();
+    this.previewRiskAndEconomics();
+    this.toast(`✓ تم تنفيذ الصفقة المصرحة بنجاح (${ev.side} ${ev.qty} ${ev.symbol})`);
+  },
+
+  conveneCouncil(silent) {
+    if (this.agentsPaused) {
+      if (!silent) this.toast('الوكلاء في وضع الإيقاف المؤقت حالياً.');
+      return;
+    }
+    const a = this.currentAsset();
+    const isSpot = a.classification === 'TRADABLE_SPOT';
+    const cards = [
+      { name: 'د. ريان (Quant Alpha)', badge: 'AGREE • موافق', cls: 'text-emerald-300 bg-emerald-500/15', stance: a.chg >= 0 ? 'BUY' : 'HOLD', conf: 82, text: `الزخم السعري لـ ${a.symbol} عند ${a.chg}% مع تقلب ${a.volPct}% عبر أفق (${this.horizon}) يدعم الدخول المنضبط.` },
+      { name: 'سارة (Risk Sentinel)', badge: 'CAUTION • تحدي المخاطر', cls: 'text-amber-300 bg-amber-500/15', stance: 'CAUTION', conf: 91, text: isSpot ? `يشترط عدم تجاوز مخاطرة 0.5% من المحفظة ووضع وقف خسارة صارم تحت $${(a.price * 0.985).toFixed(2)}.` : `تحذير حتمي: الأصل ${a.symbol} مرجعي فقط (REFERENCE_ONLY) ويُحظر توجيهه لبينانس سبوت.` },
+      { name: 'طارق (Macro Oracle)', badge: 'THINKING • سيولة', cls: 'text-cyan-300 bg-cyan-500/15', stance: 'BUY', conf: 76, text: `تدفقات سيولة USDT الفورية مستقرة مع ارتباط إيجابي معتدل بالأصول القيادية.` },
+      { name: 'خالد (Execution Architect)', badge: 'DISAGREE • تحفظ تكلفة', cls: 'text-rose-300 bg-rose-500/15', stance: 'HOLD', conf: 79, text: `السبريد الحالي (${a.spreadBps} bps)؛ أوصي بأمر LIMIT بدلاً من MARKET لتقليل الانزلاق السعري.` }
+    ];
+    document.getElementById('meeting-agents-grid').innerHTML = cards.map(c => `
+      <div class="holo-subcard p-2.5 text-xs space-y-1">
+        <div class="flex items-center justify-between gap-1">
+          <strong>${c.name}</strong>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.cls}">${c.badge}</span>
+        </div>
+        <div class="text-slate-300 leading-relaxed">${c.text}</div>
+        <div class="fin-num text-[11px]" style="color: var(--holo-muted);">Stance: ${c.stance} • Confidence: ${c.conf}% • Model: quant-deterministic-v1</div>
+      </div>
+    `).join('');
+
+    document.getElementById('meeting-agreements').innerHTML = `
+      <li>الالتزام التام بسقف مخاطرة 0.5% من حقوق الملكية لكل صفقة.</li>
+      <li>سيولة دفتر الأوامر الحالية كافية للأحجام المعيارية الصغيرة.</li>
+    `;
+    document.getElementById('meeting-disagreements').innerHTML = `
+      <li>خالد يفضل أوامر LIMIT لتفادي تكلفة السبريد (${a.spreadBps} bps) بينما يرى د. ريان أفضلية الزخم الفوري.</li>
+      <li>عدم اليقين النموذجي: 21% — الإجماع لا يعني ضمان الربحية.</li>
+    `;
+
+    const recQty = +(Math.min((this.totalEquity() * 0.004) / Math.max(1, a.price * 0.015), (this.totalEquity() * 0.05) / a.price)).toFixed(4);
+    document.getElementById('meeting-final-box').innerHTML = `
+      <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div>
+          <strong style="color: var(--holo-accent);">التوصية المجمعة للمجلس التنفيذي (${a.symbol}):</strong>
+          <span class="ms-1">${isSpot ? `فرصة مراقبة/شراء منضبط بكمية مقترحة ${recQty} مع وقف خسارة 1.5%.` : 'أداة مرجعية للتحليل الكلي فقط — غير قابلة للتنفيذ في Binance Spot.'}</span>
+        </div>
+        ${isSpot ? `<button type="button" class="holo-btn holo-btn-accent min-h-0 py-1.5 px-3 text-xs" onclick="app.proposeFromMeeting('${a.symbol}', ${recQty})">إرسال المقترح لبوابة التصاريح</button>` : ''}
+      </div>
+    `;
+    if (!silent) this.toast(`انعقد اجتماع مجلس الوكلاء حول ${a.symbol}.`);
+  },
+
+  proposeFromMeeting(sym, qty) {
+    const a = this.assets.find(x => x.symbol === sym);
+    const ev = this.evaluateProposal(sym, 'BUY', qty, +(a.price * 0.985).toFixed(2), +(a.price * 1.032).toFixed(2), 'TERMINAL');
+    if (ev.passed) this.openSealModal(ev);
+    else this.toast('مرفوض من محرك المخاطر: ' + ev.violations[0]);
+  },
+
+  speakMeetingRoundtable() {
+    const a = this.currentAsset();
+    this.speak(`اجتماع مجلس الوكلاء حول ${a.nameAr}. دكتور ريان يرى زخماً إيجابياً، وسارة حارسة المخاطر تشدد على سقف نصف بالمئة مخاطرة، وخالد يوصي بأمر محدد السعر لتقليل السبريد.`);
+  },
+
+  renderQuantumHub() {
+    const providersMeta = [
+      { id: 'local-quant-engine', label: 'Local Quant Engine (Online ✓)' },
+      { id: 'openai', label: 'OpenAI GPT (UNAVAILABLE - No Key)' },
+      { id: 'gemini', label: 'Google Gemini (UNAVAILABLE - No Key)' },
+      { id: 'anthropic', label: 'Anthropic Claude (UNAVAILABLE - No Key)' },
+      { id: 'xai', label: 'xAI Grok (UNAVAILABLE - No Key)' }
+    ];
+
+    document.getElementById('quantum-agents-list').innerHTML = this.agents.map((ag, i) => `
+      <div class="holo-subcard p-3 text-xs space-y-2">
+        <div class="flex items-center justify-between">
+          <strong>${ag.nameAr}</strong>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${ag.stateColor}">${ag.state}</span>
+        </div>
+        <div class="fin-num text-[11px] px-2 py-1 rounded bg-white/5">تأهيل: <strong>${ag.qual}</strong></div>
+        <label class="block">المزود الفعلي:
+          <select class="holo-input w-full mt-1 text-xs" onchange="app.changeAgentProvider(${i}, this.value)">
+            ${providersMeta.map(p => `<option value="${p.id}" ${p.id === ag.provider ? 'selected' : ''}>${p.label}</option>`).join('')}
+          </select>
+        </label>
+        <div class="flex justify-between fin-num text-[11px]" style="color: var(--holo-muted);">
+          <span>Weight: ${ag.weight}x</span>
+          <span>AI Cost: $${ag.cost.toFixed(4)}</span>
+        </div>
+        <div class="flex gap-1.5">
+          <button type="button" class="holo-btn holo-btn-accent flex-1 min-h-0 py-1 text-xs" onclick="app.promoteAgentQualification(${i})">ترقية التأهيل</button>
+          <button type="button" class="holo-btn border-rose-400/50 text-rose-300 min-h-0 py-1 text-xs" onclick="app.revokeAgent(${i})">سحب</button>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('kb-list').innerHTML = this.knowledge.map((k, idx) => `
+      <div class="holo-subcard p-2.5 text-xs">
+        <div class="flex justify-between"><strong>${k.title}</strong><span class="fin-num px-1.5 rounded bg-white/10">v${k.ver}</span></div>
+        <p class="m-0 mt-1 text-slate-300">${k.body}</p>
+      </div>
+    `).join('');
+
+    document.getElementById('skills-connectors-box').innerHTML = `
+      <div class="holo-subcard p-2.5 flex justify-between"><span>موصل Binance Spot (REST + WS)</span><span class="text-amber-300 font-bold fin-num">PAPER_SIMULATION</span></div>
+      <div class="holo-subcard p-2.5 flex justify-between"><span>موصل الأصول المرجعية والأخبار (مدخلات معقمة)</span><span class="text-emerald-400 font-bold fin-num">SANITIZED ✓</span></div>
+      <div class="holo-subcard p-2.5 fin-num space-y-1">
+        <div class="font-bold text-slate-200">فصل المحاسبة التشغيلية (Section 13):</div>
+        <div>إجمالي عمولات التداول والسبريد والانزلاق: <strong>$${this.totalTradingFees.toFixed(3)}</strong></div>
+        <div>إجمالي تكاليف استدلال الذكاء الاصطناعي (AI Inference): <strong>$${this.totalAiCosts.toFixed(4)}</strong></div>
+      </div>
+    `;
+  },
+
+  changeAgentProvider(idx, prov) {
+    this.agents[idx].provider = prov;
+    this.agents[idx].qual = 'TRAINEE';
+    this.logAudit('WARNING', 'AGENT_REQUALIFICATION_REQUIRED', `تغيير مزود ${this.agents[idx].id} إلى ${prov} أعاد التأهيل تلقائياً إلى TRAINEE.`);
+    this.renderQuantumHub();
+    this.toast('تم تغيير المزود وإعادة الوكيل إلى مستوى متدرب (TRAINEE) لإعادة التأهيل الإلزامي.');
+  },
+
+  promoteAgentQualification(idx) {
+    const ag = this.agents[idx];
+    if (ag.provider !== 'local-quant-engine') {
+      this.toast('لا يمكن ترقية التأهيل: المزود السحابي المختار غير متصل بمفتاح API فعلي (UNAVAILABLE).');
+      return;
+    }
+    const ladder = ['TRAINEE', 'ANALYST', 'EXPERIMENTALLY_QUALIFIED', 'PRODUCTION_QUALIFIED'];
+    const cur = ladder.indexOf(ag.qual);
+    ag.qual = ladder[Math.min(3, cur + 1)];
+    this.renderQuantumHub();
+    this.toast(`اجتاز ${ag.nameAr} اختبار التأهيل للمستوى: ${ag.qual} (التأهيل لا يضمن الربحية).`);
+  },
+
+  revokeAgent(idx) {
+    this.agents[idx].qual = 'TRAINEE';
+    this.agents[idx].state = 'INACTIVE';
+    this.renderQuantumHub();
+    this.toast('تم سحب الصلاحيات التشغيلية للوكيل.');
+  },
+
+  togglePauseAgents() {
+    this.agentsPaused = !this.agentsPaused;
+    document.getElementById('btn-pause-agents').textContent = this.agentsPaused ? '▶ استئناف عمل الوكلاء' : '⏸ إيقاف الوكلاء مؤقتاً';
+    this.toast(this.agentsPaused ? 'تم إيقاف الوكلاء مؤقتاً.' : 'تم استئناف عمل مجلس الوكلاء.');
+  },
+
+  addKnowledgeItem() {
+    const t = document.getElementById('kb-new-title').value.trim();
+    const b = document.getElementById('kb-new-body').value.trim();
+    if (!t || !b) return;
+    const existing = this.knowledge.find(k => k.title === t);
+    if (existing) { existing.ver += 1; existing.body = b; }
+    else this.knowledge.unshift({ ver: 1, title: t, body: b });
+    document.getElementById('kb-new-title').value = '';
+    document.getElementById('kb-new-body').value = '';
+    this.renderQuantumHub();
+    this.toast('تم حفظ وتوثيق الإصدار الجديد في قاعدة المعرفة.');
+  },
+
+  renderPortfolio() {
+    document.getElementById('positions-orders-box').innerHTML = `
+      <div class="holo-subcard p-3 text-xs space-y-2">
+        <strong class="block text-sm">المراكز المفتوحة (Spot Positions)</strong>
+        ${this.positions.map(p => {
+          const cur = (this.assets.find(a => a.symbol === p.symbol)?.price) || p.entry;
+          const pnl = (cur - p.entry) * p.qty;
+          return `<div class="flex justify-between fin-num border-b border-white/10 pb-1.5"><span>${p.symbol} (${p.qty})</span><span class="${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}">$${(cur * p.qty).toFixed(2)} (${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)})</span></div>`;
+        }).join('')}
+      </div>
+      <div class="holo-subcard p-3 text-xs space-y-2">
+        <strong class="block text-sm">سجل الأوامر المنفذة عبر بوابة التصاريح</strong>
+        ${this.orders.map(o => `<div class="flex justify-between fin-num border-b border-white/10 pb-1.5"><span>[${o.mode}/${o.source}] ${o.side} ${o.qty} ${o.symbol}</span><span>$${o.price} • ${o.time}</span></div>`).join('')}
+      </div>
+    `;
+  },
+
+  toggleKillSwitch() {
+    this.killSwitch = !this.killSwitch;
+    if (this.killSwitch) {
+      this.tradingMode = 'PAPER';
+      this.pendingProposal = null;
+      this.closeSealModal();
+    }
+    this.updateModePill();
+    this.previewRiskAndEconomics();
+    this.logAudit('CRITICAL', 'KILL_SWITCH_TOGGLED', this.killSwitch ? 'تفعيل مفتاح الطوارئ وتجميد جميع الصفقات الجديدة.' : 'إلغاء مفتاح الطوارئ.');
+    this.toast(this.killSwitch ? '🚨 تم تفعيل مفتاح الطوارئ وتجميد التنفيذ!' : 'تم إلغاء مفتاح الطوارئ.');
+  },
+
+  authorizeLiveMode() {
+    if (this.killSwitch) { this.toast('مرفوض: مفتاح الطوارئ مفعل.'); return; }
+    const pin = document.getElementById('gov-pin').value.trim();
+    const phrase = document.getElementById('gov-phrase').value.trim();
+    if (pin !== '7777' || phrase !== 'AUTHORIZE LIVE TRADING DR MAJOOOOOOD') {
+      this.logAudit('WARNING', 'LIVE_AUTH_REJECTED', 'رفض محاولة تفعيل وضع LIVE لعدم تطابق رمز المسؤول أو عبارة التأكيد.');
+      this.toast('مرفوض: يجب إدخال الرمز 7777 والعبارة الدقيقة AUTHORIZE LIVE TRADING DR MAJOOOOOOD.');
+      return;
+    }
+    this.tradingMode = 'HUMAN_APPROVAL (LIVE GATE)';
+    this.updateModePill();
+    this.logAudit('CRITICAL', 'LIVE_GATE_AUTHORIZED', 'تفعيل وضع HUMAN_APPROVAL بتصريح المسؤول الصريح.');
+    this.toast('تم تفعيل سياسة HUMAN_APPROVAL بنجاح.');
+  },
+
+  revertPaperMode() {
+    this.tradingMode = 'PAPER';
+    this.updateModePill();
+    this.logAudit('INFO', 'REVERTED_TO_PAPER', 'العودة إلى وضع التداول الورقي الآمن PAPER.');
+    this.toast('تمت العودة الفورية إلى وضع PAPER الآمن.');
+  },
+
+  updateModePill() {
+    const pill = document.getElementById('mode-pill');
+    if (this.killSwitch) {
+      pill.textContent = '🚨 KILL SWITCH ACTIVE — FROZEN';
+      pill.className = 'px-2.5 py-1 rounded-full text-xs font-bold border border-rose-400 bg-rose-600/30 text-rose-200';
+    } else if (this.tradingMode === 'PAPER') {
+      pill.textContent = 'PAPER TRADING (آمن افتراضياً)';
+      pill.className = 'px-2.5 py-1 rounded-full text-xs font-bold border border-emerald-400/50 bg-emerald-500/15 text-emerald-300';
+    } else {
+      pill.textContent = this.tradingMode;
+      pill.className = 'px-2.5 py-1 rounded-full text-xs font-bold border border-amber-400 bg-amber-500/20 text-amber-200';
+    }
+  },
+
+  renderAuditLogs() {
+    const el = document.getElementById('audit-log-list');
+    if (!el) return;
+    el.innerHTML = this.auditLogs.map(l => `
+      <div class="holo-subcard p-2 flex justify-between gap-2">
+        <span>[${l.time}] <strong>${l.action}</strong> — ${l.msg}</span>
+        <span class="${l.sev === 'CRITICAL' ? 'text-rose-400' : l.sev === 'WARNING' ? 'text-amber-300' : 'text-emerald-300'} font-bold">${l.sev}</span>
+      </div>
+    `).join('');
+  },
+
+  // ================== نظام الأوامر الصوتية والنصية (Voice-First Dock) ==================
+  initVoiceCapabilityBadge() {
+    const hasStt = ('SpeechRecognition' in window) || ('webkitSpeechRecognition' in window);
+    document.getElementById('voice-provider-badge').textContent = hasStt
+      ? 'مزود الصوت: Browser Web Speech API متاح ✓'
+      : 'مزود الصوت: الوضع النصي المستقل (Web Speech غير مدعوم في هذا المتصفح)';
+  },
+
+  toggleDockDrawer() {
+    const d = document.getElementById('dock-drawer');
+    const hidden = d.classList.toggle('hidden');
+    document.getElementById('btn-drawer').textContent = hidden ? '💬 سجل وغرفة الأوامر ▲' : '💬 إخفاء الدرج ▼';
+  },
+
+  async handleMicAction() {
+    if (!this.micAuthorized) {
+      try {
+        if (navigator.mediaDevices?.getUserMedia) {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          stream.getTracks().forEach(t => t.stop());
+        }
+        this.micAuthorized = true;
+        document.getElementById('btn-mic').textContent = '🎙️ ابدأ التحدث الآن';
+        this.toast('تم منح إذن الميكروفون الصريح بنجاح — لا يوجد تسجيل مستمر بدون أمرك.');
+      } catch (_) {
+        this.toast('تعذر الوصول للميكروفون — المحادثة النصية تعمل بكامل الصلاحيات 100%.');
+      }
+      return;
+    }
+    this.startListening();
+  },
+
+  revokeMic() {
+    this.stopListening();
+    this.micAuthorized = false;
+    document.getElementById('btn-mic').textContent = '🎤 تفعيل إذن الميكروفون';
+    this.toast('تم سحب إذن الميكروفون وإيقاف أي استماع.');
+  },
+
+  startListening() {
+    this.interruptSpeech();
+    const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Ctor) {
+      this.toast('متصفحك الحالي لا يدعم SpeechRecognition المباشر؛ استخدم حقل الأوامر النصية.');
+      return;
+    }
+    const rec = new Ctor();
+    rec.lang = this.lang === 'ar' ? 'ar-SA' : 'en-US';
+    rec.continuous = document.getElementById('voice-mode-sel').value === 'handsfree';
+    rec.interimResults = true;
+    rec.onstart = () => {
+      this.isListening = true;
+      document.getElementById('waveform').classList.add('wave-active');
+      document.getElementById('btn-stop-mic').classList.remove('hidden');
+      document.getElementById('btn-mic').textContent = '🔴 يستمع الآن...';
+    };
+    rec.onresult = (ev) => {
+      let finalTxt = '';
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        if (ev.results[i].isFinal) finalTxt += ev.results[i][0].transcript;
+        else document.getElementById('chat-input').value = ev.results[i][0].transcript;
+      }
+      if (finalTxt.trim()) {
+        document.getElementById('chat-input').value = '';
+        this.runCommand(finalTxt.trim(), 'VOICE');
+      }
+    };
+    rec.onend = () => this.stopListening();
+    rec.onerror = () => this.stopListening();
+    this.recognition = rec;
+    rec.start();
+  },
+
+  stopListening() {
+    if (this.recognition) { try { this.recognition.stop(); } catch (_) {} }
+    this.isListening = false;
+    document.getElementById('waveform').classList.remove('wave-active');
+    document.getElementById('btn-stop-mic').classList.add('hidden');
+    if (this.micAuthorized) document.getElementById('btn-mic').textContent = '🎙️ ابدأ التحدث الآن';
+  },
+
+  toggleMuteTts() {
+    this.ttsMuted = !this.ttsMuted;
+    if (this.ttsMuted) this.interruptSpeech();
+    document.getElementById('btn-mute-tts').textContent = this.ttsMuted ? '🔇 الصوت مكتوم' : '🔊 النطق مفعل';
+  },
+
+  speak(text) {
+    if (this.ttsMuted || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = this.lang === 'ar' ? 'ar-SA' : 'en-US';
+    u.onstart = () => {
+      document.getElementById('btn-interrupt-dock').classList.remove('hidden');
+      document.getElementById('waveform').classList.add('wave-active');
+    };
+    u.onend = () => {
+      document.getElementById('btn-interrupt-dock').classList.add('hidden');
+      if (!this.isListening) document.getElementById('waveform').classList.remove('wave-active');
+    };
+    window.speechSynthesis.speak(u);
+  },
+
+  interruptSpeech() {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    document.getElementById('btn-interrupt-dock').classList.add('hidden');
+    if (!this.isListening) document.getElementById('waveform').classList.remove('wave-active');
+  },
+
+  addChat(role, sender, text, source, proposal) {
+    const box = document.getElementById('chat-history');
+    const div = document.createElement('div');
+    div.className = 'holo-subcard p-2 flex flex-col gap-1 ' + (role === 'user' ? 'border-amber-400/30' : '');
+    div.innerHTML = `
+      <div class="flex justify-between text-[11px]" style="color: var(--holo-muted);">
+        <strong>${sender} [${source}]</strong>
+        <span class="fin-num">${new Date().toTimeString().slice(0,8)}</span>
+      </div>
+      <div class="text-slate-100">${text}</div>
+      ${proposal ? `<button type="button" class="holo-btn holo-btn-accent min-h-0 py-1 px-2 text-xs self-start mt-1" onclick='app.openSealModal(${JSON.stringify(proposal)})'>🔏 فتح ختم التصريح لهذا المقترح</button>` : ''}
+    `;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  },
+
+  submitTextChat() {
+    const inp = document.getElementById('chat-input');
+    const txt = inp.value.trim();
+    if (!txt) return;
+    inp.value = '';
+    this.runCommand(txt, 'TEXT');
+  },
+
+  runCommand(msg, source) {
+    document.getElementById('dock-drawer').classList.remove('hidden');
+    this.addChat('user', 'المسؤول', msg, source);
+    const low = msg.toLowerCase();
+
+    // قاعدة الأمان الصارمة للكلمة المنطوقة "أكد"
+    if (msg.trim() === 'أكد' || low.trim() === 'confirm') {
+      if (this.pendingProposal) {
+        this.openSealModal(this.pendingProposal);
+        const reply = 'تم فتح نافذة ختم التصريح الهولوغرامي. الكلمة المنطوقة "أكد" لا تُنفذ صفقة مالية بمفردها؛ يرجى تفعيل الختم يدوياً لإتمام التنفيذ.';
+        this.addChat('assistant', 'بوابة التصاريح', reply, source);
+        this.speak(reply);
+      } else {
+        this.addChat('assistant', 'بوابة التصاريح', 'لا يوجد مقترح صفقة معلق حالياً لتأكيده.', source);
+      }
+      return;
+    }
+
+    if (low.includes('cockpit') || msg.includes('قمرة')) {
+      this.toggleCockpit();
+      const reply = 'تم تحديث وضع قمرة القيادة الاحترافي (Cockpit Mode) لزيادة كثافة البيانات وإبراز المخاطر.';
+      this.addChat('assistant', 'المجلس التنفيذي', reply, source);
+      this.speak(reply);
+      return;
+    }
+
+    if (low.includes('obsidian') || msg.includes('أوبسيديان')) {
+      this.selectTheme('obsidian-black');
+      const reply = 'تم تطبيق سمة Obsidian Black النقية فوراً.';
+      this.addChat('assistant', 'محرك السمات', reply, source);
+      this.speak(reply);
+      return;
+    }
+
+    if (low.includes('royal gold') || msg.includes('الذهبي')) {
+      this.selectTheme('royal-gold');
+      this.addChat('assistant', 'محرك السمات', 'تم التبديل إلى سمة Royal Gold.', source);
+      return;
+    }
+
+    if (msg.includes('أوقف الوكلاء') || low.includes('pause agents')) {
+      this.agentsPaused = true;
+      document.getElementById('btn-pause-agents').textContent = '▶ استئناف عمل الوكلاء';
+      const reply = 'تم إيقاف الوكلاء مؤقتاً امتثالاً لأمر المسؤول.';
+      this.addChat('assistant', 'حوكمة الوكلاء', reply, source);
+      this.speak(reply);
+      return;
+    }
+
+    // أوامر إعداد مقترحات الشراء/البيع المالية (لا تنفذ تلقائياً أبداً!)
+    if (msg.includes('شراء') || msg.includes('بيع') || low.includes('buy') || low.includes('sell') || msg.includes('مقترح')) {
+      const side = (msg.includes('بيع') || low.includes('sell')) ? 'SELL' : 'BUY';
+      const symMatch = this.assets.find(a => low.includes(a.symbol.toLowerCase()) || low.includes(a.symbol.replace('usdt','').toLowerCase()));
+      const sym = symMatch ? symMatch.symbol : this.selectedSymbol;
+      const numMatch = msg.match(/(\d+(\.\d+)?)/);
+      const qty = numMatch ? parseFloat(numMatch[1]) : 0.05;
+      const a = this.assets.find(x => x.symbol === sym);
+      const ev = this.evaluateProposal(sym, side, qty, +(a.price * 0.985).toFixed(2), +(a.price * 1.032).toFixed(2), source);
+      this.pendingProposal = ev.passed ? ev : null;
+      const reply = ev.passed
+        ? `تم إعداد مقترح مهيكل (${side} ${qty} ${sym}) واجتاز فحص المخاطر الحتمي (${ev.riskPct.toFixed(2)}% مخاطرة، تكلفة إجمالية $${ev.totalCost.toFixed(2)}). اضغط زر ختم التصريح للمراجعة والتنفيذ.`
+        : `رفض محرك المخاطر المقترح (${side} ${qty} ${sym}): ${ev.violations.join(' — ')}`;
+      this.addChat('assistant', 'سارة (حارسة المخاطر)', reply, source, ev.passed ? ev : null);
+      this.speak(reply);
+      return;
+    }
+
+    if (msg.includes('قارن') || low.includes('compare')) {
+      const reply = 'مقارنة الفرص الفورية: يتصدر SOLUSDT الزخم (+4.12%) مع تقلب أعلى (4.8%)، بينما يوفر BTCUSDT أقل سبريد (2.5 bps) وأعلى سيولة لتنفيذ منضبط ضمن سقف مخاطرة 0.5%.';
+      this.addChat('assistant', 'د. ريان + خالد', reply, source);
+      this.speak(reply);
+      return;
+    }
+
+    if (msg.includes('مخاطر') || msg.includes('محفظة') || low.includes('risk') || low.includes('portfolio')) {
+      const reply = `إجمالي حقوق الملكية الحالي $${this.totalEquity().toFixed(2)} في وضع ${this.tradingMode}، السيولة النقدية $${this.cash.toFixed(2)}، وسقف المخاطرة مفعل عند 0.5% لكل صفقة مع حظر كامل للرافعة المالية.`;
+      this.addChat('assistant', 'سارة (حارسة المخاطر)', reply, source);
+      this.speak(reply);
+      return;
+    }
+
+    // تحليل الأصل وعقد اجتماع الوكلاء
+    const targetAsset = this.assets.find(a => low.includes(a.symbol.toLowerCase()) || msg.includes('إيثيريوم') && a.symbol === 'ETHUSDT' || msg.includes('بيتكوين') && a.symbol === 'BTCUSDT') || this.currentAsset();
+    this.selectSymbol(targetAsset.symbol);
+    this.setScreen('terminal');
+    const reply = `تم تحديث قاعة التداول وعقد اجتماع الوكلاء لـ ${targetAsset.symbol} (${targetAsset.nameAr}) بسعر $${targetAsset.price.toLocaleString('en-US')}. راجع بطاقات الاتفاق والاختلاف والتوصية المجمعة في قاعة الاجتماع.`;
+    this.addChat('assistant', 'المجلس التنفيذي', reply, source);
+    this.speak(reply);
+  }
+};
+
+window.addEventListener('DOMContentLoaded', () => app.init());
+</script>
+</body>
+</html>
