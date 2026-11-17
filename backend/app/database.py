@@ -39,7 +39,7 @@ except ImportError:  # pragma: no cover
 
 DEFAULT_DB_PATH = str(Path(__file__).resolve().parents[1] / "data" / "trilunair.db")
 INITIAL_PAPER_CAPITAL_USD = 1_000_000.00
-DEFAULT_MAX_DRAWDOWN_PCT = 5.0
+DEFAULT_MAX_DRAWDOWN_PCT = 10.0
 
 _DB_LOCK = threading.RLock()
 _INITIALIZED_TARGETS: set[str] = set()
@@ -195,12 +195,17 @@ def _open_configured_connection() -> tuple[Any, str]:
 
 
 def _ensure_column_migrations(conn: Any, target_key: str) -> None:
-    """ترقية الجداول القائمة بأعمدة انتهاء الصلاحية ومنع تكرار الأوامر دون فقدان البيانات."""
+    """ترقية الجداول القائمة بأعمدة انتهاء الصلاحية ومنع تكرار الأوامر وحدود الخسارة دون فقدان البيانات."""
     is_pg = target_key.startswith("pg:")
     migrations = [
+        ("system_state", "daily_start_equity", "REAL"),
+        ("system_state", "weekly_start_equity", "REAL"),
         ("trade_proposals", "expires_at", "TEXT"),
         ("trade_proposals", "client_order_id", "TEXT"),
         ("orders", "client_order_id", "TEXT"),
+        ("orders", "is_simulated_fill", "INTEGER DEFAULT 1"),
+        ("orders", "stop_loss", "REAL"),
+        ("orders", "take_profit", "REAL"),
     ]
     for table, col, col_type in migrations:
         if is_pg:
@@ -235,8 +240,10 @@ CREATE TABLE IF NOT EXISTS system_state (
     live_authorized INTEGER NOT NULL DEFAULT 0,
     cash_balance REAL NOT NULL,
     initial_equity REAL NOT NULL,
+    daily_start_equity REAL,
+    weekly_start_equity REAL,
     peak_equity REAL NOT NULL,
-    max_allowed_drawdown_pct REAL NOT NULL DEFAULT 5.0,
+    max_allowed_drawdown_pct REAL NOT NULL DEFAULT 10.0,
     updated_at TEXT NOT NULL
 );
 
@@ -261,6 +268,9 @@ CREATE TABLE IF NOT EXISTS orders (
     notional_usd REAL NOT NULL,
     total_fee_usd REAL NOT NULL,
     trading_mode TEXT NOT NULL,
+    is_simulated_fill INTEGER NOT NULL DEFAULT 1,
+    stop_loss REAL,
+    take_profit REAL,
     source TEXT NOT NULL,
     status TEXT NOT NULL,
     created_at TEXT NOT NULL
@@ -334,7 +344,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 def init_db(force_recheck: bool = False) -> Path:
     """
     تهيئة مخطط قاعدة البيانات (PostgreSQL أو SQLite) وبذر البيانات الابتدائية الآمنة عند أول تشغيل.
-    يضمن دائماً أن وضع التداول الابتدائي هو PAPER وأن التداول الحقيقي غير مفعل.
+    يضمن دائماً أن وضع التداول هو PAPER وأن التداول الحقيقي غير مفعل (live_authorized=0).
     """
     pg_dsn = get_postgres_dsn()
     db_path = get_db_path()
@@ -355,8 +365,33 @@ def init_db(force_recheck: bool = False) -> Path:
                 _ensure_column_migrations(conn, target_key)
 
                 existing_state = conn.execute(
-                    "SELECT id FROM system_state WHERE id = 1"
+                    "SELECT * FROM system_state WHERE id = 1"
                 ).fetchone()
+
+                if existing_state is not None:
+                    # ضمان القفل الدائم على وضع التداول الورقي في الإصدار v1.1.0-cloud-paper وترقية قيم التراجع القديمة
+                    init_eq = float(existing_state["initial_equity"] or INITIAL_PAPER_CAPITAL_USD)
+                    daily_eq = existing_state["daily_start_equity"]
+                    weekly_eq = existing_state["weekly_start_equity"]
+                    curr_max_dd = float(existing_state["max_allowed_drawdown_pct"] or DEFAULT_MAX_DRAWDOWN_PCT)
+                    if daily_eq is None and curr_max_dd == 5.0:
+                        curr_max_dd = DEFAULT_MAX_DRAWDOWN_PCT
+                    conn.execute(
+                        """
+                        UPDATE system_state
+                        SET trading_mode = 'PAPER',
+                            live_authorized = 0,
+                            daily_start_equity = ?,
+                            weekly_start_equity = ?,
+                            max_allowed_drawdown_pct = ?
+                        WHERE id = 1
+                        """,
+                        (
+                            float(daily_eq) if daily_eq is not None else init_eq,
+                            float(weekly_eq) if weekly_eq is not None else init_eq,
+                            curr_max_dd,
+                        ),
+                    )
 
                 if existing_state is None:
                     now = utc_now_iso()
@@ -373,12 +408,14 @@ def init_db(force_recheck: bool = False) -> Path:
                         """
                         INSERT INTO system_state (
                             id, trading_mode, kill_switch_active, live_authorized,
-                            cash_balance, initial_equity, peak_equity,
-                            max_allowed_drawdown_pct, updated_at
-                        ) VALUES (1, 'PAPER', 0, 0, ?, ?, ?, ?, ?)
+                            cash_balance, initial_equity, daily_start_equity, weekly_start_equity,
+                            peak_equity, max_allowed_drawdown_pct, updated_at
+                        ) VALUES (1, 'PAPER', 0, 0, ?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
                             initial_cash,
+                            INITIAL_PAPER_CAPITAL_USD,
+                            INITIAL_PAPER_CAPITAL_USD,
                             INITIAL_PAPER_CAPITAL_USD,
                             INITIAL_PAPER_CAPITAL_USD,
                             DEFAULT_MAX_DRAWDOWN_PCT,

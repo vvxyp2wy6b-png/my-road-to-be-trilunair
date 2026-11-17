@@ -23,6 +23,7 @@ import uuid
 
 from fastapi import HTTPException
 
+from app.binance_market_data import binance_public_client
 from app.database import (
     acquire_redis_idempotency_lock,
     append_audit_log,
@@ -43,6 +44,7 @@ from app.models import (
     PositionItem,
     RiskAssessment,
     RiskCheckItem,
+    RiskPolicySummary,
     SafetyChecks,
     SystemProviders,
     SystemStatus,
@@ -52,54 +54,102 @@ from app.models import (
     TradingMode,
     TradingModeRequest,
 )
+from app.security import enforce_admin_secret, security_telemetry
 
 APP_NAME: Final[str] = "My Road to be Trilunair Dr.MaJoOoOoOoD"
-APP_VERSION: Final[str] = "1.0.0"
+APP_VERSION: Final[str] = "1.1.0-cloud-paper"
 TRILUNAIR_TARGET_USD: Final[float] = 1_000_000_000_000.0  # 1 تريليون دولار
 LIVE_CONFIRMATION_PHRASE: Final[str] = "AUTHORIZE LIVE TRADING DR MAJOOOOOOD"
 
-# الحدود القصوى الحتمية لمحرك المخاطر
-MAX_SINGLE_ORDER_EQUITY_RATIO: Final[float] = 0.25  # 25% من إجمالي حقوق الملكية
-MAX_ASSET_CONCENTRATION_PCT: Final[float] = 35.0    # 35% تركز أصل واحد
-COMMISSION_BPS: Final[float] = 5.0                  # 5 نقاط أساس عمولة مؤسسية
+# الحدود الخمسة المعتمدة لسياسة المخاطر الحتمية الموحدة (القسم 5)
+DEFAULT_MAX_RISK_PER_TRADE_PCT: Final[float] = 0.5      # 0.5% أقصى مخاطرة لكل صفقة
+MAX_SINGLE_ORDER_EQUITY_RATIO: Final[float] = 0.25      # 25% سقف حجم الأمر الواحد
+MAX_ASSET_CONCENTRATION_PCT: Final[float] = 25.0        # 25% أقصى تعرض وتركز للأصل الواحد
+DEFAULT_DAILY_LOSS_LIMIT_PCT: Final[float] = 2.0        # 2% قاطع الخسارة اليومية
+DEFAULT_WEEKLY_LOSS_LIMIT_PCT: Final[float] = 5.0       # 5% قاطع الخسارة الأسبوعية
+DEFAULT_MAX_DRAWDOWN_LIMIT_PCT: Final[float] = 10.0     # 10% قاطع أقصى تراجع تراكمي
+COMMISSION_BPS: Final[float] = 5.0                      # 5 نقاط أساس عمولة مؤسسية
 
 
-def get_expected_admin_pin() -> str:
-    """قراءة الرمز السري للمسؤول من متغير البيئة مع القيمة الافتراضية الموثقة للاختبار (7777)."""
-    return (os.getenv("TRILUNAIR_ADMIN_PIN") or "7777").strip()
+def get_active_risk_policy() -> RiskPolicySummary:
+    """قراءة سياسة المخاطر الموحدة المعتمدة من جدول الحوكمة أو القيم الحتمية المعتمدة (0.5% / 25% / 2% / 5% / 10%)."""
+    max_risk = DEFAULT_MAX_RISK_PER_TRADE_PCT
+    max_exp = MAX_ASSET_CONCENTRATION_PCT
+    daily_lim = DEFAULT_DAILY_LOSS_LIMIT_PCT
+    weekly_lim = DEFAULT_WEEKLY_LOSS_LIMIT_PCT
+    max_dd = DEFAULT_MAX_DRAWDOWN_LIMIT_PCT
+    try:
+        with db_session() as conn:
+            gov_row = conn.execute(
+                """
+                SELECT max_risk_per_trade_pct, max_exposure_per_asset_pct,
+                       daily_loss_limit_pct, weekly_loss_limit_pct, max_drawdown_limit_pct
+                FROM quantum_governance
+                WHERE tenant_id = 'admin-primary'
+                """
+            ).fetchone()
+            if gov_row is not None:
+                max_risk = float(gov_row["max_risk_per_trade_pct"])
+                max_exp = float(gov_row["max_exposure_per_asset_pct"])
+                daily_lim = float(gov_row["daily_loss_limit_pct"])
+                weekly_lim = float(gov_row["weekly_loss_limit_pct"])
+                max_dd = float(gov_row["max_drawdown_limit_pct"])
+    except Exception:
+        pass
+    return RiskPolicySummary(
+        maxRiskPerTradePct=round(max_risk, 3),
+        maxExposurePerAssetPct=round(max_exp, 2),
+        dailyLossLimitPct=round(daily_lim, 2),
+        weeklyLossLimitPct=round(weekly_lim, 2),
+        maxDrawdownLimitPct=round(max_dd, 2),
+    )
 
 
 def detect_active_providers() -> SystemProviders:
-    """اكتشاف مزودي الذكاء الاصطناعي والصوت النشطين بناءً على مفاتيح البيئة."""
+    """اكتشاف مزودي الذكاء الاصطناعي والصوت النشطين بناءً على مفاتيح البيئة الفعلية."""
     has_openai = bool(os.getenv("OPENAI_API_KEY", "").strip())
     has_gemini = bool(os.getenv("GEMINI_API_KEY", "").strip())
+    has_anthropic = bool(os.getenv("ANTHROPIC_API_KEY", "").strip())
+    has_xai = bool(os.getenv("XAI_API_KEY", "").strip())
+
+    cloud_list = [
+        name
+        for name, ok in (
+            ("openai", has_openai),
+            ("gemini", has_gemini),
+            ("anthropic", has_anthropic),
+            ("xai", has_xai),
+        )
+        if ok
+    ]
+
+    if cloud_list:
+        llm = "+".join(cloud_list) + "+deterministic-council"
+    else:
+        llm = "deterministic-council-simulated"
 
     if has_openai:
-        llm = "openai-cloud+deterministic-council"
-        stt = "openai-whisper+web-speech"
-        tts = "openai-tts+speech-synthesis"
-    elif has_gemini:
-        llm = "gemini-cloud+deterministic-council"
-        stt = "web-speech+server-fallback"
-        tts = "speech-synthesis+server-wav"
+        stt = "openai-whisper+browser-speech"
+        tts = "openai-tts+browser-speech"
     else:
-        llm = "deterministic-council+optional-cloud"
-        stt = "web-speech+server-fallback"
-        tts = "speech-synthesis+server-wav"
+        stt = "browser-speech+deterministic-fallback"
+        tts = "browser-speech+server-wav"
 
     return SystemProviders(llmProvider=llm, sttProvider=stt, ttsProvider=tts)
 
 
 def evaluate_system_safety_checks() -> SafetyChecks:
     """إجراء الفحوصات الخمسة لسلامة محرك المخاطر وسجل التدقيق وحدود التراجع."""
+    policy = get_active_risk_policy()
     with db_session() as conn:
         state = conn.execute("SELECT * FROM system_state WHERE id = 1").fetchone()
 
-    max_dd_ok = state is not None and 0.5 <= float(state["max_allowed_drawdown_pct"]) <= 20.0
+    max_dd_ok = state is not None and 0.5 <= policy.maxDrawdownLimitPct <= 25.0
     audit_ok = check_audit_trail_health()
     risk_engine_ok = (
-        0.05 <= MAX_SINGLE_ORDER_EQUITY_RATIO <= 0.50
-        and 10.0 <= MAX_ASSET_CONCENTRATION_PCT <= 60.0
+        0.05 <= policy.maxRiskPerTradePct <= 2.0
+        and 5.0 <= policy.maxExposurePerAssetPct <= 25.0
+        and 0.5 <= policy.dailyLossLimitPct <= 10.0
     )
 
     return SafetyChecks(
@@ -112,28 +162,41 @@ def evaluate_system_safety_checks() -> SafetyChecks:
 
 
 def get_system_status() -> SystemStatus:
-    """استرجاع الحالة الراهنة للنظام ووضع التداول والفحوصات الأمنية الخمسة."""
+    """
+    استرجاع الحالة الراهنة للنظام.
+    في الإصدار v1.1.0-cloud-paper يظل وضع التنفيذ مقفلاً دائماً على PAPER و liveAuthorized = False.
+    """
     checks = evaluate_system_safety_checks()
     providers = detect_active_providers()
+    policy = get_active_risk_policy()
+    market_snap = binance_public_client.get_health_snapshot()
     with db_session() as conn:
         state = conn.execute("SELECT * FROM system_state WHERE id = 1").fetchone()
+        if state["trading_mode"] != "PAPER" or int(state["live_authorized"] or 0) != 0:
+            conn.execute(
+                "UPDATE system_state SET trading_mode = 'PAPER', live_authorized = 0 WHERE id = 1"
+            )
 
-    trading_mode: TradingMode = "LIVE" if state["trading_mode"] == "LIVE" else "PAPER"
     return SystemStatus(
         appName=APP_NAME,
         version=APP_VERSION,
-        tradingMode=trading_mode,
+        tradingMode="PAPER",
         killSwitchActive=bool(state["kill_switch_active"]),
-        liveAuthorized=bool(state["live_authorized"]),
+        liveAuthorized=False,
+        executionLockedToPaper=True,
+        marketDataMode=market_snap["effectiveMatrixMode"],
+        riskPolicy=policy,
         safetyChecks=checks,
         providers=providers,
     )
 
 
-def set_trading_mode(req: TradingModeRequest) -> SystemStatus:
+def set_trading_mode(req: TradingModeRequest, client_id: str = "local-client") -> SystemStatus:
     """
-    بوابة تصاريح تبديل وضع التداول بين الورقي (PAPER) والحقيقي (LIVE).
-    يُسمح بالعودة إلى PAPER فوراً في جميع الظروف، بينما يتطلب LIVE استيفاء كافة الشروط الخمسة.
+    بوابة تصاريح وضع التداول في الإصدار v1.1.0-cloud-paper:
+    - العودة إلى PAPER متاحة دائماً فوراً.
+    - طلب تفعيل LIVE يخضع للتحقق الأمني والمصادقة المشفرة (Fail-Closed + Rate Limit)،
+      ثم يُرفض حتمياً بـ HTTP 403 لأن هذا الإصدار مقفل نهائياً على التداول الورقي (PAPER) مع liveAuthorized = False.
     """
     if req.targetMode == "PAPER":
         with db_session() as conn:
@@ -150,13 +213,12 @@ def set_trading_mode(req: TradingModeRequest) -> SystemStatus:
                 source="TERMINAL",
                 action="SWITCH_MODE_PAPER",
                 severity="INFO",
-                details_ar="تم التبديل الفوري إلى وضع التداول الورقي الآمن (PAPER) وإلغاء تصريح التداول الحقيقي.",
-                details_en="Switched immediately to safe PAPER trading mode and revoked live trading authorization.",
+                details_ar="تم تأكيد وضع التداول الورقي الآمن (PAPER) وإبقاء تصريح التداول الحقيقي معطلاً.",
+                details_en="Confirmed safe PAPER trading mode; live trading authorization remains disabled.",
                 conn=conn,
             )
         return get_system_status()
 
-    # التحقق الصارم لتفعيل التداول الحقيقي (LIVE)
     current_status = get_system_status()
 
     # أ) التحقق من عدم تفعيل مفتاح الإيقاف الطارئ
@@ -166,24 +228,23 @@ def set_trading_mode(req: TradingModeRequest) -> SystemStatus:
             source="TERMINAL",
             action="LIVE_AUTH_BLOCKED_KILL_SWITCH",
             severity="CRITICAL",
-            details_ar="رفض تفعيل التداول الحقيقي (LIVE): مفتاح الإيقاف الطارئ مفعل حالياً.",
-            details_en="Blocked LIVE trading activation: Emergency Kill Switch is currently active.",
+            details_ar="رفض طلب التداول الحقيقي (LIVE): مفتاح الإيقاف الطارئ مفعل حالياً.",
+            details_en="Blocked LIVE trading request: Emergency Kill Switch is currently active.",
         )
         raise HTTPException(
             status_code=403,
-            detail="لا يمكن تفعيل التداول الحقيقي أثناء تفعيل مفتاح الإيقاف الطارئ (Kill Switch Active).",
+            detail="لا يمكن طلب وضع التداول الحقيقي أثناء تفعيل مفتاح الإيقاف الطارئ (Kill Switch Active).",
         )
 
-    # ب) التحقق من سلامة جميع الفحوصات الخمسة
-    checks_dict = current_status.safetyChecks.model_dump()
-    if not all(checks_dict.values()):
+    # ب) التحقق من سلامة الفحوصات الخمسة
+    if not all(current_status.safetyChecks.model_dump().values()):
         append_audit_log(
             actor="ADMIN_GATEWAY",
             source="TERMINAL",
             action="LIVE_AUTH_BLOCKED_SAFETY_CHECKS",
             severity="CRITICAL",
-            details_ar="رفض تفعيل التداول الحقيقي: لم تجتز جميع فحوصات الأمان الخمسة بنجاح.",
-            details_en="Blocked LIVE trading activation: Not all 5 mandatory safety checks passed.",
+            details_ar="رفض طلب التداول الحقيقي: لم تجتز جميع فحوصات الأمان الخمسة بنجاح.",
+            details_en="Blocked LIVE trading request: Not all 5 mandatory safety checks passed.",
         )
         raise HTTPException(
             status_code=403,
@@ -197,8 +258,8 @@ def set_trading_mode(req: TradingModeRequest) -> SystemStatus:
             source="TERMINAL",
             action="LIVE_AUTH_BLOCKED_NO_RISK_ACK",
             severity="WARNING",
-            details_ar="رفض تفعيل التداول الحقيقي: لم يتم الإقرار الصريح بمخاطر رأس المال الحقيقي.",
-            details_en="Blocked LIVE trading activation: Real capital risk acknowledgement missing.",
+            details_ar="رفض طلب التداول الحقيقي: لم يتم الإقرار الصريح بمخاطر رأس المال الحقيقي.",
+            details_en="Blocked LIVE trading request: Real capital risk acknowledgement missing.",
         )
         raise HTTPException(
             status_code=403,
@@ -212,50 +273,53 @@ def set_trading_mode(req: TradingModeRequest) -> SystemStatus:
             source="TERMINAL",
             action="LIVE_AUTH_BLOCKED_PHRASE_MISMATCH",
             severity="WARNING",
-            details_ar="رفض تفعيل التداول الحقيقي: عبارة التأكيد الإدارية غير مطابقة.",
-            details_en="Blocked LIVE trading activation: Confirmation phrase mismatch.",
+            details_ar="رفض طلب التداول الحقيقي: عبارة التأكيد الإدارية غير مطابقة.",
+            details_en="Blocked LIVE trading request: Confirmation phrase mismatch.",
         )
         raise HTTPException(
             status_code=403,
             detail="عبارة التأكيد الإدارية غير صحيحة — Invalid confirmation phrase.",
         )
 
-    # هـ) مطابقة الرمز السري للمسؤول
-    expected_pin = get_expected_admin_pin()
-    if not req.adminPin or req.adminPin.strip() != expected_pin:
-        append_audit_log(
-            actor="ADMIN_GATEWAY",
-            source="TERMINAL",
-            action="LIVE_AUTH_BLOCKED_INVALID_PIN",
-            severity="CRITICAL",
-            details_ar="محاولة غير مصرح بها لتفعيل التداول الحقيقي برمز مسؤول (PIN) خاطئ.",
-            details_en="Unauthorized attempt to activate LIVE trading with an invalid Admin PIN.",
-        )
-        raise HTTPException(
-            status_code=403,
-            detail="رمز التصريح الإداري (Admin PIN) غير صحيح.",
-        )
+    # هـ) التحقق المشفر من سر المسؤول (بدون أي رمز افتراضي 7777، مع Fail-Closed وحماية Brute-Force)
+    try:
+        enforce_admin_secret(req.adminPin, client_id=client_id, action_label="LIVE_MODE_GATE")
+    except HTTPException as exc:
+        if exc.status_code == 403:
+            append_audit_log(
+                actor="ADMIN_GATEWAY",
+                source="TERMINAL",
+                action="LIVE_AUTH_BLOCKED_INVALID_SECRET",
+                severity="CRITICAL",
+                details_ar="محاولة غير مصرح بها على بوابة الوضع الحقيقي ببيانات اعتماد مسؤول غير صحيحة.",
+                details_en="Unauthorized attempt on LIVE mode gate with invalid administrator credentials.",
+            )
+        raise
 
-    with db_session() as conn:
-        conn.execute(
-            """
-            UPDATE system_state
-            SET trading_mode = 'LIVE', live_authorized = 1, updated_at = ?
-            WHERE id = 1
-            """,
-            (utc_now_iso(),),
-        )
-        append_audit_log(
-            actor="DR_MAJOOOOOOD_ADMIN",
-            source="TERMINAL",
-            action="LIVE_TRADING_AUTHORIZED",
-            severity="WARNING",
-            details_ar="تم التصريح الرسمي بتفعيل وضع التداول الحقيقي (LIVE) بعد استيفاء كافة الضوابط الخمسة ورمز المسؤول.",
-            details_en="LIVE trading mode formally authorized after passing all 5 safety checks, phrase, and Admin PIN.",
-            conn=conn,
-        )
-
-    return get_system_status()
+    # و) القفل السيادي غير القابل للتفاوض للإصدار v1.1.0-cloud-paper: منع تفعيل LIVE نهائياً
+    security_telemetry.emit_event(
+        "LIVE_EXECUTION_BLOCKED",
+        severity="WARNING",
+        details={"client": client_id, "reason": "RELEASE_LOCKED_TO_PAPER_V1_1"},
+    )
+    append_audit_log(
+        actor="RELEASE_SAFETY_LOCK",
+        source="TERMINAL",
+        action="LIVE_AUTH_BLOCKED_RELEASE_PAPER_LOCK",
+        severity="CRITICAL",
+        details_ar=(
+            "تم رفض تفعيل وضع التداول الحقيقي (LIVE): الإصدار v1.1.0-cloud-paper مقفل نهائياً على التداول الورقي (PAPER) مع liveAuthorized=false."
+        ),
+        details_en=(
+            "Blocked LIVE trading activation: Release v1.1.0-cloud-paper permanently enforces PAPER mode with liveAuthorized=false."
+        ),
+    )
+    raise HTTPException(
+        status_code=403,
+        detail=(
+            "LIVE_EXECUTION_LOCKED: الإصدار v1.1.0-cloud-paper مقفل نهائياً على وضع التداول الورقي الآمن (PAPER) مع تعطيل التداول الحقيقي (liveAuthorized=false)."
+        ),
+    )
 
 
 def set_kill_switch(req: KillSwitchRequest) -> SystemStatus:
@@ -323,8 +387,9 @@ def set_kill_switch(req: KillSwitchRequest) -> SystemStatus:
 
 
 def get_portfolio_snapshot() -> PortfolioSnapshot:
-    """حساب اللقطة الحية للمحفظة المالية استناداً إلى الأسعار الحية ومراكز SQLite."""
+    """حساب اللقطة الحية للمحفظة المالية الورقية استناداً إلى الأسعار الحية ومراكز قاعدة البيانات."""
     live_assets = {a.symbol: a for a in market_engine.get_assets()}
+    policy = get_active_risk_policy()
 
     with db_session() as conn:
         state = conn.execute("SELECT * FROM system_state WHERE id = 1").fetchone()
@@ -337,9 +402,15 @@ def get_portfolio_snapshot() -> PortfolioSnapshot:
 
         cash_balance = round(float(state["cash_balance"]), 2)
         initial_equity = round(float(state["initial_equity"]), 2)
+        daily_start_equity = round(
+            float(state["daily_start_equity"]) if state["daily_start_equity"] is not None else initial_equity,
+            2,
+        )
+        weekly_start_equity = round(
+            float(state["weekly_start_equity"]) if state["weekly_start_equity"] is not None else initial_equity,
+            2,
+        )
         peak_equity = float(state["peak_equity"])
-        max_dd_pct = float(state["max_allowed_drawdown_pct"])
-        trading_mode: TradingMode = "LIVE" if state["trading_mode"] == "LIVE" else "PAPER"
 
         raw_positions: list[dict] = []
         positions_value = 0.0
@@ -359,7 +430,6 @@ def get_portfolio_snapshot() -> PortfolioSnapshot:
             unrealized_pct = (unrealized_usd / cost_basis * 100.0) if cost_basis > 0 else 0.0
 
             positions_value += mkt_val
-            # حساب القيمة المعرضة للمخاطر اليومية عند مستوى ثقة 95% (معامل 1.645)
             var_95_usd += mkt_val * (vol_pct / 100.0) * 1.645
 
             raw_positions.append(
@@ -393,8 +463,17 @@ def get_portfolio_snapshot() -> PortfolioSnapshot:
         )
         positions_items.append(PositionItem(**p, weightPct=weight_pct))
 
-    daily_pnl = round(total_equity - initial_equity, 2)
-    daily_pnl_pct = round((daily_pnl / initial_equity) * 100.0, 2) if initial_equity > 0 else 0.0
+    daily_pnl = round(total_equity - daily_start_equity, 2)
+    daily_pnl_pct = (
+        round((daily_pnl / daily_start_equity) * 100.0, 2)
+        if daily_start_equity > 0
+        else 0.0
+    )
+    weekly_loss_pct = (
+        round(max(0.0, ((weekly_start_equity - total_equity) / weekly_start_equity) * 100.0), 2)
+        if weekly_start_equity > 0
+        else 0.0
+    )
     reference_peak = max(initial_equity, peak_equity)
     current_drawdown_pct = (
         round(max(0.0, ((reference_peak - total_equity) / reference_peak) * 100.0), 2)
@@ -403,38 +482,45 @@ def get_portfolio_snapshot() -> PortfolioSnapshot:
     )
     trilunair_progress_pct = round((total_equity / TRILUNAIR_TARGET_USD) * 100.0, 6)
 
-    recent_orders = [
-        OrderRecord(
-            orderId=o["order_id"],
-            proposalId=o["proposal_id"],
-            symbol=o["symbol"],
-            side=o["side"],
-            orderType=o["order_type"],
-            quantity=float(o["quantity"]),
-            executedPrice=float(o["executed_price"]),
-            notionalUsd=float(o["notional_usd"]),
-            totalFeeUsd=float(o["total_fee_usd"]),
-            tradingMode=o["trading_mode"],
-            source=o["source"],
-            status=o["status"],
-            createdAt=o["created_at"],
-            clientOrderId=o["client_order_id"] if "client_order_id" in o.keys() else None,
+    recent_orders = []
+    for o in order_rows:
+        keys = o.keys()
+        recent_orders.append(
+            OrderRecord(
+                orderId=o["order_id"],
+                proposalId=o["proposal_id"],
+                symbol=o["symbol"],
+                side=o["side"],
+                orderType=o["order_type"],
+                quantity=float(o["quantity"]),
+                executedPrice=float(o["executed_price"]),
+                notionalUsd=float(o["notional_usd"]),
+                totalFeeUsd=float(o["total_fee_usd"]),
+                tradingMode="PAPER",
+                isSimulatedFill=bool(int(o["is_simulated_fill"])) if "is_simulated_fill" in keys and o["is_simulated_fill"] is not None else True,
+                stopLoss=float(o["stop_loss"]) if "stop_loss" in keys and o["stop_loss"] is not None else None,
+                takeProfit=float(o["take_profit"]) if "take_profit" in keys and o["take_profit"] is not None else None,
+                source=o["source"],
+                status=o["status"],
+                createdAt=o["created_at"],
+                clientOrderId=o["client_order_id"] if "client_order_id" in keys else None,
+            )
         )
-        for o in order_rows
-    ]
 
     return PortfolioSnapshot(
-        tradingMode=trading_mode,
+        tradingMode="PAPER",
         cashBalance=cash_balance,
         positionsValue=round(positions_value, 2),
         totalEquity=total_equity,
         initialEquity=initial_equity,
         dailyPnl=daily_pnl,
         dailyPnlPct=daily_pnl_pct,
+        weeklyLossPct=weekly_loss_pct,
         trilunairTargetUsd=TRILUNAIR_TARGET_USD,
         trilunairProgressPct=trilunair_progress_pct,
         currentDrawdownPct=current_drawdown_pct,
-        maxAllowedDrawdownPct=round(max_dd_pct, 2),
+        maxAllowedDrawdownPct=round(policy.maxDrawdownLimitPct, 2),
+        riskPolicy=policy,
         var95Usd=round(var_95_usd, 2),
         positions=positions_items,
         recentOrders=recent_orders,
@@ -496,8 +582,7 @@ class CommandValidator:
 
 class DeterministicRiskEngine:
     """
-    محرك المخاطر الحتمي (Deterministic Risk Engine).
-    يجري الحسابات التقديرية للتكاليف والفحوصات الخمسة الإلزامية بشكل حتمي ومطابق لجميع القنوات.
+    محرك المخاطر الحتمي الموحد (Deterministic Risk Engine — Policy 0.5% / 25% / 2% / 5% / 10%).
     """
 
     @staticmethod
@@ -540,16 +625,18 @@ class DeterministicRiskEngine:
         asset: MarketAsset,
         portfolio: PortfolioSnapshot | None = None,
         kill_switch_active: bool | None = None,
-    ) -> tuple[ float, EstimatedTradingCosts, RiskAssessment ]:
+    ) -> tuple[float, EstimatedTradingCosts, RiskAssessment]:
         """
-        تنفيذ الفحوصات الخمسة الإلزامية لمحرك المخاطر الحتمي:
-        1. KILL_SWITCH
-        2. MAX_ORDER_NOTIONAL (<= 25% من إجمالي حقوق الملكية)
-        3. MAX_CONCENTRATION (<= 35% للشراء، وتوفر الكمية المملوكة للبيع دون بيع مكشوف)
-        4. DAILY_DRAWDOWN_LIMIT (< 5.0%)
-        5. SUFFICIENT_BUYING_POWER (تغطية النقد للقيمة الاسمية + التكاليف عند الشراء)
+        تنفيذ فحوصات محرك المخاطر الحتمي وفق السياسة الموحدة المعتمدة:
+        - أقصى مخاطرة للصفقة الواحدة: 0.5% من حقوق الملكية (STOP_LOSS_RISK_LIMIT)
+        - أقصى تعرض / تركز للأصل الواحد: 25.0% من حقوق الملكية (MAX_CONCENTRATION & MAX_ORDER_NOTIONAL)
+        - قاطع الخسارة اليومية: 2.0% (DAILY_DRAWDOWN_LIMIT)
+        - قاطع الخسارة الأسبوعية: 5.0% (WEEKLY_LOSS_LIMIT)
+        - قاطع أقصى تراجع تراكمي: 10.0% (MAX_DRAWDOWN_LIMIT)
+        - مفتاح الطوارئ (KILL_SWITCH)، القوة الشرائية، حداثة السوق، ومصالحة الحساب.
         """
         snap = portfolio or get_portfolio_snapshot()
+        policy = snap.riskPolicy
         if kill_switch_active is None:
             status = get_system_status()
             ks_active = status.killSwitchActive
@@ -564,10 +651,10 @@ class DeterministicRiskEngine:
         costs = cls.calculate_costs(proposal, asset, ref_price)
 
         total_equity = max(snap.totalEquity, 1.0)
-        max_notional_usd = round(total_equity * MAX_SINGLE_ORDER_EQUITY_RATIO, 2)
+        max_exposure_pct = policy.maxExposurePerAssetPct
+        max_notional_usd = round(total_equity * (max_exposure_pct / 100.0), 2)
         order_notional_pct = round((costs.notionalUsd / total_equity) * 100.0, 2)
 
-        # البحث عن المركز المفتوح الحالي للأصل
         existing_pos = next(
             (p for p in snap.positions if p.symbol == asset.symbol), None
         )
@@ -602,35 +689,34 @@ class DeterministicRiskEngine:
                 code="MAX_ORDER_NOTIONAL",
                 passed=notional_passed,
                 messageAr=(
-                    f"حجم الصفقة (${costs.notionalUsd:,.2f} / {order_notional_pct}%) ضمن السقف المسموح (25% = ${max_notional_usd:,.2f})."
+                    f"حجم الصفقة (${costs.notionalUsd:,.2f} / {order_notional_pct}%) ضمن السقف المسموح ({max_exposure_pct}% = ${max_notional_usd:,.2f})."
                     if notional_passed
-                    else f"مرفوض: حجم الصفقة (${costs.notionalUsd:,.2f} / {order_notional_pct}%) يتجاوز سقف 25% من حقوق الملكية (${max_notional_usd:,.2f})."
+                    else f"مرفوض: حجم الصفقة (${costs.notionalUsd:,.2f} / {order_notional_pct}%) يتجاوز سقف {max_exposure_pct}% من حقوق الملكية (${max_notional_usd:,.2f})."
                 ),
                 messageEn=(
-                    f"Order notional (${costs.notionalUsd:,.2f} / {order_notional_pct}%) is within the 25% equity cap (${max_notional_usd:,.2f})."
+                    f"Order notional (${costs.notionalUsd:,.2f} / {order_notional_pct}%) is within the {max_exposure_pct}% equity cap (${max_notional_usd:,.2f})."
                     if notional_passed
-                    else f"Rejected: Order notional (${costs.notionalUsd:,.2f} / {order_notional_pct}%) exceeds 25% max single-order cap (${max_notional_usd:,.2f})."
+                    else f"Rejected: Order notional (${costs.notionalUsd:,.2f} / {order_notional_pct}%) exceeds {max_exposure_pct}% max single-order cap (${max_notional_usd:,.2f})."
                 ),
             )
         )
 
-        # 3. فحص التركز الأقصى أو ملكية الأصل عند البيع (MAX_CONCENTRATION)
+        # 3. فحص التركز الأقصى للأصل الواحد (MAX_CONCENTRATION <= 25.0%) أو عدم البيع المكشوف
         if proposal.side == "BUY":
             post_val = held_val + costs.notionalUsd
             post_conc_pct = round((post_val / total_equity) * 100.0, 2)
-            conc_passed = post_conc_pct <= MAX_ASSET_CONCENTRATION_PCT
+            conc_passed = post_conc_pct <= max_exposure_pct
             conc_msg_ar = (
-                f"التركز بعد الشراء ({post_conc_pct}%) ضمن الحد الأقصى المسموح ({MAX_ASSET_CONCENTRATION_PCT}%)."
+                f"التعرض والتركز بعد الشراء ({post_conc_pct}%) ضمن الحد الأقصى المعتمد للأصل ({max_exposure_pct}%)."
                 if conc_passed
-                else f"مرفوض: التركز بعد الشراء ({post_conc_pct}%) يتجاوز سقف التركز المسموح للأصل الواحد ({MAX_ASSET_CONCENTRATION_PCT}%)."
+                else f"مرفوض: التركز بعد الشراء ({post_conc_pct}%) يتجاوز سقف التعرض المسموح للأصل الواحد ({max_exposure_pct}%)."
             )
             conc_msg_en = (
-                f"Post-trade concentration ({post_conc_pct}%) is within the {MAX_ASSET_CONCENTRATION_PCT}% asset limit."
+                f"Post-trade concentration ({post_conc_pct}%) is within the {max_exposure_pct}% asset exposure limit."
                 if conc_passed
-                else f"Rejected: Post-trade concentration ({post_conc_pct}%) exceeds the {MAX_ASSET_CONCENTRATION_PCT}% maximum concentration limit."
+                else f"Rejected: Post-trade concentration ({post_conc_pct}%) exceeds the {max_exposure_pct}% maximum asset exposure limit."
             )
         else:
-            # منع البيع المكشوف (No Naked Shorting)
             conc_passed = (held_qty + 1e-9) >= proposal.quantity
             rem_qty = max(0.0, held_qty - proposal.quantity)
             post_conc_pct = round(((rem_qty * asset.price) / total_equity) * 100.0, 2)
@@ -654,26 +740,65 @@ class DeterministicRiskEngine:
             )
         )
 
-        # 4. فحص حد التراجع اليومي للمحفظة (DAILY_DRAWDOWN_LIMIT < 5.0%)
-        dd_passed = snap.currentDrawdownPct < snap.maxAllowedDrawdownPct
+        # 4. قاطع الخسارة اليومية (DAILY_DRAWDOWN_LIMIT < 2.0%)
+        daily_loss_pct = round(max(0.0, -snap.dailyPnlPct), 2)
+        daily_passed = daily_loss_pct < policy.dailyLossLimitPct
         checks.append(
             RiskCheckItem(
                 code="DAILY_DRAWDOWN_LIMIT",
-                passed=dd_passed,
+                passed=daily_passed,
                 messageAr=(
-                    f"التراجع الحالي للمحفظة ({snap.currentDrawdownPct}%) أقل من الحد الأقصى المسموح ({snap.maxAllowedDrawdownPct}%)."
-                    if dd_passed
-                    else f"مرفوض: التراجع الحالي ({snap.currentDrawdownPct}%) بلغ أو تجاوز حد الإيقاف اليومي ({snap.maxAllowedDrawdownPct}%)."
+                    f"الخسارة اليومية الحالية ({daily_loss_pct}%) أقل من قاطع الخسارة اليومية ({policy.dailyLossLimitPct}%)."
+                    if daily_passed
+                    else f"مرفوض: الخسارة اليومية ({daily_loss_pct}%) بلغت أو تجاوزت قاطع الإيقاف اليومي ({policy.dailyLossLimitPct}%)."
                 ),
                 messageEn=(
-                    f"Current portfolio drawdown ({snap.currentDrawdownPct}%) is below the {snap.maxAllowedDrawdownPct}% limit."
-                    if dd_passed
-                    else f"Rejected: Portfolio drawdown ({snap.currentDrawdownPct}%) breached the {snap.maxAllowedDrawdownPct}% daily limit."
+                    f"Current daily loss ({daily_loss_pct}%) is below the {policy.dailyLossLimitPct}% daily circuit breaker."
+                    if daily_passed
+                    else f"Rejected: Daily loss ({daily_loss_pct}%) breached the {policy.dailyLossLimitPct}% daily loss circuit breaker."
                 ),
             )
         )
 
-        # 5. فحص القوة الشرائية الكافية (SUFFICIENT_BUYING_POWER)
+        # 5. قاطع الخسارة الأسبوعية (WEEKLY_LOSS_LIMIT < 5.0%)
+        weekly_passed = snap.weeklyLossPct < policy.weeklyLossLimitPct
+        checks.append(
+            RiskCheckItem(
+                code="WEEKLY_LOSS_LIMIT",
+                passed=weekly_passed,
+                messageAr=(
+                    f"الخسارة الأسبوعية ({snap.weeklyLossPct}%) أقل من قاطع الخسارة الأسبوعية ({policy.weeklyLossLimitPct}%)."
+                    if weekly_passed
+                    else f"مرفوض: الخسارة الأسبوعية ({snap.weeklyLossPct}%) بلغت أو تجاوزت القاطع الأسبوعي ({policy.weeklyLossLimitPct}%)."
+                ),
+                messageEn=(
+                    f"Weekly loss ({snap.weeklyLossPct}%) is below the {policy.weeklyLossLimitPct}% weekly circuit breaker."
+                    if weekly_passed
+                    else f"Rejected: Weekly loss ({snap.weeklyLossPct}%) breached the {policy.weeklyLossLimitPct}% weekly loss circuit breaker."
+                ),
+            )
+        )
+
+        # 6. قاطع أقصى تراجع تراكمي للمحفظة (MAX_DRAWDOWN_LIMIT < 10.0%)
+        max_dd_passed = snap.currentDrawdownPct < policy.maxDrawdownLimitPct
+        checks.append(
+            RiskCheckItem(
+                code="MAX_DRAWDOWN_LIMIT",
+                passed=max_dd_passed,
+                messageAr=(
+                    f"التراجع التراكمي من القمة ({snap.currentDrawdownPct}%) أقل من قاطع التراجع الأقصى ({policy.maxDrawdownLimitPct}%)."
+                    if max_dd_passed
+                    else f"مرفوض: التراجع التراكمي ({snap.currentDrawdownPct}%) بلغ أو تجاوز قاطع أقصى تراجع ({policy.maxDrawdownLimitPct}%)."
+                ),
+                messageEn=(
+                    f"Peak-to-trough drawdown ({snap.currentDrawdownPct}%) is below the {policy.maxDrawdownLimitPct}% max drawdown circuit breaker."
+                    if max_dd_passed
+                    else f"Rejected: Portfolio drawdown ({snap.currentDrawdownPct}%) breached the {policy.maxDrawdownLimitPct}% maximum drawdown circuit breaker."
+                ),
+            )
+        )
+
+        # 7. فحص القوة الشرائية الكافية (SUFFICIENT_BUYING_POWER)
         required_cash = round(costs.notionalUsd + costs.totalEstimatedCostUsd, 2)
         if proposal.side == "BUY":
             cash_passed = snap.cashBalance >= required_cash
@@ -701,16 +826,15 @@ class DeterministicRiskEngine:
             )
         )
 
-        # 6. فحوصات إضافية حتمية عند تحديد وقف الخسارة (0.5% المخاطرة للصفقة) أو تقادم بيانات السوق أو عدم يقين الحساب
-        max_risk_per_trade_pct = 0.5
+        # 8. فحص الحد الأقصى للمخاطرة في الصفقة الواحدة (STOP_LOSS_RISK_LIMIT <= 0.5%)
+        max_risk_per_trade_pct = policy.maxRiskPerTradePct
         account_uncertain = False
         try:
             with db_session() as gov_conn:
                 gov_row = gov_conn.execute(
-                    "SELECT max_risk_per_trade_pct, account_state_uncertain FROM quantum_governance WHERE tenant_id = 'admin-primary'"
+                    "SELECT account_state_uncertain FROM quantum_governance WHERE tenant_id = 'admin-primary'"
                 ).fetchone()
                 if gov_row is not None:
-                    max_risk_per_trade_pct = float(gov_row["max_risk_per_trade_pct"])
                     account_uncertain = bool(int(gov_row["account_state_uncertain"]))
         except Exception:
             pass
@@ -752,6 +876,27 @@ class DeterministicRiskEngine:
                     messageEn=sl_msg_en,
                 )
             )
+        elif proposal.side == "BUY":
+            implied_stop_ratio = min(0.015, max(0.005, (asset.volatilityPct / 100.0) * 0.45))
+            dollar_risk = (costs.notionalUsd * implied_stop_ratio) + costs.totalEstimatedCostUsd
+            risk_pct = round((dollar_risk / total_equity) * 100.0, 3)
+            sl_passed = risk_pct <= max_risk_per_trade_pct
+            checks.append(
+                RiskCheckItem(
+                    code="STOP_LOSS_RISK_LIMIT",
+                    passed=sl_passed,
+                    messageAr=(
+                        f"المخاطرة الضمنية للصفقة ({risk_pct:.2f}% = ${dollar_risk:,.2f}) ضمن سقف المخاطرة للصفقة ({max_risk_per_trade_pct:.2f}%)."
+                        if sl_passed
+                        else f"مرفوض: المخاطرة الضمنية للصفقة ({risk_pct:.2f}% = ${dollar_risk:,.2f}) تتجاوز سقف {max_risk_per_trade_pct:.2f}%؛ حدد وقف خسارة أضيق أو قلص الحجم."
+                    ),
+                    messageEn=(
+                        f"Implied per-trade risk ({risk_pct:.2f}% = ${dollar_risk:,.2f}) is within the {max_risk_per_trade_pct:.2f}% cap."
+                        if sl_passed
+                        else f"Rejected: Implied per-trade risk ({risk_pct:.2f}% = ${dollar_risk:,.2f}) exceeds the {max_risk_per_trade_pct:.2f}% per-trade risk limit."
+                    ),
+                )
+            )
 
         if proposal.side == "BUY" and market_engine.is_stale():
             feed_health = market_engine.get_feed_health()
@@ -785,17 +930,16 @@ class DeterministicRiskEngine:
             costs.notionalUsd * (asset.volatilityPct / 100.0) * 1.645, 2
         )
 
-        # حساب درجة ومستوى المخاطر (0 - 100)
         base_score = (
-            (order_notional_pct / 25.0) * 35.0
-            + (post_conc_pct / 35.0) * 30.0
+            (order_notional_pct / max(max_exposure_pct, 1.0)) * 35.0
+            + (post_conc_pct / max(max_exposure_pct, 1.0)) * 30.0
             + min(25.0, asset.volatilityPct * 4.5)
         )
         if not all_passed:
             risk_score = min(100, max(82, int(round(base_score + 40))))
             risk_level = (
                 "CRITICAL"
-                if (not ks_passed or not dd_passed or len(violations) >= 2)
+                if (not ks_passed or not daily_passed or not weekly_passed or not max_dd_passed or len(violations) >= 2)
                 else "HIGH"
             )
         else:
@@ -1108,22 +1252,17 @@ def execute_order(req: OrderExecuteRequest) -> OrderExecuteResponse:
         except Exception:
             pass
 
-    # التحقق الإضافي من رمز المسؤول إذا كان النظام في وضع التداول الحقيقي LIVE
-    if sys_status.tradingMode == "LIVE":
-        expected_pin = get_expected_admin_pin()
-        if not sys_status.liveAuthorized or not req.adminPin or req.adminPin.strip() != expected_pin:
-            append_audit_log(
-                actor="EXECUTION_ENGINE",
-                source=req.source,
-                action="LIVE_EXECUTION_BLOCKED_PIN",
-                severity="CRITICAL",
-                details_ar=f"رفض تنفيذ صفقة حقيقية ({req.proposalId}) لعدم صحة رمز المسؤول (Admin PIN).",
-                details_en=f"Blocked LIVE order execution ({req.proposalId}): Missing or invalid Admin PIN.",
-            )
-            raise HTTPException(
-                status_code=403,
-                detail="يتطلب التنفيذ في وضع التداول الحقيقي (LIVE) إدخال رمز المسؤول الصحيح (Admin PIN).",
-            )
+    # القفل السيادي على وضع التداول الورقي (PAPER) — لا يُسمح بأي تنفيذ حقيقي في v1.1.0-cloud-paper
+    if sys_status.tradingMode != "PAPER" or sys_status.liveAuthorized:
+        security_telemetry.emit_event(
+            "LIVE_EXECUTION_BLOCKED",
+            severity="CRITICAL",
+            details={"proposalId": req.proposalId, "reason": "EXECUTION_ENGINE_PAPER_ONLY_LOCK"},
+        )
+        raise HTTPException(
+            status_code=403,
+            detail="التنفيذ الحقيقي معطل نهائياً في الإصدار v1.1.0-cloud-paper؛ يقبل محرك التنفيذ الصفقات الورقية المحاكاة (PAPER) فقط.",
+        )
 
     # إعادة بناء المقترح وإعادة فحص المخاطر الحتمية على الأسعار والسيولة اللحظية
     recheck_input = TradeProposalInput(
@@ -1172,7 +1311,6 @@ def execute_order(req: OrderExecuteRequest) -> OrderExecuteResponse:
     )
 
     with db_session() as conn:
-        # انتقال ذري للحالة لمنع أي تنفيذ متزامن مزدوج لنفس المقترح
         claim_cur = conn.execute(
             """
             UPDATE trade_proposals
@@ -1252,8 +1390,9 @@ def execute_order(req: OrderExecuteRequest) -> OrderExecuteResponse:
             INSERT INTO orders (
                 order_id, proposal_id, client_order_id, symbol, side, order_type, quantity,
                 executed_price, notional_usd, total_fee_usd, trading_mode,
+                is_simulated_fill, stop_loss, take_profit,
                 source, status, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'FILLED', ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PAPER', 1, ?, ?, ?, 'FILLED', ?)
             """,
             (
                 order_id,
@@ -1266,7 +1405,8 @@ def execute_order(req: OrderExecuteRequest) -> OrderExecuteResponse:
                 exec_price,
                 costs.notionalUsd,
                 costs.totalEstimatedCostUsd,
-                sys_status.tradingMode,
+                recheck_input.stopLoss,
+                recheck_input.takeProfit,
                 effective_source,
                 now,
             ),
@@ -1275,15 +1415,15 @@ def execute_order(req: OrderExecuteRequest) -> OrderExecuteResponse:
         append_audit_log(
             actor="EXECUTION_ENGINE",
             source=effective_source,
-            action=f"ORDER_FILLED_{sys_status.tradingMode}",
-            severity="INFO" if sys_status.tradingMode == "PAPER" else "WARNING",
+            action="ORDER_FILLED_PAPER",
+            severity="INFO",
             details_ar=(
-                f"تم تنفيذ أمر {recheck_input.side} بكمية {recheck_input.quantity:g} {asset.symbol} "
-                f"بسعر ${exec_price:,.2f} في وضع {sys_status.tradingMode} (المصدر الأصلي: {effective_source})."
+                f"تم تنفيذ أمر ورقي محاكى (SIMULATED PAPER FILL) {recheck_input.side} بكمية {recheck_input.quantity:g} {asset.symbol} "
+                f"بسعر ${exec_price:,.2f} (المصدر الأصلي: {effective_source})."
             ),
             details_en=(
-                f"Executed {recheck_input.side} {recheck_input.quantity:g} {asset.symbol} "
-                f"@ ${exec_price:,.2f} in {sys_status.tradingMode} mode (origin source: {effective_source})."
+                f"Executed simulated PAPER fill: {recheck_input.side} {recheck_input.quantity:g} {asset.symbol} "
+                f"@ ${exec_price:,.2f} (origin source: {effective_source})."
             ),
             conn=conn,
         )
@@ -1299,7 +1439,10 @@ def execute_order(req: OrderExecuteRequest) -> OrderExecuteResponse:
         executedPrice=exec_price,
         notionalUsd=costs.notionalUsd,
         totalFeeUsd=costs.totalEstimatedCostUsd,
-        tradingMode=sys_status.tradingMode,
+        tradingMode="PAPER",
+        isSimulatedFill=True,
+        stopLoss=recheck_input.stopLoss,
+        takeProfit=recheck_input.takeProfit,
         source=effective_source,
         status="FILLED",
         createdAt=now,

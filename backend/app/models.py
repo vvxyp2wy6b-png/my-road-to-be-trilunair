@@ -108,14 +108,27 @@ class SystemProviders(BaseModel):
     ttsProvider: str
 
 
+class RiskPolicySummary(BaseModel):
+    """الحدود الخمسة المعتمدة لسياسة المخاطر الحتمية الموحدة عبر النظام بالكامل."""
+
+    maxRiskPerTradePct: float = 0.5
+    maxExposurePerAssetPct: float = 25.0
+    dailyLossLimitPct: float = 2.0
+    weeklyLossLimitPct: float = 5.0
+    maxDrawdownLimitPct: float = 10.0
+
+
 class SystemStatus(BaseModel):
-    """الحالة العامة للنظام ووضع التداول الحالي (ورقي أو حقيقي)."""
+    """الحالة العامة للنظام ووضع التداول الحالي (مقفل على الورقي PAPER في الإصدار v1.1.0-cloud-paper)."""
 
     appName: str
     version: str
     tradingMode: TradingMode
     killSwitchActive: bool
     liveAuthorized: bool
+    executionLockedToPaper: bool = True
+    marketDataMode: str = "SIMULATED_MARKET_DATA_PAPER_EXECUTION"
+    riskPolicy: RiskPolicySummary = Field(default_factory=RiskPolicySummary)
     safetyChecks: SafetyChecks
     providers: SystemProviders
 
@@ -134,6 +147,7 @@ class KillSwitchRequest(BaseModel):
 
     active: bool
     reason: str = ""
+    adminPin: str = ""
 
 
 class AuditLogEntry(BaseModel):
@@ -168,6 +182,7 @@ class MarketAsset(BaseModel):
     volume24hUsd: float
     volatilityPct: float
     spreadBps: float
+    dataSource: str = "SIMULATED"
 
 
 class CandlePoint(BaseModel):
@@ -199,6 +214,8 @@ class MarketCandlesResponse(BaseModel):
     resistanceLevel: float
     bids: list[OrderbookLevel]
     asks: list[OrderbookLevel]
+    dataSource: str = "SIMULATED"
+    lastUpdateId: int | None = None
 
 
 class PositionItem(BaseModel):
@@ -229,6 +246,9 @@ class OrderRecord(BaseModel):
     notionalUsd: float
     totalFeeUsd: float
     tradingMode: TradingMode
+    isSimulatedFill: bool = True
+    stopLoss: float | None = None
+    takeProfit: float | None = None
     source: CommandSource
     status: Literal["FILLED", "REJECTED", "CANCELLED"]
     createdAt: str
@@ -245,10 +265,12 @@ class PortfolioSnapshot(BaseModel):
     initialEquity: float
     dailyPnl: float
     dailyPnlPct: float
+    weeklyLossPct: float = 0.0
     trilunairTargetUsd: float
     trilunairProgressPct: float
     currentDrawdownPct: float
     maxAllowedDrawdownPct: float
+    riskPolicy: RiskPolicySummary = Field(default_factory=RiskPolicySummary)
     var95Usd: float
     positions: list[PositionItem]
     recentOrders: list[OrderRecord]
@@ -370,6 +392,7 @@ class AgentDeliberationItem(BaseModel):
     status: Literal["READY", "AGREE", "DISSENT", "CAUTION"]
     stance: AgentStance
     confidence: int
+    uncertaintyPct: int = 18
     summaryAr: str
     summaryEn: str
     keyMetricLabelAr: str
@@ -377,6 +400,8 @@ class AgentDeliberationItem(BaseModel):
     keyMetricValue: str
     providerUsed: str = "local-quant-engine"
     modelUsed: str = "quant-deterministic-v1"
+    executionStatus: Literal["LIVE", "SIMULATED", "CACHED", "UNAVAILABLE"] = "SIMULATED"
+    respondedAt: str = ""
     isSimulated: bool = True
 
 

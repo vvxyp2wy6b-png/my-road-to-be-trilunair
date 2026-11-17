@@ -885,9 +885,10 @@ class GoalConfigUpdateRequest(BaseModel):
     monthlyGoalPct: float = Field(ge=0, le=150)
 
 
-def _check_admin_pin(pin: str) -> bool:
-    expected = os.getenv("TRILUNAIR_ADMIN_PIN", "7777").strip() or "7777"
-    return hmac.compare_digest(pin.strip(), expected)
+def _enforce_quantum_admin_auth(pin: str, action_label: str = "QUANTUM_ADMIN_ACTION") -> None:
+    from .security import enforce_admin_secret
+
+    enforce_admin_secret(pin, client_id="quantum-hub", action_label=action_label)
 
 
 def _serialize_agent(row: Any, provider_map: dict[str, dict[str, Any]]) -> dict[str, Any]:
@@ -914,7 +915,7 @@ def _serialize_agent(row: Any, provider_map: dict[str, dict[str, Any]]) -> dict[
         "operationalPermissions": {
             "canAnalyze": bool(row["can_analyze"]),
             "canProposeTrades": bool(row["can_propose_trades"]),
-            "canParticipateAutonomous": bool(row["can_participate_autonomous"]),
+            "canParticipateAutonomous": False,
         },
         "metrics": {
             "totalCalls": int(row["total_calls"]),
@@ -926,34 +927,34 @@ def _serialize_agent(row: Any, provider_map: dict[str, dict[str, Any]]) -> dict[
 
 
 def _build_exchange_status(gov_row: Any) -> dict[str, Any]:
-    binance_key = os.getenv("BINANCE_API_KEY", "").strip()
-    binance_secret = os.getenv("BINANCE_API_SECRET", "").strip()
-    creds_ok = bool(binance_key and binance_secret)
-    use_testnet = os.getenv("BINANCE_USE_TESTNET", "true").lower() == "true"
+    from .binance_market_data import binance_public_client
+    from .market_engine import market_engine
 
-    if creds_ok:
-        conn_mode = "TESTNET_AUTHENTICATED" if use_testnet else "LIVE_AUTHENTICATED"
+    b_snap = binance_public_client.get_health_snapshot()
+    if b_snap["liveMarketDataActive"]:
+        conn_mode = "LIVE_MARKET_DATA_PAPER_EXECUTION"
     else:
         conn_mode = "PAPER_SIMULATION"
 
-    from .market_engine import market_engine
-
+    live_filters = dict(binance_public_client._exchange_filters)
     stale_detected = market_engine.is_stale()
     now_ts = int(time.time())
     instruments = []
     for item in BINANCE_INSTRUMENTS_CATALOG:
+        bsym = item["canonicalSymbol"]
+        lf = live_filters.get(bsym, {})
         instruments.append(
             {
-                "canonicalSymbol": item["canonicalSymbol"],
+                "canonicalSymbol": bsym,
                 "displayAlias": item["displayAlias"],
                 "baseAsset": item["baseAsset"],
                 "quoteAsset": item["quoteAsset"],
                 "classification": item["classification"],
-                "tickSize": item["tickSize"],
-                "stepSize": item["stepSize"],
-                "minQty": item["minQty"],
-                "maxQty": item["maxQty"],
-                "minNotional": item["minNotional"],
+                "tickSize": float(lf.get("tickSize", item["tickSize"])),
+                "stepSize": float(lf.get("stepSize", item["stepSize"])),
+                "minQty": float(lf.get("minQty", item["minQty"])),
+                "maxQty": float(lf.get("maxQty", item["maxQty"])),
+                "minNotional": float(lf.get("minNotional", item["minNotional"])),
                 "lastUpdatedTs": now_ts,
                 "isStale": stale_detected,
             }
@@ -1523,13 +1524,9 @@ def toggle_external_connector(connector_id: str, req: ToggleEnabledRequest) -> d
 
 @router.put("/risk-policy")
 def update_deterministic_risk_policy(req: RiskPolicyUpdateRequest) -> dict[str, Any]:
-    """تعديل حدود محرك المخاطر عبر مسار إداري موثق برمز المسؤول دون المساس بالمحظورات القطعية."""
+    """تعديل حدود محرك المخاطر عبر مسار إداري محمي بمصادقة المسؤول المشفرة دون المساس بالمحظورات القطعية."""
     ensure_quantum_tables()
-    if not _check_admin_pin(req.adminPin):
-        raise HTTPException(
-            status_code=403,
-            detail="رمز تصريح المسؤول (Admin PIN) غير صحيح لتعديل سياسة المخاطر.",
-        )
+    _enforce_quantum_admin_auth(req.adminPin, action_label="UPDATE_RISK_POLICY")
 
     with db_session() as conn:
         conn.execute(
@@ -1548,6 +1545,10 @@ def update_deterministic_risk_policy(req: RiskPolicyUpdateRequest) -> dict[str, 
                 DEFAULT_TENANT_ID,
             ),
         )
+        conn.execute(
+            "UPDATE system_state SET max_allowed_drawdown_pct = ? WHERE id = 1",
+            (req.maxDrawdownLimitPct,),
+        )
         append_audit_log(
             actor="ADMIN",
             source="TERMINAL",
@@ -1555,7 +1556,7 @@ def update_deterministic_risk_policy(req: RiskPolicyUpdateRequest) -> dict[str, 
             severity="WARNING",
             details_ar=(
                 f"تحديث حدود المخاطر: مخاطرة/صفقة={req.maxRiskPerTradePct}%، تعرض={req.maxExposurePerAssetPct}%، "
-                f"خسارة يومية={req.dailyLossLimitPct}%، أقصى تراجع={req.maxDrawdownLimitPct}%."
+                f"خسارة يومية={req.dailyLossLimitPct}%، أسبوعية={req.weeklyLossLimitPct}%، أقصى تراجع={req.maxDrawdownLimitPct}%."
             ),
             details_en="Updated deterministic risk policy thresholds via authenticated admin flow.",
             conn=conn,
@@ -1578,35 +1579,33 @@ def update_deterministic_risk_policy(req: RiskPolicyUpdateRequest) -> dict[str, 
 @router.post("/authorization-policy")
 def set_authorization_policy(req: AuthPolicyUpdateRequest) -> dict[str, Any]:
     """
-    ضبط سياسة التفويض (PAPER / HUMAN_APPROVAL / AUTONOMOUS).
-    لا يُسمح بتفعيل AUTONOMOUS إلا بوجود رمز المسؤول السري ووجود وكيل PRODUCTION_QUALIFIED مفعل!
+    ضبط سياسة التفويض في الإصدار v1.1.0-cloud-paper:
+    - يسمح بـ PAPER و HUMAN_APPROVAL (مع بقاء التنفيذ الفعلي ورقياً PAPER حصراً).
+    - يحظر AUTONOMOUS نهائياً بموجب قواعد السلامة غير القابلة للتفاوض.
     """
     ensure_quantum_tables()
     policy = req.policy.strip().upper()
     if policy not in {"PAPER", "HUMAN_APPROVAL", "AUTONOMOUS"}:
         raise HTTPException(status_code=400, detail="Invalid authorization policy")
 
+    if policy == "AUTONOMOUS":
+        append_audit_log(
+            actor="RELEASE_SAFETY_LOCK",
+            source="TERMINAL",
+            action="AUTONOMOUS_TRADING_BLOCKED",
+            severity="CRITICAL",
+            details_ar="رفض تفعيل التداول المستقل (AUTONOMOUS): معطل نهائياً في الإصدار v1.1.0-cloud-paper.",
+            details_en="Blocked AUTONOMOUS policy activation: permanently disabled in release v1.1.0-cloud-paper.",
+        )
+        raise HTTPException(
+            status_code=403,
+            detail="AUTONOMOUS_DISABLED: التداول المستقل معطل نهائياً في الإصدار v1.1.0-cloud-paper؛ التنفيذ مقفل على الوضع الورقي الآمن (PAPER).",
+        )
+
+    if policy == "HUMAN_APPROVAL":
+        _enforce_quantum_admin_auth(req.adminPin, action_label="SET_AUTH_POLICY_HUMAN_APPROVAL")
+
     with db_session() as conn:
-        if policy in {"HUMAN_APPROVAL", "AUTONOMOUS"} and not _check_admin_pin(req.adminPin):
-            raise HTTPException(
-                status_code=403,
-                detail="يتطلب الانتقال إلى سياسة تفويض متقدمة إدخال رمز المسؤول (Admin PIN).",
-            )
-
-        if policy == "AUTONOMOUS":
-            prod_agents = conn.execute(
-                """
-                SELECT COUNT(*) AS c FROM quantum_agents
-                WHERE enabled = 1 AND qualification_level = 'PRODUCTION_QUALIFIED'
-                  AND requalification_required = 0
-                """
-            ).fetchone()["c"]
-            if int(prod_agents) == 0:
-                raise HTTPException(
-                    status_code=403,
-                    detail="مرفوض: لا يوجد أي وكيل نشط بمستوى (PRODUCTION_QUALIFIED) مؤهل للمشاركة المستقلة.",
-                )
-
         conn.execute(
             "UPDATE quantum_governance SET authorization_policy = ? WHERE tenant_id = ?",
             (policy, DEFAULT_TENANT_ID),
@@ -1616,8 +1615,8 @@ def set_authorization_policy(req: AuthPolicyUpdateRequest) -> dict[str, Any]:
             source="TERMINAL",
             action="AUTHORIZATION_POLICY_CHANGED",
             severity="WARNING" if policy != "PAPER" else "INFO",
-            details_ar=f"تم تغيير سياسة بوابة التفويض إلى: {policy}.",
-            details_en=f"Authorization policy changed to {policy}.",
+            details_ar=f"تم تغيير سياسة بوابة التفويض إلى: {policy} (مع بقاء التنفيذ الورقي PAPER إلزامياً).",
+            details_en=f"Authorization policy changed to {policy} (PAPER execution lock remains enforced).",
             conn=conn,
         )
         gov = conn.execute(
