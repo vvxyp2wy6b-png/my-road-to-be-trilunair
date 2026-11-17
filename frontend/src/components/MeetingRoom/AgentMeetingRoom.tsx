@@ -328,6 +328,19 @@ export const AgentMeetingRoom: React.FC<AgentMeetingRoomProps> = ({
                       <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
                         {language === 'ar' ? agent.roleAr : agent.roleEn}
                       </div>
+                      <div
+                        data-testid={`agent-provider-${agent.agentId}`}
+                        style={{
+                          marginTop: '0.2rem',
+                          fontSize: '0.66rem',
+                          color: agent.isSimulated === false ? 'var(--status-success)' : 'var(--text-muted)',
+                          fontFamily: 'monospace',
+                        }}
+                      >
+                        {agent.isSimulated === false
+                          ? `LIVE ADAPTER: ${agent.providerUsed || 'cloud'} (${agent.modelUsed || 'model'})`
+                          : `SIMULATED: ${agent.providerUsed || 'local-quant-engine'}`}
+                      </div>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>

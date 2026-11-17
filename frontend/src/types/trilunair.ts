@@ -15,7 +15,8 @@ export type PresetThemeId =
   | 'quantum-cyan'
   | 'nebula-purple'
   | 'emerald-matrix'
-  | 'arctic-platinum';
+  | 'arctic-platinum'
+  | 'obsidian-black';
 
 export interface ThemeTokens {
   bgBase: string;
@@ -209,16 +210,19 @@ export interface TradeProposalInput {
   takeProfit?: number | null;
   source: CommandSource;
   rationale?: string;
+  clientOrderId?: string | null;
+  ttlSeconds?: number | null;
 }
 
 export interface TradeProposalEvaluation {
   proposalId: string;
-  status: 'APPROVED_FOR_AUTH' | 'REJECTED_BY_RISK';
-  proposal: TradeProposalInput & { referencePrice: number; createdAt: string };
+  status: 'APPROVED_FOR_AUTH' | 'REJECTED_BY_RISK' | 'EXPIRED' | 'EXECUTED' | 'CANCELLED_BY_KILL_SWITCH';
+  proposal: TradeProposalInput & { referencePrice: number; createdAt: string; expiresAt?: string | null };
   estimatedCosts: EstimatedTradingCosts;
   riskAssessment: RiskAssessment;
   tradingMode: TradingMode;
   requiresLivePin: boolean;
+  expiresAt?: string | null;
 }
 
 export interface AgentProfile {
@@ -247,6 +251,9 @@ export interface AgentDeliberationItem {
   keyMetricLabelAr: string;
   keyMetricLabelEn: string;
   keyMetricValue: string;
+  providerUsed?: string;
+  modelUsed?: string;
+  isSimulated?: boolean;
 }
 
 export interface AgentMeetingResult {

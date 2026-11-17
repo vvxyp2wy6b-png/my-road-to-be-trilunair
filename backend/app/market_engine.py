@@ -128,6 +128,8 @@ BASE_ASSETS_SPEC: Final[list[dict]] = [
 # قاموس المرادفات العربية والإنجليزية لتمييز الأصول من الأوامر الصوتية والنصية بدقة
 SYMBOL_ALIASES: Final[dict[str, str]] = {
     "btc-usd": "BTC-USD",
+    "btcusdt": "BTC-USD",
+    "btc/usdt": "BTC-USD",
     "btc": "BTC-USD",
     "bitcoin": "BTC-USD",
     "بيتكوين": "BTC-USD",
@@ -135,6 +137,8 @@ SYMBOL_ALIASES: Final[dict[str, str]] = {
     "بتكوين": "BTC-USD",
     "البتكوين": "BTC-USD",
     "eth-usd": "ETH-USD",
+    "ethusdt": "ETH-USD",
+    "eth/usdt": "ETH-USD",
     "eth": "ETH-USD",
     "ethereum": "ETH-USD",
     "إيثيريوم": "ETH-USD",
@@ -149,12 +153,15 @@ SYMBOL_ALIASES: Final[dict[str, str]] = {
     "سهم إنفيديا": "NVDA",
     "سهم انفيديا": "NVDA",
     "xau-usd": "XAU-USD",
+    "xauusd": "XAU-USD",
     "xau": "XAU-USD",
     "gold": "XAU-USD",
     "الذهب": "XAU-USD",
     "ذهب": "XAU-USD",
     "أونصة الذهب": "XAU-USD",
     "sol-usd": "SOL-USD",
+    "solusdt": "SOL-USD",
+    "sol/usdt": "SOL-USD",
     "sol": "SOL-USD",
     "solana": "SOL-USD",
     "سولانا": "SOL-USD",
@@ -171,24 +178,72 @@ SYMBOL_ALIASES: Final[dict[str, str]] = {
 
 class MarketEngine:
     """
-    محرك محاكاة وتحديث بيانات السوق الحية ودفاتر الأوامر والشموع اليابانية.
-    مصمم بحركة سعرية واقعية مرتبطة بالمتوسط (Mean-Reverting) لمنع الانحراف العشوائي المفرط.
+    محرك محاكاة وتحديث بيانات السوق الحية ودفاتر الأوامر والشموع اليابانية،
+    مزود بكاشف تقادم بيانات السوق (Stale Market-Data Detector).
     """
 
     def __init__(self) -> None:
         self._lock = threading.RLock()
         self._rng = random.Random(20261117)
         self._tick_counter = 0
+        self._last_tick_epoch: float = time.time()
+        self._feed_halted: bool = False
         self._anchor_prices: dict[str, float] = {}
         self._decimals: dict[str, int] = {}
         self._assets: dict[str, MarketAsset] = {}
         self.reset()
+
+    @property
+    def max_staleness_seconds(self) -> float:
+        import os
+
+        try:
+            return max(1.0, float(os.getenv("TRILUNAIR_MARKET_STALE_SECONDS", "60.0")))
+        except ValueError:
+            return 60.0
+
+    def is_stale(self) -> bool:
+        """التحقق مما إذا كانت بيانات السوق متقادمة أو متوقفة عن التحديث."""
+        with self._lock:
+            age = max(0.0, time.time() - self._last_tick_epoch)
+            return age > self.max_staleness_seconds
+
+    def get_feed_health(self) -> dict[str, float | bool | int]:
+        """إرجاع تقرير حداثة وصحة بث أسعار السوق."""
+        with self._lock:
+            age = round(max(0.0, time.time() - self._last_tick_epoch), 3)
+            max_s = self.max_staleness_seconds
+            return {
+                "healthy": age <= max_s and not self._feed_halted,
+                "stale": age > max_s,
+                "feedHalted": self._feed_halted,
+                "ageSeconds": age,
+                "maxStalenessSeconds": max_s,
+                "tickCounter": self._tick_counter,
+            }
+
+    def simulate_stale_feed(self, age_seconds: float = 120.0) -> dict[str, float | bool | int]:
+        """محاكاة انقطاع وتقادم بث السوق لاختبارات السلامة والتعافي."""
+        with self._lock:
+            self._feed_halted = True
+            self._last_tick_epoch = time.time() - max(age_seconds, self.max_staleness_seconds + 5.0)
+            return self.get_feed_health()
+
+    def resume_feed(self) -> dict[str, float | bool | int]:
+        """استئناف بث السوق وتحديث الطابع الزمني للنبضة الحية."""
+        with self._lock:
+            self._feed_halted = False
+            self._last_tick_epoch = time.time()
+        self.tick()
+        return self.get_feed_health()
 
     def reset(self) -> None:
         """إعادة ضبط الأسعار إلى قيمها المرجعية الابتدائية (مفيد للاختبارات الحتمية)."""
         with self._lock:
             self._rng = random.Random(20261117)
             self._tick_counter = 0
+            self._last_tick_epoch = time.time()
+            self._feed_halted = False
             self._assets.clear()
             self._anchor_prices.clear()
             self._decimals.clear()
@@ -310,7 +365,10 @@ class MarketEngine:
         تستخدم معادلة ارتداد للمتوسط مع تذبذب نسبي متناغم مع volatilityPct لكل أصل.
         """
         with self._lock:
+            if self._feed_halted:
+                return [asset.model_copy(deep=True) for asset in self._assets.values()]
             self._tick_counter += 1
+            self._last_tick_epoch = time.time()
             updated: list[MarketAsset] = []
 
             for symbol, asset in self._assets.items():

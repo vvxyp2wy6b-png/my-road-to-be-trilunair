@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 import json
 import math
 import os
@@ -23,7 +24,9 @@ import uuid
 from fastapi import HTTPException
 
 from app.database import (
+    acquire_redis_idempotency_lock,
     append_audit_log,
+    cache_proposal_in_redis,
     check_audit_trail_health,
     db_session,
     utc_now_iso,
@@ -329,7 +332,7 @@ def get_portfolio_snapshot() -> PortfolioSnapshot:
             "SELECT * FROM positions WHERE quantity > 0 ORDER BY symbol ASC"
         ).fetchall()
         order_rows = conn.execute(
-            "SELECT * FROM orders ORDER BY rowid DESC LIMIT 30"
+            "SELECT * FROM orders ORDER BY created_at DESC, order_id DESC LIMIT 30"
         ).fetchall()
 
         cash_balance = round(float(state["cash_balance"]), 2)
@@ -415,6 +418,7 @@ def get_portfolio_snapshot() -> PortfolioSnapshot:
             source=o["source"],
             status=o["status"],
             createdAt=o["created_at"],
+            clientOrderId=o["client_order_id"] if "client_order_id" in o.keys() else None,
         )
         for o in order_rows
     ]
@@ -697,6 +701,83 @@ class DeterministicRiskEngine:
             )
         )
 
+        # 6. فحوصات إضافية حتمية عند تحديد وقف الخسارة (0.5% المخاطرة للصفقة) أو تقادم بيانات السوق أو عدم يقين الحساب
+        max_risk_per_trade_pct = 0.5
+        account_uncertain = False
+        try:
+            with db_session() as gov_conn:
+                gov_row = gov_conn.execute(
+                    "SELECT max_risk_per_trade_pct, account_state_uncertain FROM quantum_governance WHERE tenant_id = 'admin-primary'"
+                ).fetchone()
+                if gov_row is not None:
+                    max_risk_per_trade_pct = float(gov_row["max_risk_per_trade_pct"])
+                    account_uncertain = bool(int(gov_row["account_state_uncertain"]))
+        except Exception:
+            pass
+
+        if proposal.stopLoss is not None:
+            sl = float(proposal.stopLoss)
+            valid_dir = (
+                (proposal.side == "BUY" and 0 < sl < ref_price)
+                or (proposal.side == "SELL" and sl > ref_price)
+            )
+            stop_dist = abs(ref_price - sl)
+            min_dist = ref_price * 0.0005
+            fee_per_unit = (
+                costs.totalEstimatedCostUsd / proposal.quantity
+                if proposal.quantity > 0
+                else 0.0
+            )
+            dollar_risk = (stop_dist + fee_per_unit) * proposal.quantity
+            risk_pct = round((dollar_risk / total_equity) * 100.0, 3)
+
+            if not valid_dir or stop_dist < min_dist:
+                sl_passed = False
+                sl_msg_ar = f"مرفوض: مستوى وقف الخسارة (${sl:,.2f}) غير صالح أو قريب بشكل صفري من سعر المرجع (${ref_price:,.2f})."
+                sl_msg_en = f"Rejected: Invalid or zero-distance stop-loss (${sl:,.2f}) relative to reference (${ref_price:,.2f})."
+            elif risk_pct > max_risk_per_trade_pct:
+                sl_passed = False
+                sl_msg_ar = f"مرفوض: مخاطرة الصفقة عند وقف الخسارة ({risk_pct:.2f}% = ${dollar_risk:,.2f}) تتجاوز الحد الأقصى المسموح ({max_risk_per_trade_pct:.2f}%)."
+                sl_msg_en = f"Rejected: Stop-loss trade risk ({risk_pct:.2f}% = ${dollar_risk:,.2f}) exceeds {max_risk_per_trade_pct:.2f}% per-trade cap."
+            else:
+                sl_passed = True
+                sl_msg_ar = f"مخاطرة وقف الخسارة ({risk_pct:.2f}% = ${dollar_risk:,.2f}) ضمن سقف المخاطرة للصفقة ({max_risk_per_trade_pct:.2f}%)."
+                sl_msg_en = f"Stop-loss risk ({risk_pct:.2f}% = ${dollar_risk:,.2f}) is within the {max_risk_per_trade_pct:.2f}% per-trade cap."
+
+            checks.append(
+                RiskCheckItem(
+                    code="STOP_LOSS_RISK_LIMIT",
+                    passed=sl_passed,
+                    messageAr=sl_msg_ar,
+                    messageEn=sl_msg_en,
+                )
+            )
+
+        if proposal.side == "BUY" and market_engine.is_stale():
+            feed_health = market_engine.get_feed_health()
+            checks.append(
+                RiskCheckItem(
+                    code="STALE_MARKET_DATA",
+                    passed=False,
+                    messageAr=(
+                        f"مرفوض: بيانات السوق متقادمة ({feed_health['ageSeconds']} ثانية > الحد المسموح {feed_health['maxStalenessSeconds']} ثانية)؛ تم تجميد أوامر الشراء الجالبة للمخاطر."
+                    ),
+                    messageEn=(
+                        f"Rejected: Market data feed is stale ({feed_health['ageSeconds']}s > {feed_health['maxStalenessSeconds']}s max); risk-increasing BUY orders halted."
+                    ),
+                )
+            )
+
+        if proposal.side == "BUY" and account_uncertain:
+            checks.append(
+                RiskCheckItem(
+                    code="ACCOUNT_STATE_UNCERTAIN",
+                    passed=False,
+                    messageAr="مرفوض: حالة الحساب والأوامر غير مؤكدة بعد خطأ اتصال؛ تجب المصالحة أولاً عبر /api/quantum/exchange/reconcile.",
+                    messageEn="Rejected: Account state is uncertain following an exchange transport error; run reconciliation before new BUY orders.",
+                )
+            )
+
         violations = [f"{c.code}: {c.messageEn}" for c in checks if not c.passed]
         all_passed = len(violations) == 0
 
@@ -738,13 +819,56 @@ class DeterministicRiskEngine:
         return round(ref_price, 2), costs, assessment
 
 
+def _get_default_proposal_ttl_seconds() -> int:
+    try:
+        return max(1, int(os.getenv("TRILUNAIR_PROPOSAL_TTL_SECONDS", "180")))
+    except ValueError:
+        return 180
+
+
 def propose_order(proposal_input: TradeProposalInput) -> TradeProposalEvaluation:
     """
-    إنشاء وتقييم مقترح صفقة مهيكل عبر المدقق ومحرك المخاطر الحتمي وحفظه في SQLite.
+    إنشاء وتقييم مقترح صفقة مهيكل عبر المدقق ومحرك المخاطر الحتمي وحفظه في قاعدة البيانات.
     تطبق هذه الدالة نفس السياسة تماماً على الأوامر الصوتية (VOICE) والنصية (TEXT) واليدوية (TERMINAL)،
     ولا تنفذ الصفقة تلقائياً تحت أي ظرف.
     """
     normalized_proposal, asset = CommandValidator.validate_and_normalize(proposal_input)
+    client_oid = (normalized_proposal.clientOrderId or "").strip() or None
+
+    if client_oid:
+        if not acquire_redis_idempotency_lock("proposal", client_oid):
+            append_audit_log(
+                actor="RISK_GATEWAY",
+                source=normalized_proposal.source,
+                action="DUPLICATE_PROPOSAL_BLOCKED",
+                severity="WARNING",
+                details_ar=f"رفض إنشاء مقترح مكرر بنفس معرّف عدم التكرار (clientOrderId={client_oid}).",
+                details_en=f"Blocked duplicate trade proposal with clientOrderId={client_oid}.",
+            )
+            raise HTTPException(
+                status_code=409,
+                detail=f"تم رفض الطلب المكرر: clientOrderId مستخدم مسبقاً ({client_oid}).",
+            )
+        with db_session() as conn:
+            dup_row = conn.execute(
+                "SELECT proposal_id FROM trade_proposals WHERE client_order_id = ?",
+                (client_oid,),
+            ).fetchone()
+            if dup_row is not None:
+                append_audit_log(
+                    actor="RISK_GATEWAY",
+                    source=normalized_proposal.source,
+                    action="DUPLICATE_PROPOSAL_BLOCKED",
+                    severity="WARNING",
+                    details_ar=f"رفض مقترح مكرر في قاعدة البيانات (clientOrderId={client_oid}).",
+                    details_en=f"Blocked duplicate proposal in database (clientOrderId={client_oid}).",
+                    conn=conn,
+                )
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"تم رفض الطلب المكرر: clientOrderId مستخدم مسبقاً ({client_oid}).",
+                )
+
     sys_status = get_system_status()
     portfolio = get_portfolio_snapshot()
 
@@ -756,7 +880,14 @@ def propose_order(proposal_input: TradeProposalInput) -> TradeProposalEvaluation
     )
 
     proposal_id = f"prop_{uuid.uuid4().hex[:12]}"
-    created_at = utc_now_iso()
+    now_dt = datetime.now(timezone.utc)
+    created_at = now_dt.isoformat()
+    ttl_sec = (
+        int(normalized_proposal.ttlSeconds)
+        if normalized_proposal.ttlSeconds is not None
+        else _get_default_proposal_ttl_seconds()
+    )
+    expires_at = (now_dt + timedelta(seconds=ttl_sec)).isoformat()
     eval_status = "APPROVED_FOR_AUTH" if risk_assessment.passed else "REJECTED_BY_RISK"
     requires_live_pin = sys_status.tradingMode == "LIVE"
 
@@ -764,20 +895,22 @@ def propose_order(proposal_input: TradeProposalInput) -> TradeProposalEvaluation
         **normalized_proposal.model_dump(),
         referencePrice=ref_price,
         createdAt=created_at,
+        expiresAt=expires_at,
     )
 
     with db_session() as conn:
         conn.execute(
             """
             INSERT INTO trade_proposals (
-                proposal_id, status, symbol, side, order_type, quantity,
+                proposal_id, client_order_id, status, symbol, side, order_type, quantity,
                 limit_price, stop_loss, take_profit, source, rationale,
                 reference_price, estimated_costs_json, risk_assessment_json,
-                trading_mode, requires_live_pin, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                trading_mode, requires_live_pin, created_at, expires_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 proposal_id,
+                client_oid,
                 eval_status,
                 normalized_proposal.symbol,
                 normalized_proposal.side,
@@ -794,6 +927,7 @@ def propose_order(proposal_input: TradeProposalInput) -> TradeProposalEvaluation
                 sys_status.tradingMode,
                 1 if requires_live_pin else 0,
                 created_at,
+                expires_at,
             ),
         )
 
@@ -804,16 +938,16 @@ def propose_order(proposal_input: TradeProposalInput) -> TradeProposalEvaluation
             severity="INFO" if risk_assessment.passed else "WARNING",
             details_ar=(
                 f"تم تقييم مقترح {normalized_proposal.side} بكمية {normalized_proposal.quantity:g} {normalized_proposal.symbol} "
-                f"عبر قناة {normalized_proposal.source} بقيمة ${costs.notionalUsd:,.2f} -> الحالة: {eval_status}."
+                f"عبر قناة {normalized_proposal.source} بقيمة ${costs.notionalUsd:,.2f} -> الحالة: {eval_status} (تنتهي الصلاحية: {expires_at})."
             ),
             details_en=(
-                f"Evaluated {normalized_proposal.side} proposal for {normalized_proposal.quantity:g} {normalized_proposal.symbol} "
-                f"via {normalized_proposal.source} (${costs.notionalUsd:,.2f}) -> Status: {eval_status}."
+                f"Evaluated {normalized_proposal.source} {normalized_proposal.side} proposal for {normalized_proposal.quantity:g} {normalized_proposal.symbol} "
+                f"(${costs.notionalUsd:,.2f}) -> Status: {eval_status} (expiresAt: {expires_at})."
             ),
             conn=conn,
         )
 
-    return TradeProposalEvaluation(
+    evaluation = TradeProposalEvaluation(
         proposalId=proposal_id,
         status=eval_status,
         proposal=proposal_details,
@@ -821,17 +955,23 @@ def propose_order(proposal_input: TradeProposalInput) -> TradeProposalEvaluation
         riskAssessment=risk_assessment,
         tradingMode=sys_status.tradingMode,
         requiresLivePin=requires_live_pin,
+        expiresAt=expires_at,
     )
+    if ttl_sec > 0:
+        cache_proposal_in_redis(proposal_id, evaluation.model_dump(), ttl_sec)
+    return evaluation
 
 
 def execute_order(req: OrderExecuteRequest) -> OrderExecuteResponse:
     """
     التنفيذ المحكوم لمقترح صفقة بعد:
     1. التأكيد الصريح من المستخدم (confirmedByUser == True).
-    2. التحقق من أن المقترح معتمد للتصريح ولم يُرفض أو يُنفذ مسبقاً.
-    3. التحقق من عدم تفعيل مفتاح الإيقاف الطارئ.
-    4. التحقق من رمز المسؤول (Admin PIN) مجدداً إذا كان النظام في وضع LIVE.
-    5. إعادة إجراء الفحوصات الخمسة لمحرك المخاطر لحظة التنفيذ الفعلي.
+    2. التحقق الذري من عدم تكرار الأمر (Duplicate-Order Prevention via Redis + Unique DB Constraints).
+    3. التحقق من عدم انتهاء الصلاحية الزمنية للمقترح (Proposal Expiration Check).
+    4. التحقق من أن المقترح معتمد للتصريح ولم يُرفض أو يُنفذ مسبقاً.
+    5. التحقق من عدم تفعيل مفتاح الإيقاف الطارئ.
+    6. التحقق من رمز المسؤول (Admin PIN) مجدداً إذا كان النظام في وضع LIVE.
+    7. إعادة إجراء فحوصات محرك المخاطر لحظة التنفيذ الفعلي.
     """
     if req.confirmedByUser is not True:
         append_audit_log(
@@ -862,7 +1002,42 @@ def execute_order(req: OrderExecuteRequest) -> OrderExecuteResponse:
             detail="التنفيذ مجمد بالكامل بسبب تفعيل مفتاح الإيقاف الطارئ (Kill Switch Active).",
         )
 
+    req_client_oid = (req.clientOrderId or "").strip() or None
+    if req_client_oid and not acquire_redis_idempotency_lock("order_exec", req_client_oid):
+        append_audit_log(
+            actor="EXECUTION_ENGINE",
+            source=req.source,
+            action="DUPLICATE_ORDER_BLOCKED",
+            severity="WARNING",
+            details_ar=f"منع إرسال أمر مكرر عبر قفل Redis (clientOrderId={req_client_oid}).",
+            details_en=f"Blocked duplicate order execution via Redis lock (clientOrderId={req_client_oid}).",
+        )
+        raise HTTPException(
+            status_code=409,
+            detail=f"تم منع تكرار الأمر: clientOrderId منفذ مسبقاً ({req_client_oid}).",
+        )
+
     with db_session() as conn:
+        if req_client_oid:
+            existing_oid = conn.execute(
+                "SELECT order_id FROM orders WHERE client_order_id = ?",
+                (req_client_oid,),
+            ).fetchone()
+            if existing_oid is not None:
+                append_audit_log(
+                    actor="EXECUTION_ENGINE",
+                    source=req.source,
+                    action="DUPLICATE_ORDER_BLOCKED",
+                    severity="WARNING",
+                    details_ar=f"منع أمر مكرر في سجل الصفقات (clientOrderId={req_client_oid}).",
+                    details_en=f"Blocked duplicate order execution in DB (clientOrderId={req_client_oid}).",
+                    conn=conn,
+                )
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"تم منع تكرار الأمر: clientOrderId منفذ مسبقاً ({req_client_oid}).",
+                )
+
         prop_row = conn.execute(
             "SELECT * FROM trade_proposals WHERE proposal_id = ?",
             (req.proposalId,),
@@ -872,6 +1047,20 @@ def execute_order(req: OrderExecuteRequest) -> OrderExecuteResponse:
         raise HTTPException(
             status_code=404,
             detail=f"مقترح الصفقة غير موجود: {req.proposalId}",
+        )
+
+    if prop_row["status"] == "EXECUTED":
+        append_audit_log(
+            actor="EXECUTION_ENGINE",
+            source=req.source,
+            action="DUPLICATE_ORDER_BLOCKED",
+            severity="WARNING",
+            details_ar=f"منع إعادة تنفيذ المقترح المنفذ مسبقاً ({req.proposalId}).",
+            details_en=f"Blocked duplicate execution of already EXECUTED proposal {req.proposalId}.",
+        )
+        raise HTTPException(
+            status_code=409,
+            detail=f"تم منع تكرار الأمر: المقترح {req.proposalId} تم تنفيذه مسبقاً.",
         )
 
     if prop_row["status"] != "APPROVED_FOR_AUTH":
@@ -887,6 +1076,37 @@ def execute_order(req: OrderExecuteRequest) -> OrderExecuteResponse:
             status_code=403,
             detail=f"لا يمكن تنفيذ مقترح صفقة بحالة {prop_row['status']}.",
         )
+
+    # فحص انتهاء صلاحية المقترح الزمنية (Proposal Expiration Check)
+    expires_at_raw = prop_row["expires_at"] if "expires_at" in prop_row.keys() else None
+    if expires_at_raw:
+        try:
+            exp_dt = datetime.fromisoformat(str(expires_at_raw))
+            if exp_dt.tzinfo is None:
+                exp_dt = exp_dt.replace(tzinfo=timezone.utc)
+            if datetime.now(timezone.utc) >= exp_dt:
+                with db_session() as conn:
+                    conn.execute(
+                        "UPDATE trade_proposals SET status = 'EXPIRED' WHERE proposal_id = ?",
+                        (req.proposalId,),
+                    )
+                    append_audit_log(
+                        actor="EXECUTION_ENGINE",
+                        source=req.source,
+                        action="EXECUTION_BLOCKED_PROPOSAL_EXPIRED",
+                        severity="WARNING",
+                        details_ar=f"انتهت صلاحية مقترح الصفقة {req.proposalId} عند {expires_at_raw}؛ يجب إنشاء مقترح جديد بأسعار محدثة.",
+                        details_en=f"Blocked execution of expired proposal {req.proposalId} (expired at {expires_at_raw}).",
+                        conn=conn,
+                    )
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"انتهت الصلاحية الزمنية لمقترح الصفقة ({req.proposalId})؛ يرجى طلب تقييم جديد.",
+                )
+        except HTTPException:
+            raise
+        except Exception:
+            pass
 
     # التحقق الإضافي من رمز المسؤول إذا كان النظام في وضع التداول الحقيقي LIVE
     if sys_status.tradingMode == "LIVE":
@@ -947,8 +1167,26 @@ def execute_order(req: OrderExecuteRequest) -> OrderExecuteResponse:
     order_id = f"ord_{uuid.uuid4().hex[:12]}"
     now = utc_now_iso()
     effective_source = prop_row["source"] or req.source
+    effective_client_oid = req_client_oid or (
+        prop_row["client_order_id"] if "client_order_id" in prop_row.keys() else None
+    )
 
     with db_session() as conn:
+        # انتقال ذري للحالة لمنع أي تنفيذ متزامن مزدوج لنفس المقترح
+        claim_cur = conn.execute(
+            """
+            UPDATE trade_proposals
+            SET status = 'EXECUTED'
+            WHERE proposal_id = ? AND status = 'APPROVED_FOR_AUTH'
+            """,
+            (req.proposalId,),
+        )
+        if claim_cur.rowcount != 1:
+            raise HTTPException(
+                status_code=409,
+                detail=f"تم منع تكرار الأمر: المقترح {req.proposalId} قيد التنفيذ أو منفذ بالفعل.",
+            )
+
         state = conn.execute("SELECT * FROM system_state WHERE id = 1").fetchone()
         cash_balance = float(state["cash_balance"])
         pos_row = conn.execute(
@@ -1010,20 +1248,17 @@ def execute_order(req: OrderExecuteRequest) -> OrderExecuteResponse:
             (new_cash, now),
         )
         conn.execute(
-            "UPDATE trade_proposals SET status = 'EXECUTED' WHERE proposal_id = ?",
-            (req.proposalId,),
-        )
-        conn.execute(
             """
             INSERT INTO orders (
-                order_id, proposal_id, symbol, side, order_type, quantity,
+                order_id, proposal_id, client_order_id, symbol, side, order_type, quantity,
                 executed_price, notional_usd, total_fee_usd, trading_mode,
                 source, status, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'FILLED', ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'FILLED', ?)
             """,
             (
                 order_id,
                 req.proposalId,
+                effective_client_oid,
                 asset.symbol,
                 recheck_input.side,
                 recheck_input.orderType,
@@ -1056,6 +1291,7 @@ def execute_order(req: OrderExecuteRequest) -> OrderExecuteResponse:
     order_record = OrderRecord(
         orderId=order_id,
         proposalId=req.proposalId,
+        clientOrderId=effective_client_oid,
         symbol=asset.symbol,
         side=recheck_input.side,
         orderType=recheck_input.orderType,

@@ -160,6 +160,7 @@ const ThemePresetCard: React.FC<{
   return (
     <div
       className="holo-panel"
+      data-testid={`theme-card-${theme.id}`}
       style={{
         padding: '1rem',
         display: 'flex',
@@ -250,6 +251,7 @@ const ThemePresetCard: React.FC<{
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <button
           type="button"
+          data-testid={`apply-theme-${theme.id}`}
           className={isActive ? 'holo-btn holo-btn-primary' : 'holo-btn'}
           onClick={() => onSelect(theme.id)}
           aria-pressed={isActive}

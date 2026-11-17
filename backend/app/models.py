@@ -232,6 +232,7 @@ class OrderRecord(BaseModel):
     source: CommandSource
     status: Literal["FILLED", "REJECTED", "CANCELLED"]
     createdAt: str
+    clientOrderId: str | None = None
 
 
 class PortfolioSnapshot(BaseModel):
@@ -297,25 +298,29 @@ class TradeProposalInput(BaseModel):
     takeProfit: float | None = None
     source: CommandSource = "TERMINAL"
     rationale: str | None = ""
+    clientOrderId: str | None = None
+    ttlSeconds: int | None = None
 
 
 class TradeProposalDetails(TradeProposalInput):
-    """بيانات مقترح الصفقة مع السعر المرجعي وتاريخ الإنشاء."""
+    """بيانات مقترح الصفقة مع السعر المرجعي وتاريخ الإنشاء وانتهاء الصلاحية."""
 
     referencePrice: float
     createdAt: str
+    expiresAt: str | None = None
 
 
 class TradeProposalEvaluation(BaseModel):
     """نتيجة تقييم مقترح الصفقة عبر المدقق ومحرك المخاطر دون تنفيذ تلقائي."""
 
     proposalId: str
-    status: Literal["APPROVED_FOR_AUTH", "REJECTED_BY_RISK"]
+    status: Literal["APPROVED_FOR_AUTH", "REJECTED_BY_RISK", "EXPIRED", "EXECUTED", "CANCELLED_BY_KILL_SWITCH"]
     proposal: TradeProposalDetails
     estimatedCosts: EstimatedTradingCosts
     riskAssessment: RiskAssessment
     tradingMode: TradingMode
     requiresLivePin: bool
+    expiresAt: str | None = None
 
 
 class OrderExecuteRequest(BaseModel):
@@ -325,6 +330,7 @@ class OrderExecuteRequest(BaseModel):
     confirmedByUser: bool
     adminPin: str | None = None
     source: CommandSource = "TERMINAL"
+    clientOrderId: str | None = None
 
 
 class OrderExecuteResponse(BaseModel):
@@ -369,6 +375,9 @@ class AgentDeliberationItem(BaseModel):
     keyMetricLabelAr: str
     keyMetricLabelEn: str
     keyMetricValue: str
+    providerUsed: str = "local-quant-engine"
+    modelUsed: str = "quant-deterministic-v1"
+    isSimulated: bool = True
 
 
 class MeetingConsensus(BaseModel):

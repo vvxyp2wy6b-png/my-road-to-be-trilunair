@@ -936,6 +936,9 @@ def _build_exchange_status(gov_row: Any) -> dict[str, Any]:
     else:
         conn_mode = "PAPER_SIMULATION"
 
+    from .market_engine import market_engine
+
+    stale_detected = market_engine.is_stale()
     now_ts = int(time.time())
     instruments = []
     for item in BINANCE_INSTRUMENTS_CATALOG:
@@ -952,7 +955,7 @@ def _build_exchange_status(gov_row: Any) -> dict[str, Any]:
                 "maxQty": item["maxQty"],
                 "minNotional": item["minNotional"],
                 "lastUpdatedTs": now_ts,
-                "isStale": False,
+                "isStale": stale_detected,
             }
         )
 
@@ -961,9 +964,9 @@ def _build_exchange_status(gov_row: Any) -> dict[str, Any]:
         "connectionMode": conn_mode,
         "credentialsConfigured": creds_ok,
         "restReachable": creds_ok,
-        "wsStreamActive": True,
+        "wsStreamActive": not stale_detected,
         "accountStateUncertain": bool(gov_row["account_state_uncertain"]),
-        "staleMarketDataDetected": False,
+        "staleMarketDataDetected": stale_detected,
         "lastReconciledAt": gov_row["last_reconciled_at"],
         "authorizationPolicy": gov_row["authorization_policy"],
         "agentsPaused": bool(gov_row["agents_paused"]),
@@ -987,9 +990,21 @@ def get_quantum_overview() -> dict[str, Any]:
             "SELECT * FROM quantum_governance WHERE tenant_id = ?",
             (DEFAULT_TENANT_ID,),
         ).fetchone()
-        agent_rows = conn.execute("SELECT * FROM quantum_agents ORDER BY rowid ASC").fetchall()
-        skill_rows = conn.execute("SELECT * FROM quantum_skills ORDER BY rowid ASC").fetchall()
-        conn_rows = conn.execute("SELECT * FROM quantum_connectors ORDER BY rowid ASC").fetchall()
+        agent_rows = conn.execute(
+            """
+            SELECT * FROM quantum_agents
+            ORDER BY CASE agent_id
+                WHEN 'quant-alpha' THEN 1
+                WHEN 'risk-sentinel' THEN 2
+                WHEN 'macro-oracle' THEN 3
+                WHEN 'execution-architect' THEN 4
+                WHEN 'chief-strategist' THEN 5
+                ELSE 99
+            END ASC
+            """
+        ).fetchall()
+        skill_rows = conn.execute("SELECT * FROM quantum_skills ORDER BY skill_id ASC").fetchall()
+        conn_rows = conn.execute("SELECT * FROM quantum_connectors ORDER BY connector_id ASC").fetchall()
         fee_row = conn.execute(
             "SELECT COALESCE(SUM(total_fee_usd), 0.0) AS total_fees FROM orders"
         ).fetchone()
@@ -1735,3 +1750,186 @@ def update_goal_mode_config(req: GoalConfigUpdateRequest) -> dict[str, Any]:
             ),
         )
     return req.model_dump()
+
+
+class BinanceSpotTestOrderRequest(BaseModel):
+    symbol: str
+    side: str = "BUY"
+    orderType: str = "LIMIT"
+    quantity: float = Field(gt=0)
+    price: float | None = None
+    clientOrderId: str | None = None
+    simulateNetworkFailure: bool = False
+
+
+@router.get("/providers/audit")
+def get_truthful_providers_audit() -> dict[str, Any]:
+    """تقرير تدقيق صريح يوضح المزودات المحاكاة، الوهمية الاختبارية، والمتصلة سحابياً فعلياً."""
+    from .llm_adapters import get_provider_credentials_report
+
+    openai_key = bool(os.getenv("OPENAI_API_KEY", "").strip())
+    binance_key = bool(
+        os.getenv("BINANCE_API_KEY", "").strip()
+        or os.getenv("BINANCE_SPOT_API_KEY", "").strip()
+    )
+    binance_base = os.getenv(
+        "BINANCE_SPOT_BASE_URL", "https://testnet.binance.vision"
+    ).strip()
+
+    return {
+        "llmProviders": get_provider_credentials_report(),
+        "voiceProviders": [
+            {
+                "component": "browser-stt-tts",
+                "provider": "Web Speech API (SpeechRecognition + SpeechSynthesis)",
+                "classification": "BROWSER_NATIVE_CLIENT",
+                "credentialsConfigured": True,
+            },
+            {
+                "component": "server-stt-whisper",
+                "provider": "OpenAI Whisper (/v1/audio/transcriptions)",
+                "classification": "CONNECTED_CLOUD" if openai_key else "UNAVAILABLE_FALLBACK_BROWSER",
+                "credentialsConfigured": openai_key,
+            },
+            {
+                "component": "server-tts-wav",
+                "provider": "OpenAI TTS / Local RIFF WAVE Holo-Cue Fallback",
+                "classification": "CONNECTED_CLOUD" if openai_key else "SIMULATED_LOCAL_WAV_FALLBACK",
+                "credentialsConfigured": openai_key,
+            },
+        ],
+        "exchangeAdapter": {
+            "adapter": "BinanceSpotAdapter",
+            "liveTradingDisabled": True,
+            "configuredBaseUrl": binance_base,
+            "credentialsConfigured": binance_key,
+            "classification": "TESTNET_OR_MOCK_CONFIGURED" if binance_key else "SAFE_PAPER_MOCK_ADAPTER",
+        },
+    }
+
+
+@router.post("/exchange/spot-test-order")
+def verify_binance_spot_order_adapter(req: BinanceSpotTestOrderRequest) -> dict[str, Any]:
+    """
+    اختبار آمن لمحول Binance Spot دون إرسال أي أوامر مالية حقيقية إطلاقاً:
+    1. يمنع الخلط بين USD و USDT (يرفض BTCUSD أو BTC-USD ويشترط الرمز القياسي BTCUSDT).
+    2. يمنع إرسال الأصول المرجعية REFERENCE_ONLY (مثل XAUUSD و NVDA و SPX).
+    3. يتحقق من فلاتر LOT_SIZE (minQty, maxQty, stepSize) و PRICE_FILTER (tickSize) و MIN_NOTIONAL.
+    4. يوقع الحمولة رسمياً بـ HMAC-SHA256.
+    5. عند تفعيل simulateNetworkFailure=True يحاكي انقطاع الاتصال أثناء الإرسال ويفعل علم عدم يقين الحساب
+       (account_state_uncertain=1) لاختبار آلية التعافي والمصالحة الإلزامية.
+    """
+    ensure_quantum_tables()
+    norm_sym = req.symbol.strip().upper()
+    if norm_sym.endswith("USD") and not norm_sym.endswith("USDT") and norm_sym not in {"XAUUSD"}:
+        raise HTTPException(
+            status_code=422,
+            detail=f"رفض صارم: لا يجوز الخلط بين USD و USDT في محول Binance Spot ({norm_sym})؛ استخدم الزوج القياسي مثل BTCUSDT.",
+        )
+
+    spec_item = next(
+        (i for i in BINANCE_INSTRUMENTS_CATALOG if i["canonicalSymbol"] == norm_sym),
+        None,
+    )
+    eff_price = (
+        float(req.price)
+        if (req.price is not None and req.price > 0)
+        else float(spec_item["referencePrice"] if spec_item else 100.0)
+    )
+
+    filter_res = validate_binance_spot_filters(norm_sym, req.quantity, eff_price)
+    if not filter_res["valid"]:
+        raise HTTPException(
+            status_code=422,
+            detail=f"[{filter_res['code']}] {filter_res['reasonAr']}",
+        )
+
+    spec = filter_res["spec"]
+    # فحص دقة stepSize و tickSize
+    step_size = float(spec["stepSize"])
+    tick_size = float(spec["tickSize"])
+    qty_steps = req.quantity / step_size
+    if abs(qty_steps - round(qty_steps)) > 1e-6:
+        raise HTTPException(
+            status_code=422,
+            detail=f"[STEP_SIZE_VIOLATION] الكمية {req.quantity} لا تتوافق مع مضاعفات stepSize ({step_size}).",
+        )
+    if req.orderType.upper() == "LIMIT" and req.price is not None:
+        price_ticks = req.price / tick_size
+        if abs(price_ticks - round(price_ticks)) > 1e-6:
+            raise HTTPException(
+                status_code=422,
+                detail=f"[PRICE_FILTER_VIOLATION] السعر {req.price} لا يتوافق مع مضاعفات tickSize ({tick_size}).",
+            )
+
+    # حظر الاتصال بنطاق بينانس الحقيقي أثناء التحقق الآمن مهما كانت المتغيرات
+    configured_base = os.getenv("BINANCE_SPOT_BASE_URL", "").strip()
+    if "api.binance.com" in configured_base.lower():
+        raise HTTPException(
+            status_code=403,
+            detail="حظر أمني: يمنع الاتصال بنطاق التداول الحقيقي api.binance.com أثناء وضع التحقق والاختبار.",
+        )
+
+    client_oid = (req.clientOrderId or f"trilunair_test_{uuid.uuid4().hex[:10]}").strip()
+    params: dict[str, Any] = {
+        "symbol": norm_sym,
+        "side": req.side.upper(),
+        "type": req.orderType.upper(),
+        "quantity": f"{req.quantity:g}",
+        "newClientOrderId": client_oid,
+        "timestamp": int(time.time() * 1000),
+    }
+    if req.orderType.upper() == "LIMIT":
+        params["timeInForce"] = "GTC"
+        params["price"] = f"{eff_price:.2f}"
+
+    test_secret = os.getenv("BINANCE_SPOT_API_SECRET", "").strip() or "SAFE_SANDBOX_HMAC_KEY"
+    signed_query = sign_binance_query(params, test_secret)
+
+    # محاكاة فشل الشبكة لاختبار آلية التعافي وتجميد الحساب غير المؤكد
+    if req.simulateNetworkFailure:
+        with db_session() as conn:
+            conn.execute(
+                "UPDATE quantum_governance SET account_state_uncertain = 1 WHERE tenant_id = ?",
+                (DEFAULT_TENANT_ID,),
+            )
+            append_audit_log(
+                actor="BINANCE_SPOT_ADAPTER",
+                source="TERMINAL",
+                action="EXCHANGE_UNCERTAIN_STATE_ENTERED",
+                severity="CRITICAL",
+                details_ar=f"انقطاع اتصال محول Binance Spot أثناء إرسال {client_oid}؛ تم تفعيل حالة عدم يقين الحساب وتجميد الشراء لحين المصالحة.",
+                details_en=f"Simulated transport timeout for {client_oid}; account_state_uncertain=1 set until reconciliation.",
+                conn=conn,
+            )
+        raise HTTPException(
+            status_code=504,
+            detail="انقطاع اتصال البورصة (Timeout): دخل الحساب في وضع عدم اليقين (accountStateUncertain=true) وتجب المصالحة الفورية.",
+        )
+
+    # إذا وُجد خادم محاكاة HTTP محلي مهيأ في الاختبارات، نختبر دورة البروتوكول الكاملة عليه بأمان
+    if configured_base.startswith(("http://127.0.0.1", "http://localhost")):
+        import httpx
+
+        with httpx.Client(timeout=4.0, trust_env=False) as client:
+            resp = client.post(
+                f"{configured_base.rstrip('/')}/api/v3/order/test?{signed_query}",
+                headers={"X-MBX-APIKEY": os.getenv("BINANCE_SPOT_API_KEY", "mock-key")},
+            )
+            resp.raise_for_status()
+            remote_ack = resp.json()
+    else:
+        remote_ack = {"mockExchangeAck": True, "endpoint": "/api/v3/order/test"}
+
+    return {
+        "validated": True,
+        "executionEnvironment": "MOCK_HTTP_EXCHANGE" if configured_base.startswith(("http://127.0.0.1", "http://localhost")) else "SAFE_IN_MEMORY_SANDBOX",
+        "realOrderPlaced": False,
+        "canonicalSymbol": norm_sym,
+        "clientOrderId": client_oid,
+        "notionalUsdt": filter_res["notional"],
+        "hmacSigned": "signature=" in signed_query,
+        "signedQueryPreview": signed_query[:96] + "...",
+        "exchangeAck": remote_ack,
+    }
+

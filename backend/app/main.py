@@ -25,7 +25,7 @@ from app.agents_council import (
     get_chat_history,
     process_ai_command,
 )
-from app.database import fetch_audit_logs, init_db, utc_now_iso
+from app.database import check_infrastructure_status, fetch_audit_logs, init_db, utc_now_iso
 from app.market_engine import market_engine
 from app.models import (
     ActiveThemeState,
@@ -100,6 +100,7 @@ class MarketConnectionManager:
     async def broadcast_tick(self) -> None:
         """تحديث الأسعار وبثها لجميع العملاء المتصلين دون تعطيل الحلقة غير المتزامنة."""
         if not self.active_connections:
+            market_engine.tick()
             return
         payload = self.build_tick_payload(step_prices=True)
         stale: list[WebSocket] = []
@@ -192,6 +193,16 @@ def api_system_status() -> SystemStatus:
     return get_system_status()
 
 
+@app.get("/api/system/infrastructure")
+def api_system_infrastructure() -> dict[str, Any]:
+    """فحص اتصال واستدامة قاعدة البيانات (PostgreSQL / SQLite) وذاكرة Redis وحداثة بث السوق."""
+    init_db()
+    infra = check_infrastructure_status()
+    infra["marketFeed"] = market_engine.get_feed_health()
+    infra["timestamp"] = utc_now_iso()
+    return infra
+
+
 @app.post("/api/auth/trading-mode", response_model=SystemStatus)
 def api_set_trading_mode(payload: TradingModeRequest) -> SystemStatus:
     """بوابة المسؤول لتبديل وضع التداول بين الورقي (PAPER) والحقيقي (LIVE)."""
@@ -222,6 +233,18 @@ def api_get_audit_logs(limit: int = Query(default=100, ge=1, le=500)) -> list[Au
 def api_get_market_assets() -> list[MarketAsset]:
     """استرجاع قائمة الأصول الستة المتداولة مع أسعارها ومؤشرات التقلب والسيولة."""
     return market_engine.get_assets()
+
+
+@app.post("/api/market/feed-control")
+def api_market_feed_control(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
+    """التحكم في محاكاة تقادم بيانات السوق واستعادتها لأغراض اختبار الجاهزية والتعافي."""
+    action = str(payload.get("action") or "status").strip().lower()
+    if action == "stale":
+        age = float(payload.get("ageSeconds") or 120.0)
+        return market_engine.simulate_stale_feed(age_seconds=age)
+    if action == "resume":
+        return market_engine.resume_feed()
+    return market_engine.get_feed_health()
 
 
 @app.get("/api/market/candles/{symbol}", response_model=MarketCandlesResponse)

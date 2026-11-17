@@ -438,6 +438,101 @@ def convene_meeting(
 
     agent_responses = [quant_item, risk_item, macro_item, exec_item, chief_item]
 
+    # ربط قاعة الاجتماع بمحولات المزودات السحابية الحقيقية (OpenAI / Gemini / Anthropic / xAI) عند تهيئة بيانات الاعتماد
+    try:
+        from app.llm_adapters import invoke_configured_llm_adapter
+
+        agent_cfg_map: dict[str, dict[str, Any]] = {}
+        with db_session() as cfg_conn:
+            try:
+                cfg_rows = cfg_conn.execute(
+                    "SELECT agent_id, enabled, assigned_provider, assigned_model FROM quantum_agents"
+                ).fetchall()
+                for cr in cfg_rows:
+                    agent_cfg_map[str(cr["agent_id"])] = dict(cr)
+            except Exception:
+                agent_cfg_map = {}
+
+        market_ctx = (
+            f"Asset: {asset.symbol} | Price: ${asset.price:,.2f} | 24h: {asset.change24hPct:+.2f}% | "
+            f"Support: ${candles_data.supportLevel:,.2f} | Resistance: ${candles_data.resistanceLevel:,.2f} | "
+            f"Spread: {asset.spreadBps:.1f} bps | OB Imbalance: {ob_imbalance:.2f}x | "
+            f"Portfolio Equity: ${portfolio.totalEquity:,.2f} | Risk Passed: {risk_assessment.passed}"
+        )
+
+        total_cloud_cost = 0.0
+        enriched_responses: list[AgentDeliberationItem] = []
+        for item in agent_responses:
+            cfg = agent_cfg_map.get(item.agentId)
+            assigned_prov = (
+                str(cfg["assigned_provider"])
+                if cfg and cfg.get("assigned_provider")
+                else "local-quant-engine"
+            )
+            assigned_mod = (
+                str(cfg["assigned_model"])
+                if cfg and cfg.get("assigned_model")
+                else "quant-deterministic-v1"
+            )
+            if assigned_prov != "local-quant-engine" and (not cfg or int(cfg.get("enabled", 1)) == 1):
+                adapter_res = invoke_configured_llm_adapter(
+                    provider_id=assigned_prov,
+                    model=assigned_mod,
+                    agent_role=f"{item.nameEn} ({item.roleEn})",
+                    market_context=market_ctx,
+                )
+                if adapter_res["success"] and adapter_res["data"] is not None:
+                    d = adapter_res["data"]
+                    item = item.model_copy(
+                        update={
+                            "stance": d["stance"],
+                            "confidence": d["confidence"],
+                            "summaryAr": d["summaryAr"],
+                            "summaryEn": d["summaryEn"],
+                            "providerUsed": adapter_res["providerUsed"],
+                            "modelUsed": adapter_res["modelUsed"],
+                            "isSimulated": False,
+                        }
+                    )
+                    tokens_used = int(adapter_res["tokensUsed"])
+                    call_cost = float(adapter_res["costUsd"])
+                    total_cloud_cost += call_cost
+                    with db_session() as tel_conn:
+                        tel_conn.execute(
+                            """
+                            UPDATE quantum_agents
+                            SET total_calls = total_calls + 1,
+                                total_tokens = total_tokens + ?,
+                                attributable_ai_cost_usd = attributable_ai_cost_usd + ?
+                            WHERE agent_id = ?
+                            """,
+                            (tokens_used, call_cost, item.agentId),
+                        )
+                else:
+                    # عدم تزييف استجابة السحابة عند غياب المفتاح أو تعذر الاتصال؛ الإبقاء على المحرك المحلي معلناً بصدق
+                    item = item.model_copy(
+                        update={
+                            "providerUsed": "local-quant-engine",
+                            "modelUsed": "quant-deterministic-v1",
+                            "isSimulated": True,
+                        }
+                    )
+            enriched_responses.append(item)
+
+        agent_responses = enriched_responses
+        if total_cloud_cost > 0:
+            with db_session() as gov_conn:
+                gov_conn.execute(
+                    """
+                    UPDATE quantum_governance
+                    SET total_ai_inference_costs_usd = total_ai_inference_costs_usd + ?
+                    WHERE tenant_id = 'admin-primary'
+                    """,
+                    (total_cloud_cost,),
+                )
+    except Exception:
+        pass
+
     # بناء مصفوفات التوافق والاختلاف بشفافية كاملة
     agreement_score = 84 if (not high_vol_or_conc and not prefer_limit and risk_assessment.passed) else (62 if not risk_assessment.passed else 74)
     agreements_ar = [
@@ -567,13 +662,14 @@ def _detect_ui_action(norm_text: str) -> tuple[UiCommandAction | None, str, str]
     """اكتشاف أوامر تغيير السمات أو إعدادات العرض أو التنقل بين شاشات لوحة التحكم."""
     lower = norm_text.lower()
 
-    # 1. تبديل السمة الهولوغرامية (5 سمات أساسية + السمات المخصصة)
+    # 1. تبديل السمة الهولوغرامية (السمات الست الأساسية + السمات المخصصة)
     theme_triggers = [
         ("royal-gold", ["royal gold", "royal-gold", "الملكي الذهبي", "ملكي ذهبي", "السمة الذهبية", "الوضع الذهبي"]),
         ("quantum-cyan", ["quantum cyan", "quantum-cyan", "السيان الكمي", "سيان كمي", "سمة السيان", "السيان"]),
         ("nebula-purple", ["nebula purple", "nebula-purple", "سديم الأرجوان", "الأرجواني", "الارجواني", "البنفسجي", "سمة الأرجوان"]),
         ("emerald-matrix", ["emerald matrix", "emerald-matrix", "المصفوفة الزمردية", "الزمردية", "الزمرد", "مصفوفة الزمرد"]),
         ("arctic-platinum", ["arctic platinum", "arctic-platinum", "البلاتين القطبي", "البلاتينية", "البلاتين", "القطبي"]),
+        ("obsidian-black", ["obsidian black", "obsidian-black", "الأوبسيديان الأسود", "الاوبسيديان الاسود", "الأوبسيديان", "الاوبسيديان", "السمة السوداء"]),
     ]
 
     theme_context_words = ["theme", "سمة", "السمة", "ثيم", "لون", "واجهة", "مظهر", "حول", "غير", "فعل", "تفعيل", "switch", "activate", "set"]

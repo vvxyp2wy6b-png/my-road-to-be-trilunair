@@ -1,31 +1,79 @@
 # ==============================================================================
-# تكوين Docker Compose للنشر المتكامل
-# My Road to be Trilunair Dr.MaJoOoOoOoD
+# تكوين Docker Compose للإنتاج والتشغيل المتكامل (PostgreSQL 16 + Redis 7 + FastAPI/React)
+# My Road to be Trilunair Dr.MaJoOoOoOoD — QUANTUM AI TRADING COMMAND CENTER
 # ==============================================================================
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: trilunair-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-trilunair}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-trilunair_quantum_pw}
+      POSTGRES_DB: ${POSTGRES_DB:-trilunair}
+    ports:
+      - "5432:5432"
+    volumes:
+      - trilunair_pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-trilunair} -d ${POSTGRES_DB:-trilunair}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: trilunair-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - trilunair_redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
   trilunair-command-center:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: trilunair-command-center
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
       - "8000:8000"
     environment:
       - TRILUNAIR_DEFAULT_MODE=PAPER
       - TRILUNAIR_ADMIN_PIN=${TRILUNAIR_ADMIN_PIN:-7777}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-trilunair}:${POSTGRES_PASSWORD:-trilunair_quantum_pw}@postgres:5432/${POSTGRES_DB:-trilunair}
+      - REDIS_URL=redis://redis:6379/0
       - TRILUNAIR_DB_PATH=/app/backend/data/trilunair.db
+      - TRILUNAIR_PROPOSAL_TTL_SECONDS=${TRILUNAIR_PROPOSAL_TTL_SECONDS:-180}
+      - TRILUNAIR_MARKET_STALE_SECONDS=${TRILUNAIR_MARKET_STALE_SECONDS:-15}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - XAI_API_KEY=${XAI_API_KEY:-}
+      - BINANCE_SPOT_API_KEY=${BINANCE_SPOT_API_KEY:-}
+      - BINANCE_SPOT_API_SECRET=${BINANCE_SPOT_API_SECRET:-}
+      - BINANCE_SPOT_BASE_URL=${BINANCE_SPOT_BASE_URL:-}
     volumes:
       - trilunair_sqlite_data:/app/backend/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/api/system/status"]
-      interval: 20s
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/api/health"]
+      interval: 15s
       timeout: 5s
       retries: 3
 
 volumes:
+  trilunair_pg_data:
+  trilunair_redis_data:
   trilunair_sqlite_data:
