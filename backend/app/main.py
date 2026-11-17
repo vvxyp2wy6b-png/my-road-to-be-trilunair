@@ -29,6 +29,7 @@ from app.agents_council import (
 )
 from app.binance_market_data import binance_public_client
 from app.database import append_audit_log, check_infrastructure_status, db_session, fetch_audit_logs, init_db, utc_now_iso
+from app.latency_pipeline import pipeline_latency_tracker
 from app.llm_adapters import get_provider_credentials_report
 from app.market_engine import market_engine
 from app.models import (
@@ -53,6 +54,8 @@ from app.models import (
     TradeProposalInput,
     TradingModeRequest,
 )
+from app.performance_analytics import evaluate_walk_forward_performance
+from app.region_benchmark import evaluate_hosting_decision_matrix
 from app.safety_gateway import (
     APP_VERSION,
     execute_order,
@@ -64,12 +67,14 @@ from app.safety_gateway import (
 )
 from app.security import (
     ADMIN_SESSION_COOKIE,
+    HOST_ONLY_PRODUCTION_SESSION_COOKIE,
     clear_session_cookie,
     create_admin_session,
     enforce_admin_secret,
     get_admin_auth_config_state,
     get_allowed_cors_origins,
     get_client_identifier,
+    get_platform_isolation_audit,
     rate_limiter,
     require_authenticated_session_or_secret,
     revoke_session_token,
@@ -85,6 +90,18 @@ from app.themes_service import (
     save_custom_theme,
 )
 from app.voice_service import get_voice_subsystem_status, handle_stt_request, handle_tts_request
+from app.webauthn_passkeys import (
+    ensure_passkey_tables,
+    generate_authentication_options,
+    generate_owner_recovery_codes,
+    generate_registration_options,
+    get_passkey_security_posture,
+    list_registered_passkeys,
+    redeem_owner_recovery_code,
+    revoke_passkey_device,
+    verify_authentication_response,
+    verify_registration_response,
+)
 
 
 class MarketConnectionManager:
@@ -155,10 +172,13 @@ async def _market_broadcast_loop() -> None:
 async def lifespan(_app: FastAPI):
     """مدير دورة حياة التطبيق لتهيئة قاعدة البيانات وتشغيل حلقة البث ومشرف بيانات Binance العام."""
     init_db()
+    ensure_passkey_tables()
     try:
         from app.quantum_hub import ensure_quantum_tables
+        from app.wealth_architect import ensure_wealth_architect_tables
 
         ensure_quantum_tables()
+        ensure_wealth_architect_tables()
     except Exception:
         pass
 
@@ -202,6 +222,8 @@ app.add_middleware(
         "Accept",
         "Origin",
         "X-CSRF-Token",
+        "X-Step-Up-Token",
+        "Cf-Access-Jwt-Assertion",
         "X-Requested-With",
     ],
 )
@@ -212,7 +234,7 @@ async def cloud_security_and_telemetry_middleware(request: Request, call_next) -
     """
     طبقة الحماية السحابية المركزية:
     1. تحديد معدل الطلبات العام لكل عميل لمنع إغراق الواجهة البرمجية (Rate Limiting).
-    2. إضافة ترويسات الأمان القياسية (CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy).
+    2. إضافة ترويسات الأمان القياسية وعزل النطاق (CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy).
     3. تسجيل إحصاءات الاستجابة ومعدلات الخطأ في جامع القياسات الأمنية المهيكل.
     """
     path = request.url.path
@@ -243,8 +265,9 @@ async def cloud_security_and_telemetry_middleware(request: Request, call_next) -
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "microphone=(self), camera=(), geolocation=()"
+    response.headers["Permissions-Policy"] = "publickey-credentials-get=(self), publickey-credentials-create=(self), microphone=(self), camera=(), geolocation=()"
     response.headers["X-Trilunair-Execution-Mode"] = "PAPER-LOCKED"
+    response.headers["X-Trilunair-Isolated-Subdomain"] = os.getenv("TRILUNAIR_PRIMARY_DOMAIN", "trilunair.medinsup.com")
     if not path.startswith("/docs") and not path.startswith("/redoc"):
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
@@ -433,8 +456,16 @@ def api_system_operations() -> dict[str, Any]:
             "failClosedActive": True,
             "defaultTestPinsRemoved": True,
             "corsAllowedOrigins": get_allowed_cors_origins(),
+            "platformIsolation": get_platform_isolation_audit(),
+            "passkeyBiometricAuth": get_passkey_security_posture(),
             "metrics": sec_metrics,
         },
+        "hostingRegionDecision": {
+            "selectionStatus": evaluate_hosting_decision_matrix()["selectionStatus"],
+            "recommendedPrimaryOption": evaluate_hosting_decision_matrix()["recommendedPrimaryOption"],
+            "recommendedPaidSlaFallbackOption": evaluate_hosting_decision_matrix()["recommendedPaidSlaFallbackOption"],
+        },
+        "pipelineLatencyTelemetry": pipeline_latency_tracker.snapshot(),
         "riskPolicy": sys_status.riskPolicy.model_dump(),
         "subsystems": {
             "frontend": frontend_bundle,
@@ -511,8 +542,8 @@ def api_admin_session_login(
         source="AUTH_SESSION",
         action="ADMIN_SESSION_ESTABLISHED",
         severity="INFO",
-        details_ar="تم إنشاء جلسة مسؤول مشفرة وموقعة بنجاح مع تفعيل حماية CSRF.",
-        details_en="Established signed administrator session with HttpOnly cookie and CSRF token.",
+        details_ar="تم إنشاء جلسة مسؤول مشفرة وموقعة بنجاح مع تفعيل حماية CSRF وعزل Host-Only.",
+        details_en="Established signed administrator session with Host-Only HttpOnly cookie and CSRF token.",
     )
     return {
         "authenticated": True,
@@ -531,7 +562,7 @@ def api_admin_session_logout(request: Request, response: Response) -> dict[str, 
     """إبطال جلسة المسؤول الحالية ومسح ملف تعريف الارتباط."""
     auth_header = request.headers.get("authorization", "").strip()
     bearer_tok = auth_header[7:].strip() if auth_header.lower().startswith("bearer ") else None
-    cookie_tok = request.cookies.get(ADMIN_SESSION_COOKIE)
+    cookie_tok = request.cookies.get(HOST_ONLY_PRODUCTION_SESSION_COOKIE) or request.cookies.get(ADMIN_SESSION_COOKIE)
     revoked = revoke_session_token(bearer_tok or cookie_tok)
     clear_session_cookie(response)
     return {"authenticated": False, "revoked": revoked}
@@ -539,29 +570,194 @@ def api_admin_session_logout(request: Request, response: Response) -> dict[str, 
 
 @app.get("/api/auth/session/status")
 def api_admin_session_status(request: Request) -> dict[str, Any]:
-    """التحقق من حالة جلسة المسؤول وتهيئة المصادقة في الخادم دون كشف أي أسرار."""
+    """التحقق من حالة جلسة المسؤول ومفاتيح المرور البيومترية وتهيئة المصادقة دون كشف أي أسرار."""
+    init_db()
+    ensure_passkey_tables()
     cfg = get_admin_auth_config_state()
     auth_header = request.headers.get("authorization", "").strip()
     bearer_tok = auth_header[7:].strip() if auth_header.lower().startswith("bearer ") else None
-    cookie_tok = request.cookies.get(ADMIN_SESSION_COOKIE)
+    cookie_tok = request.cookies.get(HOST_ONLY_PRODUCTION_SESSION_COOKIE) or request.cookies.get(ADMIN_SESSION_COOKIE)
     claims = verify_session_token(bearer_tok or cookie_tok)
+    passkey_posture = get_passkey_security_posture(request)
     return {
         "authenticated": claims is not None,
-        "authConfigured": cfg["configured"],
+        "authConfigured": cfg["configured"] or passkey_posture["registeredDeviceCount"] > 0,
         "authMode": cfg["mode"],
         "reasonAr": cfg["reasonAr"],
         "reasonEn": cfg["reasonEn"],
         "csrfToken": claims.get("csrf") if claims else None,
         "expiresAtEpoch": claims.get("exp") if claims else None,
+        "registeredPasskeyCount": passkey_posture["registeredDeviceCount"],
         "tradingMode": "PAPER",
         "liveAuthorized": False,
         "executionLockedToPaper": True,
     }
 
 
+# ==============================================================================
+# 1-ب. نقاط نهاية المصادقة البيومترية للمالك (WebAuthn / FIDO2 Passkeys & Step-Up)
+# ==============================================================================
+
+
+@app.get("/api/auth/passkey/status")
+def api_passkey_status(request: Request) -> dict[str, Any]:
+    """استرجاع حالة مفاتيح المرور البيومترية للمالك، الأجهزة المسجلة، ورموز الاسترداد المتبقية."""
+    init_db()
+    ensure_passkey_tables()
+    return get_passkey_security_posture(request)
+
+
+@app.get("/api/auth/passkey/devices")
+def api_passkey_devices(include_revoked: bool = Query(default=False)) -> dict[str, Any]:
+    """قائمة أجهزة مفاتيح المرور البيومترية المسجلة للمالك دون أي قوالب حيوية مخزنة."""
+    init_db()
+    ensure_passkey_tables()
+    return {"devices": list_registered_passkeys(include_revoked=include_revoked)}
+
+
+@app.post("/api/auth/passkey/register/options")
+def api_passkey_register_options(
+    request: Request,
+    payload: dict[str, Any] = Body(default_factory=dict),
+) -> dict[str, Any]:
+    """
+    بدء تسجيل مفتاح مرور بيومتري جديد للمالك (Face ID / Touch ID / Security Key).
+    يتطلب التحقق من هوية المالك عبر رمز Step-Up أو الجلسة الموثقة أو سر المسؤول التأسيسي.
+    """
+    init_db()
+    ensure_passkey_tables()
+    existing = list_registered_passkeys(include_revoked=False)
+    require_authenticated_session_or_secret(
+        request=request,
+        provided_secret=str(payload.get("adminSecret") or payload.get("adminPin") or ""),
+        action_label="PASSKEY_REGISTER_OPTIONS",
+        require_step_up=len(existing) > 0 and os.getenv("TRILUNAIR_REQUIRE_PASSKEY_STEP_UP", "false").lower() == "true",
+    )
+    device_label = str(payload.get("deviceLabel") or "MacBook Touch ID / iPhone Face ID").strip()
+    return generate_registration_options(device_label=device_label, request=request)
+
+
+@app.post("/api/auth/passkey/register/verify")
+def api_passkey_register_verify(
+    request: Request,
+    payload: dict[str, Any] = Body(default_factory=dict),
+) -> dict[str, Any]:
+    """التحقق التشفيري من استجابة تسجيل WebAuthn وحفظ المفتاح العام للمالك وإصدار رمز Step-Up."""
+    init_db()
+    ensure_passkey_tables()
+    return verify_registration_response(payload=payload, request=request)
+
+
+@app.post("/api/auth/passkey/authenticate/options")
+def api_passkey_authenticate_options(request: Request) -> dict[str, Any]:
+    """توليد تحدي توقيع WebAuthn أحادي الاستخدام لتسجيل الدخول البيومتري أو التصعيد الأمني (Step-Up)."""
+    init_db()
+    ensure_passkey_tables()
+    return generate_authentication_options(request=request)
+
+
+@app.post("/api/auth/passkey/authenticate/verify")
+def api_passkey_authenticate_verify(
+    request: Request,
+    response: Response,
+    payload: dict[str, Any] = Body(default_factory=dict),
+) -> dict[str, Any]:
+    """التحقق التشفيري من توقيع مفتاح المرور وإصدار جلسة المالك المعزولة Host-Only ورمز Step-Up."""
+    init_db()
+    ensure_passkey_tables()
+    verified = verify_authentication_response(payload=payload, request=request)
+    set_session_cookie(response, verified["sessionToken"], int(verified["ttlSeconds"]))
+    return verified
+
+
+@app.delete("/api/auth/passkey/devices/{credential_id}")
+def api_passkey_revoke_device(
+    credential_id: str,
+    request: Request,
+    payload: dict[str, Any] = Body(default_factory=dict),
+) -> dict[str, Any]:
+    """إلغاء صلاحية جهاز مفتاح مرور مسجل فوراً بعد التحقق من المالك."""
+    init_db()
+    ensure_passkey_tables()
+    require_authenticated_session_or_secret(
+        request=request,
+        provided_secret=str(payload.get("adminSecret") or payload.get("adminPin") or ""),
+        action_label="PASSKEY_REVOKE_DEVICE",
+    )
+    return revoke_passkey_device(credential_id=credential_id)
+
+
+@app.post("/api/auth/passkey/recovery/generate")
+def api_passkey_generate_recovery(
+    request: Request,
+    payload: dict[str, Any] = Body(default_factory=dict),
+) -> dict[str, Any]:
+    """توليد حزمة رموز استرداد طوارئ أحادية الاستخدام مشفرة بـ PBKDF2 للمالك."""
+    init_db()
+    ensure_passkey_tables()
+    require_authenticated_session_or_secret(
+        request=request,
+        provided_secret=str(payload.get("adminSecret") or payload.get("adminPin") or ""),
+        action_label="PASSKEY_GENERATE_RECOVERY_CODES",
+    )
+    count = int(payload.get("count") or 6)
+    return generate_owner_recovery_codes(count=count)
+
+
+@app.post("/api/auth/passkey/recovery/redeem")
+def api_passkey_redeem_recovery(
+    response: Response,
+    payload: dict[str, Any] = Body(default_factory=dict),
+) -> dict[str, Any]:
+    """استرداد حساب المالك باستخدام رمز استرداد طوارئ أحادي الاستخدام."""
+    init_db()
+    ensure_passkey_tables()
+    code = str(payload.get("recoveryCode") or "")
+    redeemed = redeem_owner_recovery_code(candidate_code=code)
+    set_session_cookie(response, redeemed["sessionToken"], int(redeemed["ttlSeconds"]))
+    return redeemed
+
+
+# ==============================================================================
+# 1-ج. نقاط نهاية مصفوفة اختيار الإقليم السحابي والعزل وقياس الكمون والأداء خارج العينة
+# ==============================================================================
+
+
+@app.get("/api/infrastructure/benchmark-matrix")
+def api_infrastructure_benchmark_matrix() -> dict[str, Any]:
+    """استرجاع مصفوفة القرار الموزونة لاختيار الإقليم السحابي (طوكيو / سنغافورة / فرانكفورت) بشفافية كاملة."""
+    return evaluate_hosting_decision_matrix()
+
+
+@app.get("/api/infrastructure/isolation-audit")
+def api_infrastructure_isolation_audit() -> dict[str, Any]:
+    """التحقق الآلي من العزل الأمني التام للنطاق الفرعي trilunair.medinsup.com عن المنصة الطبية medinsup.com."""
+    return get_platform_isolation_audit()
+
+
+@app.get("/api/analytics/latency-pipeline")
+def api_analytics_latency_pipeline() -> dict[str, Any]:
+    """استرجاع قياسات الكمون P50/P95/P99 لمراحل خط أنابيب التداول الثماني بالنانوثانية/المللي ثانية."""
+    return pipeline_latency_tracker.snapshot()
+
+
+@app.get("/api/analytics/performance-evaluation")
+def api_analytics_performance_evaluation(
+    symbol: str = Query(default="BTC-USD"),
+    timeframe: str = Query(default="15m"),
+    hosting_cost_usd: float = Query(default=12.0, ge=0.0, le=500.0),
+) -> dict[str, Any]:
+    """تقييم الأداء المالي خارج العينة (Walk-Forward Out-of-Sample) صافي كافة العمولات والانزلاق وتكلفة AI والاستضافة."""
+    return evaluate_walk_forward_performance(
+        symbol=symbol,
+        timeframe=timeframe,
+        monthly_hosting_cost_usd=hosting_cost_usd,
+    )
+
+
 @app.post("/api/auth/trading-mode", response_model=SystemStatus)
 def api_set_trading_mode(payload: TradingModeRequest, request: Request) -> SystemStatus:
-    """بوابة المسؤول لوضع التداول (الإصدار v1.1.0-cloud-paper يفرض البقاء في PAPER ويرفض LIVE نهائياً)."""
+    """بوابة المسؤول لوضع التداول (الإصدار v1.2.0-low-latency-cloudflare يفرض البقاء في PAPER ويرفض LIVE نهائياً)."""
     init_db()
     return set_trading_mode(payload, client_id=get_client_identifier(request))
 
@@ -869,6 +1065,10 @@ try:
     app.include_router(quantum_router)
 except Exception:
     pass
+
+from app.wealth_architect import wealth_router
+
+app.include_router(wealth_router)
 
 _configure_optional_spa_serving(app)
 

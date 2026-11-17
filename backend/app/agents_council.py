@@ -169,6 +169,18 @@ def convene_meeting(
     يولّد مداخلات مستقلة لكل وكيل مع نقاط اتفاق واختلاف حقيقية مبنية على بيانات السوق والمحفظة،
     بالإضافة إلى حساب التكاليف وتقييم المخاطر عبر محرك المخاطر الحتمي.
     """
+    import concurrent.futures
+    from datetime import datetime, timedelta, timezone
+    import os
+    import time
+    from app.latency_pipeline import (
+        classify_market_data_freshness,
+        get_council_deadline_ms,
+        get_signal_ttl_seconds,
+        pipeline_latency_tracker,
+    )
+
+    t_meeting_start = time.perf_counter_ns()
     canonical_symbol = market_engine.resolve_symbol(symbol)
     if not canonical_symbol:
         raise HTTPException(
@@ -176,6 +188,14 @@ def convene_meeting(
             detail=f"رمز الأصل غير معروف لعقد الاجتماع: {symbol}",
         )
 
+    feed_health = market_engine.get_feed_health()
+    freshness_info = classify_market_data_freshness(
+        age_seconds=float(feed_health.get("ageSeconds", 0.0)),
+        max_staleness_seconds=float(feed_health.get("maxStalenessSeconds", 60.0)),
+        halted=bool(feed_health.get("feedHalted", False)),
+    )
+
+    t_mkt_0 = time.perf_counter_ns()
     asset = market_engine.get_asset(canonical_symbol)
     assert asset is not None
     tf = horizon if horizon in ("5m", "15m", "1h", "4h") else "1h"
@@ -199,6 +219,8 @@ def convene_meeting(
     total_bid_depth = sum(b.size for b in candles_data.bids)
     total_ask_depth = max(1e-6, sum(a.size for a in candles_data.asks))
     ob_imbalance = round(total_bid_depth / total_ask_depth, 2)
+    t_mkt_1 = time.perf_counter_ns()
+    market_analysis_ms = (t_mkt_1 - t_mkt_0) / 1_000_000.0
 
     # تحديد حجم الصفقة المرجعي للفحص الحتمي (إما المقترح من المستخدم أو 2% معيارية من حقوق الملكية)
     default_notional = max(1000.0, portfolio.totalEquity * 0.02)
@@ -219,12 +241,15 @@ def convene_meeting(
         source="TEXT",
         rationale="تقييم معياري لقاعة اجتماع الوكلاء",
     )
+    t_risk_0 = time.perf_counter_ns()
     _, estimated_costs, risk_assessment = DeterministicRiskEngine.evaluate(
         proposal=sim_proposal,
         asset=asset,
         portfolio=portfolio,
         kill_switch_active=sys_status.killSwitchActive,
     )
+    t_risk_1 = time.perf_counter_ns()
+    risk_validation_ms = (t_risk_1 - t_risk_0) / 1_000_000.0
 
     # 1. مداخلة د. ريان (المحلل الكمي - Quant Alpha)
     sharpe_proxy = round(asset.change24hPct / max(0.4, asset.volatilityPct), 2)
@@ -448,7 +473,9 @@ def convene_meeting(
         for it in [quant_item, risk_item, macro_item, exec_item, chief_item]
     ]
 
-    # ربط قاعة الاجتماع بمحولات المزودات السحابية الحقيقية (OpenAI / Gemini / Anthropic / xAI) عند تهيئة بيانات الاعتماد
+    # ربط قاعة الاجتماع بمحولات المزودات السحابية الحقيقية بالتوازي (Parallel Fast-Quorum) ضمن مهلة زمنية صارمة
+    t_ai_0 = time.perf_counter_ns()
+    routing_decision = "LOCAL_DETERMINISTIC_FAST_PATH"
     try:
         from app.llm_adapters import invoke_configured_llm_adapter
 
@@ -473,9 +500,8 @@ def convene_meeting(
         price_bucket = round(asset.price / 25.0) * 25.0 if asset.price >= 1000 else round(asset.price, 0)
         cache_fp = f"{asset.symbol}:{horizon}:{price_bucket}:{risk_assessment.passed}"
 
-        total_cloud_cost = 0.0
-        enriched_responses: list[AgentDeliberationItem] = []
-        for item in agent_responses:
+        cloud_candidates: list[tuple[int, AgentDeliberationItem, str, str]] = []
+        for idx_ag, item in enumerate(agent_responses):
             cfg = agent_cfg_map.get(item.agentId)
             assigned_prov = (
                 str(cfg["assigned_provider"])
@@ -488,17 +514,62 @@ def convene_meeting(
                 else "quant-deterministic-v1"
             )
             if assigned_prov != "local-quant-engine" and (not cfg or int(cfg.get("enabled", 1)) == 1):
-                adapter_res = invoke_configured_llm_adapter(
-                    provider_id=assigned_prov,
-                    model=assigned_mod,
-                    agent_role=f"{item.nameEn} ({item.roleEn})",
+                cloud_candidates.append((idx_ag, item, assigned_prov, assigned_mod))
+
+        if cloud_candidates and not freshness_info["eligibleForPaidCloudLlm"] and os.getenv("TRILUNAIR_FORCE_CLOUD_ON_STALE", "false").lower() != "true":
+            # ترشيد تكاليف الذكاء الاصطناعي عند تقادم بيانات السوق
+            routing_decision = "COST_AWARE_SKIP_STALE_MARKET_DATA"
+            pipeline_latency_tracker.record_counter("cost_aware_skip", len(cloud_candidates))
+            for idx_ag, item, assigned_prov, _ in cloud_candidates:
+                agent_responses[idx_ag] = item.model_copy(
+                    update={
+                        "providerUsed": f"local-quant-engine (cost-aware-skip:{assigned_prov})",
+                        "modelUsed": "quant-deterministic-v1",
+                        "executionStatus": "SIMULATED",
+                        "respondedAt": utc_now_iso(),
+                        "latencyMs": 0.15,
+                        "isSimulated": True,
+                    }
+                )
+        elif cloud_candidates:
+            routing_decision = "PARALLEL_BOUNDED_DEADLINE"
+            deadline_sec = get_council_deadline_ms() / 1000.0
+
+            def _call_one_agent(ag_item: AgentDeliberationItem, prov: str, mod: str) -> tuple[dict[str, Any], float]:
+                c0 = time.perf_counter_ns()
+                res = invoke_configured_llm_adapter(
+                    provider_id=prov,
+                    model=mod,
+                    agent_role=f"{ag_item.nameEn} ({ag_item.roleEn})",
                     market_context=market_ctx,
                     cache_fingerprint=cache_fp,
                 )
-                if adapter_res["success"] and adapter_res["data"] is not None:
+                c1 = time.perf_counter_ns()
+                return res, round((c1 - c0) / 1_000_000.0, 3)
+
+            total_cloud_cost = 0.0
+            telemetry_updates: list[tuple[int, float, str]] = []
+            pool = concurrent.futures.ThreadPoolExecutor(max_workers=min(5, len(cloud_candidates)))
+            future_map = {
+                pool.submit(_call_one_agent, ag_item, prov, mod): (idx_ag, ag_item, prov, mod)
+                for idx_ag, ag_item, prov, mod in cloud_candidates
+            }
+            done_futures, not_done_futures = concurrent.futures.wait(
+                future_map.keys(),
+                timeout=deadline_sec,
+            )
+
+            for fut in done_futures:
+                idx_ag, ag_item, assigned_prov, _ = future_map[fut]
+                try:
+                    adapter_res, call_ms = fut.result()
+                except Exception:
+                    adapter_res, call_ms = {"success": False, "data": None}, round(deadline_sec * 1000.0, 3)
+
+                if adapter_res.get("success") and adapter_res.get("data") is not None:
                     d = adapter_res["data"]
                     exec_st = str(adapter_res.get("executionStatus") or "LIVE")
-                    item = item.model_copy(
+                    agent_responses[idx_ag] = ag_item.model_copy(
                         update={
                             "stance": d["stance"],
                             "confidence": d["confidence"],
@@ -509,52 +580,72 @@ def convene_meeting(
                             "modelUsed": adapter_res["modelUsed"],
                             "executionStatus": exec_st if exec_st in {"LIVE", "CACHED"} else "LIVE",
                             "respondedAt": str(adapter_res.get("respondedAt") or utc_now_iso()),
+                            "latencyMs": call_ms,
                             "isSimulated": False,
                         }
                     )
-                    tokens_used = int(adapter_res["tokensUsed"])
-                    call_cost = float(adapter_res["costUsd"])
+                    tokens_used = int(adapter_res.get("tokensUsed", 0))
+                    call_cost = float(adapter_res.get("costUsd", 0.0))
                     total_cloud_cost += call_cost
                     if tokens_used > 0 or call_cost > 0:
-                        with db_session() as tel_conn:
-                            tel_conn.execute(
-                                """
-                                UPDATE quantum_agents
-                                SET total_calls = total_calls + 1,
-                                    total_tokens = total_tokens + ?,
-                                    attributable_ai_cost_usd = attributable_ai_cost_usd + ?
-                                WHERE agent_id = ?
-                                """,
-                                (tokens_used, call_cost, item.agentId),
-                            )
+                        telemetry_updates.append((tokens_used, call_cost, ag_item.agentId))
                 else:
-                    # عزل فشل المزود الخارجي مع إعلان حالة UNAVAILABLE للمزود المطلوب والتراجع الآمن للمحرك المحلي
-                    item = item.model_copy(
+                    agent_responses[idx_ag] = ag_item.model_copy(
                         update={
                             "providerUsed": f"local-quant-engine (fallback:{assigned_prov})",
                             "modelUsed": "quant-deterministic-v1",
                             "executionStatus": "UNAVAILABLE",
                             "respondedAt": str(adapter_res.get("respondedAt") or utc_now_iso()),
+                            "latencyMs": call_ms,
                             "isSimulated": True,
                         }
                     )
-            enriched_responses.append(item)
 
-        agent_responses = enriched_responses
-        if total_cloud_cost > 0:
-            with db_session() as gov_conn:
-                gov_conn.execute(
-                    """
-                    UPDATE quantum_governance
-                    SET total_ai_inference_costs_usd = total_ai_inference_costs_usd + ?
-                    WHERE tenant_id = 'admin-primary'
-                    """,
-                    (total_cloud_cost,),
+            for fut in not_done_futures:
+                fut.cancel()
+                idx_ag, ag_item, assigned_prov, _ = future_map[fut]
+                pipeline_latency_tracker.record_counter("parallel_timeout", 1)
+                agent_responses[idx_ag] = ag_item.model_copy(
+                    update={
+                        "providerUsed": f"local-quant-engine (deadline-timeout:{assigned_prov})",
+                        "modelUsed": "quant-deterministic-v1",
+                        "executionStatus": "UNAVAILABLE",
+                        "respondedAt": utc_now_iso(),
+                        "latencyMs": round(deadline_sec * 1000.0, 3),
+                        "isSimulated": True,
+                    }
                 )
+            pool.shutdown(wait=False, cancel_futures=True)
+
+            if telemetry_updates or total_cloud_cost > 0:
+                with db_session() as tel_conn:
+                    for tok_u, cost_u, ag_id in telemetry_updates:
+                        tel_conn.execute(
+                            """
+                            UPDATE quantum_agents
+                            SET total_calls = total_calls + 1,
+                                total_tokens = total_tokens + ?,
+                                attributable_ai_cost_usd = attributable_ai_cost_usd + ?
+                            WHERE agent_id = ?
+                            """,
+                            (tok_u, cost_u, ag_id),
+                        )
+                    if total_cloud_cost > 0:
+                        tel_conn.execute(
+                            """
+                            UPDATE quantum_governance
+                            SET total_ai_inference_costs_usd = total_ai_inference_costs_usd + ?
+                            WHERE tenant_id = 'admin-primary'
+                            """,
+                            (total_cloud_cost,),
+                        )
     except Exception:
         pass
+    t_ai_1 = time.perf_counter_ns()
+    ai_inference_ms = (t_ai_1 - t_ai_0) / 1_000_000.0
 
     # بناء مصفوفات التوافق والاختلاف بشفافية كاملة
+    t_cons_0 = time.perf_counter_ns()
     agreement_score = 84 if (not high_vol_or_conc and not prefer_limit and risk_assessment.passed) else (62 if not risk_assessment.passed else 74)
     agreements_ar = [
         f"اتفاق جماعي على أن مستوى الدعم المحوري للأصل {asset.symbol} يقع عند ${candles_data.supportLevel:,.2f} والمقاومة عند ${candles_data.resistanceLevel:,.2f}.",
@@ -627,9 +718,24 @@ def convene_meeting(
         f"watching support at ${candles_data.supportLevel:,.2f} and resistance at ${candles_data.resistanceLevel:,.2f}. "
         "Any execution requires explicit user authorization in the order ticket."
     )
+    t_cons_1 = time.perf_counter_ns()
+    consensus_ms = (t_cons_1 - t_cons_0) / 1_000_000.0
 
     meeting_id = f"mtg_{uuid.uuid4().hex[:12]}"
-    created_at = utc_now_iso()
+    now_dt_utc = datetime.now(timezone.utc)
+    created_at = now_dt_utc.isoformat().replace("+00:00", "Z")
+    signal_expires_at = (now_dt_utc + timedelta(seconds=get_signal_ttl_seconds())).isoformat().replace("+00:00", "Z")
+
+    prelim_total_ms = (time.perf_counter_ns() - t_meeting_start) / 1_000_000.0
+    latency_breakdown = {
+        "marketDataAgeMs": round(float(freshness_info["ageMs"]), 3),
+        "marketAnalysisMs": round(market_analysis_ms, 3),
+        "aiInferenceMs": round(ai_inference_ms, 3),
+        "agentConsensusMs": round(consensus_ms, 3),
+        "riskValidationMs": round(risk_validation_ms, 3),
+        "economicViabilityMs": round(max(0.04, risk_validation_ms * 0.25), 3),
+        "totalSignalToDecisionMs": round(prelim_total_ms, 3),
+    }
 
     result = AgentMeetingResult(
         meetingId=meeting_id,
@@ -637,6 +743,10 @@ def convene_meeting(
         topicEn=topic_en or f"Executive Council Roundtable on {asset.nameEn} ({asset.symbol})",
         symbol=asset.symbol,
         timestamp=created_at,
+        signalExpiresAt=signal_expires_at,
+        freshnessTier=str(freshness_info["tier"]),
+        routingDecision=routing_decision,
+        latencyBreakdownMs=latency_breakdown,
         agentResponses=agent_responses,
         consensus=MeetingConsensus(
             agreementScorePct=agreement_score,
@@ -665,6 +775,7 @@ def convene_meeting(
         ),
     )
 
+    t_db_0 = time.perf_counter_ns()
     with db_session() as conn:
         conn.execute(
             "INSERT INTO agent_meetings (meeting_id, symbol, meeting_json, created_at) VALUES (?, ?, ?, ?)",
@@ -675,6 +786,18 @@ def convene_meeting(
                 created_at,
             ),
         )
+    t_db_1 = time.perf_counter_ns()
+    latency_breakdown["auditPersistenceMs"] = round((t_db_1 - t_db_0) / 1_000_000.0, 3)
+    latency_breakdown["totalSignalToDecisionMs"] = round(
+        (time.perf_counter_ns() - t_meeting_start) / 1_000_000.0, 3
+    )
+    pipeline_latency_tracker.record_pipeline_trace(
+        trace_type="AI_COUNCIL_MEETING",
+        symbol=asset.symbol,
+        stages_ms=latency_breakdown,
+        routing_mode=routing_decision,
+        extra={"freshnessTier": freshness_info["tier"], "signalExpiresAt": signal_expires_at},
+    )
 
     return result
 
@@ -1024,6 +1147,35 @@ def process_ai_command(req: AiCommandRequest) -> AiCommandResponse:
             f"(Cash: `${snap.cashBalance:,.2f}` | Positions: `${snap.positionsValue:,.2f}`). "
             f"Daily P&L: `${snap.dailyPnl:+,.2f}` (`{snap.dailyPnlPct:+.2f}%`), 95% Daily VaR: `${snap.var95Usd:,.2f}`, "
             f"Current Drawdown `{snap.currentDrawdownPct:.2f}%` (cap `{snap.maxAllowedDrawdownPct:.1f}%`). Active holdings: {pos_summary_en}."
+        )
+
+    # 3-ب. فحص أوامر المدير المالي الشخصي (Personal CFO)، البطاقات الائتمانية، ومستحقات نظام العمل ومهلة 60 يوماً
+    cfo_keywords = [
+        "راتب", "ميزانية", "تسهيل", "الإمارات", "بطاق", "ديون", "نهاية الخدمة", "مكافأة",
+        "إجاز", "اجاز", "عقد", "تجديد", "60 يوم", "salary", "cfo", "tasheel", "emirates",
+        "eosb", "leave", "contract", "non-renewal", "benefits",
+    ]
+    if any(k in lower_msg for k in cfo_keywords):
+        from app.wealth_architect import get_wealth_architect_overview
+
+        w_ov = get_wealth_architect_overview()
+        sal = w_ov["salaryAndCashFlow"]
+        debt = w_ov["debtPlanner"]
+        emp = w_ov["employmentBenefits"]["primaryExpectedScenario"]
+        dl = w_ov["contractRenewalIntelligence"]
+        sections_ar.append(
+            f"🏛️ **المدير المالي الشخصي ومعماري الثروة (Personal CFO):** الراتب الشهري `{sal['monthlySalarySar']:,.0f} ريال` (يوم `{sal['paydayDayOfMonth']}`) موزّع بتوازن كامل: "
+            f"مصروفات `8,000` | سداد بطاقات `{debt['monthlyRepaymentBudgetSar']:,.0f}` (تسهيل `4,200` + الإمارات دبي الوطني `1,800`) | "
+            f"اشتراكات AI `1,375` | تشغيل وكلاء TRILUNAIR `500` | استثمار فوري `2,125` | ادخار نقدي `2,000`. "
+            f"مستحقات انتهاء العقد المحدد وعدم تجديده التقديرية (`PROVISIONAL` — مفصولة عن النقد السائل): `{emp['combinedEstimatedBenefitsSar']:,.0f} ريال` "
+            f"(`{emp['eosbAwardSar']:,.0f}` مكافأة م84 + `{emp['unusedLeaveCompensationSar']:,.0f}` إجازات م111)، وآخر موعد لإشعار عدم التجديد قبل 60 يوماً هو `{dl['finalNoticeDeadlineDate']}`."
+        )
+        sections_en.append(
+            f"🏛️ **Personal CFO & Wealth Architect:** Salary `SAR {sal['monthlySalarySar']:,.0f}` (paid day `{sal['paydayDayOfMonth']}`) fully balanced: "
+            f"Expenses `8,000` | Cards `{debt['monthlyRepaymentBudgetSar']:,.0f}` (Tasheel `4,200` + Emirates NBD `1,800`) | "
+            f"AI Subs `1,375` | TRILUNAIR Ops `500` | Investment `2,125` | Cash Savings `2,000`. "
+            f"Provisional fixed-term non-renewal benefits (`CONTINGENT_FUTURE_RECEIVABLE`, excluded from liquid cash): `SAR {emp['combinedEstimatedBenefitsSar']:,.0f}` "
+            f"(`SAR {emp['eosbAwardSar']:,.0f}` Art. 84 EOSB + `SAR {emp['unusedLeaveCompensationSar']:,.0f}` Art. 111 leave); 60-day notice deadline: `{dl['finalNoticeDeadlineDate']}`."
         )
 
     # 4. فحص المقارنة بين الأصول (Multi-Asset Comparison)

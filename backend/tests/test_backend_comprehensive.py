@@ -34,6 +34,8 @@ TEST_STRONG_SECRET = "TestSuiteAdmin#2026!Strong"
 def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     """تهيئة عميل اختبار معزول بقاعدة بيانات SQLite مؤقتة وإعادة ضبط محرك السوق ومحدد المعدل."""
     test_db = tmp_path / "test_trilunair.db"
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.delenv("TRILUNAIR_POSTGRES_DSN", raising=False)
     monkeypatch.setenv("TRILUNAIR_DB_PATH", str(test_db))
     monkeypatch.setenv("TRILUNAIR_ADMIN_SECRET", TEST_STRONG_SECRET)
     monkeypatch.delenv("TRILUNAIR_ADMIN_SECRET_HASH", raising=False)

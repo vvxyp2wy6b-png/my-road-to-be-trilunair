@@ -181,20 +181,39 @@ def main() -> None:
         assert len(voice_calls) >= 2, f"Expected both TEXT and VOICE /api/ai/command calls, got {voice_calls}"
         report["aiCommandHttpCalls"] = len(voice_calls)
 
-        # 5. الانتقال إلى شاشة الحوكمة والعمليات السحابية والتحقق من لوحة Cloud Operations وسياسة المخاطر الموحدة وخلو DOM من 7777
+        # 5. الانتقال إلى شاشة الحوكمة والعمليات السحابية والتحقق من لوحة Cloud Operations و Passkey و Region Latency وسياسة المخاطر الموحدة وخلو DOM من 7777
         page.click("#nav-governance-btn")
         page.wait_for_selector('[data-testid="governance-view"]', timeout=5000)
         page.wait_for_selector('[data-testid="cloud-operations-panel"]', timeout=5000)
+        page.wait_for_selector('[data-testid="passkey-biometric-panel"]', timeout=5000)
+        page.wait_for_selector('[data-testid="region-latency-telemetry-panel"]', timeout=5000)
         page.wait_for_selector('[data-testid="unified-risk-policy-strip"]', timeout=5000)
         page.wait_for_timeout(500)
 
         gov_text = page.get_by_test_id("governance-view").inner_text()
         assert "7777" not in gov_text, "Default test PIN 7777 must never appear in Governance DOM!"
+        passkey_panel_text = page.get_by_test_id("passkey-biometric-panel").inner_text()
+        assert ("trilunair.medinsup.com" in passkey_panel_text or "RP ID: 127.0.0.1" in passkey_panel_text), passkey_panel_text
+        assert ("صفر قوالب حيوية مخزنة" in passkey_panel_text or "Zero Biometric" in passkey_panel_text), passkey_panel_text
+        latency_panel_text = page.get_by_test_id("region-latency-telemetry-panel").inner_text()
+        assert "NOT_MEASURED" in latency_panel_text or "Tokyo" in latency_panel_text or "طوكيو" in latency_panel_text, latency_panel_text
         risk_strip_text = page.get_by_test_id("unified-risk-policy-strip").inner_text()
         for expected_pct in ("0.5%", "25%", "2%", "5%", "10%"):
             assert expected_pct in risk_strip_text, f"Missing {expected_pct} in {risk_strip_text}"
         report["verifiedUnifiedRiskStripInDom"] = True
+        report["verifiedPasskeyAndLatencyPanelsInDom"] = True
         report["verifiedZeroDefaultPinInDom"] = True
+
+        # 6. الانتقال إلى شاشة المحفظة والمدير المالي الشخصي (Personal CFO & Saudi Employment Benefits) والتحقق من ظهورها حياً
+        page.click("#nav-portfolio-btn")
+        page.wait_for_selector('[data-testid="personal-cfo-wealth-panel"]', timeout=6000)
+        page.wait_for_selector('[data-testid="saudi-labor-benefits-calculator"]', timeout=6000)
+        page.wait_for_selector('[data-testid="contract-renewal-deadline-tracker"]', timeout=6000)
+        cfo_dom_text = page.get_by_test_id("personal-cfo-wealth-panel").inner_text()
+        assert "PROVISIONAL / SUBJECT TO CONTRACT AND LEGAL VERIFICATION" in cfo_dom_text, cfo_dom_text
+        assert "2027-08-11" in cfo_dom_text, cfo_dom_text
+        assert "72,000" in cfo_dom_text, cfo_dom_text
+        report["verifiedPersonalCfoAndSaudiContractInDom"] = True
 
         browser.close()
 
@@ -204,7 +223,7 @@ def main() -> None:
         ops = http.get(f"{BASE_URL}/api/system/operations").json()
         history = http.get(f"{BASE_URL}/api/ai/history").json()
         portfolio = http.get(f"{BASE_URL}/api/portfolio").json()
-        assert final_status["version"] == "1.1.0-cloud-paper"
+        assert final_status["version"] == "1.2.0-low-latency-cloudflare"
         assert final_status["tradingMode"] == "PAPER"
         assert final_status["liveAuthorized"] is False
         assert final_status["executionLockedToPaper"] is True

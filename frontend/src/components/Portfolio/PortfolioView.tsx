@@ -4,22 +4,35 @@
  * جدول المراكز المفتوحة، وسجل الصفقات المنفذة عبر الصوت أو النص أو قاعة التداول.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  AlertTriangle,
   Briefcase,
+  CalendarClock,
   CheckCircle2,
   Clock,
   Compass,
+  CreditCard,
+  FileCheck2,
+  Landmark,
   MessageSquare,
   Mic,
+  Scale,
   ShieldAlert,
+  ShieldCheck,
   Terminal,
   TrendingUp,
   Wallet,
 } from 'lucide-react';
+import { trilunairApi } from '../../api/client';
 import { useTheme } from '../../theme/ThemeContext';
 import { formatCurrency, formatNumber, formatSignedPct } from '../../i18n/translations';
-import type { CommandSource, MarketAsset, PortfolioSnapshot } from '../../types/trilunair';
+import type {
+  CommandSource,
+  MarketAsset,
+  PortfolioSnapshot,
+  WealthArchitectOverview,
+} from '../../types/trilunair';
 
 export interface PortfolioViewProps {
   portfolio: PortfolioSnapshot | null;
@@ -46,7 +59,95 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
   onSelectSymbolForTerminal,
 }) => {
   const { language } = useTheme();
+  const isAr = language === 'ar';
   const [targetAnnualCagrPct, setTargetAnnualCagrPct] = useState<number>(65);
+  const [wealthOverview, setWealthOverview] = useState<WealthArchitectOverview | null>(null);
+  const [expiryDraft, setExpiryDraft] = useState<string>('2027-10-10');
+  const [evidenceTitle, setEvidenceTitle] = useState<string>('');
+  const [cfoFeedback, setCfoFeedback] = useState<string | null>(null);
+
+  const loadWealthOverview = useCallback(async () => {
+    try {
+      const data = await trilunairApi.getWealthOverview();
+      setWealthOverview(data);
+      if (data?.contractRenewalIntelligence?.contractExpiryDate) {
+        setExpiryDraft(data.contractRenewalIntelligence.contractExpiryDate);
+      }
+    } catch {
+      // Safe non-blocking load in isolated unit tests without mock
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadWealthOverview();
+  }, [loadWealthOverview]);
+
+  const handleRecalculateContractExpiry = async () => {
+    if (!wealthOverview) return;
+    try {
+      const cs = wealthOverview.employmentBenefits.contractSummary;
+      const updated = await trilunairApi.updateEmploymentContract({
+        commencementDate: cs.commencementDate,
+        contractExpiryDate: expiryDraft,
+        contractType: 'FIXED_TERM',
+        autoRenews: cs.autoRenews,
+        nonRenewalNoticeDays: cs.nonRenewalNoticeDays,
+        eligibleFinalWageSar: cs.eligibleFinalMonthlyWageSar,
+        annualLeaveDaysPerYear: cs.annualLeaveDaysPerYear,
+        annualLeaveTakenDays: cs.annualLeaveTakenDays,
+        exactContractExpiryVerified: cs.exactExpiryDateVerified,
+      });
+      setWealthOverview(updated);
+      setCfoFeedback(
+        isAr
+          ? `تم تحديث حسابات العقد ومهلة الـ 60 يوماً (${updated.contractRenewalIntelligence.finalNoticeDeadlineDate}).`
+          : `Updated contract & 60-day notice deadline (${updated.contractRenewalIntelligence.finalNoticeDeadlineDate}).`
+      );
+    } catch (err) {
+      setCfoFeedback(err instanceof Error ? err.message : 'Update error');
+    }
+  };
+
+  const handleLogMonthlyInvestment = async () => {
+    try {
+      const updated = await trilunairApi.recordInvestmentAllocation({
+        amountSar: 2125,
+        diversifiedWeightPct: 45,
+        saudiEquitiesWeightPct: 35,
+        cryptoSpotPaperWeightPct: 20,
+        notes: 'Scheduled SAR 2,125 monthly allocation (PAPER simulation only)',
+      });
+      setWealthOverview(updated);
+      setCfoFeedback(
+        isAr
+          ? 'تم تسجيل دفعة 2,125 ريال في دفتر الاستثمار المخصص (محاكاة PAPER فقط).'
+          : 'Recorded SAR 2,125 contribution in Investment Capital Ledger (PAPER simulation only).'
+      );
+    } catch (err) {
+      setCfoFeedback(err instanceof Error ? err.message : 'Liquidity guard blocked');
+    }
+  };
+
+  const handleVaultEvidence = async () => {
+    if (!evidenceTitle.trim()) return;
+    try {
+      await trilunairApi.recordContractEvidence({
+        documentType: 'QIWA_CONTRACT_EXTRACT',
+        title: evidenceTitle.trim(),
+        deliveryChannel: 'QIWA_PLATFORM',
+        verifiedByOwner: false,
+      });
+      setEvidenceTitle('');
+      await loadWealthOverview();
+      setCfoFeedback(
+        isAr
+          ? 'تم حفظ مرجع المستند في خزنة الإثباتات دون إرسال أي إشعار خارجي.'
+          : 'Vaulted contract evidence hash (zero external notices sent).'
+      );
+    } catch (err) {
+      setCfoFeedback(err instanceof Error ? err.message : 'Vault error');
+    }
+  };
 
   const totalEquity = portfolio?.totalEquity ?? 1_000_000;
   const initialEquity = portfolio?.initialEquity ?? 1_000_000;
@@ -660,6 +761,318 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
           </table>
         </div>
       </section>
+
+      {/* 5. المدير المالي الشخصي، مخطط الديون، مستحقات العمل السعودية، ومهلة الـ 60 يوماً ودفتر الاستثمار */}
+      {wealthOverview && (
+        <section
+          data-testid="personal-cfo-wealth-panel"
+          className="holo-panel"
+          style={{ padding: '1.25rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '1.15rem' }}
+        >
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Landmark size={20} style={{ color: 'var(--accent-primary)' }} aria-hidden="true" />
+                <h2 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 800 }}>
+                  {isAr
+                    ? 'المدير المالي الشخصي ومعماري الثروة — خطة الراتب والديون ومستحقات نظام العمل السعودي'
+                    : 'Personal CFO & Wealth Architect — Salary Plan, Debt Trade-Off & Saudi Employment Benefits'}
+                </h2>
+              </div>
+              <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                {isAr
+                  ? 'خطة استثمارية متوازية معتمدة من المالك (20,000 ريال يوم 28 ميلادي) مع عزل صارم للمستحقات التعاقدية المحتملة عن السيولة النقدية المتاحة.'
+                  : 'Owner-approved SAR 20,000 salary allocation (28th payday) with anti-double-counting reconciliation & segregated contingent Saudi labor benefits.'}
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+              <span className="holo-badge holo-badge-success">
+                <ShieldCheck size={13} />
+                <span>
+                  {isAr
+                    ? `توازن الراتب: ${formatNumber(wealthOverview.salaryAndCashFlow.monthlySalarySar, 0)} ريال`
+                    : `Balanced: SAR ${formatNumber(wealthOverview.salaryAndCashFlow.monthlySalarySar, 0)}`}
+                </span>
+              </span>
+              <span className="holo-badge holo-badge-warning" data-testid="provisional-benefits-badge">
+                <Scale size={13} />
+                <span>{wealthOverview.employmentBenefits.statusLabel}</span>
+              </span>
+            </div>
+          </div>
+
+          {cfoFeedback && (
+            <div className="holo-panel-subtle" style={{ padding: '0.6rem 0.85rem', borderColor: 'var(--accent-primary)', fontSize: '0.82rem' }}>
+              {cfoFeedback}
+            </div>
+          )}
+
+          {/* أ) التنبيهات المالية والتعاقدية الاستباقية (Financial & Legal Alerts) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', gap: '0.65rem' }} data-testid="wealth-financial-alerts">
+            {wealthOverview.financialAlerts.map((al) => (
+              <div
+                key={al.alertId}
+                className="holo-panel-subtle"
+                style={{
+                  padding: '0.7rem 0.85rem',
+                  borderInlineStart: `3px solid ${
+                    al.severity === 'CRITICAL'
+                      ? 'var(--status-danger)'
+                      : al.severity === 'WARNING' || al.severity === 'IMPORTANT'
+                        ? 'var(--status-warning)'
+                        : 'var(--accent-primary)'
+                  }`,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, fontSize: '0.82rem' }}>
+                  <AlertTriangle size={14} style={{ color: 'var(--status-warning)' }} />
+                  <span>{isAr ? al.titleAr : al.titleEn}</span>
+                </div>
+                <p style={{ margin: '0.3rem 0 0', fontSize: '0.76rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                  {isAr ? al.detailAr : al.detailEn}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* ب) توزيع الراتب الشهري (20,000 ريال يوم 28) ومخطط البطاقات الائتمانية */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '0.95rem' }}>
+            <div className="holo-panel-subtle" style={{ padding: '0.9rem 1rem' }} data-testid="salary-allocation-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
+                <strong style={{ fontSize: '0.9rem' }}>
+                  {isAr
+                    ? `دورة الراتب (يوم ${wealthOverview.salaryAndCashFlow.paydayDayOfMonth}) — منع الازدواج الحسابي`
+                    : `Salary Cycle (Day ${wealthOverview.salaryAndCashFlow.paydayDayOfMonth}) — Anti-Double-Counting`}
+                </strong>
+                <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                  {isAr
+                    ? `الراتب القادم: ${wealthOverview.salaryAndCashFlow.nextPaydayDate}`
+                    : `Next Payday: ${wealthOverview.salaryAndCashFlow.nextPaydayDate}`}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.42rem' }}>
+                {wealthOverview.salaryAndCashFlow.buckets.map((b) => (
+                  <div
+                    key={b.category}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.38rem 0.55rem',
+                      borderRadius: '6px',
+                      background: 'color-mix(in srgb, var(--bg-base) 65%, transparent)',
+                      fontSize: '0.8rem',
+                    }}
+                  >
+                    <span>{isAr ? b.labelAr : b.labelEn}</span>
+                    <span className="tabular-nums" style={{ fontWeight: 700 }}>
+                      SAR {formatNumber(b.plannedSar, 0)} ({formatNumber(b.shareOfSalaryPct, 1)}%)
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="holo-panel-subtle" style={{ padding: '0.9rem 1rem' }} data-testid="credit-card-debt-planner">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
+                <strong style={{ fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <CreditCard size={15} style={{ color: 'var(--accent-primary)' }} />
+                  {isAr ? 'مخطط سداد البطاقات ومفاضلة تكلفة التمويل' : 'Credit-Card Planner & Financing Trade-Off'}
+                </strong>
+                <span className="holo-badge">
+                  SAR {formatNumber(wealthOverview.debtPlanner.monthlyRepaymentBudgetSar, 0)}/mo
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.65rem' }}>
+                {wealthOverview.debtPlanner.cards.map((card) => (
+                  <div
+                    key={card.cardId}
+                    style={{
+                      padding: '0.5rem 0.65rem',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-subtle)',
+                      fontSize: '0.78rem',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
+                      <span>{isAr ? card.issuerNameAr : card.issuerNameEn}</span>
+                      <span className="tabular-nums" style={{ color: 'var(--accent-primary)' }}>
+                        {isAr ? 'التخصيص:' : 'Allocated:'} SAR {formatNumber(card.provisionalMonthlyAllocationSar, 0)}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                      <span className="tabular-nums">
+                        {isAr ? 'الرصيد التقديري:' : 'Approx. Balance:'} SAR {formatNumber(card.approximateBalanceSar, 0)}
+                      </span>
+                      <span className="tabular-nums" style={{ color: 'var(--status-warning)' }}>
+                        {isAr ? 'المستحق/المتأخر:' : 'Due incl. Arrears:'} SAR {formatNumber(card.reportedAmountDueInclArrearsSar, 0)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                {isAr
+                  ? wealthOverview.debtPlanner.debtVsInvestmentTradeOff.tradeOffExplanationAr
+                  : wealthOverview.debtPlanner.debtVsInvestmentTradeOff.tradeOffExplanationEn}
+              </p>
+            </div>
+          </div>
+
+          {/* ج) حاسبة نظام العمل السعودي ومهلة إشعار عدم التجديد قبل 60 يوماً */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '0.95rem' }}>
+            <div className="holo-panel-subtle" style={{ padding: '0.9rem 1rem' }} data-testid="saudi-labor-benefits-calculator">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.55rem' }}>
+                <strong style={{ fontSize: '0.9rem' }}>
+                  {isAr
+                    ? 'حاسبة مستحقات نظام العمل السعودي (م55 / م74 / م84 / م85 / م111)'
+                    : 'Saudi Labor Law Benefits Calculator (Arts. 55, 74, 84, 85, 111)'}
+                </strong>
+                <span className="holo-badge holo-badge-warning">
+                  {isAr ? 'مستحق مستقبلي محتمل (غير سائل)' : 'Contingent Receivable (Non-Liquid)'}
+                </span>
+              </div>
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginBottom: '0.6rem' }}>
+                {isAr
+                  ? `المباشرة: ${wealthOverview.employmentBenefits.contractSummary.commencementDate} • عقد محدد المدة يتجدد تلقائياً (مهلة إشعار ${wealthOverview.employmentBenefits.contractSummary.nonRenewalNoticeDays} يوماً) • رصيد الإجازات غير المستعمل المقدر: ${wealthOverview.employmentBenefits.contractSummary.accruedUnusedLeaveDays} يوماً.`
+                  : `Start: ${wealthOverview.employmentBenefits.contractSummary.commencementDate} • Fixed-Term Auto-Renewing (${wealthOverview.employmentBenefits.contractSummary.nonRenewalNoticeDays}d notice) • Unused Leave: ${wealthOverview.employmentBenefits.contractSummary.accruedUnusedLeaveDays} days.`}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                {[
+                  wealthOverview.employmentBenefits.scenarios.fixedTermExpiryNonRenewal,
+                  wealthOverview.employmentBenefits.scenarios.ordinaryResignation,
+                  wealthOverview.employmentBenefits.scenarios.employerInitiatedTermination,
+                ].map((sc) => (
+                  <div
+                    key={sc.scenarioId}
+                    style={{
+                      padding: '0.5rem 0.65rem',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-subtle)',
+                      background:
+                        sc.scenarioId === 'FIXED_TERM_EXPIRY_NON_RENEWAL'
+                          ? 'color-mix(in srgb, var(--accent-primary) 10%, transparent)'
+                          : 'transparent',
+                      fontSize: '0.77rem',
+                    }}
+                  >
+                    <div style={{ fontWeight: 700 }}>{isAr ? sc.titleAr : sc.titleEn}</div>
+                    <div className="tabular-nums" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.2rem', color: 'var(--text-secondary)' }}>
+                      <span>EOSB: SAR {formatNumber(sc.eosbAwardSar, 0)}</span>
+                      <span>Leave: SAR {formatNumber(sc.unusedLeaveCompensationSar, 0)}</span>
+                      <strong style={{ color: 'var(--accent-primary)' }}>
+                        Total: SAR {formatNumber(sc.combinedEstimatedBenefitsSar, 0)}
+                      </strong>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="holo-panel-subtle" style={{ padding: '0.9rem 1rem' }} data-testid="contract-renewal-deadline-tracker">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.55rem' }}>
+                <strong style={{ fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <CalendarClock size={15} style={{ color: 'var(--accent-primary)' }} />
+                  {isAr
+                    ? 'متتبع مهلة إشعار عدم تجديد العقد (60 يوماً)'
+                    : '60-Day Contract Non-Renewal Deadline Intelligence'}
+                </strong>
+                <span className="holo-badge holo-badge-accent">
+                  {wealthOverview.contractRenewalIntelligence.finalNoticeDeadlineDate}
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap' }}>
+                <input
+                  type="date"
+                  aria-label="Contract Expiry Date"
+                  className="holo-input"
+                  style={{ maxWidth: '165px', minHeight: '34px', padding: '0.25rem 0.5rem', fontSize: '0.78rem' }}
+                  value={expiryDraft}
+                  onChange={(e) => setExpiryDraft(e.target.value)}
+                />
+                <button type="button" className="holo-btn" style={{ minHeight: '34px', fontSize: '0.76rem' }} onClick={handleRecalculateContractExpiry}>
+                  {isAr ? 'تحديث موعد الانتهاء' : 'Recalculate Cutoff'}
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.65rem' }}>
+                {wealthOverview.contractRenewalIntelligence.reminders.map((rem) => (
+                  <div
+                    key={rem.milestoneCode}
+                    style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', padding: '0.3rem 0.45rem', borderRadius: '6px', background: 'color-mix(in srgb, var(--bg-base) 65%, transparent)' }}
+                  >
+                    <span>-{rem.daysBeforeExpiry}d ({rem.reminderDate})</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>{rem.status}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  placeholder={isAr ? 'مرجع عقد قوى / مسودة الإشعار للحفظ الآمن...' : 'Qiwa contract ref / notice draft title...'}
+                  className="holo-input"
+                  style={{ flex: 1, minHeight: '34px', padding: '0.25rem 0.55rem', fontSize: '0.76rem' }}
+                  value={evidenceTitle}
+                  onChange={(e) => setEvidenceTitle(e.target.value)}
+                />
+                <button type="button" className="holo-btn" style={{ minHeight: '34px', fontSize: '0.75rem' }} onClick={handleVaultEvidence}>
+                  <FileCheck2 size={13} />
+                  <span>{isAr ? 'حفظ إثبات' : 'Vault Proof'}</span>
+                </button>
+              </div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
+                {isAr
+                  ? 'حماية صارمة: لن يرسل النظام أي إشعار عدم تجديد تلقائياً بدون إجراء وموافقة صريحة من المالك.'
+                  : 'Safety Lock: System NEVER auto-sends a non-renewal notice without explicit owner action.'}
+              </div>
+            </div>
+          </div>
+
+          {/* د) دفتر الأستاذ المخصص للاستثمار (2,125 ريال/شهرياً) ومقارنة الفئات وسيناريوهات الهبوط */}
+          <div className="holo-panel-subtle" style={{ padding: '0.95rem 1.05rem' }} data-testid="investment-allocation-ledger">
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '0.6rem', marginBottom: '0.7rem' }}>
+              <div>
+                <strong style={{ fontSize: '0.92rem' }}>
+                  {isAr
+                    ? 'دفتر رأس المال الاستثماري المخصص (2,125 ريال/شهرياً) ومقارنة الفئات والمخاطر'
+                    : 'Dedicated Investment Capital Ledger (SAR 2,125/mo) & Multi-Asset Risk Comparison'}
+                </strong>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                  {isAr
+                    ? `الإجمالي المخصص في الدفتر: ${formatNumber(wealthOverview.investmentCommandCenter.ledgerSummary.cumulativeAllocatedCapitalSar, 2)} ريال • التداول مقفل على PAPER بدون ضمان عوائد.`
+                    : `Cumulative Ledger Principal: SAR ${formatNumber(wealthOverview.investmentCommandCenter.ledgerSummary.cumulativeAllocatedCapitalSar, 2)} • Locked to PAPER simulation; zero return guarantees.`}
+                </div>
+              </div>
+              <button
+                type="button"
+                data-testid="record-monthly-investment-btn"
+                className="holo-btn holo-btn-primary"
+                style={{ minHeight: '35px', fontSize: '0.78rem' }}
+                onClick={handleLogMonthlyInvestment}
+              >
+                {isAr ? '+ تسجيل دفعة دورة 2,125 ريال (PAPER)' : '+ Log SAR 2,125 Cycle Allocation (PAPER)'}
+              </button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(245px, 1fr))', gap: '0.65rem' }}>
+              {wealthOverview.investmentCommandCenter.opportunityAndRiskAnalysis.sleeves.map((sl) => (
+                <div key={sl.sleeveId} style={{ padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border-subtle)', fontSize: '0.77rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
+                    <span>{isAr ? sl.nameAr : sl.nameEn}</span>
+                    <span className="tabular-nums" style={{ color: 'var(--accent-primary)' }}>
+                      {sl.targetWeightPct}% (SAR {formatNumber(sl.monthlyAllocationSar, 2)})
+                    </span>
+                  </div>
+                  <div style={{ marginTop: '0.28rem', color: 'var(--text-secondary)' }}>
+                    Vol: {sl.annualizedVolatilityPct}% • Fee: {sl.estimatedTransactionFeeBps} bps • Stress: {sl.severeStressDrawdownPct}%
+                  </div>
+                  <div style={{ marginTop: '0.2rem', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    {sl.liquidityProfile}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

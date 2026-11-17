@@ -28,9 +28,13 @@ import type {
   AdminSessionStatus,
   AuditLogEntry,
   CloudOperationsTelemetry,
+  HostingDecisionMatrix,
+  PasskeySecurityPosture,
+  PipelineLatencySnapshot,
   SafetyChecks,
   SystemStatus,
   TradingMode,
+  WalkForwardEvaluation,
 } from '../../types/trilunair';
 
 export const REQUIRED_LIVE_PHRASE = 'AUTHORIZE LIVE TRADING DR MAJOOOOOOD';
@@ -76,6 +80,14 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
   const [sessionSecretInput, setSessionSecretInput] = useState<string>('');
   const [sessionStatus, setSessionStatus] = useState<AdminSessionStatus | null>(null);
   const [opsTelemetry, setOpsTelemetry] = useState<CloudOperationsTelemetry | null>(null);
+  const [passkeyStatus, setPasskeyStatus] = useState<PasskeySecurityPosture | null>(null);
+  const [benchmarkMatrix, setBenchmarkMatrix] = useState<HostingDecisionMatrix | null>(null);
+  const [latencySnapshot, setLatencySnapshot] = useState<PipelineLatencySnapshot | null>(null);
+  const [walkForwardEval, setWalkForwardEval] = useState<WalkForwardEvaluation | null>(null);
+  const [newDeviceLabel, setNewDeviceLabel] = useState<string>('MacBook Pro Touch ID / iPhone Face ID');
+  const [generatedRecoveryCodes, setGeneratedRecoveryCodes] = useState<string[]>([]);
+  const [recoveryCodeInput, setRecoveryCodeInput] = useState<string>('');
+  const [stepUpActive, setStepUpActive] = useState<boolean>(false);
   const [isLoadingOps, setIsLoadingOps] = useState<boolean>(false);
   const [confirmationPhrase, setConfirmationPhrase] = useState<string>('');
   const [acknowledgeRisk, setAcknowledgeRisk] = useState<boolean>(false);
@@ -102,16 +114,20 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
   const refreshCloudOperations = useCallback(async () => {
     setIsLoadingOps(true);
     try {
-      const [opsRes, sessRes] = await Promise.allSettled([
+      const [opsRes, sessRes, pkRes, bmRes, latRes, wfRes] = await Promise.allSettled([
         trilunairApi.getOperationsTelemetry(),
         trilunairApi.getAdminSessionStatus(),
+        trilunairApi.getPasskeyStatus(),
+        trilunairApi.getBenchmarkMatrix(),
+        trilunairApi.getLatencyPipeline(),
+        trilunairApi.getPerformanceEvaluation('BTC-USD'),
       ]);
-      if (opsRes.status === 'fulfilled') {
-        setOpsTelemetry(opsRes.value);
-      }
-      if (sessRes.status === 'fulfilled') {
-        setSessionStatus(sessRes.value);
-      }
+      if (opsRes.status === 'fulfilled') setOpsTelemetry(opsRes.value);
+      if (sessRes.status === 'fulfilled') setSessionStatus(sessRes.value);
+      if (pkRes.status === 'fulfilled') setPasskeyStatus(pkRes.value);
+      if (bmRes.status === 'fulfilled') setBenchmarkMatrix(bmRes.value);
+      if (latRes.status === 'fulfilled') setLatencySnapshot(latRes.value);
+      if (wfRes.status === 'fulfilled') setWalkForwardEval(wfRes.value);
     } catch {
       // تجاهل في بيئات الاختبار غير الموصولة بنقاط النهاية السحابية
     } finally {
@@ -122,6 +138,107 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
   useEffect(() => {
     void refreshCloudOperations();
   }, [refreshCloudOperations]);
+
+  const handleRegisterPasskey = async () => {
+    setFeedbackMessage(null);
+    try {
+      const res = await trilunairApi.registerOwnerPasskey(newDeviceLabel.trim() || 'Owner Passkey', sessionSecretInput.trim() || undefined);
+      setStepUpActive(true);
+      await refreshCloudOperations();
+      await onRefreshAuditLogs?.();
+      setFeedbackMessage({
+        type: 'success',
+        text:
+          language === 'ar'
+            ? `تم تسجيل مفتاح المرور البيومتري (${res.deviceLabel}) بنجاح دون تخزين أي بصمة أو صورة وجه.`
+            : `Registered biometric Passkey (${res.deviceLabel}) with zero stored biometric templates.`,
+      });
+    } catch (err) {
+      setFeedbackMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Passkey registration failed.',
+      });
+    }
+  };
+
+  const handleAuthenticatePasskey = async () => {
+    setFeedbackMessage(null);
+    try {
+      const res = await trilunairApi.authenticateWithPasskey();
+      setStepUpActive(true);
+      await refreshCloudOperations();
+      await onRefreshAuditLogs?.();
+      setFeedbackMessage({
+        type: 'success',
+        text:
+          language === 'ar'
+            ? `تم التحقق البيومتري للمالك عبر (${res.deviceLabel}) وتفعيل رمز Step-Up للعمليات الحساسة.`
+            : `Verified owner biometric Passkey (${res.deviceLabel}); Step-Up authorization active.`,
+      });
+    } catch (err) {
+      setFeedbackMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Passkey authentication failed.',
+      });
+    }
+  };
+
+  const handleRevokePasskey = async (credentialId: string) => {
+    setFeedbackMessage(null);
+    try {
+      await trilunairApi.revokePasskeyDevice(credentialId, sessionSecretInput.trim() || undefined);
+      await refreshCloudOperations();
+      await onRefreshAuditLogs?.();
+      setFeedbackMessage({
+        type: 'success',
+        text: language === 'ar' ? 'تم إبطال صلاحية الجهاز المسجل فوراً.' : 'Revoked registered Passkey device.',
+      });
+    } catch (err) {
+      setFeedbackMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Failed to revoke Passkey.',
+      });
+    }
+  };
+
+  const handleGenerateRecoveryCodes = async () => {
+    setFeedbackMessage(null);
+    try {
+      const res = await trilunairApi.generateRecoveryCodes(sessionSecretInput.trim() || undefined);
+      setGeneratedRecoveryCodes(res.recoveryCodesOnceOnly);
+      await refreshCloudOperations();
+      await onRefreshAuditLogs?.();
+      setFeedbackMessage({
+        type: 'success',
+        text: language === 'ar' ? res.warningAr : res.warningEn,
+      });
+    } catch (err) {
+      setFeedbackMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Recovery code generation failed.',
+      });
+    }
+  };
+
+  const handleRedeemRecoveryCode = async () => {
+    if (!recoveryCodeInput.trim()) return;
+    setFeedbackMessage(null);
+    try {
+      await trilunairApi.redeemRecoveryCode(recoveryCodeInput.trim());
+      setRecoveryCodeInput('');
+      setStepUpActive(true);
+      await refreshCloudOperations();
+      setFeedbackMessage({
+        type: 'success',
+        text: language === 'ar' ? 'تم استرداد وصول المالك بنجاح وإبطال الرمز المستخدم.' : 'Owner recovery verified and one-time code consumed.',
+      });
+    } catch (err) {
+      setFeedbackMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Invalid recovery code.',
+      });
+    }
+  };
 
   const handleAdminSessionLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -737,6 +854,222 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
               : 'Querying live subsystem telemetry from /api/system/operations...'}
           </div>
         )}
+      </section>
+
+      {/* 1.6 لوحة المصادقة البيومترية للمالك (WebAuthn / FIDO2 Passkeys — Face ID / Touch ID / Security Key) */}
+      <section
+        data-testid="passkey-biometric-panel"
+        className="holo-panel"
+        style={{ padding: '1.1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}
+      >
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <KeyRound size={18} style={{ color: 'var(--accent-primary)' }} aria-hidden="true" />
+            <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800 }}>
+              {language === 'ar'
+                ? 'المصادقة البيومترية للمالك (WebAuthn / FIDO2 Passkeys — Face ID & Touch ID)'
+                : 'Owner Biometric Passkeys (WebAuthn / FIDO2 — Face ID, Touch ID & Security Keys)'}
+            </h3>
+            <span className="holo-badge holo-badge-success">
+              {language === 'ar' ? 'صفر قوالب حيوية مخزنة' : 'Zero Biometric Templates Stored'}
+            </span>
+            {stepUpActive && (
+              <span className="holo-badge holo-badge-accent">
+                {language === 'ar' ? 'تصعيد Step-Up نشط' : 'Step-Up Verified'}
+              </span>
+            )}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            RP ID: <strong>{passkeyStatus?.rpId ?? 'trilunair.medinsup.com'}</strong> •{' '}
+            {language === 'ar' ? 'الأجهزة النشطة:' : 'Registered Devices:'}{' '}
+            <strong>{passkeyStatus?.registeredDeviceCount ?? 0}</strong> •{' '}
+            {language === 'ar' ? 'رموز الاسترداد:' : 'Recovery Codes:'}{' '}
+            <strong>{passkeyStatus?.remainingRecoveryCodes ?? 0}</strong>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem', alignItems: 'center' }}>
+          <input
+            type="text"
+            data-testid="passkey-device-label-input"
+            value={newDeviceLabel}
+            onChange={(e) => setNewDeviceLabel(e.target.value)}
+            placeholder={language === 'ar' ? 'تسمية جهاز المالك (مثلاً iPhone Face ID)' : 'Owner device label'}
+            className="holo-input"
+            style={{ minWidth: '230px', flex: '1 1 230px', minHeight: '32px', fontSize: '0.78rem' }}
+          />
+          <button
+            type="button"
+            data-testid="passkey-register-btn"
+            onClick={() => void handleRegisterPasskey()}
+            className="holo-btn holo-btn-primary"
+            style={{ minHeight: '32px', fontSize: '0.76rem', padding: '0.25rem 0.75rem' }}
+          >
+            {language === 'ar' ? 'تسجيل بصمة / Face ID / مفتاح أمان' : 'Enroll Passkey (Face ID / Touch ID)'}
+          </button>
+          <button
+            type="button"
+            data-testid="passkey-authenticate-btn"
+            onClick={() => void handleAuthenticatePasskey()}
+            className="holo-btn"
+            style={{ minHeight: '32px', fontSize: '0.76rem', padding: '0.25rem 0.75rem' }}
+          >
+            {language === 'ar' ? 'دخول بيومتري / تصعيد Step-Up' : 'Biometric Sign-In / Step-Up'}
+          </button>
+          <button
+            type="button"
+            data-testid="passkey-generate-recovery-btn"
+            onClick={() => void handleGenerateRecoveryCodes()}
+            className="holo-btn"
+            style={{ minHeight: '32px', fontSize: '0.76rem', padding: '0.25rem 0.75rem' }}
+          >
+            {language === 'ar' ? 'توليد رموز استرداد طوارئ' : 'Rotate Recovery Codes'}
+          </button>
+        </div>
+
+        {passkeyStatus && passkeyStatus.devices.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            {passkeyStatus.devices.map((dev) => (
+              <div
+                key={dev.credentialId}
+                className="holo-panel-subtle"
+                style={{
+                  padding: '0.45rem 0.65rem',
+                  fontSize: '0.75rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.55rem',
+                }}
+              >
+                <strong>{dev.deviceLabel}</strong>
+                <span style={{ color: 'var(--text-muted)' }}>
+                  ({dev.algorithm} • SignCnt: {dev.signCount})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => void handleRevokePasskey(dev.credentialId)}
+                  className="holo-btn holo-btn-danger"
+                  style={{ minHeight: '24px', padding: '0.1rem 0.45rem', fontSize: '0.7rem' }}
+                >
+                  {language === 'ar' ? 'إلغاء' : 'Revoke'}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {generatedRecoveryCodes.length > 0 && (
+          <div
+            data-testid="passkey-recovery-codes-box"
+            className="holo-panel-subtle"
+            style={{ padding: '0.6rem 0.75rem', fontSize: '0.75rem', borderColor: 'var(--status-warning)' }}
+          >
+            <strong style={{ display: 'block', marginBottom: '0.3rem', color: 'var(--status-warning)' }}>
+              {language === 'ar'
+                ? 'رموز استرداد الطوارئ أحادية الاستخدام (احفظها فوراً — لا تُخزن نصياً):'
+                : 'One-Time Emergency Recovery Codes (Save immediately — hashed via PBKDF2):'}
+            </strong>
+            <div className="tabular-nums" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              {generatedRecoveryCodes.map((code) => (
+                <code key={code} style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(0,0,0,0.28)' }}>
+                  {code}
+                </code>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', alignItems: 'center', fontSize: '0.74rem' }}>
+          <input
+            type="text"
+            data-testid="passkey-recovery-redeem-input"
+            value={recoveryCodeInput}
+            onChange={(e) => setRecoveryCodeInput(e.target.value)}
+            placeholder={language === 'ar' ? 'استرداد الوصول برمز طوارئ أحادي الاستخدام (TRIL-...)' : 'Redeem emergency one-time recovery code (TRIL-...)'}
+            className="holo-input"
+            style={{ maxWidth: '320px', minHeight: '28px', fontSize: '0.74rem' }}
+          />
+          <button
+            type="button"
+            data-testid="passkey-recovery-redeem-btn"
+            onClick={() => void handleRedeemRecoveryCode()}
+            className="holo-btn"
+            style={{ minHeight: '28px', padding: '0.15rem 0.6rem', fontSize: '0.73rem' }}
+          >
+            {language === 'ar' ? 'استرداد الطوارئ' : 'Redeem Code'}
+          </button>
+        </div>
+      </section>
+
+      {/* 1.7 لوحة اختيار الإقليم السحابي والعزل عن medinsup.com وقياسات الكمون والأداء خارج العينة */}
+      <section
+        data-testid="region-latency-telemetry-panel"
+        className="holo-panel"
+        style={{ padding: '1.1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}
+      >
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.55rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <Activity size={18} style={{ color: 'var(--accent-primary)' }} aria-hidden="true" />
+            <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800 }}>
+              {language === 'ar'
+                ? 'مصفوفة اختيار الإقليم السحابي، عزل النطاق، وكمون خط الأنابيب (v1.2 Cloudflare Architecture)'
+                : 'Cloud Region Decision Matrix, Subdomain Isolation & 8-Stage Latency Telemetry'}
+            </h3>
+            <span className="holo-badge holo-badge-success">
+              {benchmarkMatrix?.targetDomain ?? 'trilunair.medinsup.com'} ≠ medinsup.com
+            </span>
+          </div>
+          <span className="holo-badge holo-badge-warning">
+            {benchmarkMatrix?.selectionStatus ?? 'PROVISIONAL_PENDING_REGIONAL_CLOUD_PROBES'}
+          </span>
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: '0.65rem',
+            fontSize: '0.76rem',
+          }}
+        >
+          <div className="holo-panel-subtle" style={{ padding: '0.65rem 0.75rem' }}>
+            <strong>{language === 'ar' ? 'الإقليم المرشح الأعلى تقييماً' : 'Top Ranked Hosting Candidate'}</strong>
+            <div style={{ marginTop: '0.25rem', color: 'var(--text-secondary)' }}>
+              {benchmarkMatrix
+                ? `${language === 'ar' ? benchmarkMatrix.recommendedPrimaryOption.regionNameAr : benchmarkMatrix.recommendedPrimaryOption.regionNameEn} (${benchmarkMatrix.recommendedPrimaryOption.weightedScore}/100)`
+                : 'Tokyo, Japan (ap-northeast-1 / ap-tokyo-1)'}
+            </div>
+            <div className="tabular-nums" style={{ color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+              Probe: {benchmarkMatrix?.recommendedPrimaryOption.regionalMeasurementStatus ?? 'NOT_MEASURED'} • $
+              {benchmarkMatrix?.recommendedPrimaryOption.monthlyCostUsd.toFixed(2) ?? '12.00'}/mo
+            </div>
+          </div>
+
+          <div className="holo-panel-subtle" style={{ padding: '0.65rem 0.75rem' }}>
+            <strong>{language === 'ar' ? 'كمون الإشارة إلى القرار (P50 / P95 / P99)' : 'Signal-to-Decision Latency (P50 / P95 / P99)'}</strong>
+            <div className="tabular-nums" style={{ marginTop: '0.25rem', color: 'var(--text-secondary)' }}>
+              P50: {latencySnapshot?.stages?.totalSignalToDecisionMs?.p50Ms ?? 0}ms • P95:{' '}
+              {latencySnapshot?.stages?.totalSignalToDecisionMs?.p95Ms ?? 0}ms • P99:{' '}
+              {latencySnapshot?.stages?.totalSignalToDecisionMs?.p99Ms ?? 0}ms
+            </div>
+            <div className="tabular-nums" style={{ color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+              Council Deadline: {latencySnapshot?.councilDeadlineMs ?? 2200}ms • Cost Skips:{' '}
+              {latencySnapshot?.counters.costAwareCloudInferenceSkips ?? 0}
+            </div>
+          </div>
+
+          <div className="holo-panel-subtle" style={{ padding: '0.65rem 0.75rem' }}>
+            <strong>{language === 'ar' ? 'تقييم خارج العينة بعد التكاليف (Out-of-Sample)' : 'Out-of-Sample Net-of-Cost Walk-Forward'}</strong>
+            <div className="tabular-nums" style={{ marginTop: '0.25rem', color: 'var(--text-secondary)' }}>
+              {walkForwardEval
+                ? `Friction Saved: $${walkForwardEval.outOfSampleComparison.improvements.totalFrictionSavedUsd.toFixed(2)} • ΔSharpe: ${walkForwardEval.outOfSampleComparison.improvements.sharpeDelta >= 0 ? '+' : ''}${walkForwardEval.outOfSampleComparison.improvements.sharpeDelta}`
+                : 'Evaluating BTC-USD 15m OOS friction...'}
+            </div>
+            <div style={{ color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+              {language === 'ar' ? 'يشمل العمولات والسبريد والانزلاق وتكلفة AI والاستضافة' : 'Net of Spot fees, spread, slippage, AI & hosting'}
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* 2. قائمة التحقق الخماسية وبوابة القفل السيادي لوضع التداول */}
