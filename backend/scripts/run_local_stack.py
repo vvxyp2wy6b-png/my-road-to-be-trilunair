@@ -30,6 +30,7 @@ def main() -> None:
         ephemeral_secret = f"TrilunairRuntime#{secrets.token_urlsafe(12)}"
         os.environ["TRILUNAIR_ADMIN_SECRET_HASH"] = hash_admin_secret(ephemeral_secret)
     os.environ.setdefault("TRILUNAIR_SESSION_SECRET", secrets.token_hex(32))
+    os.environ.setdefault("TRILUNAIR_VAULT_MASTER_KEY", secrets.token_hex(32))
 
     TcpFakeServer.allow_reuse_address = True
     try:

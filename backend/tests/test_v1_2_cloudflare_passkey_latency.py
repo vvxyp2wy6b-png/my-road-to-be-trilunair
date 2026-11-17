@@ -728,7 +728,7 @@ def test_parallel_bounded_ai_council_cost_aware_skip_and_walk_forward_analytics(
 
         # التأكد النهائي من بقاء القفل الدائم على PAPER
         sys_status = client.get("/api/system/status").json()
-        assert sys_status["version"] == "1.2.0-low-latency-cloudflare"
+        assert sys_status["version"] == "1.3.0-binance-personal-guard"
         assert sys_status["tradingMode"] == "PAPER"
         assert sys_status["liveAuthorized"] is False
         assert sys_status["executionLockedToPaper"] is True

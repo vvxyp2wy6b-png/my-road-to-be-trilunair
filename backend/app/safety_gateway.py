@@ -59,7 +59,7 @@ from app.security import enforce_admin_secret, security_telemetry
 import time
 
 APP_NAME: Final[str] = "My Road to be Trilunair Dr.MaJoOoOoOoD"
-APP_VERSION: Final[str] = "1.2.0-low-latency-cloudflare"
+APP_VERSION: Final[str] = "1.3.0-binance-personal-guard"
 TRILUNAIR_TARGET_USD: Final[float] = 1_000_000_000_000.0  # 1 تريليون دولار
 LIVE_CONFIRMATION_PHRASE: Final[str] = "AUTHORIZE LIVE TRADING DR MAJOOOOOOD"
 

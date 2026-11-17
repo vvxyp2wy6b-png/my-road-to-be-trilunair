@@ -612,7 +612,7 @@ export interface AuditLogEntry {
   detailsEn: string;
 }
 
-export type ActiveScreen = 'terminal' | 'portfolio' | 'governance' | 'themes';
+export type ActiveScreen = 'terminal' | 'quantum' | 'binance-live' | 'portfolio' | 'governance' | 'themes';
 
 export interface WealthArchitectOverview {
   generatedAt: string;
@@ -906,9 +906,10 @@ export interface WealthArchitectOverview {
     minimumMandatoryLivingAndOverdueFloorSar: number;
     scheduledCardRepaymentSar: number;
     recommendedCycleInvestmentSar: number;
-    summaryEn: string;
-    summaryAr: string;
-  };
+      summaryEn: string;
+      summaryAr: string;
+    };
+  binancePersonalCfoBridge?: BinancePersonalCfoBridge;
   financialAlerts: Array<{
     alertId: string;
     severity: string;
@@ -919,4 +920,253 @@ export interface WealthArchitectOverview {
     detailAr: string;
   }>;
 }
+
+export interface BinancePersonalCfoBridge {
+  primaryFocus: string;
+  connectionStatus: string;
+  plannedMonthlyCryptoAllocationSar: number;
+  plannedMonthlyCryptoAllocationUsd: number;
+  activeSalaryCycleId: string;
+  cycleReconciliation: {
+    importedBankStatementInvestmentSar: number;
+    cfoLedgerCycleAllocationSar: number;
+    syncedBinanceCycleDepositsSar: number;
+    syncedBinanceCycleSpotPurchasesSar: number;
+    deduplicatedActualDeploymentSar: number;
+    effectiveReconciledBudgetOutflowSar: number;
+    remainingPlannedMonthlyBudgetSar: number;
+    budgetOverrunSar: number;
+    reconciledWithoutDoubleCount: boolean;
+  };
+  capitalVsPerformanceSeparation: {
+    cumulativeContributedCapitalSar: number;
+    realizedPnlSar: number;
+    unrealizedPnlSar: number;
+    cumulativeTradingFeesSar: number;
+    netMarketPnlAfterFeesSar: number;
+    totalActualBinanceEquitySar: number;
+  };
+  cashVsCryptoExposure: {
+    availableBinanceQuoteCashSar: number;
+    investedBinanceCryptoExposureSar: number;
+    cryptoMarketExposurePct: number;
+  };
+  actualVsPaperStrategyComparison: {
+    actualAccountStatus: string;
+    actualNetReturnAfterFeesPct: number | null;
+    paperSimulatedPortfolioEquityUsd: number;
+    paperStrategyNetReturnPct: number;
+    segregatedBalancesAndReturns: boolean;
+    comparisonNoteEn: string;
+  };
+  governanceInvariants: {
+    assumesGuaranteedReturns: boolean;
+    treatsProjectedEmploymentBenefitsAsCash: boolean;
+    tradingMode: 'PAPER';
+    liveAuthorized: false;
+  };
+}
+
+export interface PersonalBinanceBalanceItem {
+  asset: string;
+  freeQty: number;
+  lockedQty: number;
+  totalQty: number;
+  priceUsd: number;
+  valueUsd: number;
+  valueSar: number;
+  allocationWeightPct: number;
+  avgCostBasisUsd: number;
+  totalCostBasisUsd: number;
+  unrealizedPnlUsd: number;
+  unrealizedPnlPct: number;
+  realizedPnlUsd: number;
+  cumulativeFeesUsd: number;
+  reconciliationStatus: string;
+  reconciledDeltaQty: number;
+  isQuoteCash: boolean;
+  updatedAt: string;
+}
+
+export interface PersonalBinanceSlotInfo {
+  configured: boolean;
+  credentialId?: string;
+  keyLabel?: string;
+  authAlgorithm?: 'ED25519' | 'RSA_SHA256' | 'HMAC_SHA256';
+  environment?: 'MAINNET' | 'SPOT_TESTNET' | 'LOCAL_MOCK';
+  baseUrl?: string;
+  apiKeyMasked?: string;
+  trustedIps?: string[];
+  trackedSymbols?: string[];
+  status: string;
+  verificationReason?: string;
+  permissionAudit?: {
+    safe?: boolean;
+    verificationStatus?: string;
+    violations?: string[];
+    ipRestrictEnabledOnBinance?: boolean;
+    scopes?: {
+      enableReading: boolean;
+      enableSpotTrading: boolean;
+      enableWithdrawals: boolean;
+      enableMargin: boolean;
+      enableFutures: boolean;
+      enableInternalOrUniversalTransfer: boolean;
+    };
+  };
+  rotatedCount?: number;
+  health?: {
+    usedWeight1m: number;
+    lastLatencyMs: number;
+    clockSkewMs: number;
+    consecutiveFailures: number;
+    rateLimitCooldownActive: boolean;
+  };
+  lastVerifiedAt?: string | null;
+  lastSyncedAt?: string | null;
+}
+
+export interface PersonalBinanceOverview {
+  generatedAt: string;
+  dashboardLabel: 'LIVE ACCOUNT MONITORING';
+  segregatedFromPaperTrading: boolean;
+  tradingMode: 'PAPER';
+  liveAuthorized: false;
+  executionLockedToPaper: true;
+  connectionStatus: string;
+  supportedAuthMechanisms: Array<{
+    algorithm: 'ED25519' | 'RSA_SHA256' | 'HMAC_SHA256';
+    recommended: boolean;
+    label: string;
+    officialDocs: string;
+  }>;
+  biometricArchitecture: {
+    binanceAppFaceIdExplanationEn: string;
+    trilunairPasskeyExplanationEn: string;
+    enrolledPasskeyCount: number;
+    biometricStepUpRequiredForCredentialChanges: boolean;
+    biometricTemplatesStoredOnServer: false;
+  };
+  credentialSlots: {
+    READ_ONLY_MONITORING: PersonalBinanceSlotInfo;
+    FUTURE_SPOT_EXECUTION: PersonalBinanceSlotInfo;
+  };
+  portfolioSummary: {
+    accountingMethod: string;
+    totalEquityUsd: number;
+    totalEquitySar: number;
+    availableQuoteCashUsd: number;
+    availableQuoteCashSar: number;
+    investedCryptoCapitalUsd: number;
+    investedCryptoCapitalSar: number;
+    cryptoExposurePct: number;
+    netContributedCapitalUsd: number;
+    netContributedCapitalSar: number;
+    realizedPnlUsd: number;
+    realizedPnlSar: number;
+    unrealizedPnlUsd: number;
+    unrealizedPnlSar: number;
+    netPnlAfterFeesUsd: number;
+    netPnlAfterFeesSar: number;
+    cumulativeFeesUsd: number;
+    cumulativeFeesSar: number;
+    portfolioDrawdownPct: number;
+    reconciliationStatus: string;
+    unreconciledAssetsCount: number;
+  };
+  monthlyInvestmentBudgetTracking: {
+    plannedMonthlyAllocationSar: number;
+    plannedMonthlyAllocationUsd: number;
+    currentMonth: string;
+    currentMonthVerifiedDepositsSar: number;
+    currentMonthSpotPurchasesSar: number;
+    remainingMonthlyBudgetSar: number;
+  };
+  balances: PersonalBinanceBalanceItem[];
+  recentOrders: Array<{
+    orderUid: string;
+    symbol: string;
+    orderId: string;
+    side: string;
+    type: string;
+    status: string;
+    price: number;
+    origQty: number;
+    executedQty: number;
+    cummulativeQuoteQty: number;
+    orderTimeIso: string;
+  }>;
+  recentTrades: Array<{
+    tradeUid: string;
+    symbol: string;
+    tradeId: string;
+    orderId: string;
+    side: string;
+    price: number;
+    qty: number;
+    quoteQty: number;
+    commission: number;
+    commissionAsset: string;
+    commissionUsd: number;
+    tradeTimeIso: string;
+  }>;
+  recentCashflows: Array<{
+    cashflowId: string;
+    direction: string;
+    coin: string;
+    amount: number;
+    amountUsd: number;
+    amountSar: number;
+    transactionFee: number;
+    statusLabel: string;
+    network: string;
+    occurredAtIso: string;
+  }>;
+  riskAlerts: Array<{
+    code: string;
+    severity: string;
+    messageEn: string;
+    messageAr: string;
+  }>;
+}
+
+export interface LiveSpotReadiness {
+  workflowName: 'LIVE_SPOT';
+  tradingMode: 'PAPER';
+  liveAuthorized: false;
+  executionLockedToPaper: true;
+  realOrdersPermitted: false;
+  passedGatesCount: number;
+  totalGatesCount: number;
+  gates: Array<{
+    gateNumber: number;
+    gateId: string;
+    titleEn: string;
+    titleAr: string;
+    passed: boolean;
+    detailEn: string;
+  }>;
+  allowedSpotCapabilities: {
+    sides: string[];
+    orderTypes: string[];
+    supportsOrderCancellation: boolean;
+    supportsOrderStatusReconciliation: boolean;
+  };
+  prohibitedOperations: string[];
+  ownerPolicy: {
+    ownerConfigured: boolean;
+    jurisdictionEligibilityConfirmed: boolean;
+    jurisdictionCountryCode: string;
+    maxSingleOrderSar: number;
+    maxSingleOrderUsd: number;
+    maxDailySpotSar: number;
+    maxMonthlySpotSar: number;
+    maxMonthlySpotUsd: number;
+    maxSingleAssetExposurePct: number;
+    requireBiometricPerOrder: boolean;
+    allowedSpotSymbols: string[];
+    updatedAt: string;
+  };
+}
+
 

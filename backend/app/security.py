@@ -63,21 +63,26 @@ FORBIDDEN_WEAK_SECRETS: frozenset[str] = frozenset(
     }
 )
 
-# أنماط تنقية الأسرار من السجلات المركزية والرسائل
+# أنماط تنقية الأسرار من السجلات المركزية والرسائل والمطالبات الذكية
 _SECRET_KEY_PATTERN = re.compile(
-    r"(api[_-]?key|secret|password|passwd|pin|token|authorization|cookie|private[_-]?key)",
+    r"(api[_-]?key|x-mbx-apikey|secret|password|passwd|pin|token|authorization|cookie|private[_-]?key|seed[_-]?phrase|recovery[_-]?phrase|mnemonic|otp|two[_-]?factor|ciphertext)",
     re.IGNORECASE,
 )
 _INLINE_BEARER_PATTERN = re.compile(
-    r"(Bearer\s+[A-Za-z0-9._\-~+/]+=*|sk-[A-Za-z0-9_\-]{12,}|AIza[0-9A-Za-z_\-]{20,}|xai-[A-Za-z0-9_\-]{12,})",
+    r"(Bearer\s+[A-Za-z0-9._\-~+/]+=*|sk-[A-Za-z0-9_\-]{12,}|AIza[0-9A-Za-z_\-]{20,}|xai-[A-Za-z0-9_\-]{12,}|X-MBX-APIKEY\s*[:=]\s*[A-Za-z0-9_\-]{8,}|signature=[A-Za-z0-9%+/=_\-]{16,})",
+    re.IGNORECASE,
+)
+_PEM_PRIVATE_KEY_PATTERN = re.compile(
+    r"-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z0-9 ]*PRIVATE KEY-----",
     re.IGNORECASE,
 )
 
 
 def redact_sensitive_value(value: Any) -> Any:
-    """تنقية النصوص والقواميس والقوائم من أي مفاتيح API أو كلمات مرور أو رموز جلسات قبل التسجيل."""
+    """تنقية النصوص والقواميس والقوائم من أي مفاتيح API أو مفاتيح خاصة أو كلمات مرور أو رموز جلسات قبل التسجيل."""
     if isinstance(value, str):
-        return _INLINE_BEARER_PATTERN.sub("[REDACTED_SECRET]", value)
+        scrubbed = _PEM_PRIVATE_KEY_PATTERN.sub("[REDACTED_PRIVATE_KEY_PEM]", value)
+        return _INLINE_BEARER_PATTERN.sub("[REDACTED_SECRET]", scrubbed)
     if isinstance(value, dict):
         sanitized: dict[str, Any] = {}
         for k, v in value.items():
@@ -131,7 +136,7 @@ class StructuredSecurityTelemetry:
         record = {
             "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "service": "trilunair-backend",
-            "release": "1.2.0-low-latency-cloudflare",
+            "release": "1.3.0-binance-personal-guard",
             "event": event_type,
             "severity": severity,
             "details": safe_details,
@@ -810,6 +815,19 @@ def get_allowed_cors_origins() -> list[str]:
     ]
 
 
+def verify_no_medinsup_secret_collision() -> bool:
+    """التحقق من عدم وجود أي مشاركة لمفاتيح تشفير الخزنة أو مفاتيح Binance مع متغيرات النطاق الطبي medinsup.com."""
+    vault_key = os.getenv("TRILUNAIR_VAULT_MASTER_KEY", "").strip()
+    medinsup_vars = [
+        v.strip()
+        for k, v in os.environ.items()
+        if k.upper().startswith("MEDINSUP_") and v and len(v.strip()) >= 8
+    ]
+    if vault_key and vault_key in medinsup_vars:
+        return False
+    return True
+
+
 def get_platform_isolation_audit() -> dict[str, Any]:
     """فحص آلي قابل للتحقق يثبت العزل التام عن المنصة الطبية medinsup.com المستضافة في الرياض."""
     primary_sub = os.getenv("TRILUNAIR_PRIMARY_DOMAIN", "trilunair.medinsup.com").strip().lower()
@@ -821,8 +839,14 @@ def get_platform_isolation_audit() -> dict[str, Any]:
     ).lower()
     medical_db_collision = "medinsup" in db_dsn and "trilunair" not in db_dsn
     parent_leaked = any(o.lower() in FORBIDDEN_MEDICAL_PARENT_ORIGINS or "*" in o for o in allowed_origins)
+    secrets_isolated = verify_no_medinsup_secret_collision()
 
-    isolated_ok = (not medical_db_collision) and (not parent_leaked) and (primary_sub != "medinsup.com")
+    isolated_ok = (
+        (not medical_db_collision)
+        and (not parent_leaked)
+        and (primary_sub != "medinsup.com")
+        and secrets_isolated
+    )
     return {
         "isolated": isolated_ok,
         "trilunairSubdomain": primary_sub,
@@ -836,11 +860,95 @@ def get_platform_isolation_audit() -> dict[str, Any]:
             "medicalParentBlockedFromCorsAndWebAuthn": not parent_leaked,
             "wildcardMedinsupOriginBlocked": all("*" not in o for o in allowed_origins),
             "separateDatabaseCredentialsVerified": not medical_db_collision,
+            "separateBinanceAndVaultSecretsVerified": secrets_isolated,
             "separateCloudflareZeroTrustPolicy": True,
             "outboundOnlyCloudflaredTunnel": True,
         },
         "allowedOrigins": allowed_origins,
     }
+
+
+# ==============================================================================
+# 5. خزنة التشفير بالجانب الخلفي (AES-256-GCM Vault) وإخفاء المفاتيح
+# ==============================================================================
+
+_EPHEMERAL_DEV_VAULT_SEED = secrets.token_hex(32)
+
+
+def _derive_vault_aes256_key() -> bytes:
+    """
+    اشتقاق مفتاح تشفير AES-256-GCM طوله 32 بايت عبر HKDF-SHA256 من:
+    1. TRILUNAIR_VAULT_MASTER_KEY (الموصى به للإنتاج)، أو
+    2. TRILUNAIR_SESSION_SECRET / TRILUNAIR_ADMIN_SECRET_HASH، أو
+    3. بذرة ذاكرة عشوائية معزولة لبيئة التطوير والاختبارات الآلية فقط.
+    """
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+
+    if not verify_no_medinsup_secret_collision():
+        raise HTTPException(
+            status_code=500,
+            detail="CRITICAL_ISOLATION_VIOLATION: TRILUNAIR_VAULT_MASTER_KEY must never match any MEDINSUP_* secret.",
+        )
+
+    raw_seed = (
+        os.getenv("TRILUNAIR_VAULT_MASTER_KEY", "").strip()
+        or os.getenv("TRILUNAIR_SESSION_SECRET", "").strip()
+        or os.getenv("TRILUNAIR_ADMIN_SECRET_HASH", "").strip()
+        or os.getenv("TRILUNAIR_ADMIN_SECRET", "").strip()
+    )
+    if not raw_seed:
+        if os.getenv("TRILUNAIR_ENV", "development").strip().lower() == "production":
+            raise HTTPException(
+                status_code=503,
+                detail="خزنة الأسرار المشفرة غير مهيأة في الإنتاج: يرجى ضبط TRILUNAIR_VAULT_MASTER_KEY.",
+            )
+        raw_seed = _EPHEMERAL_DEV_VAULT_SEED
+
+    hkdf = HKDF(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=b"trilunair-v1.3-personal-binance-vault-salt",
+        info=b"aes-256-gcm-credential-envelope",
+    )
+    return hkdf.derive(raw_seed.encode("utf-8"))
+
+
+def encrypt_vault_secret(plaintext: str, aad_context: str = "binance-owner-vault") -> str:
+    """تشفير سر حساس عبر AES-256-GCM مع مصادقة السياق (AAD) وإرجاع مظروف مرمز دون تخزين النص الصريح."""
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+    if not plaintext:
+        raise ValueError("Cannot encrypt an empty secret in vault.")
+    aes_key = _derive_vault_aes256_key()
+    nonce = secrets.token_bytes(12)
+    aesgcm = AESGCM(aes_key)
+    ct = aesgcm.encrypt(nonce, plaintext.encode("utf-8"), aad_context.encode("utf-8"))
+    b64_nonce = base64.urlsafe_b64encode(nonce).decode("ascii")
+    b64_ct = base64.urlsafe_b64encode(ct).decode("ascii")
+    return f"v1:aes256gcm:{b64_nonce}:{b64_ct}"
+
+
+def decrypt_vault_secret(envelope: str, aad_context: str = "binance-owner-vault") -> str:
+    """فك تشفير مظروف AES-256-GCM داخل الذاكرة الخلفية حصراً للتحقق من الصلاحيات أو توقيع الطلبات الرسمية."""
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+    parts = (envelope or "").split(":")
+    if len(parts) != 4 or parts[0] != "v1" or parts[1] != "aes256gcm":
+        raise ValueError("Malformed vault ciphertext envelope.")
+    nonce = base64.urlsafe_b64decode(parts[2].encode("ascii"))
+    ct = base64.urlsafe_b64decode(parts[3].encode("ascii"))
+    aesgcm = AESGCM(_derive_vault_aes256_key())
+    pt = aesgcm.decrypt(nonce, ct, aad_context.encode("utf-8"))
+    return pt.decode("utf-8")
+
+
+def mask_api_key(api_key: str) -> str:
+    """إخفاء مفتاح API بحيث لا يُعرض سوى أول 4 وآخر 4 محارف بعد الحفظ الأولي."""
+    cleaned = (api_key or "").strip()
+    if len(cleaned) <= 8:
+        return "••••"
+    return f"{cleaned[:4]}••••••••{cleaned[-4:]}"
 
 
 def build_outbound_ssl_context() -> ssl.SSLContext:

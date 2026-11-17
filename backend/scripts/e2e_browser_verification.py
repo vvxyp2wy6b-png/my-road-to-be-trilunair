@@ -209,11 +209,22 @@ def main() -> None:
         page.wait_for_selector('[data-testid="personal-cfo-wealth-panel"]', timeout=6000)
         page.wait_for_selector('[data-testid="saudi-labor-benefits-calculator"]', timeout=6000)
         page.wait_for_selector('[data-testid="contract-renewal-deadline-tracker"]', timeout=6000)
+        page.wait_for_selector('[data-testid="cfo-personal-binance-bridge"]', timeout=6000)
         cfo_dom_text = page.get_by_test_id("personal-cfo-wealth-panel").inner_text()
         assert "PROVISIONAL / SUBJECT TO CONTRACT AND LEGAL VERIFICATION" in cfo_dom_text, cfo_dom_text
         assert "2027-08-11" in cfo_dom_text, cfo_dom_text
         assert "72,000" in cfo_dom_text, cfo_dom_text
+        assert "PENDING OWNER SETUP" in cfo_dom_text, cfo_dom_text
         report["verifiedPersonalCfoAndSaudiContractInDom"] = True
+
+        # 7. الانتقال إلى شاشة مراقبة حساب Binance الشخصي الحقيقي (LIVE ACCOUNT MONITORING) والتحقق من العزل والقفل على PAPER
+        page.click("#nav-binance-live-btn")
+        page.wait_for_selector('[data-testid="binance-live-monitoring-view"]', timeout=6000)
+        page.wait_for_selector('[data-testid="live-spot-eight-gates-panel"]', timeout=6000)
+        live_dom_text = page.get_by_test_id("binance-live-monitoring-view").inner_text()
+        assert "PENDING OWNER SETUP" in live_dom_text, live_dom_text
+        assert "2,125" in live_dom_text, live_dom_text
+        report["verifiedPersonalBinanceLiveMonitoringViewInDom"] = True
 
         browser.close()
 
@@ -223,10 +234,15 @@ def main() -> None:
         ops = http.get(f"{BASE_URL}/api/system/operations").json()
         history = http.get(f"{BASE_URL}/api/ai/history").json()
         portfolio = http.get(f"{BASE_URL}/api/portfolio").json()
-        assert final_status["version"] == "1.2.0-low-latency-cloudflare"
+        binance_personal = http.get(f"{BASE_URL}/api/binance/personal/overview").json()
+        spot_readiness = http.get(f"{BASE_URL}/api/binance/spot-execution/readiness").json()
+        assert final_status["version"] == "1.3.0-binance-personal-guard"
         assert final_status["tradingMode"] == "PAPER"
         assert final_status["liveAuthorized"] is False
         assert final_status["executionLockedToPaper"] is True
+        assert binance_personal["connectionStatus"] == "PENDING_OWNER_SETUP"
+        assert spot_readiness["realOrdersPermitted"] is False
+        assert spot_readiness["executionLockedToPaper"] is True
         assert ops["subsystems"]["postgresql"]["status"] == "CONNECTED"
         assert ops["subsystems"]["binancePublicMarketData"]["restStatus"] == "CONNECTED"
         sources_recorded = [m["source"] for m in history["messages"] if m["role"] == "user"]
@@ -234,6 +250,7 @@ def main() -> None:
         report["recordedCommandSourcesInPostgres"] = sources_recorded
         report["finalTradingMode"] = final_status["tradingMode"]
         report["liveAuthorized"] = final_status["liveAuthorized"]
+        report["personalBinanceConnectionStatus"] = binance_personal["connectionStatus"]
         report["binancePublicRestStatus"] = ops["subsystems"]["binancePublicMarketData"]["restStatus"]
         report["portfolioTotalEquity"] = portfolio["totalEquity"]
 

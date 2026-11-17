@@ -15,10 +15,12 @@ import type {
   CommandSource,
   HostingDecisionMatrix,
   Language,
+  LiveSpotReadiness,
   MarketAsset,
   MarketCandlesResponse,
   OrderRecord,
   PasskeySecurityPosture,
+  PersonalBinanceOverview,
   PipelineLatencySnapshot,
   PortfolioSnapshot,
   SystemStatus,
@@ -479,6 +481,126 @@ export const trilunairApi = {
   }) =>
     requestJson<WealthArchitectOverview>('/wealth/investment/ledger', {
       method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  // حساب Binance الشخصي (للقراءة فقط + خزنة Ed25519 + بوابات LIVE_SPOT الثماني)
+  getPersonalBinanceOverview: () =>
+    requestJson<PersonalBinanceOverview>('/binance/personal/overview'),
+
+  generateServerEd25519Keypair: (purpose: 'READ_ONLY_MONITORING' | 'FUTURE_SPOT_EXECUTION' = 'READ_ONLY_MONITORING', adminSecret?: string) =>
+    requestJson<{
+      keypairId: string;
+      purpose: string;
+      algorithm: 'ED25519';
+      publicKeyPem: string;
+      privateKeyExported: false;
+      createdAt: string;
+      binanceRegistrationInstructionsEn: string;
+      binanceRegistrationInstructionsAr: string;
+    }>('/binance/personal/ed25519/generate', {
+      method: 'POST',
+      body: JSON.stringify({ purpose, adminSecret }),
+    }),
+
+  savePersonalBinanceCredential: (payload: {
+    purpose: 'READ_ONLY_MONITORING' | 'FUTURE_SPOT_EXECUTION';
+    keyLabel: string;
+    authAlgorithm: 'ED25519' | 'RSA_SHA256' | 'HMAC_SHA256';
+    environment: 'MAINNET' | 'SPOT_TESTNET';
+    apiKey: string;
+    generatedKeypairId?: string;
+    privateKeyPem?: string;
+    apiSecret?: string;
+    trustedIps?: string[];
+    trackedSymbols?: string[];
+    verifyImmediately?: boolean;
+    adminSecret?: string;
+  }) =>
+    requestJson<{
+      saved: boolean;
+      purpose: string;
+      credentialId: string;
+      apiKeyMasked: string;
+      secretExposed: false;
+      tradingMode: 'PAPER';
+      liveAuthorized: false;
+    }>('/binance/personal/credentials', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  rotatePersonalBinanceCredential: (
+    purpose: 'READ_ONLY_MONITORING' | 'FUTURE_SPOT_EXECUTION',
+    payload: {
+      keyLabel: string;
+      authAlgorithm: 'ED25519' | 'RSA_SHA256' | 'HMAC_SHA256';
+      environment: 'MAINNET' | 'SPOT_TESTNET';
+      apiKey: string;
+      generatedKeypairId?: string;
+      privateKeyPem?: string;
+      apiSecret?: string;
+      trustedIps?: string[];
+      adminSecret?: string;
+    }
+  ) =>
+    requestJson<{
+      saved: boolean;
+      rotated: boolean;
+      apiKeyMasked: string;
+    }>(`/binance/personal/credentials/${purpose}/rotate`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  revokePersonalBinanceCredential: (
+    purpose: 'READ_ONLY_MONITORING' | 'FUTURE_SPOT_EXECUTION',
+    adminSecret?: string
+  ) =>
+    requestJson<{ revoked: boolean; purpose: string; revokedAt: string }>(
+      `/binance/personal/credentials/${purpose}${adminSecret ? `?adminSecret=${encodeURIComponent(adminSecret)}` : ''}`,
+      { method: 'DELETE' }
+    ),
+
+  verifyPersonalBinancePermissions: (
+    purpose: 'READ_ONLY_MONITORING' | 'FUTURE_SPOT_EXECUTION' = 'READ_ONLY_MONITORING',
+    adminSecret?: string
+  ) =>
+    requestJson<{
+      configured: boolean;
+      connectionStatus: string;
+      latencyMs?: number;
+      usedWeight1m?: number;
+    }>('/binance/personal/verify-permissions', {
+      method: 'POST',
+      body: JSON.stringify({ purpose, adminSecret }),
+    }),
+
+  syncPersonalBinanceAccount: (
+    purpose: 'READ_ONLY_MONITORING' | 'FUTURE_SPOT_EXECUTION' = 'READ_ONLY_MONITORING',
+    adminSecret?: string
+  ) =>
+    requestJson<PersonalBinanceOverview>('/binance/personal/sync', {
+      method: 'POST',
+      body: JSON.stringify({ purpose, adminSecret }),
+    }),
+
+  getLiveSpotReadiness: () =>
+    requestJson<LiveSpotReadiness>('/binance/spot-execution/readiness'),
+
+  updateOwnerSpotLimits: (payload: {
+    jurisdictionEligibilityConfirmed: boolean;
+    jurisdictionCountryCode: string;
+    maxSingleOrderSar: number;
+    maxDailySpotSar: number;
+    maxMonthlySpotSar: number;
+    maxSingleAssetExposurePct: number;
+    requireBiometricPerOrder: boolean;
+    allowedSpotSymbols: string[];
+    adminSecret?: string;
+  }) =>
+    requestJson<LiveSpotReadiness>('/binance/spot-execution/limits', {
+      method: 'PUT',
       body: JSON.stringify(payload),
     }),
 };

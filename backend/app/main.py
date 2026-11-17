@@ -174,11 +174,15 @@ async def lifespan(_app: FastAPI):
     init_db()
     ensure_passkey_tables()
     try:
+        from app.binance_personal_account import ensure_binance_personal_tables
+        from app.binance_spot_execution_adapter import ensure_spot_execution_tables
         from app.quantum_hub import ensure_quantum_tables
         from app.wealth_architect import ensure_wealth_architect_tables
 
         ensure_quantum_tables()
         ensure_wealth_architect_tables()
+        ensure_binance_personal_tables()
+        ensure_spot_execution_tables()
     except Exception:
         pass
 
@@ -1066,9 +1070,13 @@ try:
 except Exception:
     pass
 
+from app.binance_personal_account import binance_personal_router
+from app.binance_spot_execution_adapter import spot_execution_router
 from app.wealth_architect import wealth_router
 
 app.include_router(wealth_router)
+app.include_router(binance_personal_router)
+app.include_router(spot_execution_router)
 
 _configure_optional_spa_serving(app)
 

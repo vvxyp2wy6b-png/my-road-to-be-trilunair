@@ -26,9 +26,11 @@ import {
   Radio,
   ShieldAlert,
   ShieldCheck,
+  Wallet,
 } from 'lucide-react';
 import { connectMarketStream, trilunairApi } from './api/client';
 import { quantumApi } from './api/quantumClient';
+import { BinanceLiveAccountView } from './components/BinanceLive/BinanceLiveAccountView';
 import { CommandDock } from './components/CommandDock/CommandDock';
 import { GovernanceView, type SwitchTradingModePayload } from './components/Governance/GovernanceView';
 import { IntelligenceHubView } from './components/IntelligenceHub/IntelligenceHubView';
@@ -58,7 +60,7 @@ import type {
 } from './types/trilunair';
 import { useSpeechEngine } from './voice/useSpeechEngine';
 
-type ExtendedScreen = 'terminal' | 'quantum' | 'portfolio' | 'governance' | 'themes';
+type ExtendedScreen = 'terminal' | 'quantum' | 'binance-live' | 'portfolio' | 'governance' | 'themes';
 
 export const App: React.FC = () => {
   const {
@@ -489,6 +491,19 @@ export const App: React.FC = () => {
           </button>
 
           <button
+            id="nav-binance-live-btn"
+            type="button"
+            className={`holo-btn ${activeScreen === 'binance-live' ? 'holo-btn-primary' : ''}`}
+            onClick={() => {
+              setFocusMode(false);
+              setActiveScreen('binance-live');
+            }}
+          >
+            <Wallet size={15} />
+            {isAr ? 'حساب Binance الحقيقي (قراءة فقط)' : 'LIVE ACCOUNT (Read-Only)'}
+          </button>
+
+          <button
             id="nav-portfolio-btn"
             type="button"
             className={`holo-btn ${activeScreen === 'portfolio' ? 'holo-btn-primary' : ''}`}
@@ -730,6 +745,8 @@ export const App: React.FC = () => {
         )}
 
         {activeScreen === 'quantum' && <IntelligenceHubView />}
+
+        {activeScreen === 'binance-live' && <BinanceLiveAccountView />}
 
         {activeScreen === 'portfolio' && (
           <PortfolioView

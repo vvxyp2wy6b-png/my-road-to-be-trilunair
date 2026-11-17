@@ -1156,6 +1156,123 @@ def get_wealth_architect_overview(reference_date: date | None = None) -> dict[st
     cumulative_invested_sar = round(sum(item["amountSar"] for item in formatted_ledger), 2)
     liquid_cash_reserve_sar = round(float(prof["liquid_cash_reserve_sar"]), 2)
 
+    # 4b. Personal Binance Spot Read-Only Bridge (SAR 2,125/mo Allocation, Anti-Double-Counting & Actual-vs-PAPER)
+    from app.binance_personal_account import get_personal_binance_overview
+    from app.safety_gateway import get_portfolio_snapshot
+
+    binance_overview = get_personal_binance_overview()
+    paper_portfolio = get_portfolio_snapshot()
+    paper_starting_usd = 1_000_000.0
+    paper_net_return_pct = round(
+        ((float(paper_portfolio.totalEquity) - paper_starting_usd) / paper_starting_usd) * 100.0,
+        3,
+    )
+
+    b_summary = binance_overview["portfolioSummary"]
+    b_conn_status = str(binance_overview["connectionStatus"])
+
+    # Reconcile active salary-cycle Binance deposits & Spot purchases without double-counting against bank statements or CFO ledger
+    cycle_binance_deposits_sar = 0.0
+    for cf in binance_overview.get("recentCashflows", []):
+        if str(cf.get("direction")) == "DEPOSIT":
+            try:
+                cf_dt = _parse_iso_date(str(cf.get("occurredAtIso", ""))[:10])
+                if resolve_salary_cycle_id(cf_dt, payday_day) == active_cycle_id:
+                    cycle_binance_deposits_sar = round(cycle_binance_deposits_sar + float(cf.get("amountSar", 0.0)), 2)
+            except Exception:
+                pass
+
+    cycle_binance_spot_buys_sar = 0.0
+    for tr in binance_overview.get("recentTrades", []):
+        if str(tr.get("side")) == "BUY":
+            try:
+                tr_dt = _parse_iso_date(str(tr.get("tradeTimeIso", ""))[:10])
+                if resolve_salary_cycle_id(tr_dt, payday_day) == active_cycle_id:
+                    cycle_binance_spot_buys_sar = round(
+                        cycle_binance_spot_buys_sar + (float(tr.get("quoteQty", 0.0)) * SAR_PER_USD_PEG),
+                        2,
+                    )
+            except Exception:
+                pass
+
+    cycle_ledger_alloc_sar = round(
+        sum(
+            float(item["cryptoSpotPaperSar"])
+            for item in formatted_ledger
+            if item["salaryCycleId"] == active_cycle_id and item["entryId"] != "inv_seed_initial_cycle"
+        ),
+        2,
+    )
+    statement_inv_actual_sar = actual_by_bucket["INVESTMENT_ALLOCATION"]
+    planned_inv_sar = buckets_planned["INVESTMENT_ALLOCATION"]
+
+    # Anti-double-counting rule: a bank transfer to Binance (statement), a CFO ledger allocation, a synced Binance deposit,
+    # and subsequent Spot purchases using that same deposited quote cash represent stages of the SAME capital deployment!
+    # Therefore effective cycle deployment = max(statement_inv_actual, cycle_ledger_alloc, cycle_binance_deposits, cycle_binance_spot_buys).
+    verified_actual_deployment_sar = round(
+        max(statement_inv_actual_sar, cycle_ledger_alloc_sar, cycle_binance_deposits_sar, cycle_binance_spot_buys_sar),
+        2,
+    )
+    effective_reconciled_inv_outflow_sar = round(max(planned_inv_sar, verified_actual_deployment_sar), 2)
+
+    contributed_cap_sar = float(b_summary["netContributedCapitalSar"])
+    net_pnl_after_fees_sar = float(b_summary["netPnlAfterFeesSar"])
+    actual_net_return_pct = (
+        round((net_pnl_after_fees_sar / contributed_cap_sar) * 100.0, 2)
+        if contributed_cap_sar > 0.01
+        else 0.0
+    )
+
+    binance_cfo_bridge = {
+        "primaryFocus": "CRYPTOCURRENCY_SPOT_MARKETS",
+        "connectionStatus": b_conn_status,
+        "plannedMonthlyCryptoAllocationSar": planned_inv_sar,
+        "plannedMonthlyCryptoAllocationUsd": round(planned_inv_sar / SAR_PER_USD_PEG, 2),
+        "activeSalaryCycleId": active_cycle_id,
+        "cycleReconciliation": {
+            "importedBankStatementInvestmentSar": statement_inv_actual_sar,
+            "cfoLedgerCycleAllocationSar": cycle_ledger_alloc_sar,
+            "syncedBinanceCycleDepositsSar": cycle_binance_deposits_sar,
+            "syncedBinanceCycleSpotPurchasesSar": cycle_binance_spot_buys_sar,
+            "deduplicatedActualDeploymentSar": verified_actual_deployment_sar,
+            "effectiveReconciledBudgetOutflowSar": effective_reconciled_inv_outflow_sar,
+            "remainingPlannedMonthlyBudgetSar": round(max(0.0, planned_inv_sar - verified_actual_deployment_sar), 2),
+            "budgetOverrunSar": round(max(0.0, verified_actual_deployment_sar - planned_inv_sar), 2),
+            "reconciledWithoutDoubleCount": True,
+        },
+        "capitalVsPerformanceSeparation": {
+            "cumulativeContributedCapitalSar": contributed_cap_sar,
+            "realizedPnlSar": float(b_summary["realizedPnlSar"]),
+            "unrealizedPnlSar": float(b_summary["unrealizedPnlSar"]),
+            "cumulativeTradingFeesSar": float(b_summary["cumulativeFeesSar"]),
+            "netMarketPnlAfterFeesSar": net_pnl_after_fees_sar,
+            "totalActualBinanceEquitySar": float(b_summary["totalEquitySar"]),
+        },
+        "cashVsCryptoExposure": {
+            "availableBinanceQuoteCashSar": float(b_summary["availableQuoteCashSar"]),
+            "investedBinanceCryptoExposureSar": float(b_summary["investedCryptoCapitalSar"]),
+            "cryptoMarketExposurePct": float(b_summary["cryptoExposurePct"]),
+        },
+        "actualVsPaperStrategyComparison": {
+            "actualAccountStatus": b_conn_status,
+            "actualNetReturnAfterFeesPct": actual_net_return_pct if b_conn_status != "PENDING_OWNER_SETUP" else None,
+            "paperSimulatedPortfolioEquityUsd": round(float(paper_portfolio.totalEquity), 2),
+            "paperStrategyNetReturnPct": paper_net_return_pct,
+            "segregatedBalancesAndReturns": True,
+            "comparisonNoteEn": (
+                "Personal Binance account is PENDING OWNER SETUP; PAPER simulation metrics are never mixed with actual personal returns."
+                if b_conn_status == "PENDING_OWNER_SETUP"
+                else "Actual personal Binance Spot performance is measured net of fees on contributed capital and kept strictly separate from the $1M PAPER simulation."
+            ),
+        },
+        "governanceInvariants": {
+            "assumesGuaranteedReturns": False,
+            "treatsProjectedEmploymentBenefitsAsCash": False,
+            "tradingMode": "PAPER",
+            "liveAuthorized": False,
+        },
+    }
+
     # 5. Long-Term 36-Month Forecast (Strictly Separating Liquid/Invested Assets vs Contingent Employment Benefits)
     est_payoff_m = payoff_sim["estimatedMonthsToDebtFree"] or 6
     horizon_months = 36
@@ -1295,12 +1412,15 @@ def get_wealth_architect_overview(reference_date: date | None = None) -> dict[st
                 "entries": formatted_ledger,
             },
             "opportunityAndRiskAnalysis": investment_comparison,
+            "binancePersonalCfoBridge": binance_cfo_bridge,
         },
+        "binancePersonalCfoBridge": binance_cfo_bridge,
         "balanceSheetAndForecast": {
             "liquidAssetsAvailableNow": {
                 "liquidCashReserveSar": liquid_cash_reserve_sar,
                 "availableCurrentCycleCashSar": round(float(prof["available_cycle_cash_sar"]), 2),
                 "cumulativeInvestedCapitalLedgerSar": cumulative_invested_sar,
+                "actualBinanceSpotEquitySar": float(b_summary["totalEquitySar"]),
                 "includesUnreceivedEmploymentBenefits": False,
             },
             "contingentFutureReceivablesSegregated": {

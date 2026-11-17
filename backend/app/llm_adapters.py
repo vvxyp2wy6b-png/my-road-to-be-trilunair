@@ -246,7 +246,11 @@ def _execute_single_provider_http_call(
     market_context: str,
     timeout_sec: float,
 ) -> tuple[str, int]:
-    """تنفيذ طلب HTTP منفرد لأحد المزودات الأربعة وإرجاع (النص، إجمالي الرموز)."""
+    """تنفيذ طلب HTTP منفرد لأحد المزودات الأربعة وإرجاع (النص، إجمالي الرموز) بعد تنقية أي أسرار من السياق."""
+    from app.security import redact_sensitive_value
+
+    system_prompt = str(redact_sensitive_value(system_prompt))
+    market_context = str(redact_sensitive_value(market_context))
     if prov == "openai":
         api_key = os.getenv("OPENAI_API_KEY", "").strip()
         base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")

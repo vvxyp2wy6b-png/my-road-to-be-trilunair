@@ -1071,6 +1071,47 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
               ))}
             </div>
           </div>
+
+          {wealthOverview.binancePersonalCfoBridge && (
+            <div
+              className="holo-panel-subtle"
+              style={{ padding: '0.95rem 1.05rem' }}
+              data-testid="cfo-personal-binance-bridge"
+            >
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
+                <strong>
+                  {isAr
+                    ? 'جسر مطابقة حساب Binance الفوري الشخصي (2,125 ريال/شهرياً — معزول عن PAPER)'
+                    : 'Personal Binance Spot CFO Reconciliation Bridge (SAR 2,125/mo — Segregated from PAPER)'}
+                </strong>
+                <span className="holo-badge">
+                  {wealthOverview.binancePersonalCfoBridge.connectionStatus === 'PENDING_OWNER_SETUP'
+                    ? 'PENDING OWNER SETUP'
+                    : wealthOverview.binancePersonalCfoBridge.connectionStatus}
+                </span>
+              </div>
+              <div style={{ marginTop: '0.45rem', fontSize: '0.76rem', color: 'var(--text-secondary)', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                <span>
+                  {isAr ? 'الودائع/المشتريات الموحدة دون ازدواج:' : 'Deduplicated Cycle Deployment:'}{' '}
+                  <strong>
+                    SAR {formatNumber(wealthOverview.binancePersonalCfoBridge.cycleReconciliation.deduplicatedActualDeploymentSar, 2)}
+                  </strong>
+                </span>
+                <span>
+                  {isAr ? 'رأس المال المساهم:' : 'Contributed Principal:'}{' '}
+                  <strong>
+                    SAR {formatNumber(wealthOverview.binancePersonalCfoBridge.capitalVsPerformanceSeparation.cumulativeContributedCapitalSar, 2)}
+                  </strong>
+                </span>
+                <span>
+                  {isAr ? 'صافي ربح/خسارة السوق بعد الرسوم:' : 'Net Market P&L (After Fees):'}{' '}
+                  <strong>
+                    SAR {formatNumber(wealthOverview.binancePersonalCfoBridge.capitalVsPerformanceSeparation.netMarketPnlAfterFeesSar, 2)}
+                  </strong>
+                </span>
+              </div>
+            </div>
+          )}
         </section>
       )}
     </div>
