@@ -216,8 +216,10 @@ class MarketEngine:
         with self._lock:
             age = round(max(0.0, time.time() - self._last_tick_epoch), 3)
             max_s = self.max_staleness_seconds
+            is_fresh = age <= max_s and not self._feed_halted
             return {
-                "healthy": age <= max_s and not self._feed_halted,
+                "healthy": is_fresh,
+                "fresh": is_fresh,
                 "stale": age > max_s,
                 "feedHalted": self._feed_halted,
                 "ageSeconds": age,
@@ -352,8 +354,41 @@ class MarketEngine:
                 ordered_unique.append(sym)
         return ordered_unique
 
+    def _refresh_from_binance_public_if_active(self) -> None:
+        from app.binance_market_data import CANONICAL_TO_BINANCE_SPOT, binance_public_client
+
+        if self._feed_halted or binance_public_client.get_configured_mode() != "LIVE_PUBLIC":
+            return
+        with binance_public_client._lock:
+            live_tickers = dict(binance_public_client._tickers_cache)
+        if not live_tickers:
+            live_tickers = binance_public_client.fetch_live_tickers()
+        if not live_tickers:
+            return
+        with self._lock:
+            for symbol in CANONICAL_TO_BINANCE_SPOT:
+                live_item = live_tickers.get(symbol)
+                asset = self._assets.get(symbol)
+                if asset and live_item and float(live_item.get("price", 0.0)) > 0:
+                    decimals = self._decimals[symbol]
+                    live_price = round(float(live_item["price"]), decimals)
+                    self._anchor_prices[symbol] = live_price
+                    self._assets[symbol] = asset.model_copy(
+                        update={
+                            "price": live_price,
+                            "change24hPct": round(float(live_item["change24hPct"]), 2),
+                            "high24h": round(float(live_item["high24h"]), decimals),
+                            "low24h": round(float(live_item["low24h"]), decimals),
+                            "volume24hUsd": round(float(live_item["volume24hUsd"]), 2),
+                            "volatilityPct": round(float(live_item["volatilityPct"]), 2),
+                            "spreadBps": round(float(live_item["spreadBps"]), 2),
+                            "dataSource": str(live_item.get("source", "BINANCE_PUBLIC_REST")),
+                        }
+                    )
+
     def get_assets(self) -> list[MarketAsset]:
         """إرجاع قائمة بجميع الأصول الستة مع أسعارها الحية المحدثة."""
+        self._refresh_from_binance_public_if_active()
         with self._lock:
             return [asset.model_copy(deep=True) for asset in self._assets.values()]
 
@@ -362,6 +397,7 @@ class MarketEngine:
         canonical = self.resolve_symbol(symbol)
         if not canonical:
             return None
+        self._refresh_from_binance_public_if_active()
         with self._lock:
             asset = self._assets.get(canonical)
             return asset.model_copy(deep=True) if asset else None

@@ -174,6 +174,7 @@ def get_provider_credentials_report() -> list[dict[str, Any]]:
                     "providerId": pid,
                     "displayName": display,
                     "classification": classification,
+                    "available": creds_ok,
                     "credentialsConfigured": creds_ok,
                     "defaultModel": _get_configured_model(pid, None),
                     "envVar": env_var,
@@ -367,6 +368,7 @@ def invoke_configured_llm_adapter(
     market_context: str,
     timeout_sec: float | None = None,
     use_cache: bool | None = None,
+    cache_fingerprint: str | None = None,
 ) -> dict[str, Any]:
     """
     استدعاء المحول الحقيقي للمزود المسند للوكيل مع إعادة المحاولة، تتبع حدود المعدل،
@@ -453,17 +455,20 @@ def invoke_configured_llm_adapter(
             }
 
     eff_model = _get_configured_model(prov, model)
+    timeout_env = os.getenv("TRILUNAIR_LLM_TIMEOUT_SEC") or os.getenv("TRILUNAIR_LLM_TIMEOUT_SECONDS") or "8.0"
     eff_timeout = (
         float(timeout_sec)
         if timeout_sec is not None
-        else max(1.0, float(os.getenv("TRILUNAIR_LLM_TIMEOUT_SECONDS", "8.0")))
+        else max(1.0, float(timeout_env))
     )
     max_retries = max(0, min(3, int(os.getenv("TRILUNAIR_LLM_MAX_RETRIES", "1"))))
-    cache_ttl = float(os.getenv("TRILUNAIR_LLM_CACHE_TTL_SECONDS", "0"))
+    ttl_env = os.getenv("TRILUNAIR_LLM_CACHE_TTL_SEC") or os.getenv("TRILUNAIR_LLM_CACHE_TTL_SECONDS") or "0"
+    cache_ttl = float(ttl_env)
     enable_cache = use_cache if use_cache is not None else (cache_ttl > 0)
 
+    fp_material = cache_fingerprint if cache_fingerprint is not None else market_context
     cache_key = hashlib.sha256(
-        f"{prov}:{eff_model}:{agent_role}:{market_context}".encode("utf-8")
+        f"{prov}:{eff_model}:{agent_role}:{fp_material}".encode("utf-8")
     ).hexdigest()
 
     if enable_cache:

@@ -470,6 +470,9 @@ def convene_meeting(
             f"Portfolio Equity: ${portfolio.totalEquity:,.2f} | Risk Passed: {risk_assessment.passed}"
         )
 
+        price_bucket = round(asset.price / 25.0) * 25.0 if asset.price >= 1000 else round(asset.price, 0)
+        cache_fp = f"{asset.symbol}:{horizon}:{price_bucket}:{risk_assessment.passed}"
+
         total_cloud_cost = 0.0
         enriched_responses: list[AgentDeliberationItem] = []
         for item in agent_responses:
@@ -490,6 +493,7 @@ def convene_meeting(
                     model=assigned_mod,
                     agent_role=f"{item.nameEn} ({item.roleEn})",
                     market_context=market_ctx,
+                    cache_fingerprint=cache_fp,
                 )
                 if adapter_res["success"] and adapter_res["data"] is not None:
                     d = adapter_res["data"]

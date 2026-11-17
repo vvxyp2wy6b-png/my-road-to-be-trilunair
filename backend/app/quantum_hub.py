@@ -930,12 +930,17 @@ def _build_exchange_status(gov_row: Any) -> dict[str, Any]:
     from .binance_market_data import binance_public_client
     from .market_engine import market_engine
 
+    creds_ok = bool(
+        os.getenv("BINANCE_SPOT_API_KEY", "").strip()
+        and os.getenv("BINANCE_SPOT_API_SECRET", "").strip()
+    )
     b_snap = binance_public_client.get_health_snapshot()
     if b_snap["liveMarketDataActive"]:
         conn_mode = "LIVE_MARKET_DATA_PAPER_EXECUTION"
     else:
         conn_mode = "PAPER_SIMULATION"
 
+    rest_ok = bool(creds_ok or b_snap.get("restHealthy"))
     live_filters = dict(binance_public_client._exchange_filters)
     stale_detected = market_engine.is_stale()
     now_ts = int(time.time())
@@ -964,7 +969,7 @@ def _build_exchange_status(gov_row: Any) -> dict[str, Any]:
         "exchange": "BINANCE_SPOT",
         "connectionMode": conn_mode,
         "credentialsConfigured": creds_ok,
-        "restReachable": creds_ok,
+        "restReachable": rest_ok,
         "wsStreamActive": not stale_detected,
         "accountStateUncertain": bool(gov_row["account_state_uncertain"]),
         "staleMarketDataDetected": stale_detected,
@@ -1577,6 +1582,7 @@ def update_deterministic_risk_policy(req: RiskPolicyUpdateRequest) -> dict[str, 
 
 
 @router.post("/authorization-policy")
+@router.post("/governance/policy")
 def set_authorization_policy(req: AuthPolicyUpdateRequest) -> dict[str, Any]:
     """
     ضبط سياسة التفويض في الإصدار v1.1.0-cloud-paper:

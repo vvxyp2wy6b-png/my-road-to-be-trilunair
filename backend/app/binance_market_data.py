@@ -68,19 +68,36 @@ class OrderBookSynchronizer:
         self.sequence_gaps_detected: int = 0
         self.updated_at_epoch: float = 0.0
 
+    @property
+    def needs_resync(self) -> bool:
+        return not self.synced
+
     def apply_snapshot(
         self,
         last_update_id: int,
-        bids_raw: list[list[str | float]],
-        asks_raw: list[list[str | float]],
+        bids_raw: list[list[str | float]] | None = None,
+        asks_raw: list[list[str | float]] | None = None,
+        *,
+        bids: list[list[str | float]] | None = None,
+        asks: list[list[str | float]] | None = None,
     ) -> None:
+        eff_bids = bids_raw if bids_raw is not None else (bids or [])
+        eff_asks = asks_raw if asks_raw is not None else (asks or [])
         self.last_update_id = int(last_update_id)
-        self.bids = {float(p): float(q) for p, q in bids_raw if float(q) > 0}
-        self.asks = {float(p): float(q) for p, q in asks_raw if float(q) > 0}
+        self.bids = {float(p): float(q) for p, q in eff_bids if float(q) > 0}
+        self.asks = {float(p): float(q) for p, q in eff_asks if float(q) > 0}
         self.synced = True
         self.updated_at_epoch = time.time()
 
-    def apply_diff_event(self, event: dict[str, Any]) -> bool:
+    def apply_diff_event(
+        self,
+        event: dict[str, Any] | None = None,
+        *,
+        first_update_id: int | None = None,
+        final_update_id: int | None = None,
+        bids: list[list[str | float]] | None = None,
+        asks: list[list[str | float]] | None = None,
+    ) -> bool:
         """
         تطبيق حدث تحديث عمق دفتر الأوامر (depthUpdate):
         - يتجاهل الأحداث القديمة حيث u <= lastUpdateId.
@@ -88,8 +105,12 @@ class OrderBookSynchronizer:
         """
         if not self.synced:
             return False
-        first_id = int(event.get("U", 0))
-        final_id = int(event.get("u", 0))
+        payload = event or {}
+        first_id = int(first_update_id if first_update_id is not None else payload.get("U", 0))
+        final_id = int(final_update_id if final_update_id is not None else payload.get("u", 0))
+        bids_in = bids if bids is not None else payload.get("b", [])
+        asks_in = asks if asks is not None else payload.get("a", [])
+
         if final_id <= self.last_update_id:
             return True
         if first_id > self.last_update_id + 1:
@@ -97,14 +118,14 @@ class OrderBookSynchronizer:
             self.sequence_gaps_detected += 1
             return False
 
-        for price_s, qty_s in event.get("b", []):
+        for price_s, qty_s in bids_in:
             price, qty = float(price_s), float(qty_s)
             if qty <= 0.0:
                 self.bids.pop(price, None)
             else:
                 self.bids[price] = qty
 
-        for price_s, qty_s in event.get("a", []):
+        for price_s, qty_s in asks_in:
             price, qty = float(price_s), float(qty_s)
             if qty <= 0.0:
                 self.asks.pop(price, None)
@@ -185,7 +206,10 @@ class BinanceSpotPublicDataClient:
 
     @staticmethod
     def get_rest_candidates() -> list[str]:
-        custom = os.getenv("BINANCE_PUBLIC_REST_URL", "").strip().rstrip("/")
+        custom = (
+            os.getenv("BINANCE_SPOT_PUBLIC_REST_URL", "").strip()
+            or os.getenv("BINANCE_PUBLIC_REST_URL", "").strip()
+        ).rstrip("/")
         if custom:
             return [custom]
         return [
@@ -195,13 +219,20 @@ class BinanceSpotPublicDataClient:
 
     @staticmethod
     def get_ws_url() -> str:
-        custom = os.getenv("BINANCE_PUBLIC_WS_URL", "").strip().rstrip("/")
-        if custom:
-            return custom
+        custom = (
+            os.getenv("BINANCE_SPOT_PUBLIC_WS_URL", "").strip()
+            or os.getenv("BINANCE_PUBLIC_WS_URL", "").strip()
+        ).rstrip("/")
         streams = "/".join(
             f"{bsym.lower()}@ticker/{bsym.lower()}@depth@1000ms"
             for bsym in CANONICAL_TO_BINANCE_SPOT.values()
         )
+        if custom:
+            if "streams=" in custom:
+                return custom
+            if custom.endswith("/stream"):
+                return f"{custom}?streams={streams}"
+            return custom
         return f"wss://data-stream.binance.vision/stream?streams={streams}"
 
     def is_rate_limited(self) -> bool:
@@ -254,8 +285,21 @@ class BinanceSpotPublicDataClient:
                 continue
         return None
 
-    def fetch_live_tickers(self) -> dict[str, dict[str, Any]]:
+    def get_cached_ticker(self, symbol: str) -> dict[str, Any] | None:
+        """استرجاع أحدث سعر مخزن مؤقتاً لرمز قياسي (BTC-USD) أو رمز Binance (BTCUSDT)."""
+        key = symbol.strip().upper()
+        canonical = BINANCE_TO_CANONICAL.get(key, key)
+        with self._lock:
+            entry = self._tickers_cache.get(canonical)
+            return dict(entry) if entry else None
+
+    def fetch_live_tickers(self, force: bool = False) -> dict[str, dict[str, Any]]:
         """جلب بيانات 24 ساعة الحية (السعر، أعلى/أدنى، الحجم، العرض/الطلب، السبريد) لأزواج Binance Spot."""
+        now = time.time()
+        if not force:
+            with self._lock:
+                if self._tickers_cache and (now - self._last_rest_success_epoch) < 1.5:
+                    return {k: dict(v) for k, v in self._tickers_cache.items()}
         symbols_param = json.dumps(list(CANONICAL_TO_BINANCE_SPOT.values()), separators=(",", ":"))
         data = self._rest_get("/api/v3/ticker/24hr", params={"symbols": symbols_param})
         if not isinstance(data, list):
@@ -510,16 +554,26 @@ class BinanceSpotPublicDataClient:
         with self._lock:
             last_live = max(self._last_rest_success_epoch, self._last_ws_message_epoch)
             age = round(now - last_live, 2) if last_live > 0 else None
+            rest_healthy = self._last_rest_success_epoch > 0 and (now - self._last_rest_success_epoch) <= 60.0
             live_active = mode == "LIVE_PUBLIC" and last_live > 0 and (age is not None and age <= 60.0)
             composite_mode = (
                 "LIVE_MARKET_DATA_PAPER_EXECUTION"
                 if live_active
                 else "SIMULATED_MARKET_DATA_PAPER_EXECUTION"
             )
+            ob_sync = {
+                bsym: {
+                    "synced": ob.synced,
+                    "lastUpdateId": ob.last_update_id,
+                    "sequenceGaps": ob.sequence_gaps_detected,
+                }
+                for bsym, ob in self._orderbooks.items()
+            }
             return {
                 "configuredMode": mode,
                 "effectiveMatrixMode": composite_mode,
                 "liveMarketDataActive": live_active,
+                "restHealthy": rest_healthy,
                 "executionMode": "PAPER",
                 "liveExecutionPermitted": False,
                 "restEndpoint": self._active_rest_base,
@@ -530,15 +584,11 @@ class BinanceSpotPublicDataClient:
                 "usedWeight1m": self._used_weight_1m,
                 "rateLimited": self.is_rate_limited(),
                 "cachedLiveSymbols": sorted(self._tickers_cache.keys()),
-                "syncedOrderbooks": {
-                    bsym: {
-                        "synced": ob.synced,
-                        "lastUpdateId": ob.last_update_id,
-                        "sequenceGaps": ob.sequence_gaps_detected,
-                    }
-                    for bsym, ob in self._orderbooks.items()
-                },
+                "syncedOrderbooks": ob_sync,
+                "orderbookSync": ob_sync,
                 "lastError": self._last_error,
+                "lastRestError": None if rest_healthy else self._last_error,
+                "lastWsError": None if self._ws_connected else self._last_error,
                 "policyMatrix": {
                     "LIVE_MARKET_DATA_PLUS_PAPER_EXECUTION": "PERMITTED",
                     "SIMULATED_MARKET_DATA_PLUS_PAPER_EXECUTION": "PERMITTED",

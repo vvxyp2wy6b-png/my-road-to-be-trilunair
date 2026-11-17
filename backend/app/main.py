@@ -343,7 +343,7 @@ def _inspect_reconciliation_state() -> dict[str, Any]:
     except Exception:
         pass
 
-    computed_positions_value = sum(pos.marketValue for pos in portfolio.positions)
+    computed_positions_value = sum(pos.marketValueUsd for pos in portfolio.positions)
     computed_total = round(portfolio.cashBalance + computed_positions_value, 2)
     drift_usd = round(abs(computed_total - portfolio.totalEquity), 4)
     consistent = (not uncertain) and (drift_usd <= 0.05)
@@ -377,9 +377,22 @@ def api_system_operations() -> dict[str, Any]:
     reconciliation = _inspect_reconciliation_state()
     frontend_bundle = _inspect_frontend_bundle_state()
 
-    db_backend = infra["database"]["activeBackend"]
-    db_status = "CONNECTED" if db_backend == "POSTGRESQL" else "SIMULATED_LOCAL_SQLITE"
-    redis_status = "CONNECTED" if infra["redis"]["connected"] else "SIMULATED_IN_PROCESS"
+    db_engine = str(infra["database"].get("engine", "sqlite")).lower()
+    db_connected = bool(infra["database"].get("connected"))
+    if db_engine == "postgresql" and db_connected:
+        db_status = "CONNECTED"
+    elif db_engine == "sqlite" and db_connected:
+        db_status = "SIMULATED_LOCAL_SQLITE"
+    else:
+        db_status = "OFFLINE"
+
+    redis_mode = str(infra["redis"].get("mode", "unconfigured"))
+    if infra["redis"].get("connected") and redis_mode == "redis-native-tcp":
+        redis_status = "CONNECTED"
+    elif infra["redis"].get("connected"):
+        redis_status = "MOCK_TCP_RESP"
+    else:
+        redis_status = "SIMULATED_IN_PROCESS"
 
     mkt_mode = os.getenv("TRILUNAIR_MARKET_DATA_MODE", "SIMULATED").strip().upper()
     if mkt_mode != "LIVE_PUBLIC":
@@ -411,7 +424,7 @@ def api_system_operations() -> dict[str, Any]:
             "withdrawalsPermitted": False,
             "marginAndLeveragePermitted": False,
             "killSwitchActive": sys_status.killSwitchActive,
-            "killSwitchReason": sys_status.killSwitchReason,
+            "killSwitchReason": getattr(sys_status, "killSwitchReason", None),
             "policyMatrix": binance_snap.get("policyMatrix", {}),
         },
         "adminSecurity": {
@@ -434,16 +447,16 @@ def api_system_operations() -> dict[str, Any]:
             },
             "postgresql": {
                 "status": db_status,
-                "activeBackend": db_backend,
-                "configuredEngine": infra["database"]["configuredEngine"],
-                "latencyMs": infra["database"]["latencyMs"],
-                "persistent": infra["database"]["persistent"],
+                "activeBackend": db_engine.upper(),
+                "configuredEngine": db_engine.upper(),
+                "latencyMs": infra["database"].get("latencyMs", 0.0),
+                "persistent": bool(infra["database"].get("persistenceVerified")),
             },
             "redis": {
                 "status": redis_status,
-                "connected": infra["redis"]["connected"],
-                "mode": infra["redis"]["mode"],
-                "latencyMs": infra["redis"]["latencyMs"],
+                "connected": bool(infra["redis"].get("connected")),
+                "mode": redis_mode,
+                "latencyMs": infra["redis"].get("latencyMs", 0.0),
             },
             "binancePublicMarketData": {
                 "marketDataMode": mkt_mode,

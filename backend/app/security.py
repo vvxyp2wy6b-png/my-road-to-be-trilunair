@@ -448,11 +448,17 @@ def enforce_admin_secret(
             severity="WARNING",
             details={"client": client_id, "action": action_label},
         )
-        if not allowed:
+        if (not allowed) or rate_limiter.count_recent(fail_bucket, window_sec) >= max_attempts:
+            eff_retry = retry_after if retry_after > 0 else int(window_sec)
+            security_telemetry.emit_event(
+                "RATE_LIMIT_BLOCKED",
+                severity="WARNING",
+                details={"client": client_id, "action": action_label, "reason": "AUTH_BRUTE_FORCE_LOCKOUT"},
+            )
             raise HTTPException(
                 status_code=429,
                 detail="تم تجاوز الحد الأقصى لمحاولات المصادقة الفاشلة؛ يرجى الانتظار قبل المحاولة مجدداً.",
-                headers={"Retry-After": str(retry_after)},
+                headers={"Retry-After": str(eff_retry)},
             )
         raise HTTPException(
             status_code=403,

@@ -116,6 +116,10 @@ class RiskPolicySummary(BaseModel):
     dailyLossLimitPct: float = 2.0
     weeklyLossLimitPct: float = 5.0
     maxDrawdownLimitPct: float = 10.0
+    prohibitLeverage: bool = True
+    prohibitMargin: bool = True
+    prohibitFutures: bool = True
+    prohibitWithdrawals: bool = True
 
 
 class SystemStatus(BaseModel):
