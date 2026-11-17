@@ -28,7 +28,7 @@ from typing import Any
 from urllib.parse import urlencode
 import uuid
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from .database import append_audit_log, db_session, utc_now_iso
@@ -859,7 +859,7 @@ class RiskPolicyUpdateRequest(BaseModel):
     dailyLossLimitPct: float = Field(gt=0.2, le=10.0)
     weeklyLossLimitPct: float = Field(gt=0.5, le=15.0)
     maxDrawdownLimitPct: float = Field(gt=1.0, le=25.0)
-    adminPin: str
+    adminPin: str = ""
 
 
 class AuthPolicyUpdateRequest(BaseModel):
@@ -885,10 +885,20 @@ class GoalConfigUpdateRequest(BaseModel):
     monthlyGoalPct: float = Field(ge=0, le=150)
 
 
-def _enforce_quantum_admin_auth(pin: str, action_label: str = "QUANTUM_ADMIN_ACTION") -> None:
-    from .security import enforce_admin_secret
+def _enforce_quantum_admin_auth(
+    pin: str,
+    action_label: str = "QUANTUM_ADMIN_ACTION",
+    request: Request | None = None,
+) -> dict[str, Any]:
+    from .security import require_authenticated_session_or_secret
 
-    enforce_admin_secret(pin, client_id="quantum-hub", action_label=action_label)
+    require_step_up = os.getenv("TRILUNAIR_REQUIRE_PASSKEY_STEP_UP", "false").lower() == "true"
+    return require_authenticated_session_or_secret(
+        request=request,
+        provided_secret=pin,
+        action_label=action_label,
+        require_step_up=require_step_up,
+    )
 
 
 def _serialize_agent(row: Any, provider_map: dict[str, dict[str, Any]]) -> dict[str, Any]:
@@ -1528,10 +1538,10 @@ def toggle_external_connector(connector_id: str, req: ToggleEnabledRequest) -> d
 
 
 @router.put("/risk-policy")
-def update_deterministic_risk_policy(req: RiskPolicyUpdateRequest) -> dict[str, Any]:
-    """تعديل حدود محرك المخاطر عبر مسار إداري محمي بمصادقة المسؤول المشفرة دون المساس بالمحظورات القطعية."""
+def update_deterministic_risk_policy(req: RiskPolicyUpdateRequest, request: Request) -> dict[str, Any]:
+    """تعديل حدود محرك المخاطر عبر مسار إداري محمي بمصادقة المالك البيومترية (Step-Up) أو سر المسؤول المشفر."""
     ensure_quantum_tables()
-    _enforce_quantum_admin_auth(req.adminPin, action_label="UPDATE_RISK_POLICY")
+    auth_ctx = _enforce_quantum_admin_auth(req.adminPin, action_label="UPDATE_RISK_POLICY", request=request)
 
     with db_session() as conn:
         conn.execute(
@@ -1555,15 +1565,15 @@ def update_deterministic_risk_policy(req: RiskPolicyUpdateRequest) -> dict[str, 
             (req.maxDrawdownLimitPct,),
         )
         append_audit_log(
-            actor="ADMIN",
+            actor="OWNER_DR_MAJOOD" if "WEBAUTHN" in auth_ctx.get("authMethod", "") else "ADMIN",
             source="TERMINAL",
             action="RISK_POLICY_UPDATED",
             severity="WARNING",
             details_ar=(
-                f"تحديث حدود المخاطر: مخاطرة/صفقة={req.maxRiskPerTradePct}%، تعرض={req.maxExposurePerAssetPct}%، "
+                f"تحديث حدود المخاطر ({auth_ctx.get('authMethod')}): مخاطرة/صفقة={req.maxRiskPerTradePct}%، تعرض={req.maxExposurePerAssetPct}%، "
                 f"خسارة يومية={req.dailyLossLimitPct}%، أسبوعية={req.weeklyLossLimitPct}%، أقصى تراجع={req.maxDrawdownLimitPct}%."
             ),
-            details_en="Updated deterministic risk policy thresholds via authenticated admin flow.",
+            details_en=f"Updated deterministic risk policy thresholds via {auth_ctx.get('authMethod')}.",
             conn=conn,
         )
 
@@ -1583,9 +1593,9 @@ def update_deterministic_risk_policy(req: RiskPolicyUpdateRequest) -> dict[str, 
 
 @router.post("/authorization-policy")
 @router.post("/governance/policy")
-def set_authorization_policy(req: AuthPolicyUpdateRequest) -> dict[str, Any]:
+def set_authorization_policy(req: AuthPolicyUpdateRequest, request: Request) -> dict[str, Any]:
     """
-    ضبط سياسة التفويض في الإصدار v1.1.0-cloud-paper:
+    ضبط سياسة التفويض في الإصدار v1.2.0-low-latency-cloudflare:
     - يسمح بـ PAPER و HUMAN_APPROVAL (مع بقاء التنفيذ الفعلي ورقياً PAPER حصراً).
     - يحظر AUTONOMOUS نهائياً بموجب قواعد السلامة غير القابلة للتفاوض.
     """
@@ -1600,16 +1610,16 @@ def set_authorization_policy(req: AuthPolicyUpdateRequest) -> dict[str, Any]:
             source="TERMINAL",
             action="AUTONOMOUS_TRADING_BLOCKED",
             severity="CRITICAL",
-            details_ar="رفض تفعيل التداول المستقل (AUTONOMOUS): معطل نهائياً في الإصدار v1.1.0-cloud-paper.",
-            details_en="Blocked AUTONOMOUS policy activation: permanently disabled in release v1.1.0-cloud-paper.",
+            details_ar="رفض تفعيل التداول المستقل (AUTONOMOUS): معطل نهائياً في الإصدار v1.2.0-low-latency-cloudflare.",
+            details_en="Blocked AUTONOMOUS policy activation: permanently disabled in release v1.2.0-low-latency-cloudflare.",
         )
         raise HTTPException(
             status_code=403,
-            detail="AUTONOMOUS_DISABLED: التداول المستقل معطل نهائياً في الإصدار v1.1.0-cloud-paper؛ التنفيذ مقفل على الوضع الورقي الآمن (PAPER).",
+            detail="AUTONOMOUS_DISABLED: التداول المستقل معطل نهائياً في الإصدار v1.2.0-low-latency-cloudflare؛ التنفيذ مقفل على الوضع الورقي الآمن (PAPER).",
         )
 
     if policy == "HUMAN_APPROVAL":
-        _enforce_quantum_admin_auth(req.adminPin, action_label="SET_AUTH_POLICY_HUMAN_APPROVAL")
+        _enforce_quantum_admin_auth(req.adminPin, action_label="SET_AUTH_POLICY_HUMAN_APPROVAL", request=request)
 
     with db_session() as conn:
         conn.execute(

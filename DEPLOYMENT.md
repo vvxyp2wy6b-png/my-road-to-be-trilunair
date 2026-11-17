@@ -1,84 +1,89 @@
-# دليل النشر السحابي، التصليب الأمني، والنسخ الاحتياطي الخاص
-## Cloud Deployment, Security Hardening & Private Backup Guide — `v1.1.0-cloud-paper`
+# دليل النشر منخفض الكمون بدون Docker عبر Cloudflare و Ubuntu 24.04
+## Cloudflare-First, Docker-Free Production Deployment Guide — `v1.2.0-low-latency-cloudflare`
 
 ---
 
-## 1. القواعد الأمنية غير القابلة للتفاوض (Non-Negotiable Safety Lock)
-- **وضع التنفيذ مقفل نهائياً على `PAPER`** (`liveAuthorized = false`) طوال الإصدار `v1.1.0-cloud-paper`.
-- التداول الذاتي الحقيقي (`AUTONOMOUS`) والأوامر المالية الحقيقية والسحوبات والهامش والرافعة المالية والعقود الآجلة **معطلة ومحظورة برمجياً**.
-- الاتصال العام ببيانات سوق Binance Spot (`https://data-api.binance.vision`) مخصص **لقراءة الأسعار الحية ودفتر الأوامر والشموع فقط** بينما يظل التنفيذ ورقياً محاكياً بنسبة 100%.
-- تمت إزالة جميع رموز PIN التجريبية الافتراضية نهائياً؛ تعمل مصادقة المسؤول بنظام **الإغلاق الآمن (`Fail-Closed` — HTTP 503)** ما لم يتم تزويد تجزئة قوية في `TRILUNAIR_ADMIN_SECRET_HASH`.
+## 1. العزل الصارم عن المنصة الطبية `medinsup.com` والقفل الدائم على `PAPER`
+- **عزل السيادة الطبية (`medinsup.com`):** يعمل نظام التداول حصرياً على النطاق الفرعي المستقل **`https://trilunair.medinsup.com`** فوق خادم سحابي مخصص وجديد بالكامل (الموصى به مبدئياً: **طوكيو `Tokyo` — AWS Lightsail 2 GB بتكلفة \$12/شهرياً مع SLA أو Oracle Cloud Tokyo Always Free بتكلفة \$0/شهرياً** بعد تنفيذ فحص الكمون الميداني).
+- **حظر المساس بـ `medinsup.com`:** لا يتم تعديل أي سجل DNS قائم للنطاق الرئيسي (`@` أو `www`) أو خوادم الرياض الطبية أو قواعد بياناتها أو شهاداتها، وتُربط الجلسات حصرياً بـ `__Host-trilunair_admin_session` (`Host-Only` بدون `Domain=.medinsup.com`).
+- **القفل الدائم على `PAPER`:** يظل `tradingMode = "PAPER"` و `liveAuthorized = false` و `executionLockedToPaper = true` طوال الإصدار `v1.2.0-low-latency-cloudflare`؛ لا يتم إرسال أي أوامر تداول حقيقية مطلقاً.
 
 ---
 
-## 2. توليد الأسرار المشفرة وتجهيز ملف `.env`
-انسخ القالب الخالي من الأسرار واضبط القيم على خادمك أو جهازك:
+## 2. قياس الكمون الميداني من الخادم السحابي قبل تثبيت المنطقة نهائياً
+انسخ السكربت القياسي المستقل (بدون أي اعتماديات خارجية) إلى الخادم السحابي المرشح في طوكيو / أوساكا / سنغافورة / فرانكفورت، ونفذه لقياس الـ 15 مؤشراً ضد نقاط Binance Spot العامة:
+
 ```bash
-cp .env.example .env
-```
+python3 scripts/benchmark_region_probe.py \
+  --region-id tokyo-lightsail-apne1 \
+  --region-label "Tokyo, Japan (AWS Lightsail ap-northeast-1)" \
+  --provider "AWS Lightsail 2 GB" \
+  --monthly-cost-usd 12.0 \
+  --samples 50 \
+  --ws-duration 30 \
+  --output probes/tokyo-lightsail.json
 
-توليد تجزئة `PBKDF2-HMAC-SHA256` لسر المسؤول (8 محارف قوية فأكثر) ومفتاح توقيع الجلسات:
-```bash
-cd backend
-uv run python -c "import secrets; from app.security import hash_admin_secret; print('TRILUNAIR_SESSION_SECRET=' + secrets.token_hex(32)); print('TRILUNAIR_ADMIN_SECRET_HASH=\x27' + hash_admin_secret('REPLACE_WITH_YOUR_STRONG_PASSPHRASE') + '\x27')"
-```
-
-| المتغير | الوصف | الحالة في `v1.1.0-cloud-paper` |
-|---|---|---|
-| `TRILUNAIR_DEFAULT_MODE` | وضع التداول المقفل برمجياً | `PAPER` (إلزامي ودائم) |
-| `TRILUNAIR_ADMIN_SECRET_HASH` | تجزئة `PBKDF2-HMAC-SHA256` لسر المسؤول | إلزامي للعمليات الإدارية (`Fail-Closed`) |
-| `TRILUNAIR_SESSION_SECRET` | سر توقيع جلسات `HMAC-SHA256` (`HttpOnly` + `X-CSRF-Token`) | إلزامي للإنتاج |
-| `TRILUNAIR_ALLOWED_ORIGINS` | قائمة النطاقات المسموحة لـ `CORS` و`WebSocket Origin` | قائمة محددة بدون `*` |
-| `TRILUNAIR_MARKET_DATA_MODE` | مصدر بيانات السوق (`LIVE_PUBLIC` لبينانس العام أو `SIMULATED`) | `LIVE_PUBLIC` |
-| `DATABASE_URL` | عنوان اتصال `PostgreSQL 16` المستديم | `postgresql://trilunair:<STRONG_PW>@postgres:5432/trilunair` |
-| `REDIS_URL` | عنوان اتصال `Redis 7` لأقفال منع تكرار الأوامر والصلاحية الزمنية | `redis://redis:6379/0` |
-| `OPENAI_API_KEY` / `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` / `XAI_API_KEY` | مفاتيح اختيارية لمزودات الوكلاء السحابية والصوت | اختيارية (تُعلَم كـ `UNAVAILABLE_NO_KEY` عند غيابها) |
-
----
-
-## 3. النشر على macOS عبر Docker Desktop أو على خادم سحابي (HTTPS + WSS)
-
-### أ) التشغيل على macOS مع Docker Desktop
-```bash
-docker compose up --build -d
-docker compose ps
-```
-
-### ب) التشغيل السحابي الكامل مع TLS تلقائي (`https://` + `wss://` لمتصفح Safari على macOS / iOS)
-يقوم ملف `docker-compose.cloud.yml` مع `deploy/Caddyfile` بتشغيل خادم `Caddy 2` كوكيل عكسي يصدر شهادات TLS تلقائياً ويمرر اتصالات REST API وحزمة React SPA وبث `wss://<YOUR_DOMAIN>/ws/market`:
-```bash
-docker compose -f docker-compose.yml -f docker-compose.cloud.yml up --build -d
-```
-
-### ج) التحقق من صحة الخدمات بعد النشر
-```bash
-curl -fsS https://<YOUR_DOMAIN>/api/health
-curl -fsS https://<YOUR_DOMAIN>/api/system/operations
+python3 scripts/compare_regional_benchmarks.py --probes-dir probes
 ```
 
 ---
 
-## 4. سياسة المخاطر الموحدة المعتمدة (Unified 5-Limit Risk Policy)
-تُطبق الحدود الخمسة التالية بشكل متطابق عبر قاعدة البيانات ومحرك المخاطر الحتمي والواجهة الأمامية:
-1. **أقصى مخاطرة لكل صفقة (`STOP_LOSS_RISK_LIMIT`):** `0.5%` من إجمالي حقوق الملكية.
-2. **أقصى تعرض / تركز للأصل الواحد (`MAX_CONCENTRATION` & `MAX_ORDER_NOTIONAL`):** `25.0%` من إجمالي حقوق الملكية.
-3. **قاطع الخسارة اليومية (`DAILY_DRAWDOWN_LIMIT`):** `2.0%`.
-4. **قاطع الخسارة الأسبوعية (`WEEKLY_LOSS_LIMIT`):** `5.0%`.
-5. **أقصى سحب تراكمي مسموح (`MAX_DRAWDOWN_LIMIT`):** `10.0%`.
+## 3. النشر الأصلي السريع بدون Docker (Native Linux `systemd` + PostgreSQL 16 + Cloudflare Tunnel)
+
+### الخطوة 1: تجهيز نظام Ubuntu 24.04 LTS وتصليب الجدار الناري (`UFW`)
+على الخادم السحابي الجديد المخصص لـ `trilunair` فقط:
+```bash
+sudo bash deploy/linux-systemd/install_native_ubuntu.sh
+```
+
+### الخطوة 2: إعداد قاعدة بيانات PostgreSQL 16 المحلية (`127.0.0.1:5432` فقط)
+```bash
+sudo cp deploy/postgresql/postgresql-trilunair.conf /etc/postgresql/16/main/conf.d/99-trilunair-hardening.conf
+sudo cp deploy/postgresql/pg_hba-trilunair.conf /etc/postgresql/16/main/pg_hba.conf
+sudo systemctl restart postgresql
+
+sudo -u postgres psql -v ON_ERROR_STOP=1 <<'SQL'
+CREATE ROLE trilunair_app WITH LOGIN PASSWORD '<REPLACE_WITH_STRONG_SCRAM_PASSWORD>';
+CREATE DATABASE trilunair OWNER trilunair_app;
+REVOKE ALL ON DATABASE trilunair FROM PUBLIC;
+SQL
+```
+
+### الخطوة 3: تثبيت التطبيق وبناء الواجهة الأمامية وتشغيل `systemd`
+```bash
+sudo -u trilunair git clone <PRIVATE_REPO_URL> /opt/trilunair/app
+cd /opt/trilunair/app
+sudo -u trilunair git checkout v1.2.0-low-latency-cloudflare
+
+# تثبيت بيئة Python الأصلية السريعة عبر uv
+cd /opt/trilunair/app/backend
+sudo -u trilunair uv sync --frozen
+
+# بناء حزمة React SPA (أو نشرها مباشرة على Cloudflare Pages مع frontend/public/_headers)
+cd /opt/trilunair/app/frontend
+npm ci && npm run build
+
+# إعداد ملف البيئة المحمي 0640
+sudo cp /opt/trilunair/app/.env.example /etc/trilunair/trilunair.env
+sudo chown root:trilunair /etc/trilunair/trilunair.env && sudo chmod 0640 /etc/trilunair/trilunair.env
+
+# تفعيل خدمات systemd المعزولة
+sudo cp /opt/trilunair/app/deploy/linux-systemd/trilunair-engine.service /etc/systemd/system/
+sudo cp /opt/trilunair/app/deploy/linux-systemd/cloudflared-trilunair.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now trilunair-engine
+```
+
+### الخطوة 4: ربط Cloudflare Tunnel و Cloudflare Zero Trust Access (بموافقة المالك)
+1. من لوحة **Cloudflare Zero Trust → Networks → Tunnels**، أنشئ نفقاً مخصصاً باسم `trilunair-tokyo` وضع بيانات اعتماده في `/etc/cloudflared/trilunair-tunnel.json` وملف [`deploy/cloudflare/cloudflared-config.yml`](file:///home/antigravity/my-road-to-be-trilunair/deploy/cloudflare/cloudflared-config.yml) في `/etc/cloudflared/cloudflared-config.yml`.
+2. أضف سجل `CNAME` **واحداً فقط** للنطاق الفرعي المستقل `trilunair` يشير إلى `<TUNNEL_UUID>.cfargotunnel.com` (دون المساس مطلقاً بأي سجل من سجلات `medinsup.com`).
+3. طبّق سياسة المالك الوحيد من [`deploy/cloudflare/zero-trust-access-policy.json`](file:///home/antigravity/my-road-to-be-trilunair/deploy/cloudflare/zero-trust-access-policy.json) لحماية `trilunair.medinsup.com`.
+4. شغّل النفق الصادر: `sudo systemctl enable --now cloudflared-trilunair`.
 
 ---
 
-## 5. إجراء النسخ الاحتياطي الآمن إلى مستودع GitHub خاص (Private GitHub Backup)
-لدفع النسخة الموثقة والوسوم (`v1.0.0-paper-verified` و `v1.1.0-cloud-paper`) إلى مستودع GitHub **خاص (Private)** دون تسريب أي أسرار:
-1. تحقق أولاً من خلو شجرة العمل من أي ملفات بيئة حساسة:
-   ```bash
-   git status --ignored
-   ```
-2. أنشئ مستودعاً خاصاً فارغاً (`Private Repository`) على حسابك في GitHub باسم `my-road-to-be-trilunair`.
-3. اربط المستودع البعيد وادفع الفرع الرئيسي وفرع الإصدار والوسوم الموثقة:
-   ```bash
-   git remote add origin git@github.com:<YOUR_GITHUB_USER>/my-road-to-be-trilunair.git
-   git push -u origin main
-   git push -u origin release/cloud-paper-v1.1
-   git push origin --tags
-   ```
+## 4. تسجيل بصمة المالك (Face ID / Touch ID / Security Key) والنسخ الاحتياطي المشفر
+1. افتح `https://trilunair.medinsup.com` وسجّل الدخول الأولي للمسؤول ثم افتح **الحوكمة والأمان → المصادقة البيومترية للمالك (WebAuthn Passkeys)**.
+2. سجّل مفتاح مرور `Face ID` أو `Touch ID` بالإضافة إلى مفتاح أمان احتياطي، وولّد رموز الاسترداد الطارئة لمرة واحدة واحفظها خارج الاتصال، ثم فعّل `TRILUNAIR_REQUIRE_PASSKEY_STEP_UP=true`.
+3. فعّل النسخ الاحتياطي المشفر اليومي لـ PostgreSQL عبر `cron` أو `systemd-timer` لتشغيل [`deploy/postgresql/backup_verify_restore.sh`](file:///home/antigravity/my-road-to-be-trilunair/deploy/postgresql/backup_verify_restore.sh).
+4. لإجراءات الاسترداد من الكوارث أو التراجع إلى `v1.1.0-cloud-paper` راجع [`RECOVERY_AND_ROLLBACK.md`](file:///home/antigravity/my-road-to-be-trilunair/RECOVERY_AND_ROLLBACK.md).

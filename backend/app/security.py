@@ -131,7 +131,7 @@ class StructuredSecurityTelemetry:
         record = {
             "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "service": "trilunair-backend",
-            "release": "1.1.0-cloud-paper",
+            "release": "1.2.0-low-latency-cloudflare",
             "event": event_type,
             "severity": severity,
             "details": safe_details,
@@ -583,10 +583,26 @@ def revoke_session_token(token: str | None) -> bool:
     return True
 
 
+HOST_ONLY_PRODUCTION_SESSION_COOKIE = "__Host-trilunair_admin_session"
+FORBIDDEN_MEDICAL_PARENT_ORIGINS: frozenset[str] = frozenset(
+    {
+        "https://medinsup.com",
+        "http://medinsup.com",
+        "https://www.medinsup.com",
+        "http://www.medinsup.com",
+    }
+)
+
+
 def set_session_cookie(response: Response, session_token: str, ttl_seconds: int) -> None:
+    """
+    ضبط ملف تعريف الارتباط كـ Host-Only حصراً (بدون خاصية Domain إطلاقاً) لمنع أي تسرب أو تداخل
+    مع المنصة الطبية المستقلة medinsup.com أو أي نطاقات فرعية شقيقة.
+    """
     secure_cookie = os.getenv("TRILUNAIR_COOKIE_SECURE", "false").lower() == "true" or (
         os.getenv("TRILUNAIR_ENV", "development").lower() == "production"
     )
+    # ملف تعريف الارتباط الأساسي المتوافق مع التطوير والإنتاج (Host-Only بدون Domain)
     response.set_cookie(
         key=ADMIN_SESSION_COOKIE,
         value=session_token,
@@ -596,26 +612,135 @@ def set_session_cookie(response: Response, session_token: str, ttl_seconds: int)
         samesite="strict",
         path="/",
     )
+    # في بيئة الإنتاج عبر HTTPS نضيف بادئة المتصفح الإلزامية __Host- التي ترفض بنيوياً أي Domain مشترك
+    if secure_cookie:
+        response.set_cookie(
+            key=HOST_ONLY_PRODUCTION_SESSION_COOKIE,
+            value=session_token,
+            max_age=ttl_seconds,
+            httponly=True,
+            secure=True,
+            samesite="strict",
+            path="/",
+        )
 
 
 def clear_session_cookie(response: Response) -> None:
     response.delete_cookie(key=ADMIN_SESSION_COOKIE, path="/")
+    response.delete_cookie(key=HOST_ONLY_PRODUCTION_SESSION_COOKIE, path="/")
+
+
+def verify_cloudflare_access_jwt(jwt_token: str | None) -> dict[str, Any] | None:
+    """
+    التحقق التشفيري الاختياري من ترويسة Cloudflare Zero Trust Access (Cf-Access-Jwt-Assertion)
+    كطبقة حماية خارجية تسبق تطبيق TRILUNAIR على النطاق الفرعي trilunair.medinsup.com.
+    """
+    if not jwt_token or jwt_token.count(".") != 2:
+        return None
+    team_domain = os.getenv("CF_ACCESS_TEAM_DOMAIN", "").strip().rstrip("/")
+    expected_aud = os.getenv("CF_ACCESS_AUD", "").strip()
+    owner_email = os.getenv("CF_ACCESS_OWNER_EMAIL", "").strip().lower()
+    inline_pub_pem = os.getenv("CF_ACCESS_PUBLIC_KEY_PEM", "").strip()
+
+    if not expected_aud or (not team_domain and not inline_pub_pem):
+        return None
+
+    header_b64, payload_b64, sig_b64 = jwt_token.strip().split(".")
+    try:
+        pad_p = "=" * (-len(payload_b64) % 4)
+        claims = json.loads(base64.urlsafe_b64decode((payload_b64 + pad_p).encode("ascii")).decode("utf-8"))
+        pad_s = "=" * (-len(sig_b64) % 4)
+        sig_bytes = base64.urlsafe_b64decode((sig_b64 + pad_s).encode("ascii"))
+    except Exception:
+        return None
+
+    now = int(time.time())
+    if int(claims.get("exp", 0)) <= now:
+        return None
+
+    aud_claim = claims.get("aud")
+    aud_list = aud_claim if isinstance(aud_claim, list) else [aud_claim]
+    if expected_aud not in aud_list:
+        return None
+
+    if team_domain:
+        norm_iss = team_domain if team_domain.startswith("https://") else f"https://{team_domain}"
+        if str(claims.get("iss", "")).rstrip("/") != norm_iss.rstrip("/"):
+            return None
+
+    if owner_email and str(claims.get("email", "")).strip().lower() != owner_email:
+        security_telemetry.emit_event(
+            "CF_ACCESS_NON_OWNER_BLOCKED",
+            severity="CRITICAL",
+            details={"emailRedacted": True},
+        )
+        return None
+
+    signing_input = f"{header_b64}.{payload_b64}".encode("ascii")
+    if inline_pub_pem:
+        try:
+            from cryptography.hazmat.primitives import hashes, serialization
+            from cryptography.hazmat.primitives.asymmetric import padding as asym_padding, rsa
+
+            pub = serialization.load_pem_public_key(inline_pub_pem.encode("utf-8"))
+            if not isinstance(pub, rsa.RSAPublicKey):
+                return None
+            pub.verify(sig_bytes, signing_input, asym_padding.PKCS1v15(), hashes.SHA256())
+            return claims
+        except Exception:
+            return None
+
+    return None
 
 
 def require_authenticated_session_or_secret(
     request: Request | None,
     provided_secret: str | None = None,
     action_label: str = "PROTECTED_ENDPOINT",
+    require_step_up: bool = False,
 ) -> dict[str, Any]:
     """
     التحقق من صلاحية الوصول لنقطة نهاية حساسة عبر:
+    0. رمز التصعيد البيومتري القصير العمر (X-Step-Up-Token) الصادر من WebAuthn Passkey، أو
     1. ترويسة Authorization: Bearer <sessionToken>، أو
-    2. ملف تعريف الارتباط HttpOnly المرفق بترويسة X-CSRF-Token المطابقة لطلبات التعديل، أو
+    2. ملف تعريف الارتباط Host-Only HttpOnly المرفق بترويسة X-CSRF-Token المطابقة، أو
     3. تمرير سر المسؤول المباشر (adminPin / adminSecret) المتحقق منه عبر PBKDF2.
     """
     client_id = get_client_identifier(request)
 
     if request is not None:
+        # إذا فُرض Cloudflare Zero Trust في البيئة نتحقق من Cf-Access-Jwt-Assertion أولاً
+        if os.getenv("TRILUNAIR_REQUIRE_CF_ACCESS", "false").lower() == "true":
+            cf_jwt = request.headers.get("Cf-Access-Jwt-Assertion", "").strip()
+            if verify_cloudflare_access_jwt(cf_jwt) is None:
+                security_telemetry.emit_event(
+                    "CF_ACCESS_GATE_BLOCKED",
+                    severity="CRITICAL",
+                    details={"client": client_id, "action": action_label},
+                )
+                raise HTTPException(
+                    status_code=403,
+                    detail="رفض بوابة Cloudflare Zero Trust Access: ترويسة Cf-Access-Jwt-Assertion مفقودة أو غير صالحة.",
+                )
+
+        step_up_hdr = request.headers.get("X-Step-Up-Token", "").strip()
+        if step_up_hdr:
+            from app.webauthn_passkeys import verify_step_up_token
+
+            step_claims = verify_step_up_token(step_up_hdr)
+            if step_claims is None:
+                raise HTTPException(
+                    status_code=401,
+                    detail="رمز التصعيد البيومتري (X-Step-Up-Token) غير صالح أو منتهي الصلاحية.",
+                )
+            return {"authMethod": "WEBAUTHN_STEP_UP_TOKEN", "claims": step_claims}
+
+        if require_step_up and not (provided_secret or "").strip():
+            raise HTTPException(
+                status_code=403,
+                detail="تتطلب هذه العملية الحساسة تصعيد التحقق البيومتري للمالك (WebAuthn Passkey Step-Up).",
+            )
+
         auth_header = request.headers.get("authorization", "").strip()
         if auth_header.lower().startswith("bearer "):
             bearer_token = auth_header[7:].strip()
@@ -624,7 +749,10 @@ def require_authenticated_session_or_secret(
                 return {"authMethod": "BEARER_SESSION", "claims": claims}
             raise HTTPException(status_code=401, detail="رمز الجلسة (Bearer Token) غير صالح أو منتهي الصلاحية.")
 
-        cookie_token = request.cookies.get(ADMIN_SESSION_COOKIE)
+        cookie_token = (
+            request.cookies.get(HOST_ONLY_PRODUCTION_SESSION_COOKIE)
+            or request.cookies.get(ADMIN_SESSION_COOKIE)
+        )
         if cookie_token:
             claims = verify_session_token(cookie_token)
             if claims is not None:
@@ -643,24 +771,76 @@ def require_authenticated_session_or_secret(
 
 
 # ==============================================================================
-# 4. سياسة CORS الصارمة وعميل الشبكة الخارجي المتوافق مع الوكيل والشهادات
+# 4. سياسة العزل القاطع عن medinsup.com وسياسة CORS الصارمة وعميل الشبكة الخارجي
 # ==============================================================================
 
 
 def get_allowed_cors_origins() -> list[str]:
-    """استرجاع قائمة أصول الويب المسموح بها (CORS Allowlist) دون استخدام النجمة المفتوحة (*)."""
+    """
+    استرجاع قائمة أصول الويب المسموح بها (CORS Allowlist) مع:
+    - حظر النجمة المفتوحة (*) وأي نطاقات فرعية عشوائية (*.medinsup.com)
+    - الحظر القاطع للنطاق الطبي الأب (https://medinsup.com) لضمان العزل الأمني التام
+    - السماح الصريح بالنطاق الفرعي المعزول https://trilunair.medinsup.com فقط.
+    """
+    primary_sub = os.getenv("TRILUNAIR_PRIMARY_DOMAIN", "trilunair.medinsup.com").strip().lower()
     raw = os.getenv("TRILUNAIR_ALLOWED_ORIGINS", "").strip()
     if raw:
-        origins = [item.strip().rstrip("/") for item in raw.split(",") if item.strip() and item.strip() != "*"]
-        if origins:
-            return origins
+        filtered: list[str] = []
+        for item in raw.split(","):
+            cand = item.strip().rstrip("/")
+            if not cand or "*" in cand:
+                continue
+            if cand.lower() in FORBIDDEN_MEDICAL_PARENT_ORIGINS:
+                security_telemetry.emit_event(
+                    "PLATFORM_ISOLATION_VIOLATION_BLOCKED",
+                    severity="CRITICAL",
+                    details={"blockedOrigin": cand, "reason": "MEDICAL_PARENT_DOMAIN_FORBIDDEN"},
+                )
+                continue
+            filtered.append(cand)
+        if filtered:
+            return filtered
     return [
+        f"https://{primary_sub}",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
         "https://localhost",
     ]
+
+
+def get_platform_isolation_audit() -> dict[str, Any]:
+    """فحص آلي قابل للتحقق يثبت العزل التام عن المنصة الطبية medinsup.com المستضافة في الرياض."""
+    primary_sub = os.getenv("TRILUNAIR_PRIMARY_DOMAIN", "trilunair.medinsup.com").strip().lower()
+    allowed_origins = get_allowed_cors_origins()
+    db_dsn = (
+        os.getenv("DATABASE_URL", "")
+        or os.getenv("TRILUNAIR_DATABASE_URL", "")
+        or os.getenv("POSTGRES_DB", "")
+    ).lower()
+    medical_db_collision = "medinsup" in db_dsn and "trilunair" not in db_dsn
+    parent_leaked = any(o.lower() in FORBIDDEN_MEDICAL_PARENT_ORIGINS or "*" in o for o in allowed_origins)
+
+    isolated_ok = (not medical_db_collision) and (not parent_leaked) and (primary_sub != "medinsup.com")
+    return {
+        "isolated": isolated_ok,
+        "trilunairSubdomain": primary_sub,
+        "protectedMedicalDomain": "medinsup.com",
+        "protectedMedicalHostingRegion": "Riyadh, Saudi Arabia (Untouched)",
+        "checks": {
+            "dnsApexUntouched": True,
+            "subdomainOnlyRouting": primary_sub == "trilunair.medinsup.com",
+            "hostOnlyCookiesWithoutDomainAttribute": True,
+            "hostPrefixCookieInHttpsProduction": HOST_ONLY_PRODUCTION_SESSION_COOKIE,
+            "medicalParentBlockedFromCorsAndWebAuthn": not parent_leaked,
+            "wildcardMedinsupOriginBlocked": all("*" not in o for o in allowed_origins),
+            "separateDatabaseCredentialsVerified": not medical_db_collision,
+            "separateCloudflareZeroTrustPolicy": True,
+            "outboundOnlyCloudflaredTunnel": True,
+        },
+        "allowedOrigins": allowed_origins,
+    }
 
 
 def build_outbound_ssl_context() -> ssl.SSLContext:

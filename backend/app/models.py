@@ -406,6 +406,7 @@ class AgentDeliberationItem(BaseModel):
     modelUsed: str = "quant-deterministic-v1"
     executionStatus: Literal["LIVE", "SIMULATED", "CACHED", "UNAVAILABLE"] = "SIMULATED"
     respondedAt: str = ""
+    latencyMs: float = 0.0
     isSimulated: bool = True
 
 
@@ -449,6 +450,10 @@ class AgentMeetingResult(BaseModel):
     topicEn: str
     symbol: str
     timestamp: str
+    signalExpiresAt: str | None = None
+    freshnessTier: str = "ULTRA_FRESH"
+    routingDecision: str = "PARALLEL_BOUNDED_DEADLINE"
+    latencyBreakdownMs: dict[str, float] = Field(default_factory=dict)
     agentResponses: list[AgentDeliberationItem]
     consensus: MeetingConsensus
     evidenceAndUncertainty: MeetingEvidenceAndUncertainty

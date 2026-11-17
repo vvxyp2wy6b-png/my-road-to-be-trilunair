@@ -1,0 +1,49 @@
+{
+  "name": "TRILUNAIR Quantum Command Center — Single Owner Gate",
+  "domain": "trilunair.medinsup.com",
+  "type": "self_hosted",
+  "session_duration": "1h",
+  "app_launcher_visible": false,
+  "auto_redirect_to_identity": true,
+  "http_only_cookie_attribute": true,
+  "same_site_cookie_attribute": "strict",
+  "enable_binding_cookie": true,
+  "isolation_guarantees": {
+    "protected_hostname": "trilunair.medinsup.com",
+    "excluded_medical_platform": "medinsup.com",
+    "wildcard_subdomains_prohibited": true,
+    "parent_domain_cookie_sharing": false,
+    "cloudflare_plan": "Zero Trust Free (up to 50 users — 1 owner seat used)"
+  },
+  "policies": [
+    {
+      "name": "Allow Single Authorized Owner Only",
+      "decision": "allow",
+      "precedence": 1,
+      "include": [
+        {
+          "email": {
+            "email": "<REPLACE_WITH_OWNER_EMAIL>"
+          }
+        }
+      ],
+      "require": [
+        {
+          "auth_method": {
+            "auth_method": "swk"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Default Deny All Other Principals",
+      "decision": "block",
+      "precedence": 2,
+      "include": [
+        {
+          "everyone": {}
+        }
+      ]
+    }
+  ]
+}

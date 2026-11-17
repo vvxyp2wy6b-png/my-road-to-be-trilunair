@@ -1,0 +1,23 @@
+[Unit]
+Description=Cloudflare Outbound Zero-Trust Tunnel for trilunair.medinsup.com
+After=network-online.target trilunair-engine.service
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=cloudflared
+Group=cloudflared
+ExecStart=/usr/bin/cloudflared --no-autoupdate --config /etc/cloudflared/cloudflared-config.yml tunnel run
+Restart=always
+RestartSec=5
+TimeoutStartSec=0
+
+# Hardened outbound-only tunnel sandboxing
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadOnlyPaths=/etc/cloudflared
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,40 @@
+# ==============================================================================
+# Cloudflare Outbound Tunnel Configuration — trilunair.medinsup.com
+# Release: v1.2.0-low-latency-cloudflare
+#
+# CRITICAL ISOLATION GUARANTEE:
+# - Zero modifications to medinsup.com apex (@) or www records or Riyadh servers.
+# - Outbound-only QUIC/HTTP2 tunnel from the regional Linux VM (127.0.0.1:8000).
+# - Zero inbound firewall ports opened on the trading VM.
+# ==============================================================================
+
+tunnel: <REPLACE_WITH_TRILUNAIR_TUNNEL_UUID>
+credentials-file: /etc/cloudflared/trilunair-tunnel.json
+protocol: quic
+edge-ip-version: auto
+no-autoupdate: true
+
+originRequest:
+  connectTimeout: 5s
+  tlsTimeout: 5s
+  tcpKeepAlive: 30s
+  keepAliveConnections: 64
+  keepAliveTimeout: 90s
+  noHappyEyeballs: false
+
+ingress:
+  # Route API & WebSocket traffic on trilunair.medinsup.com to local FastAPI engine
+  - hostname: trilunair.medinsup.com
+    path: ^/(api|ws)(/.*)?$
+    service: http://127.0.0.1:8000
+    originRequest:
+      httpHostHeader: trilunair.medinsup.com
+      noTLSVerify: false
+
+  # Optional dedicated API origin if Cloudflare Pages serves /* directly on trilunair.medinsup.com
+  # via Pages Functions proxy or Service Binding, OR serve built SPA static bundle from FastAPI
+  - hostname: trilunair.medinsup.com
+    service: http://127.0.0.1:8000
+
+  # Default fail-closed catch-all (never forward unknown hostnames)
+  - service: http_status:404
