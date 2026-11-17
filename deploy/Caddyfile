@@ -1,0 +1,23 @@
+{
+	email {$TRILUNAIR_TLS_EMAIL}
+}
+
+{$TRILUNAIR_CLOUD_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "microphone=(self), camera=(), geolocation=()"
+		-Server
+	}
+
+	# تمرير سلس لاتصالات البث الحي عبر wss://.../ws/market وجميع مسارات REST API و React SPA
+	reverse_proxy trilunair-command-center:8000 {
+		health_uri /api/health
+		health_interval 15s
+		health_timeout 5s
+	}
+}

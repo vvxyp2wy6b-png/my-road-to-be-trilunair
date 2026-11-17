@@ -9,6 +9,14 @@ __pycache__/
 frontend/node_modules/
 frontend/dist/
 
-# Secrets & Local Env
+# Secrets, Certificates & Local Env (Never commit secrets)
 .env
+.env.*
+!.env.example
 *.local
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.bundle

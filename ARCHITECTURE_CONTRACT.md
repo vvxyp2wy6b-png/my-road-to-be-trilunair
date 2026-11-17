@@ -50,7 +50,7 @@
       "acknowledgeRealCapitalRisk": true
     }
     ```
-  - يتحقق من `safetyChecks` كافة + `adminPin` (الافتراضي القابل للتهيئة عبر البيئة `TRILUNAIR_ADMIN_PIN`، القيمة التجريبية `7777` موثقة بوضوح للاختبار) + عبارة التأكيد، ويرفض فوراً إذا كان مفتاح الإيقاف الطارئ (`killSwitchActive`) مفعلاً.
+  - يتحقق من `safetyChecks` كافة + سر المسؤول المشفر عبر `PBKDF2-HMAC-SHA256` (`TRILUNAIR_ADMIN_SECRET_HASH` أو `TRILUNAIR_ADMIN_SECRET` مع سياسة الإغلاق الآمن `Fail-Closed` ومنع التخمين المتكرر `Brute-Force`) + عبارة التأكيد، ويفرض في الإصدار `v1.1.0-cloud-paper` قفلاً سيادياً دائماً على وضع `PAPER` (`liveAuthorized = false`).
 - `POST /api/auth/kill-switch`:
   - Request: `{ "active": true | false, "reason": "string" }`
   - عند التفعيل، يعيد النظام فوراً إلى وضع `PAPER` ويجمد تنفيذ الصفقات الجديدة ويلغي المقترحات المعلقة.
