@@ -21,20 +21,29 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.database import db_session, init_db
+from app.llm_adapters import reset_llm_adapter_state
 from app.main import app
 from app.market_engine import market_engine
 from app.safety_gateway import LIVE_CONFIRMATION_PHRASE
+from app.security import rate_limiter
+
+TEST_STRONG_SECRET = "TestSuiteAdmin#2026!Strong"
 
 
 @pytest.fixture()
 def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
-    """تهيئة عميل اختبار معزول بقاعدة بيانات SQLite مؤقتة وإعادة ضبط محرك السوق."""
+    """تهيئة عميل اختبار معزول بقاعدة بيانات SQLite مؤقتة وإعادة ضبط محرك السوق ومحدد المعدل."""
     test_db = tmp_path / "test_trilunair.db"
     monkeypatch.setenv("TRILUNAIR_DB_PATH", str(test_db))
-    monkeypatch.setenv("TRILUNAIR_ADMIN_PIN", "7777")
+    monkeypatch.setenv("TRILUNAIR_ADMIN_SECRET", TEST_STRONG_SECRET)
+    monkeypatch.delenv("TRILUNAIR_ADMIN_SECRET_HASH", raising=False)
+    monkeypatch.delenv("TRILUNAIR_ADMIN_PIN", raising=False)
+    monkeypatch.setenv("TRILUNAIR_MARKET_DATA_MODE", "SIMULATED")
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
 
+    rate_limiter.reset()
+    reset_llm_adapter_state()
     market_engine.reset()
     init_db(force_recheck=True)
 
@@ -48,7 +57,7 @@ def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
 
 
 def test_default_paper_trading_mode_and_seeded_portfolio(client: TestClient) -> None:
-    """التحقق من أن النظام يقلع دائماً في وضع PAPER مع رأسمال $1M ومركزين ابتدائيين."""
+    """التحقق من أن النظام يقلع دائماً في وضع PAPER المقفل مع رأسمال $1M ومركزين ابتدائيين."""
     status_res = client.get("/api/system/status")
     assert status_res.status_code == 200
     status = status_res.json()
@@ -57,6 +66,7 @@ def test_default_paper_trading_mode_and_seeded_portfolio(client: TestClient) -> 
     assert status["tradingMode"] == "PAPER"
     assert status["killSwitchActive"] is False
     assert status["liveAuthorized"] is False
+    assert status["executionLockedToPaper"] is True
     assert all(status["safetyChecks"].values()) is True
 
     port_res = client.get("/api/portfolio")
@@ -74,20 +84,20 @@ def test_default_paper_trading_mode_and_seeded_portfolio(client: TestClient) -> 
 
 
 # ==============================================================================
-# 2. اختبارات بوابة تصاريح التداول الحقيقي (LIVE) ومفتاح الإيقاف الطارئ (Kill Switch)
+# 2. اختبارات القفل السيادي على وضع PAPER ومفتاح الإيقاف الطارئ (Kill Switch)
 # ==============================================================================
 
 
-def test_live_trading_gate_blocks_unauthorized_and_allows_valid_credentials(
+def test_live_trading_gate_enforces_permanent_paper_lock_and_audit_trail(
     client: TestClient,
 ) -> None:
-    """التحقق من رفض تفعيل LIVE عند غياب أي شرط أمني وقبوله فقط عند استيفاء جميع الشروط."""
+    """التحقق من رفض تفعيل LIVE نهائياً في الإصدار v1.1.0-cloud-paper حتى عند إدخال سر المسؤول الصحيح."""
     # 1. رفض عند عدم الإقرار بالمخاطر
     r1 = client.post(
         "/api/auth/trading-mode",
         json={
             "targetMode": "LIVE",
-            "adminPin": "7777",
+            "adminPin": TEST_STRONG_SECRET,
             "confirmationPhrase": LIVE_CONFIRMATION_PHRASE,
             "acknowledgeRealCapitalRisk": False,
         },
@@ -99,19 +109,19 @@ def test_live_trading_gate_blocks_unauthorized_and_allows_valid_credentials(
         "/api/auth/trading-mode",
         json={
             "targetMode": "LIVE",
-            "adminPin": "7777",
+            "adminPin": TEST_STRONG_SECRET,
             "confirmationPhrase": "ENABLE LIVE PLEASE",
             "acknowledgeRealCapitalRisk": True,
         },
     )
     assert r2.status_code == 403
 
-    # 3. رفض عند إدخال رمز مسؤول خاطئ
+    # 3. رفض عند إدخال سر مسؤول خاطئ أو ضعيف
     r3 = client.post(
         "/api/auth/trading-mode",
         json={
             "targetMode": "LIVE",
-            "adminPin": "0000",
+            "adminPin": "WrongSecret#1234",
             "confirmationPhrase": LIVE_CONFIRMATION_PHRASE,
             "acknowledgeRealCapitalRisk": True,
         },
@@ -121,7 +131,7 @@ def test_live_trading_gate_blocks_unauthorized_and_allows_valid_credentials(
     # التأكد من بقاء النظام في وضع PAPER بعد المحاولات الفاشلة
     assert client.get("/api/system/status").json()["tradingMode"] == "PAPER"
 
-    # 4. تفعيل مفتاح الإيقاف الطارئ ثم محاولة تفعيل LIVE بالبيانات الصحيحة -> يجب أن يُرفض بـ 403
+    # 4. تفعيل مفتاح الإيقاف الطارئ ثم محاولة طلب LIVE -> يُرفض بـ 403
     ks_on = client.post(
         "/api/auth/kill-switch",
         json={"active": True, "reason": "اختبار تجميد الطوارئ"},
@@ -133,7 +143,7 @@ def test_live_trading_gate_blocks_unauthorized_and_allows_valid_credentials(
         "/api/auth/trading-mode",
         json={
             "targetMode": "LIVE",
-            "adminPin": "7777",
+            "adminPin": TEST_STRONG_SECRET,
             "confirmationPhrase": LIVE_CONFIRMATION_PHRASE,
             "acknowledgeRealCapitalRisk": True,
         },
@@ -149,22 +159,24 @@ def test_live_trading_gate_blocks_unauthorized_and_allows_valid_credentials(
     assert ks_off.json()["tradingMode"] == "PAPER"
     assert ks_off.json()["killSwitchActive"] is False
 
-    # 5. تفعيل LIVE بنجاح بعد استيفاء كافة الشروط الخمسة والرمز والعبارة
-    r_ok = client.post(
+    # 5. حتى مع استيفاء جميع الشروط والسر الصحيح، يظل الإصدار v1.1.0-cloud-paper مقفلاً على PAPER بـ HTTP 403!
+    r_locked = client.post(
         "/api/auth/trading-mode",
         json={
             "targetMode": "LIVE",
-            "adminPin": "7777",
+            "adminPin": TEST_STRONG_SECRET,
             "confirmationPhrase": LIVE_CONFIRMATION_PHRASE,
             "acknowledgeRealCapitalRisk": True,
         },
     )
-    assert r_ok.status_code == 200
-    live_state = r_ok.json()
-    assert live_state["tradingMode"] == "LIVE"
-    assert live_state["liveAuthorized"] is True
+    assert r_locked.status_code == 403
+    assert "LIVE_EXECUTION_LOCKED" in r_locked.json()["detail"]
 
-    # 6. في وضع LIVE، يجب أن يرفض التنفيذ بدون رمز PIN حتى لو كان المقترح معتمداً
+    locked_state = client.get("/api/system/status").json()
+    assert locked_state["tradingMode"] == "PAPER"
+    assert locked_state["liveAuthorized"] is False
+
+    # 6. الصفقات الورقية المعتمدة تُنفذ في وضع PAPER فقط مع isSimulatedFill=True
     prop = client.post(
         "/api/orders/propose",
         json={
@@ -175,9 +187,9 @@ def test_live_trading_gate_blocks_unauthorized_and_allows_valid_credentials(
             "source": "TERMINAL",
         },
     ).json()
-    assert prop["requiresLivePin"] is True
+    assert prop["requiresLivePin"] is False
 
-    exec_no_pin = client.post(
+    exec_paper = client.post(
         "/api/orders/execute",
         json={
             "proposalId": prop["proposalId"],
@@ -185,21 +197,11 @@ def test_live_trading_gate_blocks_unauthorized_and_allows_valid_credentials(
             "source": "TERMINAL",
         },
     )
-    assert exec_no_pin.status_code == 403
+    assert exec_paper.status_code == 200
+    assert exec_paper.json()["order"]["tradingMode"] == "PAPER"
+    assert exec_paper.json()["order"]["isSimulatedFill"] is True
 
-    exec_with_pin = client.post(
-        "/api/orders/execute",
-        json={
-            "proposalId": prop["proposalId"],
-            "confirmedByUser": True,
-            "adminPin": "7777",
-            "source": "TERMINAL",
-        },
-    )
-    assert exec_with_pin.status_code == 200
-    assert exec_with_pin.json()["order"]["tradingMode"] == "LIVE"
-
-    # 7. تفعيل مفتاح الطوارئ أثناء وضع LIVE يعيد النظام فوراً إلى PAPER
+    # 7. تفعيل مفتاح الطوارئ يبقي النظام في PAPER ويجمد التنفيذ
     ks_emergency = client.post(
         "/api/auth/kill-switch",
         json={"active": True, "reason": "إيقاف طارئ فوري"},
@@ -212,8 +214,8 @@ def test_live_trading_gate_blocks_unauthorized_and_allows_valid_credentials(
     # التحقق من تسجيل الأحداث الأمنية في سجل التدقيق
     logs = client.get("/api/auth/audit-logs").json()
     actions = [entry["action"] for entry in logs]
-    assert "LIVE_AUTH_BLOCKED_INVALID_PIN" in actions
-    assert "LIVE_TRADING_AUTHORIZED" in actions
+    assert "LIVE_AUTH_BLOCKED_INVALID_SECRET" in actions
+    assert "LIVE_AUTH_BLOCKED_RELEASE_PAPER_LOCK" in actions
     assert "KILL_SWITCH_ACTIVATED" in actions
 
 
@@ -542,7 +544,7 @@ def test_agent_meeting_room_completeness(client: TestClient) -> None:
 
     # فحص التكاليف وتقييم المخاطر والتوصية النهائية
     assert meeting["estimatedCosts"]["notionalUsd"] > 0
-    assert len(meeting["riskAssessment"]["checks"]) == 5
+    assert len(meeting["riskAssessment"]["checks"]) >= 7
     rec = meeting["finalRecommendation"]
     assert rec["stance"] in ("BUY", "SELL", "HOLD", "CAUTION")
     assert rec["suggestedQuantity"] > 0

@@ -6,7 +6,7 @@
 1. اتصال واستدامة قاعدة بيانات PostgreSQL 15 الحقيقية (127.0.0.1:5432) مع إعادة الاتصال.
 2. اتصال واستدامة بروتوكول Redis عبر مقبس TCP فعلي (RESP Wire Protocol) وأقفال منع التكرار وصلاحية TTL.
 3. دورة التداول الورقي الكاملة بمحفظة $1,000,000 (شراء + بيع + حساب العمولات والانزلاق + بقاء LIVE معطلاً).
-4. حدود المخاطر الحتمية (سقف وقف الخسارة 0.5% لكل صفقة، حجم الأمر 25%، التركز 35%، القوة الشرائية)،
+4. حدود المخاطر الحتمية الموحدة (سقف وقف الخسارة 0.5% لكل صفقة، حجم الأمر والتركز 25%، قاطع الخسارة اليومية 2%، الأسبوعية 5%، السحب الأقصى 10%)،
    انتهاء صلاحية المقترح (Proposal Expiration)، منع تكرار الأوامر (Duplicate-Order Prevention عبر proposalId و clientOrderId)،
    التصاريح، ومفتاح الإيقاف الطارئ (Emergency Shutdown / Kill Switch).
 5. محولات الذكاء الاصطناعي الحقيقية (OpenAI, Gemini, Anthropic, xAI) عبر خادم HTTP فعلي عند تهيئة المفاتيح،
@@ -34,11 +34,14 @@ import pytest
 import redis as redis_lib
 
 from app.database import init_db, reset_db_init_cache
+from app.llm_adapters import reset_llm_adapter_state
 from app.main import app
 from app.market_engine import market_engine
 from app.quantum_hub import ensure_quantum_tables
+from app.security import rate_limiter
 
 PG_TEST_DSN = "postgresql://trilunair@127.0.0.1:5432/trilunair_test"
+STRONG_VERIFICATION_SECRET = "VerificationSuite#2026!Strong"
 
 
 def _wipe_pg_test_schema(dsn: str) -> None:
@@ -118,7 +121,10 @@ def isolated_sqlite_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.delenv("REDIS_URL", raising=False)
     monkeypatch.delenv("TRILUNAIR_REDIS_URL", raising=False)
     monkeypatch.setenv("TRILUNAIR_DB_PATH", str(db_file))
-    monkeypatch.setenv("TRILUNAIR_ADMIN_PIN", "7777")
+    monkeypatch.setenv("TRILUNAIR_ADMIN_SECRET", STRONG_VERIFICATION_SECRET)
+    monkeypatch.delenv("TRILUNAIR_ADMIN_SECRET_HASH", raising=False)
+    monkeypatch.delenv("TRILUNAIR_ADMIN_PIN", raising=False)
+    monkeypatch.setenv("TRILUNAIR_MARKET_DATA_MODE", "SIMULATED")
     for k in (
         "OPENAI_API_KEY",
         "GEMINI_API_KEY",
@@ -129,6 +135,8 @@ def isolated_sqlite_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         "BINANCE_SPOT_BASE_URL",
     ):
         monkeypatch.delenv(k, raising=False)
+    rate_limiter.reset()
+    reset_llm_adapter_state()
     reset_db_init_cache()
     market_engine.reset()
     init_db()
@@ -174,7 +182,12 @@ def test_real_postgresql_and_tcp_redis_persistence_and_1m_paper_workflow(
         redis_url = f"redis://127.0.0.1:{redis_port}/0"
         monkeypatch.setenv("DATABASE_URL", PG_TEST_DSN)
         monkeypatch.setenv("REDIS_URL", redis_url)
-        monkeypatch.setenv("TRILUNAIR_ADMIN_PIN", "7777")
+        monkeypatch.setenv("TRILUNAIR_ADMIN_SECRET", STRONG_VERIFICATION_SECRET)
+        monkeypatch.delenv("TRILUNAIR_ADMIN_SECRET_HASH", raising=False)
+        monkeypatch.delenv("TRILUNAIR_ADMIN_PIN", raising=False)
+        monkeypatch.setenv("TRILUNAIR_MARKET_DATA_MODE", "SIMULATED")
+        rate_limiter.reset()
+        reset_llm_adapter_state()
         reset_db_init_cache()
         market_engine.reset()
 

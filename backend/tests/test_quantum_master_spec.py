@@ -23,15 +23,21 @@ from fastapi.testclient import TestClient
 def quantum_client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     db_file = tmp_path / "quantum_test.db"
     monkeypatch.setenv("TRILUNAIR_DB_PATH", str(db_file))
-    monkeypatch.setenv("TRILUNAIR_ADMIN_PIN", "7777")
+    monkeypatch.setenv("TRILUNAIR_ADMIN_SECRET", "QuantumSpecTest#2026!Strong")
+    monkeypatch.delenv("TRILUNAIR_ADMIN_SECRET_HASH", raising=False)
+    monkeypatch.delenv("TRILUNAIR_ADMIN_PIN", raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch.delenv("XAI_API_KEY", raising=False)
 
     from app.database import init_db
+    from app.llm_adapters import reset_llm_adapter_state
     from app.quantum_hub import ensure_quantum_tables, router
+    from app.security import rate_limiter
 
+    rate_limiter.reset()
+    reset_llm_adapter_state()
     init_db(force_recheck=True)
     ensure_quantum_tables()
 

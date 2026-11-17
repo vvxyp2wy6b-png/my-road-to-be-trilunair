@@ -181,19 +181,41 @@ def main() -> None:
         assert len(voice_calls) >= 2, f"Expected both TEXT and VOICE /api/ai/command calls, got {voice_calls}"
         report["aiCommandHttpCalls"] = len(voice_calls)
 
+        # 5. الانتقال إلى شاشة الحوكمة والعمليات السحابية والتحقق من لوحة Cloud Operations وسياسة المخاطر الموحدة وخلو DOM من 7777
+        page.click("#nav-governance-btn")
+        page.wait_for_selector('[data-testid="governance-view"]', timeout=5000)
+        page.wait_for_selector('[data-testid="cloud-operations-panel"]', timeout=5000)
+        page.wait_for_selector('[data-testid="unified-risk-policy-strip"]', timeout=5000)
+        page.wait_for_timeout(500)
+
+        gov_text = page.get_by_test_id("governance-view").inner_text()
+        assert "7777" not in gov_text, "Default test PIN 7777 must never appear in Governance DOM!"
+        risk_strip_text = page.get_by_test_id("unified-risk-policy-strip").inner_text()
+        for expected_pct in ("0.5%", "25%", "2%", "5%", "10%"):
+            assert expected_pct in risk_strip_text, f"Missing {expected_pct} in {risk_strip_text}"
+        report["verifiedUnifiedRiskStripInDom"] = True
+        report["verifiedZeroDefaultPinInDom"] = True
+
         browser.close()
 
-    # التحقق النهائي من قاعدة البيانات وسجل التدقيق وبقاء التداول في وضع PAPER
+    # التحقق النهائي من قاعدة البيانات ولوحة العمليات السحابية وبقاء التداول مقفلاً على PAPER
     with httpx.Client(timeout=5.0, trust_env=False) as http:
         final_status = http.get(f"{BASE_URL}/api/system/status").json()
+        ops = http.get(f"{BASE_URL}/api/system/operations").json()
         history = http.get(f"{BASE_URL}/api/ai/history").json()
         portfolio = http.get(f"{BASE_URL}/api/portfolio").json()
+        assert final_status["version"] == "1.1.0-cloud-paper"
         assert final_status["tradingMode"] == "PAPER"
         assert final_status["liveAuthorized"] is False
+        assert final_status["executionLockedToPaper"] is True
+        assert ops["subsystems"]["postgresql"]["status"] == "CONNECTED"
+        assert ops["subsystems"]["binancePublicMarketData"]["restStatus"] == "CONNECTED"
         sources_recorded = [m["source"] for m in history["messages"] if m["role"] == "user"]
         assert "TEXT" in sources_recorded and "VOICE" in sources_recorded, sources_recorded
         report["recordedCommandSourcesInPostgres"] = sources_recorded
         report["finalTradingMode"] = final_status["tradingMode"]
+        report["liveAuthorized"] = final_status["liveAuthorized"]
+        report["binancePublicRestStatus"] = ops["subsystems"]["binancePublicMarketData"]["restStatus"]
         report["portfolioTotalEquity"] = portfolio["totalEquity"]
 
     print("E2E_VERIFICATION_SUCCESS")
