@@ -4,13 +4,17 @@
  * مفتاح الطوارئ الفوري (Emergency Kill Switch)، قائمة فحوصات السلامة الخمسة، وسجل التدقيق الشامل.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Activity,
   AlertOctagon,
   CheckCircle2,
+  Cloud,
+  Database,
   FileText,
   KeyRound,
   Lock,
+  LogOut,
   Power,
   RefreshCw,
   ShieldAlert,
@@ -18,8 +22,16 @@ import {
   Unlock,
   XCircle,
 } from 'lucide-react';
+import { trilunairApi } from '../../api/client';
 import { useTheme } from '../../theme/ThemeContext';
-import type { AuditLogEntry, SafetyChecks, SystemStatus, TradingMode } from '../../types/trilunair';
+import type {
+  AdminSessionStatus,
+  AuditLogEntry,
+  CloudOperationsTelemetry,
+  SafetyChecks,
+  SystemStatus,
+  TradingMode,
+} from '../../types/trilunair';
 
 export const REQUIRED_LIVE_PHRASE = 'AUTHORIZE LIVE TRADING DR MAJOOOOOOD';
 
@@ -39,6 +51,17 @@ export interface GovernanceViewProps {
   onRefreshAuditLogs?: () => Promise<void>;
 }
 
+function opsStatusBadgeClass(status: string): string {
+  const s = (status || '').toUpperCase();
+  if (s === 'CONNECTED' || s === 'READY' || s === 'RECONCILED' || s === 'ACTIVE' || s === 'CLOUD_AND_BROWSER_READY') {
+    return 'holo-badge holo-badge-success';
+  }
+  if (s.includes('SIMULATED') || s.includes('FALLBACK') || s.includes('BROWSER_PRIMARY') || s === 'IDLE_READY' || s === 'DEV_PROXY_MODE') {
+    return 'holo-badge holo-badge-warning';
+  }
+  return 'holo-badge holo-badge-danger';
+}
+
 export const GovernanceView: React.FC<GovernanceViewProps> = ({
   systemStatus,
   auditLogs,
@@ -50,6 +73,10 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
   const { language } = useTheme();
 
   const [adminPin, setAdminPin] = useState<string>('');
+  const [sessionSecretInput, setSessionSecretInput] = useState<string>('');
+  const [sessionStatus, setSessionStatus] = useState<AdminSessionStatus | null>(null);
+  const [opsTelemetry, setOpsTelemetry] = useState<CloudOperationsTelemetry | null>(null);
+  const [isLoadingOps, setIsLoadingOps] = useState<boolean>(false);
   const [confirmationPhrase, setConfirmationPhrase] = useState<string>('');
   const [acknowledgeRisk, setAcknowledgeRisk] = useState<boolean>(false);
   const [killSwitchReason, setKillSwitchReason] = useState<string>(
@@ -63,6 +90,92 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
 
   const tradingMode = systemStatus?.tradingMode ?? 'PAPER';
   const killSwitchActive = systemStatus?.killSwitchActive ?? false;
+  const riskPolicy = systemStatus?.riskPolicy ?? opsTelemetry?.riskPolicy ?? {
+    maxRiskPerTradePct: 0.5,
+    maxExposurePerAssetPct: 25.0,
+    dailyLossLimitPct: 2.0,
+    weeklyLossLimitPct: 5.0,
+    maxDrawdownLimitPct: 10.0,
+    prohibitLeverage: true,
+  };
+
+  const refreshCloudOperations = useCallback(async () => {
+    setIsLoadingOps(true);
+    try {
+      const [opsRes, sessRes] = await Promise.allSettled([
+        trilunairApi.getOperationsTelemetry(),
+        trilunairApi.getAdminSessionStatus(),
+      ]);
+      if (opsRes.status === 'fulfilled') {
+        setOpsTelemetry(opsRes.value);
+      }
+      if (sessRes.status === 'fulfilled') {
+        setSessionStatus(sessRes.value);
+      }
+    } catch {
+      // تجاهل في بيئات الاختبار غير الموصولة بنقاط النهاية السحابية
+    } finally {
+      setIsLoadingOps(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshCloudOperations();
+  }, [refreshCloudOperations]);
+
+  const handleAdminSessionLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFeedbackMessage(null);
+    if (sessionSecretInput.trim().length < 8) {
+      setFeedbackMessage({
+        type: 'error',
+        text:
+          language === 'ar'
+            ? 'سر المسؤول يجب أن يتكون من 8 محارف قوية على الأقل (تمت إزالة كافة رموز الاختبار الافتراضية).'
+            : 'Administrator secret must be at least 8 strong characters (all default test PINs removed).',
+      });
+      return;
+    }
+    try {
+      await trilunairApi.loginAdminSession(sessionSecretInput.trim());
+      setSessionSecretInput('');
+      await refreshCloudOperations();
+      await onRefreshAuditLogs?.();
+      setFeedbackMessage({
+        type: 'success',
+        text:
+          language === 'ar'
+            ? 'تم توثيق جلسة المسؤول المشفرة (PBKDF2 + HttpOnly + CSRF) بنجاح.'
+            : 'Authenticated signed administrator session (PBKDF2 + HttpOnly + CSRF).',
+      });
+    } catch (err) {
+      setFeedbackMessage({
+        type: 'error',
+        text:
+          err instanceof Error
+            ? err.message
+            : language === 'ar'
+              ? 'فشل تسجيل دخول جلسة المسؤول.'
+              : 'Administrator session login failed.',
+      });
+    }
+  };
+
+  const handleAdminSessionLogout = async () => {
+    try {
+      await trilunairApi.logoutAdminSession();
+      await refreshCloudOperations();
+      setFeedbackMessage({
+        type: 'success',
+        text:
+          language === 'ar'
+            ? 'تم إنهاء وإبطال جلسة المسؤول بنجاح.'
+            : 'Administrator session revoked and cleared.',
+      });
+    } catch {
+      // تجاهل
+    }
+  };
 
   const safetyItems = useMemo(() => {
     const checks: SafetyChecks = systemStatus?.safetyChecks ?? {
@@ -82,8 +195,8 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
       {
         key: 'maxDrawdownConfigured',
         passed: checks.maxDrawdownConfigured,
-        labelAr: 'حدود السحب الأقصى لرأس المال (Max Drawdown Circuit Breaker) مفعلة',
-        labelEn: 'Maximum Drawdown Circuit Breaker Configured',
+        labelAr: 'حدود السحب الأقصى لرأس المال (10% Max Drawdown Circuit Breaker) مفعلة',
+        labelEn: '10% Maximum Drawdown Circuit Breaker Configured',
       },
       {
         key: 'killSwitchReady',
@@ -94,8 +207,8 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
       {
         key: 'positionLimitsActive',
         passed: checks.positionLimitsActive,
-        labelAr: 'قيود التركز الأقصى لكل أصل وحجم الصفقة نشطة',
-        labelEn: 'Position Concentration & Order Notional Caps Active',
+        labelAr: 'قيود المخاطرة 0.5% والتركز الأقصى 25% لكل أصل نشطة',
+        labelEn: '0.5% Per-Trade Risk & 25% Asset Concentration Caps Active',
       },
       {
         key: 'auditTrailHealthy',
@@ -115,7 +228,7 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
   const canEnableLiveMode =
     allSafetyChecksPassed &&
     !killSwitchActive &&
-    adminPin.trim().length >= 4 &&
+    adminPin.trim().length >= 8 &&
     phraseMatches &&
     acknowledgeRisk &&
     !isUpdating;
@@ -149,8 +262,8 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
         type: 'success',
         text:
           language === 'ar'
-            ? 'تم التصريح بتفعيل وضع التداول الحقيقي (LIVE) وتسجيل الحدث في سجل التدقيق.'
-            : 'LIVE Trading Mode authorized and logged to the security audit trail.',
+            ? 'تم التحقق من حالة وضع التداول.'
+            : 'Trading mode authorization evaluated.',
       });
     } catch (err) {
       setFeedbackMessage({
@@ -159,8 +272,8 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
           err instanceof Error
             ? err.message
             : language === 'ar'
-              ? 'فشل تفويض التداول الحقيقي — تحقق من رمز PIN وشروط الأمان.'
-              : 'Live authorization failed — check Admin PIN and safety requirements.',
+              ? 'الإصدار v1.1.0-cloud-paper مقفل نهائياً على التداول الورقي (PAPER) مع liveAuthorized=false.'
+              : 'Release v1.1.0-cloud-paper is permanently locked to PAPER mode (liveAuthorized=false).',
       });
     }
   };
@@ -170,7 +283,7 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
     try {
       await onSwitchTradingMode({
         targetMode: 'PAPER',
-        adminPin: adminPin.trim() || '7777',
+        adminPin: '',
         confirmationPhrase: 'REVERT_TO_PAPER',
         acknowledgeRealCapitalRisk: false,
       });
@@ -203,6 +316,7 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
         killSwitchReason.trim() ||
           (nextActive ? 'Emergency operator freeze' : 'Operator cleared emergency freeze')
       );
+      await refreshCloudOperations();
       setFeedbackMessage({
         type: nextActive ? 'error' : 'success',
         text: nextActive
@@ -210,8 +324,8 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
             ? 'تم تفعيل مفتاح الطوارئ (Kill Switch) وتجميد كافة عمليات تنفيذ الأوامر فوراً!'
             : 'Emergency Kill Switch ACTIVATED — All order execution is now frozen!'
           : language === 'ar'
-            ? 'تم إلغاء تجميد مفتاح الطوارئ واستعادة الجاهزية تحت ضوابط المخاطر.'
-            : 'Emergency Kill Switch deactivated — Normal risk-guarded operation restored.',
+            ? 'تم إلغاء تجميد مفتاح الطوارئ واستعادة الجاهزية الورقية تحت ضوابط المخاطر.'
+            : 'Emergency Kill Switch deactivated — Normal paper risk-guarded operation restored.',
       });
     } catch (err) {
       setFeedbackMessage({
@@ -231,7 +345,7 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
       data-testid="governance-view"
       style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}
     >
-      {/* 1. لافتة الحالة السيادية ومفتاح الطوارئ الفوري (Status Banner & Emergency Kill Switch) */}
+      {/* 1. لافتة الحالة السيادية والقفل الورقي الدائم ومفتاح الطوارئ الفوري */}
       <section
         className="holo-panel"
         style={{
@@ -263,8 +377,8 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
               )}
               <h2 style={{ margin: 0, fontSize: '1.12rem', fontWeight: 800 }}>
                 {language === 'ar'
-                  ? 'بوابة التصاريح السيادية ومفتاح الطوارئ'
-                  : 'Paper vs Live Trading Authorization Gateway'}
+                  ? 'بوابة التصاريح السيادية ومفتاح الطوارئ السحابي'
+                  : 'Cloud Security, Paper Lock & Kill Switch Gateway'}
               </h2>
               <span
                 data-testid="governance-mode-badge"
@@ -277,15 +391,18 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
                     ? 'وضع التداول الحقيقي مفعل (LIVE)'
                     : 'LIVE TRADING ACTIVE'
                   : language === 'ar'
-                    ? 'التداول الورقي الآمن هو الوضع النشط (PAPER)'
-                    : 'PAPER TRADING (SAFE DEFAULT)'}
+                    ? 'التداول الورقي مقفل نهائياً (PAPER — liveAuthorized=false)'
+                    : 'PAPER TRADING LOCKED (liveAuthorized=false)'}
+              </span>
+              <span className="holo-badge holo-badge-accent tabular-nums">
+                {systemStatus?.version || '1.1.0-cloud-paper'}
               </span>
             </div>
 
             <p style={{ margin: 0, fontSize: '0.83rem', color: 'var(--text-secondary)' }}>
               {language === 'ar'
-                ? 'يبقى النظام مقفلاً افتراضياً على التداول الورقي المحاكي، ولا ينتقل للتداول الحقيقي إلا بعد اجتياز فحوصات السلامة الخمسة وتفويض المسؤول الصريح.'
-                : 'System defaults strictly to simulated Paper Trading. Live capital execution requires passing all 5 deterministic safety checks plus multi-factor administrator authorization.'}
+                ? 'في الإصدار v1.1.0-cloud-paper، يظل وضع التنفيذ مقفلاً نهائياً على التداول الورقي الآمن (PAPER) مع تعطيل الأوامر الحقيقية والسحوبات والرافعة المالية، حتى عند الاتصال ببيانات السوق العامة الحية لـ Binance Spot.'
+                : 'In release v1.1.0-cloud-paper, order execution is permanently locked to PAPER mode (liveAuthorized=false). Live Binance Spot public market data never enables real order placement.'}
             </p>
           </div>
 
@@ -307,6 +424,60 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
               </span>
             </button>
           )}
+        </div>
+
+        {/* شريط حدود سياسة المخاطر الموحدة الخمسة (Unified 5-Limit Risk Policy) */}
+        <div
+          data-testid="unified-risk-policy-strip"
+          className="holo-panel-subtle"
+          style={{
+            padding: '0.65rem 0.9rem',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+            gap: '0.6rem',
+            fontSize: '0.78rem',
+          }}
+        >
+          <div>
+            <span style={{ color: 'var(--text-muted)', display: 'block' }}>
+              {language === 'ar' ? 'أقصى مخاطرة لكل صفقة' : 'Max Risk / Trade'}
+            </span>
+            <strong className="tabular-nums" style={{ color: 'var(--accent-primary)' }}>
+              {riskPolicy.maxRiskPerTradePct}%
+            </strong>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-muted)', display: 'block' }}>
+              {language === 'ar' ? 'أقصى تعرض للأصل الواحد' : 'Max Asset Exposure'}
+            </span>
+            <strong className="tabular-nums" style={{ color: 'var(--accent-primary)' }}>
+              {riskPolicy.maxExposurePerAssetPct}%
+            </strong>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-muted)', display: 'block' }}>
+              {language === 'ar' ? 'قاطع الخسارة اليومية' : 'Daily Loss Breaker'}
+            </span>
+            <strong className="tabular-nums" style={{ color: 'var(--status-warning)' }}>
+              {riskPolicy.dailyLossLimitPct}%
+            </strong>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-muted)', display: 'block' }}>
+              {language === 'ar' ? 'قاطع الخسارة الأسبوعية' : 'Weekly Loss Breaker'}
+            </span>
+            <strong className="tabular-nums" style={{ color: 'var(--status-warning)' }}>
+              {riskPolicy.weeklyLossLimitPct}%
+            </strong>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-muted)', display: 'block' }}>
+              {language === 'ar' ? 'أقصى سحب مسموح (Drawdown)' : 'Max Drawdown Limit'}
+            </span>
+            <strong className="tabular-nums" style={{ color: 'var(--status-danger)' }}>
+              {riskPolicy.maxDrawdownLimitPct}%
+            </strong>
+          </div>
         </div>
 
         {/* وحدة التحكم بمفتاح الطوارئ (Emergency Kill Switch) */}
@@ -407,7 +578,168 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
         )}
       </section>
 
-      {/* 2. قائمة التحقق الخماسية وبوابة تفويض التداول الحقيقي */}
+      {/* 1.5 لوحة العمليات والمراقبة السحابية الشفافة (Cloud Operations & Monitoring — Section 13) */}
+      <section
+        data-testid="cloud-operations-panel"
+        className="holo-panel"
+        style={{ padding: '1.1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}
+      >
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.65rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <Cloud size={19} style={{ color: 'var(--accent-primary)' }} aria-hidden="true" />
+            <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800 }}>
+              {language === 'ar'
+                ? 'لوحة العمليات والمراقبة السحابية الحقيقية (Cloud Operations & Telemetry)'
+                : 'Truthful Cloud Operations & Subsystem Health Matrix'}
+            </h3>
+            <span className="holo-badge holo-badge-accent">
+              {language === 'ar' ? 'فصل صارم بين الحي والمحاكي' : 'Zero Fake Live Claims'}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {sessionStatus?.authenticated ? (
+              <button
+                type="button"
+                onClick={() => void handleAdminSessionLogout()}
+                className="holo-btn"
+                style={{ minHeight: '30px', padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+              >
+                <LogOut size={13} aria-hidden="true" />
+                <span>{language === 'ar' ? 'إنهاء جلسة المسؤول' : 'Sign Out Session'}</span>
+              </button>
+            ) : (
+              <form
+                onSubmit={handleAdminSessionLogin}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+              >
+                <input
+                  type="password"
+                  data-testid="admin-session-secret-input"
+                  value={sessionSecretInput}
+                  onChange={(e) => setSessionSecretInput(e.target.value)}
+                  placeholder={language === 'ar' ? 'سر جلسة المسؤول (PBKDF2)' : 'Admin Session Secret'}
+                  className="holo-input"
+                  style={{ width: '175px', minHeight: '30px', fontSize: '0.75rem' }}
+                />
+                <button
+                  type="submit"
+                  data-testid="admin-session-login-btn"
+                  className="holo-btn holo-btn-primary"
+                  style={{ minHeight: '30px', padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+                >
+                  {language === 'ar' ? 'توثيق الجلسة' : 'Auth Session'}
+                </button>
+              </form>
+            )}
+            <button
+              type="button"
+              data-testid="refresh-cloud-ops-btn"
+              onClick={() => void refreshCloudOperations()}
+              className="holo-btn"
+              style={{ minHeight: '30px', padding: '0.2rem 0.55rem' }}
+              title={language === 'ar' ? 'تحديث حالة الأنظمة السحابية' : 'Refresh Cloud Operations'}
+            >
+              <RefreshCw size={13} className={isLoadingOps ? 'pulse-active' : ''} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+
+        {opsTelemetry ? (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(215px, 1fr))',
+              gap: '0.65rem',
+              fontSize: '0.77rem',
+            }}
+          >
+            <div className="holo-panel-subtle" style={{ padding: '0.65rem 0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                <strong><Database size={13} style={{ marginInlineEnd: '4px', verticalAlign: 'middle' }} />PostgreSQL</strong>
+                <span className={opsStatusBadgeClass(opsTelemetry.subsystems.postgresql.status)}>
+                  {opsTelemetry.subsystems.postgresql.status}
+                </span>
+              </div>
+              <div className="tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                Backend: {opsTelemetry.subsystems.postgresql.activeBackend} ({opsTelemetry.subsystems.postgresql.latencyMs}ms)
+              </div>
+            </div>
+
+            <div className="holo-panel-subtle" style={{ padding: '0.65rem 0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                <strong>Redis Cache</strong>
+                <span className={opsStatusBadgeClass(opsTelemetry.subsystems.redis.status)}>
+                  {opsTelemetry.subsystems.redis.status}
+                </span>
+              </div>
+              <div className="tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                Mode: {opsTelemetry.subsystems.redis.mode} ({opsTelemetry.subsystems.redis.latencyMs}ms)
+              </div>
+            </div>
+
+            <div className="holo-panel-subtle" style={{ padding: '0.65rem 0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                <strong>Binance Public Data</strong>
+                <span className={opsStatusBadgeClass(opsTelemetry.subsystems.binancePublicMarketData.restStatus)}>
+                  REST: {opsTelemetry.subsystems.binancePublicMarketData.restStatus}
+                </span>
+              </div>
+              <div className="tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                WS: {opsTelemetry.subsystems.binancePublicMarketData.wsStatus} • Weight: {opsTelemetry.subsystems.binancePublicMarketData.usedWeight1m}
+              </div>
+            </div>
+
+            <div className="holo-panel-subtle" style={{ padding: '0.65rem 0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                <strong>AI Council Providers</strong>
+                <span className={opsStatusBadgeClass(opsTelemetry.subsystems.aiProviders.cloudConnectedCount > 0 ? 'CONNECTED' : 'SIMULATED_LOCAL')}>
+                  {opsTelemetry.subsystems.aiProviders.cloudConnectedCount > 0
+                    ? `${opsTelemetry.subsystems.aiProviders.cloudConnectedCount} CLOUD`
+                    : 'SIMULATED_LOCAL'}
+                </span>
+              </div>
+              <div style={{ color: 'var(--text-muted)' }}>
+                {opsTelemetry.subsystems.aiProviders.providers
+                  .map((p) => `${p.providerId.split('-')[0]}:${p.available ? 'ON' : 'OFF'}`)
+                  .join(' · ')}
+              </div>
+            </div>
+
+            <div className="holo-panel-subtle" style={{ padding: '0.65rem 0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                <strong>Voice & Safari Audio</strong>
+                <span className={opsStatusBadgeClass(opsTelemetry.subsystems.voiceServices.status)}>
+                  {opsTelemetry.subsystems.voiceServices.cloudSpeechConfigured ? 'CLOUD+WEB' : 'WEB_PRIMARY'}
+                </span>
+              </div>
+              <div style={{ color: 'var(--text-muted)' }}>
+                STT: {opsTelemetry.subsystems.voiceServices.sttPrimaryEngine}
+              </div>
+            </div>
+
+            <div className="holo-panel-subtle" style={{ padding: '0.65rem 0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                <strong><Activity size={13} style={{ marginInlineEnd: '4px', verticalAlign: 'middle' }} />Reconciliation & WS</strong>
+                <span className={opsStatusBadgeClass(opsTelemetry.subsystems.accountReconciliation.status)}>
+                  {opsTelemetry.subsystems.accountReconciliation.status}
+                </span>
+              </div>
+              <div className="tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                WS Clients: {opsTelemetry.subsystems.webSocketHub.activeClientConnections} • Err: {opsTelemetry.subsystems.backendApi.serverErrorRatePct}%
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="holo-panel-subtle" style={{ padding: '0.65rem 0.85rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            {language === 'ar'
+              ? 'قياسات العمليات السحابية قيد الاستعلام من /api/system/operations...'
+              : 'Querying live subsystem telemetry from /api/system/operations...'}
+          </div>
+        )}
+      </section>
+
+      {/* 2. قائمة التحقق الخماسية وبوابة القفل السيادي لوضع التداول */}
       <div
         style={{
           display: 'grid',
@@ -499,7 +831,7 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
           )}
         </section>
 
-        {/* نموذج التفويض الصريح لوضع التداول الحقيقي (Explicit Live Trading Authorization Form) */}
+        {/* بوابة التحقق من القفل السيادي لوضع التداول (Permanent PAPER Release Lock Gate) */}
         <section
           className="holo-panel"
           style={{ padding: '1.1rem 1.2rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}
@@ -509,8 +841,8 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
               <KeyRound size={18} style={{ color: 'var(--status-warning)' }} aria-hidden="true" />
               <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800 }}>
                 {language === 'ar'
-                  ? 'تفويض الانتقال إلى التداول الحقيقي (LIVE)'
-                  : 'Explicit Live Trading Authorization'}
+                  ? 'بوابة وضع التداول السيادي (مقفلة على PAPER)'
+                  : 'Trading Mode Gate (Locked to PAPER in v1.1)'}
               </h3>
             </div>
 
@@ -544,18 +876,19 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
                   marginBottom: '0.25rem',
                 }}
               >
-                <span>{language === 'ar' ? 'رمز المسؤول السري (Admin PIN)' : 'Administrator PIN'}</span>
-                <span className="tabular-nums" style={{ color: 'var(--text-muted)', fontSize: '0.74rem' }}>
-                  {language === 'ar' ? 'تلميح الاختبار: 7777' : 'Testing Hint: 7777'}
+                <span>{language === 'ar' ? 'سر المسؤول المشفر (Admin Secret)' : 'Administrator Secret'}</span>
+                <span className="tabular-nums" style={{ color: 'var(--status-success)', fontSize: '0.72rem' }}>
+                  {sessionStatus?.authConfigured
+                    ? 'PBKDF2-SHA256 Active'
+                    : 'Fail-Closed (Env Secret Required)'}
                 </span>
               </label>
               <input
                 id="gov-admin-pin"
                 data-testid="gov-admin-pin-input"
                 type="password"
-                inputMode="numeric"
                 autoComplete="off"
-                placeholder="••••"
+                placeholder="••••••••••••"
                 value={adminPin}
                 onChange={(e) => setAdminPin(e.target.value)}
                 className="holo-input tabular-nums"
@@ -573,8 +906,8 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
                 }}
               >
                 {language === 'ar'
-                  ? 'اكتب عبارة التفويض الحرفية لتأكيد الإرادة الصريحة:'
-                  : 'Type exact confirmation phrase to unlock LIVE mode:'}
+                  ? 'عبارة التحقق السيادية (مقفلة أمنياً على PAPER في v1.1.0-cloud-paper):'
+                  : 'Sovereign verification phrase (permanently locked to PAPER in v1.1.0-cloud-paper):'}
               </label>
               <div
                 className="tabular-nums"
@@ -622,8 +955,8 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
               />
               <span>
                 {language === 'ar'
-                  ? 'أقر بالمسؤولية المالية الكاملة عن التداول برأس مال حقيقي، مع بقاء كل صفقة خاضعة لفحص المخاطر وتأكيد PIN الفردي.'
-                  : 'I acknowledge full capital risk for Live Trading, understanding that every individual order still requires risk validation and PIN confirmation.'}
+                  ? 'أدرك أن الإصدار v1.1.0-cloud-paper يفرض قفلاً دائماً على التداول الورقي (PAPER) مع liveAuthorized=false ويرفض أي تفعيل للتداول الحقيقي.'
+                  : 'I understand release v1.1.0-cloud-paper enforces a permanent PAPER execution lock (liveAuthorized=false) and rejects LIVE mode activation.'}
               </span>
             </label>
 
@@ -637,8 +970,8 @@ export const GovernanceView: React.FC<GovernanceViewProps> = ({
               <ShieldAlert size={16} aria-hidden="true" />
               <span>
                 {language === 'ar'
-                  ? 'تفويض وتفعيل وضع التداول الحقيقي (LIVE)'
-                  : 'Authorize & Enable LIVE Trading Mode'}
+                  ? 'التحقق من قفل وضع التداول السيادي (LIVE مقفل على PAPER)'
+                  : 'Verify Trading Gate (LIVE Permanently Locked to PAPER)'}
               </span>
             </button>
           </form>

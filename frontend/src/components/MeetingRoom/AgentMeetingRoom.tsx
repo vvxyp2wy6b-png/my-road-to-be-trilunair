@@ -333,14 +333,38 @@ export const AgentMeetingRoom: React.FC<AgentMeetingRoomProps> = ({
                         style={{
                           marginTop: '0.2rem',
                           fontSize: '0.66rem',
-                          color: agent.isSimulated === false ? 'var(--status-success)' : 'var(--text-muted)',
+                          color:
+                            agent.executionStatus === 'LIVE' || agent.isSimulated === false
+                              ? 'var(--status-success)'
+                              : agent.executionStatus === 'CACHED'
+                                ? 'var(--accent-primary)'
+                                : agent.executionStatus === 'UNAVAILABLE'
+                                  ? 'var(--status-warning)'
+                                  : 'var(--text-muted)',
                           fontFamily: 'monospace',
                         }}
                       >
-                        {agent.isSimulated === false
-                          ? `LIVE ADAPTER: ${agent.providerUsed || 'cloud'} (${agent.modelUsed || 'model'})`
-                          : `SIMULATED: ${agent.providerUsed || 'local-quant-engine'}`}
+                        {(() => {
+                          const execState =
+                            agent.executionStatus ||
+                            (agent.isSimulated === false ? 'LIVE' : 'SIMULATED');
+                          const modelInfo = agent.modelUsed ? ` (${agent.modelUsed})` : '';
+                          return `${execState}: ${agent.providerUsed || 'local-quant-engine'}${modelInfo}`;
+                        })()}
                       </div>
+                      {agent.respondedAt && (
+                        <div
+                          className="tabular-nums"
+                          style={{ fontSize: '0.63rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}
+                        >
+                          {language === 'ar' ? 'التوقيت: ' : 'At: '}
+                          {new Date(agent.respondedAt).toLocaleTimeString('en-GB', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
@@ -362,7 +386,7 @@ export const AgentMeetingRoom: React.FC<AgentMeetingRoomProps> = ({
                     </div>
                   </div>
 
-                  {/* شريط الثقة والمؤشر الكمي الرئيسي */}
+                  {/* شريط الثقة وعدم اليقين والمؤشر الكمي الرئيسي */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                     <div
                       style={{
@@ -372,8 +396,13 @@ export const AgentMeetingRoom: React.FC<AgentMeetingRoomProps> = ({
                         color: 'var(--text-secondary)',
                       }}
                     >
-                      <span>{language === 'ar' ? 'درجة الثقة:' : 'Confidence:'}</span>
-                      <strong className="tabular-nums">{formatNumber(agent.confidence, 0)}%</strong>
+                      <span>{language === 'ar' ? 'درجة الثقة / عدم اليقين:' : 'Confidence / Uncertainty:'}</span>
+                      <strong className="tabular-nums">
+                        {formatNumber(agent.confidence, 0)}%
+                        {typeof agent.uncertaintyPct === 'number'
+                          ? ` (±${formatNumber(agent.uncertaintyPct, 0)}%)`
+                          : ''}
+                      </strong>
                     </div>
                     <div
                       style={{

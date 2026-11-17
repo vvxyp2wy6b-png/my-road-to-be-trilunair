@@ -75,12 +75,25 @@ export interface SafetyChecks {
   auditTrailHealthy: boolean;
 }
 
+export interface RiskPolicySummary {
+  maxRiskPerTradePct: number;
+  maxExposurePerAssetPct: number;
+  dailyLossLimitPct: number;
+  weeklyLossLimitPct: number;
+  maxDrawdownLimitPct: number;
+  prohibitLeverage: boolean;
+}
+
 export interface SystemStatus {
   appName: string;
   version: string;
   tradingMode: TradingMode;
   killSwitchActive: boolean;
+  killSwitchReason?: string;
   liveAuthorized: boolean;
+  executionLockedToPaper?: boolean;
+  marketDataMode?: string;
+  riskPolicy?: RiskPolicySummary;
   safetyChecks: SafetyChecks;
   providers: {
     llmProvider: string;
@@ -101,6 +114,7 @@ export interface MarketAsset {
   volume24hUsd: number;
   volatilityPct: number;
   spreadBps: number;
+  dataSource?: string;
 }
 
 export interface CandlePoint {
@@ -126,6 +140,8 @@ export interface MarketCandlesResponse {
   resistanceLevel: number;
   bids: OrderbookLevel[];
   asks: OrderbookLevel[];
+  dataSource?: string;
+  lastUpdateId?: number | null;
 }
 
 export interface PositionItem {
@@ -152,6 +168,7 @@ export interface OrderRecord {
   notionalUsd: number;
   totalFeeUsd: number;
   tradingMode: TradingMode;
+  isSimulatedFill?: boolean;
   source: CommandSource;
   status: 'FILLED' | 'REJECTED' | 'CANCELLED';
   createdAt: string;
@@ -165,6 +182,7 @@ export interface PortfolioSnapshot {
   initialEquity: number;
   dailyPnl: number;
   dailyPnlPct: number;
+  weeklyLossPct?: number;
   trilunairTargetUsd: number;
   trilunairProgressPct: number;
   currentDrawdownPct: number;
@@ -237,6 +255,8 @@ export interface AgentProfile {
   accentToken: string;
 }
 
+export type AgentExecutionStatus = 'LIVE' | 'SIMULATED' | 'CACHED' | 'UNAVAILABLE';
+
 export interface AgentDeliberationItem {
   agentId: string;
   nameAr: string;
@@ -246,6 +266,7 @@ export interface AgentDeliberationItem {
   status: 'READY' | 'AGREE' | 'DISSENT' | 'CAUTION';
   stance: AgentStance;
   confidence: number;
+  uncertaintyPct?: number;
   summaryAr: string;
   summaryEn: string;
   keyMetricLabelAr: string;
@@ -254,6 +275,128 @@ export interface AgentDeliberationItem {
   providerUsed?: string;
   modelUsed?: string;
   isSimulated?: boolean;
+  executionStatus?: AgentExecutionStatus;
+  respondedAt?: string;
+}
+
+export interface AdminSessionStatus {
+  authenticated: boolean;
+  authConfigured: boolean;
+  authMode: string;
+  reasonAr: string;
+  reasonEn: string;
+  csrfToken?: string | null;
+  expiresAtEpoch?: number | null;
+  tradingMode: TradingMode;
+  liveAuthorized: boolean;
+  executionLockedToPaper: boolean;
+}
+
+export interface CloudOperationsTelemetry {
+  releaseVersion: string;
+  timestamp: string;
+  environment: string;
+  executionSafety: {
+    tradingMode: TradingMode;
+    liveAuthorized: boolean;
+    executionLockedToPaper: boolean;
+    autonomousLiveTradingDisabled: boolean;
+    realOrdersPermitted: boolean;
+    withdrawalsPermitted: boolean;
+    marginAndLeveragePermitted: boolean;
+    killSwitchActive: boolean;
+    killSwitchReason?: string;
+  };
+  adminSecurity: {
+    authConfigured: boolean;
+    authMode: string;
+    failClosedActive: boolean;
+    defaultTestPinsRemoved: boolean;
+    corsAllowedOrigins: string[];
+    metrics: {
+      uptimeSeconds: number;
+      totalHttpRequests: number;
+      serverErrorRatePct: number;
+      authFailures: number;
+      rateLimitBlocks: number;
+      liveModeBlocks: number;
+    };
+  };
+  riskPolicy: RiskPolicySummary;
+  subsystems: {
+    frontend: {
+      status: string;
+      servingStaticSpa: boolean;
+      bundleAssetCount: number;
+      messageAr: string;
+      messageEn: string;
+    };
+    backendApi: {
+      status: string;
+      version: string;
+      uptimeSeconds: number;
+      serverErrorRatePct: number;
+      totalHttpRequests: number;
+    };
+    postgresql: {
+      status: string;
+      activeBackend: string;
+      configuredEngine: string;
+      latencyMs: number;
+      persistent: boolean;
+    };
+    redis: {
+      status: string;
+      connected: boolean;
+      mode: string;
+      latencyMs: number;
+    };
+    binancePublicMarketData: {
+      marketDataMode: string;
+      restStatus: string;
+      wsStatus: string;
+      feedFresh: boolean;
+      ageSeconds: number;
+      usedWeight1m: number;
+      rateLimited: boolean;
+      lastRestError?: string | null;
+      lastWsError?: string | null;
+    };
+    aiProviders: {
+      cloudConnectedCount: number;
+      localDeterministicEngineActive: boolean;
+      providers: Array<{
+        providerId: string;
+        displayName: string;
+        status: string;
+        available: boolean;
+        configuredModel?: string;
+        lastLatencyMs?: number | null;
+        errorRatePct?: number;
+      }>;
+    };
+    voiceServices: {
+      status: string;
+      cloudSpeechConfigured: boolean;
+      sttPrimaryEngine: string;
+      ttsPrimaryEngine: string;
+    };
+    webSocketHub: {
+      status: string;
+      broadcasterRunning: boolean;
+      activeClientConnections: number;
+      totalOpened: number;
+      totalRejected: number;
+    };
+    accountReconciliation: {
+      status: string;
+      consistent: boolean;
+      accountStateUncertain: boolean;
+      equityDriftUsd: number;
+      totalEquityUsd: number;
+      lastReconciledAt: string;
+    };
+  };
 }
 
 export interface AgentMeetingResult {

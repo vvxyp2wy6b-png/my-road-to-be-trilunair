@@ -61,9 +61,54 @@ function getSpeechRecognitionCtor(): SpeechRecognitionConstructor | null {
   );
 }
 
+export function detectPreferredRecorderMimeType(): string {
+  if (typeof window === 'undefined' || typeof MediaRecorder === 'undefined') {
+    return 'audio/mp4';
+  }
+  const candidates = [
+    'audio/mp4',
+    'audio/webm;codecs=opus',
+    'audio/webm',
+    'audio/ogg;codecs=opus',
+    'audio/wav',
+  ];
+  if (typeof MediaRecorder.isTypeSupported === 'function') {
+    for (const mime of candidates) {
+      try {
+        if (MediaRecorder.isTypeSupported(mime)) {
+          return mime;
+        }
+      } catch {
+        // المتابعة للخيار التالي
+      }
+    }
+  }
+  return 'audio/mp4';
+}
+
+function unlockSafariWebAudioGesture(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const w = window as unknown as Record<string, unknown>;
+    const AudioCtx = (w.AudioContext || w.webkitAudioContext) as (new () => AudioContext) | undefined;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    if (ctx.state === 'suspended') {
+      void ctx.resume().finally(() => {
+        void ctx.close().catch(() => {});
+      });
+    } else {
+      void ctx.close().catch(() => {});
+    }
+  } catch {
+    // تجاهل في البيئات غير الداعمة لـ AudioContext
+  }
+}
+
 export interface SpeechEngineController {
   sttSupported: boolean;
   ttsSupported: boolean;
+  preferredAudioMimeType?: string;
   micPermission: MicPermissionState;
   voiceAuthorized: boolean;
   mode: VoiceInteractionMode;
@@ -94,7 +139,10 @@ export function useSpeechEngine(
   onFinalTranscript?: (transcript: string, lang: Language) => void
 ): SpeechEngineController {
   const recognitionCtor = getSpeechRecognitionCtor();
-  const sttSupported = Boolean(recognitionCtor);
+  const mediaRecorderAvailable =
+    typeof window !== 'undefined' && typeof MediaRecorder !== 'undefined';
+  const sttSupported = Boolean(recognitionCtor) || mediaRecorderAvailable;
+  const preferredAudioMimeType = detectPreferredRecorderMimeType();
   const ttsSupported =
     typeof window !== 'undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
 
@@ -110,6 +158,9 @@ export function useSpeechEngine(
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const recognitionRef = useRef<BrowserSpeechRecognitionInstance | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
   const handsFreeActiveRef = useRef<boolean>(false);
   const voiceAuthorizedRef = useRef<boolean>(false);
   const onFinalTranscriptRef = useRef(onFinalTranscript);
@@ -122,6 +173,23 @@ export function useSpeechEngine(
   useEffect(() => {
     setRecognitionLang(defaultLang);
   }, [defaultLang]);
+
+  // تحميل أصوات النطق مسبقاً لمتصفح Safari على macOS/iOS حيث تُحمّل الأصوات بشكل غير متزامن
+  useEffect(() => {
+    if (!ttsSupported) return;
+    try {
+      window.speechSynthesis.getVoices();
+      const handleVoicesChanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+      window.speechSynthesis.addEventListener?.('voiceschanged', handleVoicesChanged);
+      return () => {
+        window.speechSynthesis.removeEventListener?.('voiceschanged', handleVoicesChanged);
+      };
+    } catch {
+      return undefined;
+    }
+  }, [ttsSupported]);
 
   const interruptSpeech = useCallback(() => {
     speechQueueCancelledRef.current = true;
@@ -145,14 +213,26 @@ export function useSpeechEngine(
         // تجاهل الإيقاف المكرر
       }
     }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {
+        // تجاهل
+      }
+    }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((t) => t.stop());
+      mediaStreamRef.current = null;
+    }
     setIsListening(false);
     setInterimTranscript('');
   }, []);
 
   const requestExplicitMicAuthorization = useCallback(async (): Promise<boolean> => {
     setErrorMessage(null);
+    unlockSafariWebAudioGesture();
     if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
-      if (sttSupported) {
+      if (recognitionCtor) {
         setMicPermission('granted');
         setVoiceAuthorized(true);
         voiceAuthorizedRef.current = true;
@@ -186,7 +266,7 @@ export function useSpeechEngine(
       );
       return false;
     }
-  }, [recognitionLang, sttSupported]);
+  }, [recognitionCtor, recognitionLang]);
 
   const revokeMicAuthorization = useCallback(() => {
     stopListening();
@@ -195,6 +275,75 @@ export function useSpeechEngine(
     voiceAuthorizedRef.current = false;
     setMicPermission('prompt');
   }, [stopListening, interruptSpeech]);
+
+  const startCloudRecorderFallback = useCallback(async () => {
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      setMicPermission('unsupported');
+      setErrorMessage(
+        recognitionLang === 'ar'
+          ? 'التعرف الصوتي المدمج غير متوفر في هذا المتصفح؛ استخدم حقل الإدخال النصي.'
+          : 'Web Speech Recognition is not supported in this browser; please use text input.'
+      );
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      recordedChunksRef.current = [];
+      const mimeType = detectPreferredRecorderMimeType();
+      const recorder =
+        typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(mimeType)
+          ? new MediaRecorder(stream, { mimeType })
+          : new MediaRecorder(stream);
+
+      recorder.ondataavailable = (ev: BlobEvent) => {
+        if (ev.data && ev.data.size > 0) {
+          recordedChunksRef.current.push(ev.data);
+        }
+      };
+
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        mediaStreamRef.current = null;
+        const blob = new Blob(recordedChunksRef.current, { type: mimeType });
+        recordedChunksRef.current = [];
+        if (blob.size === 0) return;
+
+        try {
+          const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('wav') ? 'wav' : 'webm';
+          const form = new FormData();
+          form.append('file', blob, `speech.${ext}`);
+          form.append('language', recognitionLang);
+          const resp = await fetch('/api/voice/stt', { method: 'POST', body: form });
+          if (resp.ok) {
+            const data = (await resp.json()) as { transcript?: string; messageAr?: string; messageEn?: string };
+            if (data.transcript && data.transcript.trim()) {
+              onFinalTranscriptRef.current?.(data.transcript.trim(), recognitionLang);
+            } else {
+              setErrorMessage(
+                recognitionLang === 'ar'
+                  ? data.messageAr || 'لم يتم التقاط نص صوتي واضح؛ يمكنك استخدام الإدخال النصي.'
+                  : data.messageEn || 'No speech transcript captured; text input remains ready.'
+              );
+            }
+          }
+        } catch {
+          setErrorMessage(
+            recognitionLang === 'ar'
+              ? 'تعذر الاتصال بخدمة التفريغ الصوتي السحابية؛ الأوامر النصية متاحة فوراً.'
+              : 'Cloud STT endpoint unreachable; text commands remain active.'
+          );
+        }
+      };
+
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setIsListening(true);
+    } catch {
+      setIsListening(false);
+    }
+  }, [recognitionLang]);
 
   const startListening = useCallback(() => {
     setErrorMessage(null);
@@ -212,12 +361,7 @@ export function useSpeechEngine(
 
     const Ctor = getSpeechRecognitionCtor();
     if (!Ctor) {
-      setMicPermission('unsupported');
-      setErrorMessage(
-        recognitionLang === 'ar'
-          ? 'التعرف الصوتي المدمج غير متوفر في هذا المتصفح؛ استخدم حقل الإدخال النصي.'
-          : 'Web Speech Recognition is not supported in this browser; please use text input.'
-      );
+      void startCloudRecorderFallback();
       return;
     }
 
@@ -293,7 +437,7 @@ export function useSpeechEngine(
     } catch {
       setIsListening(false);
     }
-  }, [interruptSpeech, mode, recognitionLang]);
+  }, [interruptSpeech, mode, recognitionLang, startCloudRecorderFallback]);
 
   const setMode = useCallback(
     (nextMode: VoiceInteractionMode) => {
@@ -434,6 +578,7 @@ export function useSpeechEngine(
   return {
     sttSupported,
     ttsSupported,
+    preferredAudioMimeType,
     micPermission,
     voiceAuthorized,
     mode,

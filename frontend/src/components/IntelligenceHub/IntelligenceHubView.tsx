@@ -779,17 +779,25 @@ export const IntelligenceHubView: React.FC = () => {
                 <button
                   key={pol}
                   type="button"
+                  disabled={pol === 'AUTONOMOUS'}
+                  title={
+                    pol === 'AUTONOMOUS'
+                      ? isAr
+                        ? 'التداول الذاتي الحقيقي معطل نهائياً في الإصدار v1.1.0-cloud-paper'
+                        : 'Autonomous live trading is permanently disabled in v1.1.0-cloud-paper'
+                      : undefined
+                  }
                   className={`holo-btn ${overview.exchangeStatus.authorizationPolicy === pol ? 'holo-btn-primary' : ''}`}
                   onClick={() => void handleChangeAuthPolicy(pol)}
                 >
-                  {pol}
+                  {pol === 'AUTONOMOUS' ? `${pol} (LOCKED)` : pol}
                 </button>
               ))}
               <input
                 type="password"
                 className="holo-input"
-                style={{ maxWidth: '190px' }}
-                placeholder={isAr ? 'رمز المسؤول PIN (7777)' : 'Admin PIN (7777)'}
+                style={{ maxWidth: '215px' }}
+                placeholder={isAr ? 'سر المسؤول المشفر (Admin Secret)' : 'Encrypted Admin Secret'}
                 value={policyPin}
                 onChange={(e) => setPolicyPin(e.target.value)}
               />

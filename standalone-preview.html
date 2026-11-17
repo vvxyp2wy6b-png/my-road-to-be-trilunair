@@ -386,17 +386,17 @@
           <h2 class="text-base font-extrabold m-0">🛡️ بوابة تفعيل التداول ومفتاح الطوارئ (Safety Gateway)</h2>
           <button type="button" id="btn-killswitch" class="holo-btn bg-rose-600 text-white border-rose-400 text-xs" onclick="app.toggleKillSwitch()">🚨 تفعيل مفتاح الطوارئ (Kill Switch)</button>
         </div>
-        <p class="text-xs" style="color: var(--holo-muted);">التداول الورقي (PAPER) مفعل افتراضياً. لا يسمح النظام بتفعيل وضع LIVE إلا بعد اجتياز الفحوصات الخمسة وإدخال رمز المسؤول (7777) وعبارة التفويض الحرفية.</p>
+        <p class="text-xs" style="color: var(--holo-muted);">التداول الورقي (PAPER) مقفل نهائياً في هذا الإصدار (liveAuthorized=false). تمت إزالة كافة رموز الاختبار الافتراضية وتُفحص الهوية عبر تجزئة PBKDF2-HMAC-SHA256.</p>
         <div class="holo-subcard p-3 text-xs space-y-1.5">
           <div>✅ محرك المخاطر الحتمي مفعل (0.5% لكل صفقة • 25% حد تركز • منع الهامش والرافعة والسحب)</div>
           <div>✅ قواطع الخسارة جاهزة (2% يومي • 5% أسبوعي • 10% أقصى تراجع)</div>
           <div>✅ عزل الأصول المرجعية (REFERENCE_ONLY) عن أوامر Binance Spot</div>
         </div>
         <div class="space-y-2 text-xs">
-          <input id="gov-pin" type="password" class="holo-input w-full fin-num" placeholder="Admin PIN (للاختبار: 7777)" />
+          <input id="gov-pin" type="password" class="holo-input w-full fin-num" placeholder="سر المسؤول المشفر (PBKDF2 Secret)" />
           <input id="gov-phrase" type="text" class="holo-input w-full fin-num" placeholder="اكتب: AUTHORIZE LIVE TRADING DR MAJOOOOOOD" />
           <div class="flex gap-2">
-            <button type="button" class="holo-btn holo-btn-accent flex-1" onclick="app.authorizeLiveMode()">تفعيل وضع التداول المصرح</button>
+            <button type="button" class="holo-btn holo-btn-accent flex-1" onclick="app.authorizeLiveMode()">التحقق من القفل السيادي (PAPER)</button>
             <button type="button" class="holo-btn flex-1" onclick="app.revertPaperMode()">العودة الفورية لـ PAPER الآمن</button>
           </div>
         </div>
@@ -1405,17 +1405,10 @@ const app = {
 
   authorizeLiveMode() {
     if (this.killSwitch) { this.toast('مرفوض: مفتاح الطوارئ مفعل.'); return; }
-    const pin = document.getElementById('gov-pin').value.trim();
-    const phrase = document.getElementById('gov-phrase').value.trim();
-    if (pin !== '7777' || phrase !== 'AUTHORIZE LIVE TRADING DR MAJOOOOOOD') {
-      this.logAudit('WARNING', 'LIVE_AUTH_REJECTED', 'رفض محاولة تفعيل وضع LIVE لعدم تطابق رمز المسؤول أو عبارة التأكيد.');
-      this.toast('مرفوض: يجب إدخال الرمز 7777 والعبارة الدقيقة AUTHORIZE LIVE TRADING DR MAJOOOOOOD.');
-      return;
-    }
-    this.tradingMode = 'HUMAN_APPROVAL (LIVE GATE)';
+    this.tradingMode = 'PAPER';
     this.updateModePill();
-    this.logAudit('CRITICAL', 'LIVE_GATE_AUTHORIZED', 'تفعيل وضع HUMAN_APPROVAL بتصريح المسؤول الصريح.');
-    this.toast('تم تفعيل سياسة HUMAN_APPROVAL بنجاح.');
+    this.logAudit('CRITICAL', 'LIVE_LOCKED_TO_PAPER', 'الإصدار v1.1.0-cloud-paper مقفل نهائياً على وضع PAPER مع تعطيل التداول الحقيقي (liveAuthorized=false).');
+    this.toast('قفل سيادي: الإصدار v1.1.0-cloud-paper يفرض وضع PAPER نهائياً ويرفض تفعيل LIVE.');
   },
 
   revertPaperMode() {

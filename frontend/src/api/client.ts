@@ -5,11 +5,13 @@
 
 import type {
   ActiveThemeState,
+  AdminSessionStatus,
   AgentMeetingResult,
   AgentProfile,
   AiCommandResponse,
   AuditLogEntry,
   ChatMessageRecord,
+  CloudOperationsTelemetry,
   CommandSource,
   Language,
   MarketAsset,
@@ -26,11 +28,25 @@ import type {
 
 const API_BASE = '/api';
 
+let activeCsrfToken: string | null = null;
+
+export function setActiveCsrfToken(token: string | null): void {
+  activeCsrfToken = token;
+}
+
 async function requestJson<T>(path: string, options?: RequestInit): Promise<T> {
+  const method = (options?.method || 'GET').toUpperCase();
+  const csrfHeaders: Record<string, string> =
+    activeCsrfToken && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
+      ? { 'X-CSRF-Token': activeCsrfToken }
+      : {};
+
   const response = await fetch(`${API_BASE}${path}`, {
+    credentials: 'same-origin',
     headers: {
       'Content-Type': 'application/json',
-      ...(options?.headers || {}),
+      ...csrfHeaders,
+      ...((options?.headers as Record<string, string>) || {}),
     },
     ...options,
   });
@@ -50,8 +66,45 @@ async function requestJson<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const trilunairApi = {
-  // حالة النظام وبوابة الأمان
+  // حالة النظام وبوابة الأمان والعمليات السحابية
   getSystemStatus: () => requestJson<SystemStatus>('/system/status'),
+
+  getOperationsTelemetry: () => requestJson<CloudOperationsTelemetry>('/system/operations'),
+
+  getAdminSessionStatus: async () => {
+    const status = await requestJson<AdminSessionStatus>('/auth/session/status');
+    if (status.csrfToken) {
+      activeCsrfToken = status.csrfToken;
+    }
+    return status;
+  },
+
+  loginAdminSession: async (adminSecret: string) => {
+    const res = await requestJson<{
+      authenticated: boolean;
+      sessionToken: string;
+      csrfToken: string;
+      expiresAtEpoch: number;
+      ttlSeconds: number;
+      tradingMode: TradingMode;
+      liveAuthorized: boolean;
+      executionLockedToPaper: boolean;
+    }>('/auth/session/login', {
+      method: 'POST',
+      body: JSON.stringify({ adminSecret }),
+    });
+    activeCsrfToken = res.csrfToken;
+    return res;
+  },
+
+  logoutAdminSession: async () => {
+    const res = await requestJson<{ authenticated: boolean; revoked: boolean }>('/auth/session/logout', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+    activeCsrfToken = null;
+    return res;
+  },
 
   setTradingMode: (payload: {
     targetMode: TradingMode;
