@@ -20,7 +20,48 @@ from typing import Any
 import wave
 
 from fastapi import Request
-import httpx
+
+from app.security import create_outbound_async_http_client, security_telemetry
+
+
+def _infer_audio_mime_type(filename: str, declared_mime: str | None = None) -> str:
+    """استنتاج نوع الوسائط الصوتية بدقة لدعم متصفح Safari (audio/mp4, audio/m4a, audio/wav) وChrome (audio/webm)."""
+    if declared_mime and declared_mime.strip().startswith("audio/"):
+        return declared_mime.split(";")[0].strip().lower()
+    lower = (filename or "").lower()
+    if lower.endswith(".mp4") or lower.endswith(".m4a") or lower.endswith(".aac"):
+        return "audio/mp4"
+    if lower.endswith(".wav"):
+        return "audio/wav"
+    if lower.endswith(".ogg") or lower.endswith(".oga"):
+        return "audio/ogg"
+    if lower.endswith(".mp3") or lower.endswith(".mpeg"):
+        return "audio/mpeg"
+    return "audio/webm"
+
+
+def get_voice_subsystem_status() -> dict[str, Any]:
+    """فحص شفاف لحالة منظومة الأوامر الصوتية العربية والإنجليزية (المتصفح + السحابة + Safari)."""
+    openai_key = os.getenv("OPENAI_API_KEY", "").strip()
+    stt_url = os.getenv("OPENAI_STT_URL", "https://api.openai.com/v1/audio/transcriptions").strip()
+    tts_url = os.getenv("OPENAI_TTS_URL", "https://api.openai.com/v1/audio/speech").strip()
+    cloud_configured = bool(openai_key)
+    return {
+        "status": "CLOUD_AND_BROWSER_READY" if cloud_configured else "BROWSER_PRIMARY_LOCAL_WAV_FALLBACK",
+        "cloudSpeechConfigured": cloud_configured,
+        "sttPrimaryEngine": "openai-whisper" if cloud_configured else "browser-webkit-speech-recognition",
+        "ttsPrimaryEngine": "openai-tts" if cloud_configured else "browser-speech-synthesis+server-riff-wav",
+        "sttEndpoint": stt_url,
+        "ttsEndpoint": tts_url,
+        "supportedLanguages": ["ar-SA", "ar", "en-US", "en"],
+        "safariCompatibility": {
+            "webkitSpeechRecognitionSupported": True,
+            "mediaRecorderMimeFallbacks": ["audio/mp4", "audio/webm;codecs=opus", "audio/webm", "audio/wav"],
+            "webkitAudioContextSupported": True,
+            "explicitMicPermissionRequired": True,
+            "continuousBackgroundRecordingDisabled": True,
+        },
+    }
 
 
 def generate_holo_chime_wav_bytes(
@@ -68,13 +109,15 @@ def generate_holo_chime_wav_bytes(
 async def handle_stt_request(request: Request) -> dict[str, Any]:
     """
     معالجة طلبات تحويل الصوت إلى نص (POST /api/voice/stt).
-    يدعم رفع ملف صوتي (multipart/form-data) أو حمولة JSON اختبارية.
+    يدعم رفع ملف صوتي (multipart/form-data بما في ذلك صيغ Safari audio/mp4) أو حمولة JSON اختبارية.
     """
     content_type = (request.headers.get("content-type") or "").lower()
     openai_key = os.getenv("OPENAI_API_KEY", "").strip()
+    stt_url = os.getenv("OPENAI_STT_URL", "https://api.openai.com/v1/audio/transcriptions").strip()
 
     audio_bytes: bytes | None = None
     filename = "audio.webm"
+    declared_mime: str | None = None
     language = "ar"
     fallback_transcript = ""
 
@@ -86,59 +129,78 @@ async def handle_stt_request(request: Request) -> dict[str, Any]:
         if uploaded is not None and hasattr(uploaded, "read"):
             audio_bytes = await uploaded.read()  # type: ignore[misc]
             filename = getattr(uploaded, "filename", None) or "speech.webm"
+            declared_mime = getattr(uploaded, "content_type", None)
     else:
         try:
             body = await request.json()
             if isinstance(body, dict):
                 language = str(body.get("language") or "ar")
                 fallback_transcript = str(body.get("transcript") or body.get("text") or "").strip()
+                declared_mime = str(body.get("mimeType") or "").strip() or None
+                if declared_mime and "mp4" in declared_mime:
+                    filename = "speech.mp4"
                 b64_audio = body.get("audioBase64")
                 if isinstance(b64_audio, str) and b64_audio.strip():
                     audio_bytes = base64.b64decode(b64_audio)
         except Exception:
             pass
 
-    # في حال توفر مفتاح OpenAI وبيانات صوتية فعلية، يتم استخدام Whisper السحابي
+    audio_mime = _infer_audio_mime_type(filename, declared_mime)
+
+    # في حال توفر مفتاح OpenAI وبيانات صوتية فعلية، يتم استخدام Whisper السحابي عبر العميل المتوافق مع الوكيل
     if openai_key and audio_bytes:
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with create_outbound_async_http_client(stt_url, timeout_sec=12.0) as client:
                 whisper_lang = "ar" if language.startswith("ar") else "en"
                 resp = await client.post(
-                    "https://api.openai.com/v1/audio/transcriptions",
+                    stt_url,
                     headers={"Authorization": f"Bearer {openai_key}"},
-                    data={"model": "whisper-1", "language": whisper_lang},
-                    files={"file": (filename, audio_bytes, "audio/webm")},
+                    data={"model": os.getenv("OPENAI_STT_MODEL", "whisper-1"), "language": whisper_lang},
+                    files={"file": (filename, audio_bytes, audio_mime)},
                 )
                 if resp.status_code == 200:
                     transcript_text = resp.json().get("text", "").strip()
                     return {
                         "status": "OK",
                         "provider": "openai-whisper",
+                        "executionMode": "CLOUD_STT",
                         "cloudConfigured": True,
                         "browserSpeechPrimary": False,
+                        "mimeType": audio_mime,
                         "language": language,
                         "transcript": transcript_text,
                         "messageAr": "تم تفريغ الصوت بنجاح عبر محرك OpenAI Whisper السحابي.",
                         "messageEn": "Audio transcribed successfully via OpenAI Whisper.",
                     }
-        except Exception:
-            pass
+                security_telemetry.emit_event(
+                    "VOICE_CLOUD_STT_DEGRADED",
+                    severity="WARNING",
+                    details={"httpStatus": resp.status_code, "mimeType": audio_mime},
+                )
+        except Exception as exc:
+            security_telemetry.emit_event(
+                "VOICE_CLOUD_STT_ERROR",
+                severity="WARNING",
+                details={"errorType": type(exc).__name__},
+            )
 
     return {
         "status": "FALLBACK_READY",
         "provider": "web-speech-primary",
+        "executionMode": "BROWSER_SPEECH_FALLBACK",
         "cloudConfigured": bool(openai_key),
         "browserSpeechPrimary": True,
+        "mimeType": audio_mime,
         "language": language,
         "receivedAudioBytes": len(audio_bytes) if audio_bytes else 0,
         "transcript": fallback_transcript,
         "messageAr": (
-            "التعرف الصوتي الفوري يعمل عبر متصفحك (SpeechRecognition) كمسار أساسي منخفض الكمون؛ "
-            "ويمكن تفعيل التفريغ السحابي الخلفي تلقائياً بتزويد متغير البيئة OPENAI_API_KEY."
+            "التعرف الصوتي الفوري يعمل عبر المتصفح (SpeechRecognition / webkitSpeechRecognition) كمسار أساسي منخفض الكمون؛ "
+            "ويتفعل التفريغ السحابي الخلفي تلقائياً عند تهيئة OPENAI_API_KEY."
         ),
         "messageEn": (
-            "Browser Web Speech API (SpeechRecognition) is active as the primary zero-latency engine; "
-            "server-side Whisper STT activates automatically when OPENAI_API_KEY is configured."
+            "Browser SpeechRecognition / webkitSpeechRecognition is active as the primary low-latency engine; "
+            "cloud Whisper STT activates automatically when OPENAI_API_KEY is configured."
         ),
     }
 
@@ -151,16 +213,17 @@ async def handle_tts_request(payload: dict[str, Any]) -> tuple[bytes, str, dict[
     text = str(payload.get("text") or "مركز القيادة الهولوغرامي جاهز.").strip()
     language = "en" if str(payload.get("language") or "ar").lower().startswith("en") else "ar"
     openai_key = os.getenv("OPENAI_API_KEY", "").strip()
+    tts_url = os.getenv("OPENAI_TTS_URL", "https://api.openai.com/v1/audio/speech").strip()
 
     if openai_key and text:
         try:
-            async with httpx.AsyncClient(timeout=8.0) as client:
+            async with create_outbound_async_http_client(tts_url, timeout_sec=10.0) as client:
                 resp = await client.post(
-                    "https://api.openai.com/v1/audio/speech",
+                    tts_url,
                     headers={"Authorization": f"Bearer {openai_key}"},
                     json={
-                        "model": "tts-1",
-                        "voice": "onyx",
+                        "model": os.getenv("OPENAI_TTS_MODEL", "tts-1"),
+                        "voice": os.getenv("OPENAI_TTS_VOICE", "onyx"),
                         "input": text[:800],
                         "response_format": "wav",
                     },
@@ -171,6 +234,7 @@ async def handle_tts_request(payload: dict[str, Any]) -> tuple[bytes, str, dict[
                     meta = {
                         "status": "OK",
                         "provider": "openai-tts",
+                        "executionMode": "CLOUD_TTS",
                         "mimeType": "audio/wav",
                         "language": language,
                         "interruptible": True,
@@ -181,8 +245,12 @@ async def handle_tts_request(payload: dict[str, Any]) -> tuple[bytes, str, dict[
                         "messageEn": "Synthesized speech via cloud TTS in interruptible WAV format.",
                     }
                     return audio_bytes, "audio/wav", meta
-        except Exception:
-            pass
+        except Exception as exc:
+            security_telemetry.emit_event(
+                "VOICE_CLOUD_TTS_ERROR",
+                severity="WARNING",
+                details={"errorType": type(exc).__name__},
+            )
 
     wav_bytes = generate_holo_chime_wav_bytes(text=text, language=language)
     b64_wav = base64.b64encode(wav_bytes).decode("ascii")
@@ -191,6 +259,7 @@ async def handle_tts_request(payload: dict[str, Any]) -> tuple[bytes, str, dict[
     metadata = {
         "status": "OK",
         "provider": "speech-synthesis+server-wav",
+        "executionMode": "LOCAL_WAV_AND_BROWSER_TTS",
         "mimeType": "audio/wav",
         "language": language,
         "interruptible": True,

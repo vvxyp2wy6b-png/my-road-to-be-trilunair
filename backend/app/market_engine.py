@@ -18,7 +18,7 @@ import math
 import random
 import threading
 import time
-from typing import Final
+from typing import Any, Final
 
 from app.models import (
     CandlePoint,
@@ -208,8 +208,11 @@ class MarketEngine:
             age = max(0.0, time.time() - self._last_tick_epoch)
             return age > self.max_staleness_seconds
 
-    def get_feed_health(self) -> dict[str, float | bool | int]:
-        """إرجاع تقرير حداثة وصحة بث أسعار السوق."""
+    def get_feed_health(self) -> dict[str, Any]:
+        """إرجاع تقرير حداثة وصحة بث أسعار السوق ومصدر البيانات النشط (Binance Public مقابل المحاكاة)."""
+        from app.binance_market_data import binance_public_client
+
+        binance_snap = binance_public_client.get_health_snapshot()
         with self._lock:
             age = round(max(0.0, time.time() - self._last_tick_epoch), 3)
             max_s = self.max_staleness_seconds
@@ -220,16 +223,19 @@ class MarketEngine:
                 "ageSeconds": age,
                 "maxStalenessSeconds": max_s,
                 "tickCounter": self._tick_counter,
+                "marketDataMode": binance_snap["effectiveMatrixMode"],
+                "liveMarketDataActive": binance_snap["liveMarketDataActive"],
+                "binancePublic": binance_snap,
             }
 
-    def simulate_stale_feed(self, age_seconds: float = 120.0) -> dict[str, float | bool | int]:
+    def simulate_stale_feed(self, age_seconds: float = 120.0) -> dict[str, Any]:
         """محاكاة انقطاع وتقادم بث السوق لاختبارات السلامة والتعافي."""
         with self._lock:
             self._feed_halted = True
             self._last_tick_epoch = time.time() - max(age_seconds, self.max_staleness_seconds + 5.0)
             return self.get_feed_health()
 
-    def resume_feed(self) -> dict[str, float | bool | int]:
+    def resume_feed(self) -> dict[str, Any]:
         """استئناف بث السوق وتحديث الطابع الزمني للنبضة الحية."""
         with self._lock:
             self._feed_halted = False
@@ -263,6 +269,7 @@ class MarketEngine:
                     volume24hUsd=float(spec["volume24hUsd"]),
                     volatilityPct=float(spec["volatilityPct"]),
                     spreadBps=float(spec["spreadBps"]),
+                    dataSource="SIMULATED",
                 )
 
     def resolve_symbol(self, raw_symbol: str | None) -> str | None:
@@ -359,11 +366,32 @@ class MarketEngine:
             asset = self._assets.get(canonical)
             return asset.model_copy(deep=True) if asset else None
 
+    def sync_live_binance_tickers(self) -> dict[str, dict[str, Any]]:
+        """جلب الأسعار العامة الحقيقية من Binance Spot عند تفعيل وضع LIVE_PUBLIC."""
+        from app.binance_market_data import binance_public_client
+
+        if binance_public_client.get_configured_mode() != "LIVE_PUBLIC":
+            return {}
+        return binance_public_client.fetch_live_tickers()
+
     def tick(self) -> list[MarketAsset]:
         """
         تحديث نبضة السوق الحية (Market Tick) لجميع الأصول الستة.
-        تستخدم معادلة ارتداد للمتوسط مع تذبذب نسبي متناغم مع volatilityPct لكل أصل.
+        عند تفعيل وضع LIVE_PUBLIC، تُستخدم بيانات السوق العامة الحقيقية من Binance Spot لأصول الكريبتو،
+        مع تمييز مصدر كل أصل بشفافية تامة (BINANCE_PUBLIC_REST / BINANCE_PUBLIC_WS مقابل SIMULATED).
         """
+        from app.binance_market_data import CANONICAL_TO_BINANCE_SPOT, binance_public_client
+
+        live_tickers: dict[str, dict[str, Any]] = {}
+        if not self._feed_halted and binance_public_client.get_configured_mode() == "LIVE_PUBLIC":
+            # الاستفادة من ذاكرة WS الحية أو التحديث الدوري كل بضع نبضات عبر REST
+            snap = binance_public_client.get_health_snapshot()
+            if not snap["wsConnected"] and (self._tick_counter % 3 == 0 or not snap["cachedLiveSymbols"]):
+                live_tickers = binance_public_client.fetch_live_tickers()
+            else:
+                with binance_public_client._lock:
+                    live_tickers = dict(binance_public_client._tickers_cache)
+
         with self._lock:
             if self._feed_halted:
                 return [asset.model_copy(deep=True) for asset in self._assets.values()]
@@ -372,20 +400,44 @@ class MarketEngine:
             updated: list[MarketAsset] = []
 
             for symbol, asset in self._assets.items():
-                anchor = self._anchor_prices[symbol]
                 decimals = self._decimals[symbol]
-                # معامل التذبذب اللحظي لكل نبضة (لطيف وواقعي)
+                live_item = live_tickers.get(symbol) if symbol in CANONICAL_TO_BINANCE_SPOT else None
+
+                if live_item and float(live_item.get("price", 0.0)) > 0:
+                    live_price = round(float(live_item["price"]), decimals)
+                    self._anchor_prices[symbol] = live_price
+                    updated_asset = asset.model_copy(
+                        update={
+                            "price": live_price,
+                            "change24hPct": round(float(live_item["change24hPct"]), 2),
+                            "high24h": round(float(live_item["high24h"]), decimals),
+                            "low24h": round(float(live_item["low24h"]), decimals),
+                            "volume24hUsd": round(float(live_item["volume24hUsd"]), 2),
+                            "volatilityPct": round(float(live_item["volatilityPct"]), 2),
+                            "spreadBps": round(float(live_item["spreadBps"]), 2),
+                            "dataSource": str(live_item.get("source", "BINANCE_PUBLIC_REST")),
+                        }
+                    )
+                    self._assets[symbol] = updated_asset
+                    updated.append(updated_asset.model_copy(deep=True))
+                    continue
+
+                anchor = self._anchor_prices[symbol]
                 step_sigma = (asset.volatilityPct / 100.0) * 0.035
                 random_shock = self._rng.gauss(0.0, step_sigma)
-                # قوة جذب نحو السعر المرجعي لمنع الانحراف بأكثر من ±2.5%
                 deviation = (asset.price - anchor) / anchor
                 mean_reversion = -0.18 * deviation
 
                 pct_move = random_shock + mean_reversion
                 new_price = round(max(anchor * 0.96, min(anchor * 1.04, asset.price * (1.0 + pct_move))), decimals)
 
-                # تحديث السعر الأعلى والأدنى ونسبة التغير اليومي والحجم
-                base_open_24h = anchor / (1.0 + (BASE_ASSETS_SPEC[[s["symbol"] for s in BASE_ASSETS_SPEC].index(symbol)]["change24hPct"] / 100.0))
+                base_open_24h = anchor / (
+                    1.0
+                    + (
+                        BASE_ASSETS_SPEC[[s["symbol"] for s in BASE_ASSETS_SPEC].index(symbol)]["change24hPct"]
+                        / 100.0
+                    )
+                )
                 new_change_pct = round(((new_price - base_open_24h) / base_open_24h) * 100.0, 2)
                 new_high = round(max(asset.high24h, new_price), decimals)
                 new_low = round(min(asset.low24h, new_price), decimals)
@@ -398,6 +450,7 @@ class MarketEngine:
                         "high24h": new_high,
                         "low24h": new_low,
                         "volume24hUsd": new_volume,
+                        "dataSource": "SIMULATED",
                     }
                 )
                 self._assets[symbol] = updated_asset
@@ -409,9 +462,12 @@ class MarketEngine:
         self, symbol: str, timeframe: str = "15m", limit: int = 90
     ) -> MarketCandlesResponse | None:
         """
-        توليد سلسلة شموع يابانية واقعية (OHLCV) تنتهي بالسعر الحي الحالي،
-        مع حساب مستويات الدعم والمقاومة وعمق دفتر الأوامر (Bids & Asks).
+        استرجاع سلسلة الشموع اليابانية (OHLCV) وعمق دفتر الأوامر:
+        - يستخدم بيانات Binance Spot العامة الحقيقية (/api/v3/klines و /api/v3/depth) عند تفعيل LIVE_PUBLIC لأزواج Spot.
+        - يتراجع بشفافية معلنة إلى المحرك الحتمي المحلي للأصول المرجعية أو عند وضع SIMULATED.
         """
+        from app.binance_market_data import CANONICAL_TO_BINANCE_SPOT, binance_public_client
+
         asset = self.get_asset(symbol)
         if asset is None:
             return None
@@ -421,6 +477,36 @@ class MarketEngine:
         safe_limit = max(20, min(240, int(limit)))
         decimals = self._decimals.get(asset.symbol, 2)
 
+        if (
+            binance_public_client.get_configured_mode() == "LIVE_PUBLIC"
+            and asset.symbol in CANONICAL_TO_BINANCE_SPOT
+        ):
+            live_candles = binance_public_client.fetch_klines(
+                canonical_symbol=asset.symbol, timeframe=tf, limit=safe_limit
+            )
+            live_depth = binance_public_client.fetch_orderbook_depth(
+                canonical_symbol=asset.symbol, limit=8, decimals=decimals
+            )
+            if live_candles and live_depth:
+                bids_live, asks_live, last_update_id = live_depth
+                recent_slice = live_candles[-min(40, len(live_candles)) :]
+                recent_lows = sorted(c.low for c in recent_slice)
+                recent_highs = sorted(c.high for c in recent_slice)
+                raw_support = recent_lows[max(0, len(recent_lows) // 8)]
+                raw_resistance = recent_highs[min(len(recent_highs) - 1, (len(recent_highs) * 7) // 8)]
+                curr_p = live_candles[-1].close
+                return MarketCandlesResponse(
+                    symbol=asset.symbol,
+                    timeframe=tf,
+                    candles=live_candles,
+                    supportLevel=round(min(raw_support, curr_p * 0.985), decimals),
+                    resistanceLevel=round(max(raw_resistance, curr_p * 1.015), decimals),
+                    bids=bids_live,
+                    asks=asks_live,
+                    dataSource="BINANCE_PUBLIC_REST",
+                    lastUpdateId=last_update_id,
+                )
+
         # بذرة حتمية مستقرة لكل أصل وإطار زمني لتوليد مسار تاريخي متماسك
         seed_bytes = hashlib.sha256(f"{asset.symbol}:{tf}".encode("utf-8")).digest()
         seed_int = int.from_bytes(seed_bytes[:8], "big")
@@ -429,7 +515,6 @@ class MarketEngine:
         now_sec = int(time.time())
         aligned_now_sec = (now_sec // step_sec) * step_sec
 
-        # توليد مسار عكسي من السعر الحالي إلى الماضي ثم عكسه ليكون متصلاً تماماً بالسعر الحي
         tf_vol_scale = math.sqrt(step_sec / 86400.0) * (asset.volatilityPct / 100.0)
         closes_rev: list[float] = [asset.price]
         trend_bias = (asset.change24hPct / 100.0) / max(24.0, float(safe_limit))
@@ -469,7 +554,6 @@ class MarketEngine:
                 )
             )
 
-        # حساب مستويات الدعم والمقاومة استناداً إلى النطاق السعري الحديث
         recent_slice = candles[-min(40, len(candles)) :]
         recent_lows = sorted(c.low for c in recent_slice)
         recent_highs = sorted(c.high for c in recent_slice)
@@ -479,7 +563,6 @@ class MarketEngine:
         support_level = round(min(raw_support, asset.price * 0.985), decimals)
         resistance_level = round(max(raw_resistance, asset.price * 1.015), decimals)
 
-        # بناء عمق دفتر الأوامر (8 مستويات شراء Bids و 8 مستويات بيع Asks)
         half_spread_ratio = (asset.spreadBps / 10000.0) * 0.5
         level_step_ratio = max(0.0004, (asset.spreadBps / 10000.0) * 0.85)
         unit_base_size = max(0.05, round((asset.volume24hUsd * 0.000015) / asset.price, 3))
@@ -516,6 +599,8 @@ class MarketEngine:
             resistanceLevel=resistance_level,
             bids=bids,
             asks=asks,
+            dataSource="SIMULATED",
+            lastUpdateId=None,
         )
 
 

@@ -304,12 +304,12 @@ def convene_meeting(
         risk_status = "AGREE"
         risk_conf = 82
         risk_summary_ar = (
-            f"جميع الضوابط الخمسة لمحرك المخاطر سليمة؛ التركز بعد الصفقة {risk_assessment.postTradeConcentrationPct:.2f}% "
-            f"(أقل بكثير من سقف 35%) وتراجع المحفظة الحالي {portfolio.currentDrawdownPct:.2f}%."
+            f"جميع ضوابط محرك المخاطر سليمة؛ التركز بعد الصفقة {risk_assessment.postTradeConcentrationPct:.2f}% "
+            f"(ضمن سقف التعرض المعتمد {portfolio.riskPolicy.maxExposurePerAssetPct:.1f}%) وتراجع المحفظة الحالي {portfolio.currentDrawdownPct:.2f}%."
         )
         risk_summary_en = (
-            f"All 5 deterministic risk checks pass cleanly; post-trade concentration is {risk_assessment.postTradeConcentrationPct:.2f}% "
-            f"(well below 35% cap) and portfolio drawdown stands at {portfolio.currentDrawdownPct:.2f}%."
+            f"All deterministic risk checks pass cleanly; post-trade concentration is {risk_assessment.postTradeConcentrationPct:.2f}% "
+            f"(within {portfolio.riskPolicy.maxExposurePerAssetPct:.1f}% exposure cap) and portfolio drawdown stands at {portfolio.currentDrawdownPct:.2f}%."
         )
 
     risk_item = AgentDeliberationItem(
@@ -436,7 +436,17 @@ def convene_meeting(
         keyMetricValue=f"{safe_suggested_qty:g} {asset.symbol}",
     )
 
-    agent_responses = [quant_item, risk_item, macro_item, exec_item, chief_item]
+    now_iso = utc_now_iso()
+    agent_responses = [
+        it.model_copy(
+            update={
+                "uncertaintyPct": max(5, min(85, 100 - it.confidence)),
+                "executionStatus": "SIMULATED",
+                "respondedAt": now_iso,
+            }
+        )
+        for it in [quant_item, risk_item, macro_item, exec_item, chief_item]
+    ]
 
     # ربط قاعة الاجتماع بمحولات المزودات السحابية الحقيقية (OpenAI / Gemini / Anthropic / xAI) عند تهيئة بيانات الاعتماد
     try:
@@ -454,7 +464,7 @@ def convene_meeting(
                 agent_cfg_map = {}
 
         market_ctx = (
-            f"Asset: {asset.symbol} | Price: ${asset.price:,.2f} | 24h: {asset.change24hPct:+.2f}% | "
+            f"Asset: {asset.symbol} ({asset.dataSource}) | Price: ${asset.price:,.2f} | 24h: {asset.change24hPct:+.2f}% | "
             f"Support: ${candles_data.supportLevel:,.2f} | Resistance: ${candles_data.resistanceLevel:,.2f} | "
             f"Spread: {asset.spreadBps:.1f} bps | OB Imbalance: {ob_imbalance:.2f}x | "
             f"Portfolio Equity: ${portfolio.totalEquity:,.2f} | Risk Passed: {risk_assessment.passed}"
@@ -483,37 +493,44 @@ def convene_meeting(
                 )
                 if adapter_res["success"] and adapter_res["data"] is not None:
                     d = adapter_res["data"]
+                    exec_st = str(adapter_res.get("executionStatus") or "LIVE")
                     item = item.model_copy(
                         update={
                             "stance": d["stance"],
                             "confidence": d["confidence"],
+                            "uncertaintyPct": d.get("uncertaintyPct", max(5, 100 - int(d["confidence"]))),
                             "summaryAr": d["summaryAr"],
                             "summaryEn": d["summaryEn"],
                             "providerUsed": adapter_res["providerUsed"],
                             "modelUsed": adapter_res["modelUsed"],
+                            "executionStatus": exec_st if exec_st in {"LIVE", "CACHED"} else "LIVE",
+                            "respondedAt": str(adapter_res.get("respondedAt") or utc_now_iso()),
                             "isSimulated": False,
                         }
                     )
                     tokens_used = int(adapter_res["tokensUsed"])
                     call_cost = float(adapter_res["costUsd"])
                     total_cloud_cost += call_cost
-                    with db_session() as tel_conn:
-                        tel_conn.execute(
-                            """
-                            UPDATE quantum_agents
-                            SET total_calls = total_calls + 1,
-                                total_tokens = total_tokens + ?,
-                                attributable_ai_cost_usd = attributable_ai_cost_usd + ?
-                            WHERE agent_id = ?
-                            """,
-                            (tokens_used, call_cost, item.agentId),
-                        )
+                    if tokens_used > 0 or call_cost > 0:
+                        with db_session() as tel_conn:
+                            tel_conn.execute(
+                                """
+                                UPDATE quantum_agents
+                                SET total_calls = total_calls + 1,
+                                    total_tokens = total_tokens + ?,
+                                    attributable_ai_cost_usd = attributable_ai_cost_usd + ?
+                                WHERE agent_id = ?
+                                """,
+                                (tokens_used, call_cost, item.agentId),
+                            )
                 else:
-                    # عدم تزييف استجابة السحابة عند غياب المفتاح أو تعذر الاتصال؛ الإبقاء على المحرك المحلي معلناً بصدق
+                    # عزل فشل المزود الخارجي مع إعلان حالة UNAVAILABLE للمزود المطلوب والتراجع الآمن للمحرك المحلي
                     item = item.model_copy(
                         update={
-                            "providerUsed": "local-quant-engine",
+                            "providerUsed": f"local-quant-engine (fallback:{assigned_prov})",
                             "modelUsed": "quant-deterministic-v1",
+                            "executionStatus": "UNAVAILABLE",
+                            "respondedAt": str(adapter_res.get("respondedAt") or utc_now_iso()),
                             "isSimulated": True,
                         }
                     )
