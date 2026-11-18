@@ -40,24 +40,23 @@ def test_trm_brand_and_four_factor_admin_mfa_flow(isolated_admin_client: TestCli
     from app.admin_identity import compute_totp_code
     from app.database import db_session
 
-    # 1. فحص حالة الهوية المبدئية والشعار الثلاثي TRM
+    # 1. فحص حالة الهوية المبدئية والشعار الثلاثي الموصى به TMJ (تريلماجد)
     r0 = isolated_admin_client.get("/api/auth/admin/identity")
     assert r0.status_code == 200
     body0 = r0.json()
-    assert body0["brand"]["monogram"] == "TRM"
-    assert "Trilunair" in body0["brand"]["expansionEn"]
+    assert body0["brand"]["monogram"] == "TMJ"
     assert "Majed" in body0["brand"]["expansionEn"]
     assert "ماجد" in body0["brand"]["titleAr"]
     assert body0["enrolled"] is False
     assert body0["tradingMode"] == "PAPER"
     assert body0["liveAuthorized"] is False
 
-    # 2. تأسيس حساب أدمن المنصة (البريد + الجوال + مفتاح التحقق + توليد مفتاح Authenticator)
+    # 2. تأسيس حساب أدمن المنصة بمفتاح سري من 6 خانات فأكثر (مثلاً Mj#926) + توليد مفتاح Authenticator
     enroll_payload = {
         "displayName": "د. ماجد (أدمن المنصة)",
         "email": "majed.owner@example.sa",
         "phone": "+966501234567",
-        "verificationKey": "Majed#TRM$Sovereign2026!",
+        "verificationKey": "Mj#926",
     }
     r_enr = isolated_admin_client.post("/api/auth/admin/enroll", json=enroll_payload)
     assert r_enr.status_code == 200, r_enr.text
@@ -67,7 +66,7 @@ def test_trm_brand_and_four_factor_admin_mfa_flow(isolated_admin_client: TestCli
     assert enr["phoneMasked"].startswith("+966")
     secret_b32 = enr["authenticatorSetup"]["secretBase32"]
     assert len(secret_b32) >= 24
-    assert enr["authenticatorSetup"]["otpauthUri"].startswith("otpauth://totp/TRM-Trilunair-Majed")
+    assert enr["authenticatorSetup"]["otpauthUri"].startswith("otpauth://totp/TMJ-TrilMajed")
 
     # 3. التحقق من أن البريد ورقم الجوال وسر TOTP ومفتاح التحقق غير مخزنة كنص صريح في قاعدة البيانات
     with db_session() as conn:
@@ -86,7 +85,7 @@ def test_trm_brand_and_four_factor_admin_mfa_flow(isolated_admin_client: TestCli
     r_conf = isolated_admin_client.post(
         "/api/auth/admin/totp/confirm",
         json={
-            "verificationKey": "Majed#TRM$Sovereign2026!",
+            "verificationKey": "Mj#926",
             "totpCode": confirm_code,
         },
     )
@@ -99,7 +98,7 @@ def test_trm_brand_and_four_factor_admin_mfa_flow(isolated_admin_client: TestCli
         json={
             "email": "majed.owner@example.sa",
             "phone": "+966501234567",
-            "verificationKey": "Majed#TRM$Sovereign2026!",
+            "verificationKey": "Mj#926",
             "totpCode": confirm_code,
         },
     )
@@ -112,7 +111,7 @@ def test_trm_brand_and_four_factor_admin_mfa_flow(isolated_admin_client: TestCli
         json={
             "email": "majed.owner@example.sa",
             "phone": "+966599999999",
-            "verificationKey": "Majed#TRM$Sovereign2026!",
+            "verificationKey": "Mj#926",
             "totpCode": fresh_code,
         },
     )
@@ -124,14 +123,14 @@ def test_trm_brand_and_four_factor_admin_mfa_flow(isolated_admin_client: TestCli
         json={
             "email": "majed.owner@example.sa",
             "phone": "+966501234567",
-            "verificationKey": "Majed#TRM$Sovereign2026!",
+            "verificationKey": "Mj#926",
             "totpCode": fresh_code,
         },
     )
     assert r_login.status_code == 200, r_login.text
     login_body = r_login.json()
     assert login_body["authenticated"] is True
-    assert login_body["brandMonogram"] == "TRM"
+    assert login_body["brandMonogram"] == "TMJ"
     assert login_body["sessionToken"]
     assert login_body["csrfToken"]
     assert login_body["tradingMode"] == "PAPER"

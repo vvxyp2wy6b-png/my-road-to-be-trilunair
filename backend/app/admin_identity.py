@@ -39,10 +39,10 @@ from app.security import (
     verify_session_token,
 )
 
-BRAND_MONOGRAM = "TRM"
-BRAND_EXPANSION_EN = "Trilunair • Road • Majed"
-BRAND_TITLE_AR = "طريقي إلى التريليون — د. ماجد"
-BRAND_MEANING_AR = "مسار د. ماجد السيادي نحو التريليون عبر الذكاء الكمي المنضبط وإدارة الثروة"
+BRAND_MONOGRAM = "TMJ"
+BRAND_EXPANSION_EN = "TrilMajed • Dr. Majed Trillionaire"
+BRAND_TITLE_AR = "تريلماجد (TMJ) — طريقي إلى التريليون • د. ماجد"
+BRAND_MEANING_AR = "رحلة د. ماجد السيادية نحو التريليون عبر الذكاء الكمي المنضبط وإدارة الثروة (TrilMajed)"
 
 _EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$")
 _PHONE_RE = re.compile(r"^\+?[0-9]{8,15}$")
@@ -173,7 +173,7 @@ def verify_totp_code(
     return False, last_used_step
 
 
-def build_otpauth_uri(secret_b32: str, email: str, issuer: str = "TRM-Trilunair-Majed") -> str:
+def build_otpauth_uri(secret_b32: str, email: str, issuer: str = "TMJ-TrilMajed") -> str:
     from urllib.parse import quote
 
     label = quote(f"{issuer}:{email.strip()}")
@@ -200,10 +200,10 @@ def _validate_email_and_phone(email: str, phone: str) -> tuple[str, str]:
 
 def _validate_verification_key(vkey: str) -> str:
     cleaned = vkey.strip()
-    if len(cleaned) < 8 or cleaned.lower() in FORBIDDEN_WEAK_SECRETS:
+    if len(cleaned) < 6 or cleaned.lower() in FORBIDDEN_WEAK_SECRETS:
         raise HTTPException(
             status_code=400,
-            detail="مفتاح التحقق للأدمن يجب ألا يقل عن 8 محارف وألا يكون قيمة افتراضية ضعيفة.",
+            detail="كلمة المرور السرية الثابتة للأدمن يجب ألا تقل عن 6 خانات وألا تكون قيمة افتراضية ضعيفة (مثل 123456).",
         )
     return cleaned
 
@@ -367,7 +367,7 @@ def api_enroll_admin_identity(
         "emailMasked": mask_email(email),
         "phoneMasked": mask_phone(phone),
         "authenticatorSetup": {
-            "issuer": "TRM-Trilunair-Majed",
+            "issuer": "TMJ-TrilMajed",
             "secretBase32": totp_secret,
             "otpauthUri": build_otpauth_uri(totp_secret, email),
             "digits": 6,

@@ -1,12 +1,14 @@
 /**
- * منظومة الهوية السيادية، الشعار ثلاثي الأحرف (TRM)، وبوابة دخول أدمن المنصة متعددة العوامل
- * المشروع: طريقي إلى التريليون — د. ماجد (TRM • Trilunair × Road × Majed)
+ * منظومة الهوية السيادية، الشعار السداسي ثلاثي الأحرف (TMJ — TrilMajed | تريلماجد)،
+ * وبوابة دخول أدمن المنصة متعددة العوامل بدون أي التباس بين كلمة السر الثابتة ورمز المصادقة المتغير (6 أرقام).
  */
 
 import React, { useEffect, useState } from 'react';
 import {
   CheckCircle2,
   Copy,
+  Eye,
+  EyeOff,
   Fingerprint,
   KeyRound,
   Lock,
@@ -16,12 +18,22 @@ import {
   Smartphone,
   Sparkles,
   UserCheck,
+  Wand2,
   X,
 } from 'lucide-react';
 import { trilunairApi } from '../../api/client';
 import type { Language } from '../../types/trilunair';
 
-export const TrmMonogramCrest: React.FC<{ size?: number }> = ({ size = 50 }) => (
+export type MonogramVariant = 'TMJ' | 'MTR' | 'DMT';
+
+/**
+ * الشعار الهندسي ثلاثي الأحرف المطابق لبطاقة الهوية المعتمدة:
+ * الخيار الافتراضي الموصى به: A • TMJ (TrilMajed — تريلماجد) داخل إطار سداسي ذهبي مزدوج مع قمة التاج الصاعدة.
+ */
+export const TrmMonogramCrest: React.FC<{ size?: number; variant?: MonogramVariant }> = ({
+  size = 54,
+  variant = 'TMJ',
+}) => (
   <div
     style={{
       position: 'relative',
@@ -32,79 +44,135 @@ export const TrmMonogramCrest: React.FC<{ size?: number }> = ({ size = 50 }) => 
       alignItems: 'center',
       justifyContent: 'center',
     }}
-    title="TRM — Trilunair • Road • Majed (طريقي إلى التريليون • د. ماجد)"
+    title={
+      variant === 'TMJ'
+        ? 'TMJ — TrilMajed (تريلماجد • د. ماجد)'
+        : variant === 'MTR'
+        ? 'MTR — MajTrillion (ماج تريليون)'
+        : 'DMT — Dr. Majed Trillionaire (د. ماجد التريليونير)'
+    }
   >
     <svg
       width={size}
       height={size}
-      viewBox="0 0 64 64"
+      viewBox="0 0 68 68"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="شعار TRM — Trilunair Road Majed"
-      style={{ filter: 'drop-shadow(0 0 12px rgba(var(--accent-primary-rgb), 0.45))' }}
+      aria-label={`شعار ${variant}`}
+      style={{ filter: 'drop-shadow(0 0 12px rgba(var(--accent-primary-rgb), 0.42))' }}
     >
       <defs>
-        <linearGradient id="trmShieldGrad" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="var(--bg-surface)" />
-          <stop offset="100%" stopColor="var(--bg-base)" />
+        <linearGradient id="tmjNavyGrad" x1="8" y1="4" x2="60" y2="64" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#0d1528" />
+          <stop offset="100%" stopColor="#050811" />
         </linearGradient>
-        <linearGradient id="trmGoldGrad" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="var(--accent-secondary)" />
-          <stop offset="55%" stopColor="var(--accent-primary)" />
-          <stop offset="100%" stopColor="var(--accent-tertiary)" />
+        <linearGradient id="tmjGoldGrad" x1="8" y1="6" x2="60" y2="62" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ffe48f" />
+          <stop offset="50%" stopColor="var(--accent-primary)" />
+          <stop offset="100%" stopColor="#c5962d" />
         </linearGradient>
       </defs>
-      {/* الدرع الثماني السيادي */}
-      <polygon
-        points="20,3 44,3 61,20 61,44 44,61 20,61 3,44 3,20"
-        fill="url(#trmShieldGrad)"
-        stroke="url(#trmGoldGrad)"
-        strokeWidth="2.4"
-      />
-      <polygon
-        points="22,7 42,7 57,22 57,42 42,57 22,57 7,42 7,22"
-        fill="none"
-        stroke="var(--border-holo)"
-        strokeWidth="1"
-        strokeDasharray="3 2"
-      />
-      {/* قوس مسار التريليون الصاعد أعلى الشعار */}
-      <path
-        d="M16 18 C25 11, 39 11, 48 18"
-        stroke="url(#trmGoldGrad)"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <circle cx="32" cy="11.5" r="2.3" fill="var(--accent-primary)" />
-      {/* الأحرف الثلاثة المترابطة TRM */}
-      <text
-        x="32"
-        y="37"
-        textAnchor="middle"
-        fill="url(#trmGoldGrad)"
-        style={{
-          fontFamily: "'Cairo', 'IBM Plex Mono', sans-serif",
-          fontWeight: 900,
-          fontSize: '18.5px',
-          letterSpacing: '0.6px',
-        }}
-      >
-        TRM
-      </text>
-      {/* الهوية العربية المصغرة أسفل الأحرف الثلاثة */}
-      <text
-        x="32"
-        y="50.5"
-        textAnchor="middle"
-        fill="var(--text-secondary)"
-        style={{
-          fontFamily: "'Cairo', sans-serif",
-          fontWeight: 700,
-          fontSize: '7.5px',
-        }}
-      >
-        ت • ر • م
-      </text>
+
+      {variant === 'TMJ' && (
+        <>
+          {/* السداسي الذهبي المزدوج — الخيار A الموصى به (TMJ • TRILMAJED) */}
+          <polygon
+            points="34,3 61,18.5 61,49.5 34,65 7,49.5 7,18.5"
+            fill="url(#tmjNavyGrad)"
+            stroke="url(#tmjGoldGrad)"
+            strokeWidth="2.4"
+          />
+          <polygon
+            points="34,7.5 57,20.8 57,47.2 34,60.5 11,47.2 11,20.8"
+            fill="none"
+            stroke="url(#tmjGoldGrad)"
+            strokeWidth="0.95"
+            opacity="0.72"
+          />
+          {/* قمة المسار المزدوجة أعلى الشعار */}
+          <polyline
+            points="25,19 29.5,14.5 34,18 38.5,14.5 43,19"
+            fill="none"
+            stroke="url(#tmjGoldGrad)"
+            strokeWidth="1.9"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <text
+            x="34"
+            y="40"
+            textAnchor="middle"
+            fill="url(#tmjGoldGrad)"
+            style={{
+              fontFamily: "Georgia, 'Times New Roman', 'Cairo', serif",
+              fontWeight: 800,
+              fontSize: '19px',
+              letterSpacing: '0.8px',
+            }}
+          >
+            TMJ
+          </text>
+          <text
+            x="34"
+            y="50.5"
+            textAnchor="middle"
+            fill="url(#tmjGoldGrad)"
+            opacity="0.88"
+            style={{
+              fontFamily: "'Cairo', sans-serif",
+              fontWeight: 700,
+              fontSize: '5.5px',
+              letterSpacing: '1.3px',
+            }}
+          >
+            TRILMAJED
+          </text>
+        </>
+      )}
+
+      {variant === 'MTR' && (
+        <>
+          <circle cx="34" cy="34" r="30" fill="url(#tmjNavyGrad)" stroke="url(#tmjGoldGrad)" strokeWidth="2.3" />
+          <circle cx="34" cy="34" r="26.5" fill="none" stroke="url(#tmjGoldGrad)" strokeWidth="0.9" strokeDasharray="1.5 2.5" />
+          <polyline points="30,17 34,12.5 38,17" fill="none" stroke="url(#tmjGoldGrad)" strokeWidth="1.9" strokeLinecap="round" />
+          <text
+            x="34"
+            y="39"
+            textAnchor="middle"
+            fill="url(#tmjGoldGrad)"
+            style={{ fontFamily: "Georgia, 'Cairo', serif", fontWeight: 800, fontSize: '18px', letterSpacing: '0.8px' }}
+          >
+            MTR
+          </text>
+          <text x="34" y="51" textAnchor="middle" fill="url(#tmjGoldGrad)" style={{ fontSize: '5.3px', letterSpacing: '1.1px' }}>
+            MAJ TRILLION
+          </text>
+        </>
+      )}
+
+      {variant === 'DMT' && (
+        <>
+          <path
+            d="M34 4 L59 13 V33 C59 48.5 48.2 59.2 34 64 C19.8 59.2 9 48.5 9 33 V13 L34 4 Z"
+            fill="url(#tmjNavyGrad)"
+            stroke="url(#tmjGoldGrad)"
+            strokeWidth="2.3"
+          />
+          <polyline points="21,23 28,18 33,20.5 42,13 47,15" fill="none" stroke="url(#tmjGoldGrad)" strokeWidth="1.8" strokeLinecap="round" />
+          <text
+            x="34"
+            y="40.5"
+            textAnchor="middle"
+            fill="url(#tmjGoldGrad)"
+            style={{ fontFamily: "Georgia, 'Cairo', serif", fontWeight: 900, fontSize: '17.5px', letterSpacing: '0.6px' }}
+          >
+            DMT
+          </text>
+          <text x="34" y="50.5" textAnchor="middle" fill="url(#tmjGoldGrad)" style={{ fontSize: '4.7px', letterSpacing: '0.9px' }}>
+            DR. MAJED
+          </text>
+        </>
+      )}
     </svg>
   </div>
 );
@@ -137,16 +205,16 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
   const [activeTab, setActiveTab] = useState<'login' | 'enroll'>(
     identity?.enrolled ? 'login' : 'enroll'
   );
+  const [monogram, setMonogram] = useState<MonogramVariant>('TMJ');
 
-  // حقول التأسيس والدخول لأدمن المنصة (د. ماجد)
   const [displayName, setDisplayName] = useState<string>(identity?.displayName || 'د. ماجد');
   const [email, setEmail] = useState<string>('');
   const [phone, setPhone] = useState<string>('+9665');
   const [verificationKey, setVerificationKey] = useState<string>('');
+  const [showKey, setShowKey] = useState<boolean>(false);
   const [currentVerificationKey, setCurrentVerificationKey] = useState<string>('');
   const [totpCode, setTotpCode] = useState<string>('');
 
-  // مخرجات إعداد تطبيق المصادقة (RFC 6238 Authenticator)
   const [pendingSetup, setPendingSetup] = useState<{
     secretBase32: string;
     otpauthUri: string;
@@ -176,6 +244,18 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const generateStrongPassword = () => {
+    const rand = Math.floor(100 + Math.random() * 900);
+    const generated = `Majed#${rand}!`;
+    setVerificationKey(generated);
+    setShowKey(true);
+    setSuccessMsg(
+      isAr
+        ? `تم توليد كلمة سر ثابتة جاهزة للأدمن (${generated}) — احتفظ بها، وهي تختلف عن رمز الـ 6 أرقام المتغير الخاص بتطبيق المصادقة.`
+        : `Generated admin password: ${generated}`
+    );
+  };
 
   const copyText = async (val: string, label: string) => {
     try {
@@ -207,8 +287,8 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
       });
       setSuccessMsg(
         isAr
-          ? 'تم حفظ البريد الإلكتروني ورقم الجوال ومفتاح التحقق مشفرةً بـ AES-256-GCM! الآن أضف مفتاح المصادقة أدناه في تطبيق Authenticator وأدخل الرمز المكون من 6 أرقام للتأكيد.'
-          : 'Admin credentials encrypted! Add the Base32 key to your Authenticator app and confirm the 6-digit code.'
+          ? 'الخطوة 1 اكتملت! الآن أضف مفتاح Base32 أدناه في تطبيق المصادقة على جوالك (Google / Apple Authenticator) ثم أدخل الرمز المكون من 6 أرقام في الخانة بالأسفل.'
+          : 'Step 1 complete! Add the Base32 key to your Authenticator app and enter the 6-digit code below.'
       );
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'فشل تأسيس هوية الأدمن');
@@ -226,13 +306,14 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
         verificationKey,
         totpCode,
       });
-      // تسجيل الدخول مباشرة بعد تأكيد الإقران
-      const loginRes = await trilunairApi.loginAdminMfa({
-        email,
-        phone,
-        verificationKey,
-        totpCode,
-      }).catch(() => null);
+      const loginRes = await trilunairApi
+        .loginAdminMfa({
+          email,
+          phone,
+          verificationKey,
+          totpCode,
+        })
+        .catch(() => null);
 
       const updated: AdminIdentitySummary = {
         enrolled: true,
@@ -247,8 +328,8 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
       onAuthenticated(
         updated,
         isAr
-          ? 'تم تفعيل تطبيق المصادقة الثنائية وتوثيق حساب الأدمن (د. ماجد — TRM) بنجاح!'
-          : 'TRM Sovereign Admin MFA enrolled & verified!'
+          ? 'تم تفعيل تطبيق المصادقة الثنائية وتوثيق حساب الأدمن (د. ماجد — TMJ تريلماجد) بنجاح!'
+          : 'TMJ Sovereign Admin MFA enrolled & verified!'
       );
       onClose();
     } catch (err) {
@@ -280,8 +361,8 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
           totpVerified: true,
         },
         isAr
-          ? `مرحباً ${res.displayName} — تم التحقق من العوامل الأربعة (البريد + الجوال + مفتاح التحقق + Authenticator) بنجاح.`
-          : `Welcome ${res.displayName} — 4-Factor TRM Admin session active.`
+          ? `مرحباً ${res.displayName} — تم التحقق من العوامل الأربعة (البريد + الجوال + كلمة سر الأدمن + Authenticator) بنجاح.`
+          : `Welcome ${res.displayName} — 4-Factor TMJ Admin session active.`
       );
       onClose();
     } catch (err) {
@@ -327,12 +408,12 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
     <div
       role="dialog"
       aria-modal="true"
-      aria-labelledby="trm-admin-gate-title"
+      aria-labelledby="tmj-admin-gate-title"
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 1200,
-        background: 'rgba(4, 6, 12, 0.84)',
+        background: 'rgba(4, 6, 12, 0.85)',
         backdropFilter: 'blur(14px)',
         display: 'flex',
         alignItems: 'center',
@@ -344,7 +425,7 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
         className="holo-panel"
         style={{
           width: '100%',
-          maxWidth: '640px',
+          maxWidth: '650px',
           maxHeight: '92vh',
           overflowY: 'auto',
           padding: '1.35rem 1.5rem',
@@ -352,7 +433,7 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
           boxShadow: 'var(--shadow-glow-strong)',
         }}
       >
-        {/* رأس البوابة مع شعار TRM ثلاثي الأحرف */}
+        {/* رأس البوابة مع خيارات الشعار الثلاثية TMJ / MTR / DMT */}
         <div
           style={{
             display: 'flex',
@@ -364,26 +445,46 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-            <TrmMonogramCrest size={54} />
+            <TrmMonogramCrest size={58} variant={monogram} />
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
-                <span className="holo-badge holo-badge-accent" style={{ fontWeight: 800 }}>
-                  TRM • Trilunair × Majed
-                </span>
-                <span className="holo-badge holo-badge-success">PAPER SAFE LOCK</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className={`holo-btn ${monogram === 'TMJ' ? 'holo-btn-primary' : ''}`}
+                  style={{ padding: '0.15rem 0.5rem', fontSize: '0.72rem', minHeight: 'auto' }}
+                  onClick={() => setMonogram('TMJ')}
+                >
+                  A • TMJ (الموصى به)
+                </button>
+                <button
+                  type="button"
+                  className={`holo-btn ${monogram === 'MTR' ? 'holo-btn-primary' : ''}`}
+                  style={{ padding: '0.15rem 0.5rem', fontSize: '0.72rem', minHeight: 'auto' }}
+                  onClick={() => setMonogram('MTR')}
+                >
+                  B • MTR
+                </button>
+                <button
+                  type="button"
+                  className={`holo-btn ${monogram === 'DMT' ? 'holo-btn-primary' : ''}`}
+                  style={{ padding: '0.15rem 0.5rem', fontSize: '0.72rem', minHeight: 'auto' }}
+                  onClick={() => setMonogram('DMT')}
+                >
+                  C • DMT
+                </button>
               </div>
               <h2
-                id="trm-admin-gate-title"
-                style={{ margin: '0.25rem 0 0', fontSize: '1.15rem', fontWeight: 800 }}
+                id="tmj-admin-gate-title"
+                style={{ margin: '0.3rem 0 0', fontSize: '1.15rem', fontWeight: 800 }}
               >
                 {isAr
-                  ? 'بوابة الهوية والدخول السيادي لأدمن المنصة (د. ماجد)'
-                  : 'TRM Sovereign Platform Admin MFA Gate'}
+                  ? 'بوابة دخول وتأسيس أدمن المنصة — تريلماجد (د. ماجد)'
+                  : 'TMJ Sovereign Platform Admin MFA Gate'}
               </h2>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                 {isAr
-                  ? 'حماية رباعية العوامل: البريد الإلكتروني + رقم الجوال + مفتاح التحقق السري + تطبيق المصادقة (Authenticator)'
-                  : '4-Factor Admin Verification: Email + Phone + Secret Verification Key + TOTP Authenticator'}
+                  ? 'توضيح هام: «كلمة سر الأدمن الثابتة» تختارها أنت (6 خانات فأكثر)، أما «رمز Authenticator» فهو الـ 6 أرقام المتغيرة كل 30 ثانية.'
+                  : 'Static Admin Password (6+ chars) + 6-digit rotating Authenticator TOTP code.'}
               </div>
             </div>
           </div>
@@ -392,14 +493,13 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
             type="button"
             className="holo-btn"
             onClick={onClose}
-            aria-label={isAr ? 'إغلاق نافذة دخول الأدمن' : 'Close Admin Gate'}
+            aria-label={isAr ? 'إغلاق' : 'Close'}
             style={{ padding: '0.4rem' }}
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* شريط حالة الهوية المسجلة */}
         {identity?.enrolled && (
           <div
             style={{
@@ -423,11 +523,7 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
                 ({identity.emailMasked} • {identity.phoneMasked})
               </span>
             </div>
-            <span
-              className={`holo-badge ${
-                identity.authenticated ? 'holo-badge-success' : 'holo-badge-warning'
-              }`}
-            >
+            <span className={`holo-badge ${identity.authenticated ? 'holo-badge-success' : 'holo-badge-warning'}`}>
               {identity.authenticated
                 ? isAr
                   ? 'جلسة أدمن موثقة نشطة'
@@ -439,7 +535,6 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
           </div>
         )}
 
-        {/* التبديل بين تسجيل الدخول وتأسيس/تحديث بيانات الأدمن */}
         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.95rem' }}>
           <button
             id="trm-tab-login"
@@ -452,7 +547,7 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
             }}
           >
             <Lock size={15} />
-            {isAr ? 'دخول الأدمن (4 عوامل + Authenticator)' : 'Admin 4-Factor Login'}
+            {isAr ? 'تسجيل دخول الأدمن' : 'Admin Sign-In'}
           </button>
           <button
             id="trm-tab-enroll"
@@ -465,7 +560,7 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
             }}
           >
             <Sparkles size={15} />
-            {isAr ? 'تأسيس / تحديث بيانات الأدمن' : 'Enroll / Update Admin MFA'}
+            {isAr ? 'تأسيس / تحديث حساب الأدمن' : 'Setup / Update Admin'}
           </button>
         </div>
 
@@ -542,17 +637,29 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
             </div>
 
             <label style={{ display: 'grid', gap: '0.3rem', fontSize: '0.82rem' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <KeyRound size={14} style={{ color: 'var(--accent-primary)' }} />
-                {isAr ? 'مفتاح التحقق السري للأدمن (Verification Key)' : 'Secret Verification Key'}
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <KeyRound size={14} style={{ color: 'var(--accent-primary)' }} />
+                  {isAr ? 'كلمة المرور الثابتة للأدمن (التي اخترتها عند التأسيس — 6 خانات فأكثر)' : 'Static Admin Password (6+ chars)'}
+                </span>
+                <button
+                  type="button"
+                  className="holo-btn"
+                  style={{ padding: '0.15rem 0.5rem', fontSize: '0.72rem', minHeight: 'auto' }}
+                  onClick={() => setShowKey((p) => !p)}
+                >
+                  {showKey ? <EyeOff size={13} /> : <Eye size={13} />}
+                  {showKey ? (isAr ? 'إخفاء' : 'Hide') : isAr ? 'إظهار' : 'Show'}
+                </button>
               </span>
               <input
                 id="admin-login-vkey"
-                type="password"
+                type={showKey ? 'text' : 'password'}
                 required
+                minLength={6}
                 dir="ltr"
                 className="holo-input"
-                placeholder="••••••••••••"
+                placeholder="مثال: Majed#926!"
                 value={verificationKey}
                 onChange={(e) => setVerificationKey(e.target.value)}
               />
@@ -563,7 +670,7 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                   <Smartphone size={14} style={{ color: 'var(--accent-primary)' }} />
                   {isAr
-                    ? 'رمز تطبيق المصادقة (Authenticator — 6 أرقام)'
+                    ? 'رمز تطبيق المصادقة المتغير (Authenticator — 6 أرقام)'
                     : 'Authenticator 6-Digit Code (TOTP)'}
                 </span>
                 <span className="fin-value" style={{ fontSize: '0.75rem', color: 'var(--accent-primary)' }}>
@@ -600,7 +707,7 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
                     ? 'جارٍ التحقق المشفر...'
                     : 'Verifying...'
                   : isAr
-                  ? 'تسجيل دخول أدمن المنصة (TRM)'
+                  ? 'تسجيل دخول أدمن المنصة (TMJ)'
                   : 'Sign In as Sovereign Admin'}
               </button>
 
@@ -661,19 +768,41 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
               </label>
 
               <label style={{ display: 'grid', gap: '0.3rem', fontSize: '0.82rem' }}>
-                <span>
-                  {isAr
-                    ? 'مفتاح التحقق السري الجديد (10 خانات فأكثر — يُحفظ بـ PBKDF2-SHA256)'
-                    : 'New Secret Verification Key (min 10 chars)'}
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.35rem' }}>
+                  <span>
+                    {isAr
+                      ? 'كلمة سر الأدمن الثابتة الخاصة بك (6 خانات فأكثر — وليست رمز الـ 6 أرقام المتغير)'
+                      : 'Your Static Admin Password (min 6 chars)'}
+                  </span>
+                  <span style={{ display: 'flex', gap: '0.35rem' }}>
+                    <button
+                      type="button"
+                      className="holo-btn"
+                      style={{ padding: '0.15rem 0.5rem', fontSize: '0.72rem', minHeight: 'auto' }}
+                      onClick={generateStrongPassword}
+                    >
+                      <Wand2 size={12} />
+                      {isAr ? 'توليد كلمة سر جاهزة' : 'Generate'}
+                    </button>
+                    <button
+                      type="button"
+                      className="holo-btn"
+                      style={{ padding: '0.15rem 0.5rem', fontSize: '0.72rem', minHeight: 'auto' }}
+                      onClick={() => setShowKey((p) => !p)}
+                    >
+                      {showKey ? <EyeOff size={12} /> : <Eye size={12} />}
+                      {showKey ? (isAr ? 'إخفاء' : 'Hide') : isAr ? 'إظهار' : 'Show'}
+                    </button>
+                  </span>
                 </span>
                 <input
                   id="admin-enroll-vkey"
-                  type="password"
+                  type={showKey ? 'text' : 'password'}
                   required
-                  minLength={10}
+                  minLength={6}
                   dir="ltr"
                   className="holo-input"
-                  placeholder="مثال: Majed#TRM$2026!"
+                  placeholder="اختر كلمة سر ثابتة (6 خانات فأكثر مثل Majed#926)"
                   value={verificationKey}
                   onChange={(e) => setVerificationKey(e.target.value)}
                 />
@@ -683,8 +812,8 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
                 <label style={{ display: 'grid', gap: '0.3rem', fontSize: '0.82rem' }}>
                   <span>
                     {isAr
-                      ? 'مفتاح التحقق الحالي (مطلوب لتأكيد ملكية الأدمن قبل التحديث)'
-                      : 'Current Verification Key'}
+                      ? 'كلمة سر الأدمن الحالية (لتأكيد ملكية الحساب قبل التحديث)'
+                      : 'Current Admin Password'}
                   </span>
                   <input
                     type="password"
@@ -710,8 +839,8 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
                     ? 'جارٍ التشفير وتوليد مفتاح المصادقة...'
                     : 'Encrypting & Generating TOTP...'
                   : isAr
-                  ? 'حفظ الهوية وتوليد مفتاح تطبيق المصادقة (Authenticator)'
-                  : 'Save Identity & Generate Authenticator Secret'}
+                  ? '1. حفظ بيانات الأدمن وإظهار مفتاح تطبيق المصادقة'
+                  : '1. Save Admin Profile & Generate Authenticator Secret'}
               </button>
             </form>
 
@@ -730,8 +859,8 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
                 <div style={{ fontWeight: 800, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <Smartphone size={16} style={{ color: 'var(--accent-primary)' }} />
                   {isAr
-                    ? 'إقران تطبيق المصادقة (Google / Apple / Microsoft Authenticator)'
-                    : 'Pair Your Authenticator App (RFC 6238)'}
+                    ? '2. إقران تطبيق المصادقة وإدخال رمز الـ 6 أرقام المتغير'
+                    : '2. Pair Your Authenticator App & Enter 6-Digit Code'}
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                   {pendingSetup.instructionsAr}
@@ -762,18 +891,6 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
                   </button>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    className="holo-btn"
-                    style={{ fontSize: '0.76rem' }}
-                    onClick={() => void copyText(pendingSetup.otpauthUri, 'رابط otpauth://')}
-                  >
-                    <Copy size={13} />
-                    {isAr ? 'نسخ رابط الإقران القياسي (otpauth://)' : 'Copy otpauth:// URI'}
-                  </button>
-                </div>
-
                 <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
                   <input
                     id="admin-confirm-totp-input"
@@ -784,7 +901,7 @@ export const AdminSovereignGateModal: React.FC<AdminSovereignGateModalProps> = (
                     dir="ltr"
                     className="holo-input fin-value"
                     style={{ flex: 1, minWidth: '150px', textAlign: 'center', fontSize: '1.1rem', letterSpacing: '0.3em', fontWeight: 800 }}
-                    placeholder="000000"
+                    placeholder="أدخل الـ 6 أرقام هنا"
                     value={totpCode}
                     onChange={(e) => setTotpCode(e.target.value)}
                   />

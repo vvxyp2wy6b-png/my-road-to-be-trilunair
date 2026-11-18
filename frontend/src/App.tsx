@@ -457,7 +457,7 @@ export const App: React.FC = () => {
                 className="holo-badge holo-badge-accent"
                 style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.12rem 0.48rem' }}
               >
-                TRM • ت ر م
+                TMJ • تريلماجد
               </span>
             </div>
             <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
