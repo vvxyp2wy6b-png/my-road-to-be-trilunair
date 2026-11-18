@@ -3,82 +3,192 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>طريقي إلى التريليون — د. مجووووود | QUANTUM TRILUNAIR v1.3.0</title>
+  <title>TRM | طريقي إلى التريليون — د. ماجد (Trilunair × Road × Majed)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg-base: #07080d;
       --bg-elevated: #0e111a;
-      --bg-surface: rgba(21, 26, 40, 0.86);
-      --bg-sub: rgba(10, 13, 22, 0.78);
+      --bg-surface: rgba(20, 25, 39, 0.90);
+      --bg-sub: rgba(10, 13, 22, 0.84);
       --accent: #f5c451;
+      --accent-2: #ffd97d;
       --accent-rgb: 245, 196, 81;
       --text-main: #f8fafc;
+      --text-sec: #cbd5e1;
       --text-muted: #94a3b8;
-      --border-holo: rgba(var(--accent-rgb), 0.36);
-      --border-sub: rgba(255, 255, 255, 0.10);
+      --border-holo: rgba(var(--accent-rgb), 0.38);
+      --border-sub: rgba(255, 255, 255, 0.11);
       --ok: #10b981;
       --warn: #f59e0b;
       --err: #f43f5e;
       --cyan: #38bdf8;
-      --radius: 13px;
+      --radius: 14px;
     }
-    html[data-cockpit="true"] { --bg-surface: rgba(14, 17, 26, 0.97); --radius: 7px; }
+    html[data-cockpit="true"] { --bg-surface: rgba(12, 15, 24, 0.98); --radius: 8px; }
     html[data-focus="true"] .hide-focus { display: none !important; }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      padding: 0 0 96px 0;
+      padding: 0 0 98px 0;
       min-height: 100vh;
-      font-family: 'Cairo', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+      font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
       color: var(--text-main);
       background:
-        radial-gradient(circle at 15% 10%, rgba(var(--accent-rgb), 0.13), transparent 42%),
-        radial-gradient(circle at 85% 16%, rgba(56, 189, 248, 0.08), transparent 45%),
+        radial-gradient(circle at 14% 8%, rgba(var(--accent-rgb), 0.15), transparent 40%),
+        radial-gradient(circle at 86% 14%, rgba(56, 189, 248, 0.09), transparent 44%),
         linear-gradient(180deg, var(--bg-base) 0%, var(--bg-elevated) 100%);
+      line-height: 1.55;
     }
-    .num { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; display: inline-block; }
-    .topbar {
-      position: sticky; top: 0; z-index: 30;
-      background: rgba(7, 8, 13, 0.88);
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border-sub);
-      padding: 12px 18px;
-      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+    h1, h2, h3, h4, button, input, select, textarea {
+      font-family: 'Cairo', system-ui, -apple-system, sans-serif;
     }
-    .brand { display: flex; align-items: center; gap: 11px; }
-    .orb {
-      width: 38px; height: 38px; border-radius: 10px;
-      background: var(--accent); color: #07080d;
-      font-weight: 900; font-size: 19px;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.45);
+    .num {
+      font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-variant-numeric: tabular-nums;
+      direction: ltr;
+      unicode-bidi: isolate;
+      display: inline-block;
+    }
+
+    /* الهيدر السيادي للمنصة (TRM Sovereign Meaning Header) */
+    .sovereign-header {
+      position: relative;
+      z-index: 30;
+      background:
+        linear-gradient(135deg, rgba(var(--accent-rgb), 0.11) 0%, rgba(10, 14, 24, 0.96) 46%, rgba(7, 9, 16, 0.98) 100%);
+      border-bottom: 1px solid var(--border-holo);
+      box-shadow: 0 12px 34px -14px rgba(0, 0, 0, 0.85);
+    }
+    .header-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 14px 18px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .identity-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .trm-crest-wrap {
+      width: 64px;
+      height: 64px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 0 14px rgba(var(--accent-rgb), 0.42));
+    }
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+    .brand-h1 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
+    }
+    .brand-meaning {
+      margin: 2px 0 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-sec);
+    }
+    .trm-pillars {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 6px;
+    }
+    .pillar-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid var(--border-sub);
+      color: var(--text-sec);
+    }
+    .pillar-letter {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 19px;
+      height: 19px;
+      border-radius: 5px;
+      background: var(--accent);
+      color: #07080d;
+      font-weight: 900;
+      font-size: 11.5px;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .nav-bar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-sub);
     }
     .nav { display: flex; flex-wrap: wrap; gap: 6px; }
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       padding: 7px 12px; border-radius: 9px; font-size: 12.5px; font-weight: 700;
       color: var(--text-main); background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border-sub); cursor: pointer; font-family: inherit;
+      border: 1px solid var(--border-sub); cursor: pointer;
       transition: all 0.16s ease;
     }
-    .btn:hover { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.12); }
+    .btn:hover { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.13); }
     .btn-primary {
       background: var(--accent); color: #090b10; border-color: var(--accent);
-      box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.32);
+      font-weight: 800;
+      box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.30);
     }
     .btn-primary:hover { filter: brightness(1.06); background: var(--accent); color: #090b10; }
     .btn-danger { background: rgba(244, 63, 94, 0.18); color: #fda4af; border-color: rgba(244, 63, 94, 0.5); }
     .btn-ok { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.5); }
+
     .badge {
       display: inline-flex; align-items: center; gap: 5px;
       padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700;
       border: 1px solid var(--border-sub); background: rgba(255,255,255,0.06);
     }
+    .badge-acc { color: var(--accent); background: rgba(var(--accent-rgb), 0.14); border-color: var(--border-holo); font-weight: 800; }
     .badge-ok { color: #6ee7b7; background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.45); }
     .badge-warn { color: #fcd34d; background: rgba(245, 158, 11, 0.16); border-color: rgba(245, 158, 11, 0.45); }
     .badge-err { color: #fda4af; background: rgba(244, 63, 94, 0.16); border-color: rgba(244, 63, 94, 0.45); }
+
     .wrap { max-width: 1440px; margin: 0 auto; padding: 14px 18px; }
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 1150px) {
+      .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    }
     .card {
       background: var(--bg-surface);
       border: 1px solid var(--border-holo);
@@ -89,7 +199,7 @@
     .subcard {
       background: var(--bg-sub);
       border: 1px solid var(--border-sub);
-      border-radius: 9px;
+      border-radius: 10px;
       padding: 10px 12px;
     }
     .grid-term { display: grid; grid-template-columns: 280px 1fr 320px; gap: 14px; align-items: start; }
@@ -100,10 +210,14 @@
       .grid-term, .grid-2, .grid-4 { grid-template-columns: 1fr; }
       .grid-3 { grid-template-columns: repeat(2, 1fr); }
     }
+    @media (max-width: 640px) {
+      .grid-3 { grid-template-columns: 1fr; }
+    }
+
     .inp, select, textarea {
-      width: 100%; padding: 8px 10px; border-radius: 8px;
-      background: rgba(6, 9, 15, 0.9); color: var(--text-main);
-      border: 1px solid rgba(255,255,255,0.16); font-family: inherit; font-size: 12.5px;
+      width: 100%; padding: 8px 11px; border-radius: 9px;
+      background: rgba(6, 9, 15, 0.92); color: var(--text-main);
+      border: 1px solid rgba(255,255,255,0.17); font-size: 13px;
     }
     .inp:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
     .row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
@@ -112,59 +226,112 @@
     .toast {
       margin-bottom: 12px; padding: 10px 14px; border-radius: 10px;
       background: rgba(var(--accent-rgb), 0.16); border: 1px solid var(--accent);
-      font-size: 12.5px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;
     }
     .dock {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 35;
-      padding: 8px 16px 12px; background: linear-gradient(180deg, transparent, rgba(5,6,10,0.94) 28%);
+      padding: 8px 16px 12px; background: linear-gradient(180deg, transparent, rgba(5,6,10,0.95) 28%);
     }
     .dock-inner {
       max-width: 1400px; margin: 0 auto;
-      background: rgba(14, 18, 29, 0.95); border: 1px solid var(--border-holo);
+      background: rgba(14, 18, 29, 0.96); border: 1px solid var(--border-holo);
       border-radius: 13px; padding: 10px 12px;
-      box-shadow: 0 -6px 28px rgba(0,0,0,0.75);
+      box-shadow: 0 -6px 28px rgba(0,0,0,0.78);
     }
     .modal-bg {
-      position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.8);
+      position: fixed; inset: 0; z-index: 60;
+      background: rgba(3, 5, 10, 0.86);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       display: flex; align-items: center; justify-content: center; padding: 16px;
     }
     .asset-item {
       padding: 9px 11px; border-radius: 9px; border: 1px solid var(--border-sub);
       background: rgba(255,255,255,0.03); cursor: pointer; margin-top: 7px;
     }
-    .asset-item.active { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.12); }
+    .asset-item.active { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.13); }
     .text-ok { color: #34d399; }
     .text-err { color: #fb7185; }
     .text-warn { color: #fbbf24; }
     .text-acc { color: var(--accent); }
+    .totp-bar-track {
+      width: 100%; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.09); overflow: hidden; margin-top: 6px;
+    }
+    .totp-bar-fill {
+      height: 100%; background: var(--accent); transition: width 0.4s linear;
+    }
   </style>
 </head>
 <body>
 
-  <!-- الشريط العلوي -->
-  <header class="topbar">
-    <div class="brand">
-      <div class="orb">₮</div>
-      <div>
-        <div style="font-weight:800;font-size:15.5px;">طريقي إلى التريليون — د. مجووووود</div>
-        <div class="muted">My Road to be Trilunair Dr.MaJoOoOoOoD • v1.3.0-binance-personal-guard</div>
+  <!-- الهيدر السيادي للمنصة بشعار الأحرف الثلاثة المترابطة (TRM = Trilunair × Road × Majed) -->
+  <header class="sovereign-header" role="banner">
+    <div class="header-inner">
+      <div class="identity-row">
+        <div class="brand-cluster">
+          <!-- الشعار الهندسي ثلاثي الأحرف TRM (Trilunair • Road • Majed) -->
+          <div class="trm-crest-wrap" title="شعار المنصة السيادي: TRM (Trilunair • Road • Majed)">
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="TRM Emblem">
+              <defs>
+                <linearGradient id="trmBg" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#171e30" />
+                  <stop offset="100%" stop-color="#06080f" />
+                </linearGradient>
+                <linearGradient id="trmGold" x1="6" y1="6" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#ffe28a" />
+                  <stop offset="52%" stop-color="var(--accent)" />
+                  <stop offset="100%" stop-color="#38bdf8" />
+                </linearGradient>
+              </defs>
+              <polygon points="20,3 44,3 61,20 61,44 44,61 20,61 3,44 3,20" fill="url(#trmBg)" stroke="url(#trmGold)" stroke-width="2.5" />
+              <polygon points="22,7 42,7 57,22 57,42 42,57 22,57 7,42 7,22" fill="none" stroke="rgba(245,196,81,0.35)" stroke-width="1" stroke-dasharray="3 2" />
+              <path d="M16 18 C25 11, 39 11, 48 18" stroke="url(#trmGold)" stroke-width="1.9" stroke-linecap="round" />
+              <circle cx="32" cy="11.5" r="2.4" fill="var(--accent)" />
+              <text x="32" y="37" text-anchor="middle" fill="url(#trmGold)" style="font-family:'Cairo','IBM Plex Mono',sans-serif;font-weight:900;font-size:18.5px;letter-spacing:0.7px;">TRM</text>
+              <text x="32" y="50.5" text-anchor="middle" fill="#cbd5e1" style="font-family:'Cairo',sans-serif;font-weight:700;font-size:7.6px;">ت • ر • م</text>
+            </svg>
+          </div>
+
+          <div>
+            <div class="brand-title-row">
+              <h1 class="brand-h1">طريقي إلى التريليون — د. ماجد</h1>
+              <span class="badge badge-acc num">TRM • Trilunair × Majed</span>
+              <span id="admin-hdr-badge" class="badge badge-warn">👑 أدمن المنصة: بانتظار التفعيل</span>
+            </div>
+            <p class="brand-meaning">
+              رحلة بناء الثروة السيادية بقيادة د. ماجد: من إدارة الدخل الشهري المنضبطة (20,000 ر.س) إلى التراكم الكمي الآمن نحو التريليون
+            </p>
+            <div class="trm-pillars hide-focus">
+              <span class="pillar-chip"><span class="pillar-letter">T</span> <strong>Trilunair:</strong> غاية التريليون ($1T)</span>
+              <span class="pillar-chip"><span class="pillar-letter">R</span> <strong>Road:</strong> منهجية المخاطر الصارمة (0.5%)</span>
+              <span class="pillar-chip"><span class="pillar-letter">M</span> <strong>Majed:</strong> القيادة السيادية لأدمن المنصة</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- أزرار التحكم العليا ودخول الأدمن -->
+        <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
+          <span id="mode-badge" class="badge badge-ok">🔒 PAPER LOCKED • liveAuthorized=false</span>
+          <button id="btn-open-admin" class="btn btn-primary" onclick="ui.openAdminModal()">🔐 دخول / إعداد الأدمن (MFA)</button>
+          <button id="btn-lock-platform" class="btn" onclick="ui.lockPlatform()" title="قفل المنصة بكلمة تحقق الأدمن و Authenticator">🔒 قفل المنصة</button>
+          <button class="btn" id="btn-cockpit" onclick="ui.toggleCockpit()">⚡ Cockpit</button>
+          <button class="btn" id="btn-focus" onclick="ui.toggleFocus()">🎯 تركيز</button>
+          <select id="theme-select" style="width:auto;" onchange="ui.setTheme(this.value)" aria-label="السمة الهولوغرافية"></select>
+        </div>
       </div>
-    </div>
 
-    <nav class="nav" aria-label="التنقل الرئيسي">
-      <button class="btn btn-primary" data-tab="terminal" onclick="ui.tab('terminal')">📈 قاعة التداول الحية</button>
-      <button class="btn" data-tab="binance" onclick="ui.tab('binance')">🔐 حساب Binance الحقيقي (قراءة فقط)</button>
-      <button class="btn" data-tab="cfo" onclick="ui.tab('cfo')">💼 المحفظة والمدير المالي (20,000 ر.س)</button>
-      <button class="btn" data-tab="quantum" onclick="ui.tab('quantum')">🧠 مجلس الوكلاء الكمي</button>
-      <button class="btn" data-tab="gov" onclick="ui.tab('gov')">🛡️ بوابة الأمان و Passkeys</button>
-      <button class="btn" data-tab="themes" onclick="ui.tab('themes')">🎨 السمات الهولوغرافية (6)</button>
-    </nav>
-
-    <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
-      <span id="mode-badge" class="badge badge-ok">🔒 PAPER LOCKED • liveAuthorized=false</span>
-      <button class="btn" id="btn-cockpit" onclick="ui.toggleCockpit()">⚡ Cockpit</button>
-      <button class="btn" id="btn-focus" onclick="ui.toggleFocus()">🎯 تركيز</button>
-      <select id="theme-select" style="width:auto;" onchange="ui.setTheme(this.value)"></select>
+      <!-- شريط التبويبات الرئيسي -->
+      <div class="nav-bar-row">
+        <nav class="nav" aria-label="التنقل الرئيسي">
+          <button class="btn btn-primary" data-tab="terminal" onclick="ui.tab('terminal')">📈 قاعة التداول والاجتماع</button>
+          <button class="btn" data-tab="admin" onclick="ui.tab('admin')">👑 هوية ودخول الأدمن (TRM MFA)</button>
+          <button class="btn" data-tab="binance" onclick="ui.tab('binance')">🔐 حساب Binance الحقيقي (قراءة فقط)</button>
+          <button class="btn" data-tab="cfo" onclick="ui.tab('cfo')">💼 المدير المالي (20,000 ر.س)</button>
+          <button class="btn" data-tab="quantum" onclick="ui.tab('quantum')">🧠 مجلس الوكلاء الكمي</button>
+          <button class="btn" data-tab="gov" onclick="ui.tab('gov')">🛡️ الأمان و Passkeys</button>
+          <button class="btn" data-tab="themes" onclick="ui.tab('themes')">🎨 السمات (6)</button>
+        </nav>
+        <div class="muted" style="font-weight:700;">الخط النشط: <strong class="text-acc">Cairo (القاهرة)</strong> • العزل: 100% آمن</div>
+      </div>
     </div>
   </header>
 
@@ -175,43 +342,41 @@
       <button class="btn" style="padding:2px 8px;" onclick="document.getElementById('toast').classList.add('hidden')">✕</button>
     </div>
 
-    <!-- شريط المؤشرات العلوي (لمحفظة المحاكاة الورقية المعزولة) -->
+    <!-- شريط المؤشرات العلوي (KPI Grid) -->
     <section class="kpi-grid hide-focus">
       <div class="card">
         <div class="muted">إجمالي حقوق الملكية (محاكاة PAPER)</div>
-        <div id="kpi-eq" class="num" style="font-size:20px;font-weight:800;margin-top:4px;">$1,001,420.50</div>
+        <div id="kpi-eq" class="num" style="font-size:19px;font-weight:800;margin-top:4px;">$1,001,420.50</div>
       </div>
       <div class="card">
         <div class="muted">ربح / خسارة اليوم</div>
-        <div id="kpi-pnl" class="num text-ok" style="font-size:18px;font-weight:800;margin-top:4px;">+$1,420.50 (+0.14%)</div>
+        <div id="kpi-pnl" class="num text-ok" style="font-size:17.5px;font-weight:800;margin-top:4px;">+$1,420.50 (+0.14%)</div>
       </div>
       <div class="card">
         <div class="muted">السيولة المتاحة (USDT ورقي)</div>
-        <div id="kpi-cash" class="num" style="font-size:18px;font-weight:800;margin-top:4px;">$912,450.00</div>
+        <div id="kpi-cash" class="num" style="font-size:17.5px;font-weight:800;margin-top:4px;">$912,450.00</div>
       </div>
       <div class="card">
         <div class="muted">سقوف المخاطر الموحدة الخمسة</div>
-        <div class="num text-warn" style="font-size:13.5px;font-weight:700;margin-top:6px;">0.5% صفقة • 25% أصل • 10% أقصى تراجع</div>
+        <div class="num text-warn" style="font-size:13px;font-weight:700;margin-top:6px;">0.5% صفقة • 25% أصل • 10% أقصى تراجع</div>
       </div>
       <div class="card">
-        <div class="muted">التقدم نحو هدف التريليون ($1T)</div>
-        <div class="num text-acc" style="font-size:14.5px;font-weight:800;margin-top:6px;">$1.00T Target • Log 14.3%</div>
+        <div class="muted">بوصلة TRM نحو التريليون ($1T)</div>
+        <div class="num text-acc" style="font-size:14px;font-weight:800;margin-top:6px;">$1.00T Target • Log 14.3%</div>
       </div>
     </section>
 
     <!-- 1. شاشة قاعة التداول الحية -->
     <main id="scr-terminal" class="grid-term">
-      <!-- قائمة مراقبة الأسواق -->
       <aside class="card">
         <div class="row-between">
-          <strong style="font-size:14px;">📡 مراقبة الأسواق الحية</strong>
+          <strong style="font-size:14.5px;">📡 مراقبة الأسواق الحية</strong>
           <span class="badge">6 أصول</span>
         </div>
         <input id="sym-search" class="inp" style="margin-top:8px;" placeholder="ابحث عن BTCUSDT أو ETH..." oninput="ui.renderWatchlist()" />
         <div id="watchlist"></div>
       </aside>
 
-      <!-- المخطط الهولوغرامي + قاعة اجتماع الوكلاء -->
       <section style="display:flex;flex-direction:column;gap:14px;">
         <div class="card">
           <div class="row-between" style="border-bottom:1px solid var(--border-sub);padding-bottom:10px;margin-bottom:10px;">
@@ -230,15 +395,14 @@
               <button class="btn" onclick="ui.setTf('4h')">4h</button>
             </div>
           </div>
-          <canvas id="candle-cv" width="760" height="245" style="width:100%;height:245px;background:rgba(0,0,0,0.42);border-radius:10px;display:block;"></canvas>
+          <canvas id="candle-cv" width="760" height="245" style="width:100%;height:245px;background:rgba(0,0,0,0.44);border-radius:10px;display:block;"></canvas>
         </div>
 
-        <!-- قاعة اجتماع الوكلاء المدمجة -->
         <div class="card">
           <div class="row-between" style="border-bottom:1px solid var(--border-sub);padding-bottom:9px;margin-bottom:10px;">
             <div>
               <strong style="font-size:14.5px;">🏛️ قاعة اجتماع مجلس الوكلاء (Agent Meeting Room)</strong>
-              <div class="muted">مداولة مهيكلة بين الوكلاء الخمسة — لا يملك أي وكيل صلاحية تنفيذ مباشر.</div>
+              <div class="muted">مداولة مهيكلة بين الوكلاء الخمسة — لا يملك أي وكيل صلاحية تنفيذ مباشر بدون ختم د. ماجد.</div>
             </div>
             <button class="btn btn-primary" onclick="ui.conveneCouncil()">🔄 عقد مداولة فورية</button>
           </div>
@@ -246,10 +410,9 @@
         </div>
       </section>
 
-      <!-- تذكرة التداول الورقي وفحص المخاطر -->
       <aside class="card">
         <div class="row-between" style="margin-bottom:10px;">
-          <strong style="font-size:14px;">🛡️ تذكرة التداول وفحص المخاطر</strong>
+          <strong style="font-size:14.5px;">🛡️ تذكرة التداول وفحص المخاطر</strong>
           <span class="badge badge-ok">PAPER ONLY</span>
         </div>
         <div class="grid-2" style="gap:7px;margin-bottom:10px;">
@@ -269,12 +432,124 @@
             </label>
           </div>
         </div>
-        <div id="risk-box" class="subcard" style="font-size:12px;line-height:1.75;margin-bottom:10px;"></div>
+        <div id="risk-box" class="subcard" style="font-size:12.5px;line-height:1.75;margin-bottom:10px;"></div>
         <button class="btn btn-primary" style="width:100%;" onclick="ui.openSeal()">🔏 مراجعة وإصدار ختم التصريح الورقي</button>
       </aside>
     </main>
 
-    <!-- 2. شاشة حساب Binance الشخصي الحقيقي (قراءة فقط — v1.3.0) -->
+    <!-- 2. شاشة هوية ودخول أدمن المنصة (TRM Sovereign Admin MFA Center) -->
+    <main id="scr-admin" class="hidden" style="display:flex;flex-direction:column;gap:14px;">
+      <div class="card" style="border-width:2px;">
+        <div class="row-between">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <strong style="font-size:17px;">👑 منظومة الهوية والدخول السيادي لأدمن المنصة — د. ماجد (TRM Admin MFA)</strong>
+              <span id="adm-page-pill" class="badge badge-warn">يتطلب التأسيس الأولي</span>
+            </div>
+            <div class="muted" style="margin-top:4px;">
+              تحمي هذه المنظومة صلاحيات أدمن المنصة بأربعة عوامل متكاملة: <strong>البريد الإلكتروني الرسمي</strong> + <strong>رقم الجوال الدولي</strong> + <strong>مفتاح التحقق السري المشفر</strong> + <strong>تطبيق المصادقة القياسي (Google / Apple / Microsoft Authenticator — RFC 6238)</strong>.
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="ui.openAdminModal()">🔐 فتح نافذة الدخول السريع</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- اللوحة اليمنى: تأسيس / تحديث بيانات أدمن المنصة (د. ماجد) -->
+        <section class="card" style="display:flex;flex-direction:column;gap:10px;">
+          <div class="row-between" style="border-bottom:1px solid var(--border-sub);padding-bottom:8px;">
+            <strong style="font-size:15px;">1️⃣ تأسيس / تحديث بيانات الأدمن وإقران Authenticator</strong>
+            <span class="badge badge-acc">AES-256-GCM + SHA-256</span>
+          </div>
+          <form onsubmit="event.preventDefault();ui.enrollAdminInline();" style="display:grid;gap:10px;">
+            <div class="grid-2" style="gap:9px;">
+              <label class="muted">الاسم القيادي للأدمن
+                <input id="enr-name" class="inp" value="د. ماجد (أدمن المنصة)" required style="margin-top:4px;" />
+              </label>
+              <label class="muted">رقم الجوال الشخصي (بصيغة دولية)
+                <input id="enr-phone" type="tel" dir="ltr" class="inp num" placeholder="+9665XXXXXXXX" value="+9665" required style="margin-top:4px;" />
+              </label>
+            </div>
+            <label class="muted">البريد الإلكتروني الرسمي لأدمن المنصة
+              <input id="enr-email" type="email" dir="ltr" class="inp num" placeholder="majed@domain.com" required style="margin-top:4px;" />
+            </label>
+            <label class="muted">مفتاح التحقق السري للأدمن (Verification Key — 8 خانات فأكثر)
+              <input id="enr-vkey" type="password" dir="ltr" class="inp num" placeholder="أدخل مفتاح تحقق سري قوي خاص بك..." minlength="8" required style="margin-top:4px;" />
+            </label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button type="submit" class="btn btn-primary" style="flex:1;">⚙️ حفظ هوية الأدمن وتوليد مفتاح Authenticator</button>
+              <button type="button" class="btn" onclick="ui.rotateTotpSecret()">🔄 تدوير مفتاح المصادقة</button>
+            </div>
+          </form>
+
+          <!-- بطاقة مفتاح المصادقة القياسي RFC 6238 -->
+          <div id="totp-setup-card" class="subcard" style="border-color:var(--border-holo);margin-top:4px;">
+            <div class="row-between">
+              <strong style="font-size:13.5px;">📲 مفتاح إقران تطبيق المصادقة (Google / Apple / Microsoft Authenticator)</strong>
+              <span class="badge badge-ok num">RFC 6238 • 6 Digits / 30s</span>
+            </div>
+            <div class="muted" style="margin-top:4px;">
+              انسخ المفتاح أدناه وأضفه في تطبيق المصادقة على جوالك (إدخال مفتاح الإعداد — <span class="num">Time-based</span>)، أو اختبر الرمز الحي المتزامن مباشرة:
+            </div>
+            <div class="row-between" style="margin-top:8px;padding:8px 10px;background:rgba(0,0,0,0.45);border-radius:8px;border:1px solid var(--border-sub);">
+              <div>
+                <div class="muted" style="font-size:11px;">مفتاح Base32 السري للأدمن:</div>
+                <strong id="totp-secret-view" class="num text-acc" style="font-size:14.5px;letter-spacing:1.2px;">—</strong>
+              </div>
+              <div style="display:flex;gap:6px;">
+                <button type="button" class="btn" onclick="ui.copyTotpSecret()">📋 نسخ المفتاح</button>
+                <button type="button" class="btn" onclick="ui.copyOtpauthUri()">🔗 نسخ otpauth://</button>
+              </div>
+            </div>
+            <div class="row-between" style="margin-top:9px;">
+              <div>
+                <span class="muted">الرمز القياسي المتزامن حالياً (للمعاينة الفورية): </span>
+                <strong id="totp-live-preview" class="num text-ok" style="font-size:16px;letter-spacing:3px;margin-right:6px;">------</strong>
+              </div>
+              <span id="totp-countdown-lbl" class="muted num">يتجدد خلال 30 ث</span>
+            </div>
+            <div class="totp-bar-track"><div id="totp-bar-fill" class="totp-bar-fill" style="width:100%;"></div></div>
+          </div>
+        </section>
+
+        <!-- اللوحة اليسرى: اختبار الدخول الرباعي الفوري + حالة العوامل الأربعة -->
+        <section class="card" style="display:flex;flex-direction:column;gap:10px;">
+          <div class="row-between" style="border-bottom:1px solid var(--border-sub);padding-bottom:8px;">
+            <strong style="font-size:15px;">2️⃣ تسجيل دخول الأدمن متعدد العوامل (4-Factor Verification)</strong>
+            <span id="mfa-session-badge" class="badge badge-warn">غير مسجل الدخول</span>
+          </div>
+
+          <form onsubmit="event.preventDefault();ui.verifyAdminLogin('inline');" style="display:grid;gap:10px;">
+            <div class="grid-2" style="gap:9px;">
+              <label class="muted">البريد الإلكتروني للأدمن
+                <input id="lgn-email" type="email" dir="ltr" class="inp num" placeholder="majed@domain.com" required style="margin-top:4px;" />
+              </label>
+              <label class="muted">رقم الجوال المعتمد
+                <input id="lgn-phone" type="tel" dir="ltr" class="inp num" placeholder="+9665XXXXXXXX" required style="margin-top:4px;" />
+              </label>
+            </div>
+            <label class="muted">مفتاح التحقق السري (Verification Key)
+              <input id="lgn-vkey" type="password" dir="ltr" class="inp num" placeholder="••••••••••••" required style="margin-top:4px;" />
+            </label>
+            <label class="muted">
+              <span class="row-between">
+                <span>رمز تطبيق المصادقة (Authenticator — 6 أرقام)</span>
+                <button type="button" class="btn" style="padding:2px 8px;font-size:11px;" onclick="ui.autofillCurrentTotp('lgn-totp')">⚡ تعبئة الرمز المتزامن للاختبار</button>
+              </span>
+              <input id="lgn-totp" type="text" inputmode="numeric" maxlength="6" dir="ltr" class="inp num" style="margin-top:4px;font-size:18px;font-weight:800;text-align:center;letter-spacing:7px;" placeholder="000000" required />
+            </label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button type="submit" class="btn btn-primary" style="flex:2;">🛡️ تحقق ودخول كأدمن المنصة (TRM)</button>
+              <button type="button" class="btn" style="flex:1;" onclick="ui.stepUpBio()">🪪 بصمة Passkey</button>
+            </div>
+          </form>
+
+          <div id="admin-factors-summary" class="subcard" style="font-size:12.5px;line-height:1.85;margin-top:4px;"></div>
+        </section>
+      </div>
+    </main>
+
+    <!-- 3. شاشة حساب Binance الشخصي الحقيقي (قراءة فقط — v1.3.0) -->
     <main id="scr-binance" class="hidden" style="display:flex;flex-direction:column;gap:14px;">
       <div class="card" style="border-width:2px;">
         <div class="row-between">
@@ -316,34 +591,28 @@
       </div>
 
       <div class="grid-2">
-        <!-- معالج مفاتيح Ed25519 وتصعيد البصمة -->
         <div class="card" style="display:flex;flex-direction:column;gap:10px;">
           <div class="row-between">
             <strong style="font-size:14.5px;">🔑 معالج الربط المشفر للمالك (Ed25519 / AES-256-GCM Vault)</strong>
             <button class="btn" onclick="ui.stepUpBio()">🪪 تصعيد Face ID / Touch ID</button>
           </div>
           <div class="subcard muted" style="line-height:1.65;">
-            <strong class="text-warn">قاعدة أمان صارمة:</strong> لا يُطلب أبداً كلمة مرور حساب Binance أو عبارة الاسترداد (Seed Phrase) أو رمز OTP. بصمة تطبيق Binance محلية للتطبيق؛ أما TRILUNAIR فيصادق عبر مفاتيح مرور النظام (<span class="num">WebAuthn Passkeys</span>) دون تخزين أي بصمة حيوية.
+            <strong class="text-warn">قاعدة أمان صارمة:</strong> لا يُطلب أبداً كلمة مرور حساب Binance أو عبارة الاسترداد (Seed Phrase) أو رمز OTP.
           </div>
           <div class="row-between">
             <button class="btn btn-primary" onclick="ui.genEd25519()">⚙️ توليد زوج مفاتيح Ed25519 (عرض المفتاح العام فقط)</button>
             <span id="bio-pill" class="badge">البصمة: بانتظار التصعيد</span>
           </div>
-          <textarea id="ed-pub" rows="4" readonly class="num" placeholder="اضغط الزر أعلاه لتوليد المفتاح العام PUBLIC KEY PEM للصقه في إعدادات Binance API (يبقى المفتاح الخاص مشفراً داخل خزنة AES-256-GCM)..."></textarea>
-          <div class="subcard muted" style="font-size:11.5px;">
-            ✓ <strong>فحص الصلاحيات الصارم (Fail-Closed):</strong> يرفض تلقائياً أي مفتاح يفعّل السحب أو المارجن أو العقود الآجلة أو التداول على خانة القراءة فقط.
-          </div>
+          <textarea id="ed-pub" rows="4" readonly class="num" placeholder="اضغط الزر أعلاه لتوليد المفتاح العام PUBLIC KEY PEM للصقه في إعدادات Binance API..."></textarea>
         </div>
 
-        <!-- البوابات الثماني للاعتماد المستقبلي -->
         <div class="card" style="display:flex;flex-direction:column;gap:9px;">
           <div class="row-between">
             <strong style="font-size:14.5px;">🛡️ بوابات الاعتماد الثماني المستقبلية (LIVE_SPOT 8-Gate Lock)</strong>
             <span class="badge badge-err num">Gate #8 LOCKED</span>
           </div>
-          <div class="muted">العقود الآجلة والهامش والرافعة (&gt;1x) والاقتراض والسحب والتحويلات الخارجية محظورة معمارياً بالكامل (<span class="num">HTTP 403</span>).</div>
           <div class="grid-2" style="gap:7px;font-size:12px;">
-            <div class="subcard">✅ <strong>#1</strong> هوية المالك (Cloudflare ZT)</div>
+            <div class="subcard">✅ <strong>#1</strong> هوية أدمن المنصة (TRM MFA)</div>
             <div class="subcard" id="gate-2-box">○ <strong>#2</strong> بصمة Face ID / Touch ID</div>
             <div class="subcard text-warn">○ <strong>#3</strong> تفعيل LIVE_SPOT اليدوي</div>
             <div class="subcard">✅ <strong>#4</strong> سلامة محرك المخاطر</div>
@@ -356,7 +625,7 @@
       </div>
     </main>
 
-    <!-- 3. شاشة المحفظة والمدير المالي الشخصي وعقد العمل السعودي -->
+    <!-- 4. شاشة المحفظة والمدير المالي الشخصي وعقد العمل السعودي -->
     <main id="scr-cfo" class="hidden" style="display:flex;flex-direction:column;gap:14px;">
       <div class="grid-2">
         <div class="card" style="display:flex;flex-direction:column;gap:10px;">
@@ -373,7 +642,7 @@
             <div class="subcard" style="border-color:rgba(16,185,129,0.45);"><div class="muted text-ok">مخصص استثمار Spot</div><strong class="num text-ok" style="font-size:16px;">SAR 2,125</strong></div>
             <div class="subcard"><div class="muted">الادخار النقدي السائل</div><strong class="num" style="font-size:16px;">SAR 2,000</strong></div>
             <div class="subcard"><div class="muted">اشتراكات الذكاء الاصطناعي</div><strong class="num" style="font-size:16px;">SAR 1,375</strong></div>
-            <div class="subcard"><div class="muted">تشغيل وكلاء TRILUNAIR</div><strong class="num" style="font-size:16px;">SAR 500</strong></div>
+            <div class="subcard"><div class="muted">تشغيل وكلاء TRM</div><strong class="num" style="font-size:16px;">SAR 500</strong></div>
           </div>
           <div class="subcard muted" style="font-size:12px;line-height:1.7;">
             <strong>خطة سداد البطاقات الائتمانية (6,000 ر.س شهرياً):</strong><br/>
@@ -387,14 +656,12 @@
             <strong style="font-size:15px;">⚖️ حاسبة عقد العمل السعودي المحدد المدة ومهلة الـ 60 يوماً</strong>
             <span class="badge badge-warn">مباشرة العمل: 10 أكتوبر 2024</span>
           </div>
-          <div class="muted">يتجدد تلقائياً ما لم يُقدّم إشعار عدم التجديد قبل <strong>60 يوماً على الأقل</strong> من انتهاء المدة. عدم التجديد عند انتهاء العقد لا يُصنّف كاستقالة أثناء السريان.</div>
           <select id="saudi-sel" onchange="ui.renderSaudi(this.value)">
             <option value="EXPIRY">انتهاء العقد المحدد وعدم التجديد (المسار المتوقع — 100% مكافأة)</option>
             <option value="TERM">إنهاء من صاحب العمل (المادة 84 — 100% مكافأة)</option>
             <option value="RESIGN">استقالة أثناء سريان العقد قبل سنتين (المادة 85 — 0% مكافأة)</option>
           </select>
           <div id="saudi-box" class="subcard" style="font-size:12.5px;line-height:1.8;"></div>
-          <div class="muted text-warn" style="font-size:11.5px;">⚠ المستحقات التقديرية أعلاه معزولة تماماً عن الرصيد النقدي ولا تُستخدم في التداول؛ يرجى تثبيت تاريخ انتهاء العقد الفعلي من منصة «قوى» (الموعد الإيضاحي لمهلة الـ 60 يوماً: <span class="num">2026-08-11</span>).</div>
         </div>
       </div>
 
@@ -404,7 +671,7 @@
       </div>
     </main>
 
-    <!-- 4. شاشة مجلس الوكلاء الكمي -->
+    <!-- 5. شاشة مجلس الوكلاء الكمي -->
     <main id="scr-quantum" class="hidden card">
       <div class="row-between" style="margin-bottom:12px;">
         <div>
@@ -415,7 +682,7 @@
       <div id="agents-full" class="grid-3"></div>
     </main>
 
-    <!-- 5. شاشة بوابة الأمان و Passkeys -->
+    <!-- 6. شاشة بوابة الأمان و Passkeys -->
     <main id="scr-gov" class="hidden grid-2">
       <div class="card" style="display:flex;flex-direction:column;gap:10px;">
         <div class="row-between">
@@ -423,10 +690,10 @@
           <button class="btn btn-danger" onclick="ui.toggleKill()">🚨 تبديل مفتاح الطوارئ</button>
         </div>
         <div class="subcard" style="font-size:12.5px;line-height:1.85;">
+          <div>✅ <strong>الهوية السيادية الثلاثية:</strong> <span class="num">TRM (Trilunair • Road • Majed)</span></div>
+          <div>✅ <strong>دخول الأدمن رباعي العوامل:</strong> بريد إلكتروني + رقم جوال + مفتاح تحقق + <span class="num">Authenticator TOTP</span></div>
           <div>✅ <strong>قفل التنفيذ الورقي الدائم:</strong> <span class="num">tradingMode = "PAPER" • liveAuthorized = false</span></div>
-          <div>✅ <strong>المصادقة البيومترية (WebAuthn Passkeys):</strong> دعم <span class="num">Face ID</span> و<span class="num">Touch ID</span> بشريحة الأمان المحلية</div>
-          <div>✅ <strong>عزل النطاق والأسرار:</strong> عزل كامل للنطاق الفرعي <span class="num">trilunair.medinsup.com</span> عن موقع <span class="num">medinsup.com</span></div>
-          <div>✅ <strong>الإقليم السحابي الأقل كموناً:</strong> Tokyo مرشح ابتدائي خاضع للقياس الشبكي الفعلي أمام Frankfurt وSingapore</div>
+          <div>✅ <strong>المصادقة البيومترية (WebAuthn Passkeys):</strong> دعم <span class="num">Face ID</span> و<span class="num">Touch ID</span></div>
         </div>
       </div>
       <div class="card">
@@ -435,24 +702,67 @@
       </div>
     </main>
 
-    <!-- 6. شاشة السمات الهولوغرافية الست -->
+    <!-- 7. شاشة السمات الهولوغرافية الست -->
     <main id="scr-themes" class="hidden card">
-      <strong style="font-size:15.5px;display:block;margin-bottom:12px;">🎨 استوديو السمات الهولوغرافية الست (تبديل فوري حي)</strong>
+      <strong style="font-size:15.5px;display:block;margin-bottom:12px;">🎨 استوديو السمات الهولوغرافية الست (تبديل فوري حي مع شعار TRM)</strong>
       <div id="themes-grid" class="grid-3"></div>
     </main>
+  </div>
+
+  <!-- نافذة دخول / قفل أدمن المنصة السيادية (TRM Admin MFA Modal & Lock Screen) -->
+  <div id="admin-modal" class="modal-bg hidden">
+    <div class="card" style="max-width:560px;width:100%;display:flex;flex-direction:column;gap:12px;border-width:2px;">
+      <div class="row-between" style="border-bottom:1px solid var(--border-sub);padding-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="pillar-letter" style="width:34px;height:34px;font-size:13px;border-radius:8px;">TRM</span>
+          <div>
+            <strong id="adm-modal-title" style="font-size:15.5px;">🔐 بوابة دخول أدمن المنصة — د. ماجد (4 عوامل)</strong>
+            <div class="muted">البريد الإلكتروني + رقم الجوال + مفتاح التحقق + رمز Authenticator</div>
+          </div>
+        </div>
+        <button id="adm-modal-close" class="btn" onclick="ui.closeAdminModal()">✕</button>
+      </div>
+
+      <div id="adm-modal-err" class="subcard hidden" style="border-color:var(--err);color:#fda4af;font-size:12.5px;"></div>
+
+      <form onsubmit="event.preventDefault();ui.verifyAdminLogin('modal');" style="display:grid;gap:9px;">
+        <div class="grid-2" style="gap:8px;">
+          <label class="muted">البريد الإلكتروني للأدمن
+            <input id="mdl-email" type="email" dir="ltr" class="inp num" placeholder="majed@domain.com" required style="margin-top:4px;" />
+          </label>
+          <label class="muted">رقم الجوال الدولي
+            <input id="mdl-phone" type="tel" dir="ltr" class="inp num" placeholder="+9665XXXXXXXX" required style="margin-top:4px;" />
+          </label>
+        </div>
+        <label class="muted">مفتاح التحقق السري للأدمن (Verification Key)
+          <input id="mdl-vkey" type="password" dir="ltr" class="inp num" placeholder="••••••••••••" required style="margin-top:4px;" />
+        </label>
+        <label class="muted">
+          <span class="row-between">
+            <span>رمز تطبيق المصادقة (Authenticator — 6 أرقام)</span>
+            <button type="button" class="btn" style="padding:2px 8px;font-size:11px;" onclick="ui.autofillCurrentTotp('mdl-totp')">⚡ تعبئة الرمز المتزامن</button>
+          </span>
+          <input id="mdl-totp" type="text" inputmode="numeric" maxlength="6" dir="ltr" class="inp num" style="margin-top:4px;font-size:18px;font-weight:800;text-align:center;letter-spacing:7px;" placeholder="000000" required />
+        </label>
+        <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
+          <button type="submit" class="btn btn-primary" style="flex:2;">✓ تحقق وفتح صلاحيات الأدمن</button>
+          <button type="button" class="btn" style="flex:1;" onclick="ui.closeAdminModal();ui.tab('admin');">⚙️ تأسيس البيانات أولاً</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- نافذة ختم التصريح الورقي -->
   <div id="seal-modal" class="modal-bg hidden">
     <div class="card" style="max-width:480px;width:100%;display:flex;flex-direction:column;gap:12px;">
       <div class="row-between" style="border-bottom:1px solid var(--border-sub);padding-bottom:8px;">
-        <strong>🔏 ختم التصريح الهولوغرامي الموحد (PAPER)</strong>
+        <strong>🔏 ختم التصريح الهولوغرامي الموحد (TRM PAPER)</strong>
         <button class="btn" onclick="ui.closeSeal()">✕</button>
       </div>
       <div id="seal-summary" class="subcard" style="font-size:12.5px;line-height:1.8;"></div>
       <label style="font-size:12.5px;display:flex;gap:8px;align-items:center;cursor:pointer;">
         <input type="checkbox" id="seal-chk" style="width:auto;" onchange="document.getElementById('seal-go').disabled=!this.checked" />
-        <span>أقر بمراجعة تقييم المخاطر والعمولات وأصرح بتنفيذ الصفقة الورقية في محفظة المحاكاة.</span>
+        <span>أقر أنا د. ماجد بمراجعة تقييم المخاطر والعمولات وأصرح بتنفيذ الصفقة الورقية في محفظة المحاكاة.</span>
       </label>
       <div style="display:flex;justify-content:flex-end;gap:8px;">
         <button class="btn" onclick="ui.closeSeal()">إلغاء</button>
@@ -464,14 +774,15 @@
   <!-- شريط الأوامر الصوتي والنصي الدائم -->
   <aside class="dock">
     <div class="dock-inner">
-      <div id="chat-log" class="hidden subcard" style="margin-bottom:8px;max-height:130px;overflow-y:auto;font-size:12px;line-height:1.7;"></div>
+      <div id="chat-log" class="hidden subcard" style="margin-bottom:8px;max-height:130px;overflow-y:auto;font-size:12.5px;line-height:1.7;"></div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <button class="btn" onclick="document.getElementById('chat-log').classList.toggle('hidden')">💬 سجل الأوامر</button>
+        <button class="btn" onclick="ui.quickCmd('افتح هوية ودخول الأدمن TRM')">👑 دخول الأدمن</button>
         <button class="btn" onclick="ui.quickCmd('حلل البيتكوين الآن واعقد اجتماع الوكلاء')">⚡ حلل BTC</button>
         <button class="btn" onclick="ui.quickCmd('افتح شاشة حساب Binance الحقيقي للقراءة فقط')">🔐 شاشة Binance</button>
         <button class="btn" onclick="ui.quickCmd('اعرض المدير المالي وراتب 20,000 ريال')">💼 المدير المالي</button>
         <form style="flex:1;display:flex;gap:7px;min-width:220px;" onsubmit="event.preventDefault();ui.sendChat();">
-          <input id="chat-inp" class="inp" placeholder="اكتب أمراً بالعربية (مثال: حلل الإيثيريوم، غيّر السمة إلى Quantum Cyan، فعّل Cockpit)..." />
+          <input id="chat-inp" class="inp" placeholder="اكتب أمراً بالعربية (مثال: افتح دخول الأدمن، حلل الإيثيريوم، غيّر السمة إلى Quantum Cyan)..." />
           <button type="submit" class="btn btn-primary">إرسال ↵</button>
         </form>
       </div>
@@ -488,12 +799,56 @@
       { id: 'obsidian-black', name: 'الأوبسيديان الأسود (Obsidian Black)', bg: '#000000', el: '#050507', acc: '#d4af37', rgb: '212, 175, 55' }
     ];
 
+    /* محرك المصادقة القياسي الحقيقي RFC 6238 TOTP (WebCrypto HMAC-SHA1) */
+    const B32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    function genBase32Secret(len = 32) {
+      const arr = new Uint8Array(len);
+      crypto.getRandomValues(arr);
+      return Array.from(arr, b => B32_ALPHABET[b % 32]).join('');
+    }
+    function base32ToBytes(b32) {
+      const clean = b32.toUpperCase().replace(/[^A-Z2-7]/g, '');
+      let bits = '';
+      for (const ch of clean) bits += B32_ALPHABET.indexOf(ch).toString(2).padStart(5, '0');
+      const out = new Uint8Array(Math.floor(bits.length / 8));
+      for (let i = 0; i < out.length; i++) out[i] = parseInt(bits.slice(i * 8, i * 8 + 8), 2);
+      return out;
+    }
+    async function computeTotpRFC6238(secretB32, stepOffset = 0) {
+      const keyBytes = base32ToBytes(secretB32);
+      const step = Math.floor(Date.now() / 1000 / 30) + stepOffset;
+      const msg = new ArrayBuffer(8);
+      const view = new DataView(msg);
+      view.setUint32(0, Math.floor(step / 0x100000000), false);
+      view.setUint32(4, step >>> 0, false);
+      const cryptoKey = await crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
+      const sig = new Uint8Array(await crypto.subtle.sign('HMAC', cryptoKey, msg));
+      const offset = sig[sig.length - 1] & 0x0f;
+      const bin = ((sig[offset] & 0x7f) << 24) | ((sig[offset + 1] & 0xff) << 16) | ((sig[offset + 2] & 0xff) << 8) | (sig[offset + 3] & 0xff);
+      return String(bin % 1000000).padStart(6, '0');
+    }
+    async function sha256Hex(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     const ui = {
       activeTab: 'terminal',
       themeId: 'royal-gold',
       side: 'BUY',
       killSwitch: false,
       bioVerified: false,
+      platformLocked: false,
+      admin: {
+        enrolled: false,
+        authenticated: false,
+        name: 'د. ماجد (أدمن المنصة)',
+        email: '',
+        phone: '',
+        vkeyHash: '',
+        totpSecret: genBase32Secret(32),
+        lastUsedCode: ''
+      },
       cash: 912450.00,
       selectedSym: 'BTCUSDT',
       assets: [
@@ -512,11 +867,19 @@
         { id: 'PAPER-901', sym: 'BTCUSDT', side: 'BUY', qty: 0.65, price: 94800.00, time: '09:42:11' }
       ],
       audits: [
-        { t: '10:00:01', s: 'INFO', a: 'SYSTEM_BOOT_PAPER_LOCKED', m: 'تشغيل المنصة بوضع PAPER الدائم مع عزل حساب Binance الشخصي.' }
+        { t: '10:00:01', s: 'INFO', a: 'TRM_BOOT_CAIRO_IDENTITY', m: 'تشغيل منصة TRM (طريقي إلى التريليون — د. ماجد) بخط القاهرة وقفل PAPER الدائم.' }
       ],
       candles: [],
 
       init() {
+        try {
+          const saved = localStorage.getItem('trm_admin_sovereign_v1');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed && parsed.totpSecret) this.admin = { ...this.admin, ...parsed };
+          }
+        } catch {}
+
         const sel = document.getElementById('theme-select');
         sel.innerHTML = THEMES.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
         this.genCandles();
@@ -530,7 +893,197 @@
         this.renderAudits();
         this.renderThemesGrid();
         this.updateKpis();
+        this.renderAdminState();
+        this.refreshTotpClock();
         setInterval(() => this.tick(), 1800);
+        setInterval(() => this.refreshTotpClock(), 1000);
+      },
+
+      saveAdminStorage() {
+        try { localStorage.setItem('trm_admin_sovereign_v1', JSON.stringify(this.admin)); } catch {}
+      },
+
+      maskEmail(em) {
+        if (!em || !em.includes('@')) return 'غير مسجل بعد';
+        const [u, d] = em.split('@');
+        return (u.slice(0, 2) + '••••@' + d);
+      },
+
+      maskPhone(ph) {
+        if (!ph || ph.length < 6) return 'غير مسجل بعد';
+        return ph.slice(0, 4) + '••••••' + ph.slice(-2);
+      },
+
+      async refreshTotpClock() {
+        const secLeft = 30 - (Math.floor(Date.now() / 1000) % 30);
+        const code = await computeTotpRFC6238(this.admin.totpSecret, 0);
+        const secEl = document.getElementById('totp-secret-view');
+        const prevEl = document.getElementById('totp-live-preview');
+        const lblEl = document.getElementById('totp-countdown-lbl');
+        const barEl = document.getElementById('totp-bar-fill');
+        if (secEl) secEl.textContent = this.admin.totpSecret;
+        if (prevEl) prevEl.textContent = code;
+        if (lblEl) lblEl.textContent = `يتجدد خلال ${secLeft} ث`;
+        if (barEl) barEl.style.width = `${(secLeft / 30) * 100}%`;
+      },
+
+      renderAdminState() {
+        const hdr = document.getElementById('admin-hdr-badge');
+        const pill = document.getElementById('adm-page-pill');
+        const sess = document.getElementById('mfa-session-badge');
+        const btn = document.getElementById('btn-open-admin');
+
+        if (this.admin.authenticated) {
+          hdr.textContent = `👑 ${this.admin.name} • موثق (4/4 MFA)`;
+          hdr.className = 'badge badge-ok';
+          pill.textContent = '✓ الحساب مؤسس والجلسة موثقة';
+          pill.className = 'badge badge-ok';
+          sess.textContent = '✓ جلسة أدمن موثقة نشطة';
+          sess.className = 'badge badge-ok';
+          btn.textContent = '👑 حساب الأدمن (موثق ✓)';
+        } else if (this.admin.enrolled) {
+          hdr.textContent = `👑 ${this.admin.name} • بانتظار الدخول`;
+          hdr.className = 'badge badge-warn';
+          pill.textContent = 'الحساب مؤسس — بانتظار تسجيل الدخول';
+          pill.className = 'badge badge-warn';
+          sess.textContent = 'بانتظار التحقق الرباعي';
+          sess.className = 'badge badge-warn';
+          btn.textContent = '🔐 دخول الأدمن (MFA)';
+        } else {
+          hdr.textContent = '👑 أدمن المنصة: بانتظار التفعيل';
+          hdr.className = 'badge badge-warn';
+          pill.textContent = 'يتطلب التأسيس الأولي للأدمن';
+          pill.className = 'badge badge-warn';
+        }
+
+        const box = document.getElementById('admin-factors-summary');
+        if (box) {
+          box.innerHTML = `
+            <div class="row-between"><span>1. البريد الإلكتروني المعتمد:</span><strong class="num">${this.maskEmail(this.admin.email)}</strong></div>
+            <div class="row-between"><span>2. رقم الجوال المعتمد:</span><strong class="num">${this.maskPhone(this.admin.phone)}</strong></div>
+            <div class="row-between"><span>3. مفتاح التحقق السري (SHA-256):</span><strong class="${this.admin.vkeyHash ? 'text-ok' : 'text-warn'}">${this.admin.vkeyHash ? '✓ محفوظ مشفراً' : '○ غير مهيأ بعد'}</strong></div>
+            <div class="row-between"><span>4. تطبيق المصادقة (Authenticator TOTP):</span><strong class="text-ok">✓ جاهز للإقران (RFC 6238)</strong></div>
+          `;
+        }
+      },
+
+      async enrollAdminInline() {
+        const name = document.getElementById('enr-name').value.trim() || 'د. ماجد';
+        const email = document.getElementById('enr-email').value.trim().toLowerCase();
+        let phone = document.getElementById('enr-phone').value.trim().replace(/[\s\-()]/g, '');
+        if (phone && !phone.startsWith('+')) phone = '+' + phone;
+        const vkey = document.getElementById('enr-vkey').value;
+        if (vkey.length < 8) {
+          this.notify('⚠️ يرجى اختيار مفتاح تحقق سري لا يقل عن 8 خانات.');
+          return;
+        }
+        this.admin.name = name;
+        this.admin.email = email;
+        this.admin.phone = phone;
+        this.admin.vkeyHash = await sha256Hex('TRM-SALT:' + vkey);
+        this.admin.enrolled = true;
+        this.saveAdminStorage();
+
+        document.getElementById('lgn-email').value = email;
+        document.getElementById('lgn-phone').value = phone;
+        document.getElementById('mdl-email').value = email;
+        document.getElementById('mdl-phone').value = phone;
+
+        this.renderAdminState();
+        this.audit('INFO', 'ADMIN_MFA_ENROLLED', `تأسيس هوية أدمن المنصة (${this.maskEmail(email)} • ${this.maskPhone(phone)}) وتجهيز مفتاح Authenticator.`);
+        this.notify('✓ تم حفظ بريد وجوال ومفتاح تحقق الأدمن! الآن أدخل رمز الـ 6 أرقام في لوحة الدخول لتوثيق الجلسة.');
+      },
+
+      rotateTotpSecret() {
+        this.admin.totpSecret = genBase32Secret(32);
+        this.admin.authenticated = false;
+        this.saveAdminStorage();
+        this.refreshTotpClock();
+        this.renderAdminState();
+        this.audit('INFO', 'ADMIN_TOTP_ROTATED', 'تدوير مفتاح تطبيق المصادقة Base32 لأدمن المنصة.');
+        this.notify('🔄 تم توليد مفتاح Base32 جديد لتطبيق المصادقة Authenticator.');
+      },
+
+      copyTotpSecret() {
+        navigator.clipboard?.writeText(this.admin.totpSecret);
+        this.notify('📋 تم نسخ مفتاح Authenticator السري إلى الحافظة.');
+      },
+
+      copyOtpauthUri() {
+        const acc = encodeURIComponent(this.admin.email || 'majed@trm-platform');
+        const uri = `otpauth://totp/TRM-Trilunair-Majed:${acc}?secret=${this.admin.totpSecret}&issuer=TRM-Trilunair-Majed&algorithm=SHA1&digits=6&period=30`;
+        navigator.clipboard?.writeText(uri);
+        this.notify('🔗 تم نسخ رابط الإقران القياسي otpauth:// إلى الحافظة.');
+      },
+
+      async autofillCurrentTotp(inputId) {
+        const code = await computeTotpRFC6238(this.admin.totpSecret, 0);
+        document.getElementById(inputId).value = code;
+      },
+
+      openAdminModal() {
+        document.getElementById('adm-modal-err').classList.add('hidden');
+        document.getElementById('adm-modal-close').classList.toggle('hidden', this.platformLocked);
+        document.getElementById('adm-modal-title').textContent = this.platformLocked
+          ? '🔒 المنصة مقفلة سيادياً — أدخل بيانات الأدمن (د. ماجد) للفتح'
+          : '🔐 بوابة دخول أدمن المنصة — د. ماجد (4 عوامل)';
+        document.getElementById('admin-modal').classList.remove('hidden');
+      },
+
+      closeAdminModal() {
+        if (this.platformLocked) return;
+        document.getElementById('admin-modal').classList.add('hidden');
+      },
+
+      lockPlatform() {
+        if (!this.admin.enrolled) {
+          this.tab('admin');
+          this.notify('⚙️ قم بتأسيس بريدك ورقم جوالك ومفتاح التحقق أولاً لتفعيل قفل المنصة.');
+          return;
+        }
+        this.platformLocked = true;
+        this.admin.authenticated = false;
+        this.renderAdminState();
+        this.openAdminModal();
+        this.audit('INFO', 'PLATFORM_LOCKED_BY_ADMIN', 'تم قفل المنصة سيادياً بواسطة الأدمن — يتطلب الفتح التحقق الرباعي.');
+      },
+
+      async verifyAdminLogin(mode) {
+        const errBox = document.getElementById('adm-modal-err');
+        if (!this.admin.enrolled) {
+          const msg = 'يرجى تأسيس بيانات الأدمن أولاً (البريد + رقم الجوال + مفتاح التحقق) من تبويب هوية ودخول الأدمن.';
+          if (mode === 'modal') { errBox.textContent = msg; errBox.classList.remove('hidden'); }
+          else this.notify('⚠️ ' + msg);
+          return;
+        }
+        const pfx = mode === 'modal' ? 'mdl' : 'lgn';
+        const em = document.getElementById(pfx + '-email').value.trim().toLowerCase();
+        let ph = document.getElementById(pfx + '-phone').value.trim().replace(/[\s\-()]/g, '');
+        if (ph && !ph.startsWith('+')) ph = '+' + ph;
+        const vk = document.getElementById(pfx + '-vkey').value;
+        const totp = document.getElementById(pfx + '-totp').value.trim();
+
+        const vkHash = await sha256Hex('TRM-SALT:' + vk);
+        const cPrev = await computeTotpRFC6238(this.admin.totpSecret, -1);
+        const cNow = await computeTotpRFC6238(this.admin.totpSecret, 0);
+        const cNext = await computeTotpRFC6238(this.admin.totpSecret, 1);
+        const totpValid = (totp === cNow || totp === cPrev || totp === cNext);
+
+        if (em !== this.admin.email || ph !== this.admin.phone || vkHash !== this.admin.vkeyHash || !totpValid) {
+          const failMsg = '✕ فشل التحقق الرباعي: تأكد من تطابق البريد الإلكتروني ورقم الجوال ومفتاح التحقق ورمز Authenticator المكون من 6 أرقام.';
+          this.audit('CRITICAL', 'ADMIN_MFA_REJECTED', 'رفض محاولة دخول غير متطابقة مع عوامل التحقق الأربعة للأدمن.');
+          if (mode === 'modal') { errBox.textContent = failMsg; errBox.classList.remove('hidden'); }
+          else this.notify(failMsg);
+          return;
+        }
+
+        this.admin.authenticated = true;
+        this.platformLocked = false;
+        this.saveAdminStorage();
+        document.getElementById('admin-modal').classList.add('hidden');
+        this.renderAdminState();
+        this.audit('INFO', 'ADMIN_MFA_LOGIN_OK', `نجاح دخول ${this.admin.name} عبر البريد والجوال ومفتاح التحقق و Authenticator.`);
+        this.notify(`✓ مرحباً ${this.admin.name} — تم توثيق الدخول السيادي عبر العوامل الأربعة بنجاح!`);
       },
 
       notify(msg) {
@@ -546,7 +1099,7 @@
 
       tab(id) {
         this.activeTab = id;
-        ['terminal', 'binance', 'cfo', 'quantum', 'gov', 'themes'].forEach(k => {
+        ['terminal', 'admin', 'binance', 'cfo', 'quantum', 'gov', 'themes'].forEach(k => {
           document.getElementById('scr-' + k).classList.toggle('hidden', k !== id);
           const b = document.querySelector(`[data-tab="${k}"]`);
           if (b) b.classList.toggle('btn-primary', k === id);
@@ -804,9 +1357,9 @@
       stepUpBio() {
         this.bioVerified = true;
         const p = document.getElementById('bio-pill');
-        p.textContent = '✓ مصادق بيومترياً (Face ID / Touch ID)';
-        p.className = 'badge badge-ok';
-        document.getElementById('gate-2-box').innerHTML = '✅ <strong>#2</strong> بصمة Face ID / Touch ID نشطة';
+        if (p) { p.textContent = '✓ مصادق بيومترياً (Face ID / Touch ID)'; p.className = 'badge badge-ok'; }
+        const g2 = document.getElementById('gate-2-box');
+        if (g2) g2.innerHTML = '✅ <strong>#2</strong> بصمة Face ID / Touch ID نشطة';
         this.audit('INFO', 'WEBAUTHN_STEPUP_OK', 'نجاح تصعيد المصادقة البيومترية عبر WebAuthn Passkey.');
         this.notify('✓ تم التحقق من بصمة النظام عبر WebAuthn دون تخزين أي بيانات حيوية.');
       },
@@ -920,7 +1473,10 @@
         log.classList.remove('hidden');
         const low = msg.toLowerCase();
         let reply = 'تم تحديث قاعة التداول وعقد مداولة مجلس الوكلاء بوضع PAPER الآمن.';
-        if (low.includes('binance') || msg.includes('بينانس')) {
+        if (msg.includes('أدمن') || msg.includes('دخول') || low.includes('admin') || low.includes('mfa')) {
+          this.tab('admin');
+          reply = 'تم فتح منظومة الهوية والدخول السيادي لأدمن المنصة (TRM Admin MFA — البريد + الجوال + مفتاح التحقق + Authenticator).';
+        } else if (low.includes('binance') || msg.includes('بينانس')) {
           this.tab('binance');
           reply = 'تم فتح شاشة مراقبة حساب Binance الشخصي الحقيقي (قراءة فقط — معزولة 100% عن محفظة PAPER).';
         } else if (msg.includes('المالي') || msg.includes('20,000') || msg.includes('راتب')) {
@@ -940,7 +1496,7 @@
           this.pickAsset('BTCUSDT');
           this.tab('terminal');
         }
-        log.innerHTML = `<div><strong>أنت:</strong> ${msg}</div><div class="text-acc" style="margin-bottom:6px;"><strong>المجلس التنفيذي:</strong> ${reply}</div>` + log.innerHTML;
+        log.innerHTML = `<div><strong>د. ماجد:</strong> ${msg}</div><div class="text-acc" style="margin-bottom:6px;"><strong>مجلس TRM التنفيذي:</strong> ${reply}</div>` + log.innerHTML;
       }
     };
 

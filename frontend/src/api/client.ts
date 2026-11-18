@@ -603,6 +603,93 @@ export const trilunairApi = {
       method: 'PUT',
       body: JSON.stringify(payload),
     }),
+
+  // منظومة الهوية السيادية والدخول متعدد العوامل لأدمن المنصة (TRM Admin MFA Gate)
+  getAdminIdentity: () =>
+    requestJson<{
+      brand: {
+        monogram: string;
+        expansionEn: string;
+        titleAr: string;
+        meaningAr: string;
+      };
+      enrolled: boolean;
+      authenticated: boolean;
+      displayName: string;
+      emailMasked: string | null;
+      phoneMasked: string | null;
+      totpVerified: boolean;
+      mfaFactorsConfigured: {
+        email: boolean;
+        phone: boolean;
+        verificationKey: boolean;
+        authenticatorTotp: boolean;
+      };
+      updatedAt?: string;
+      tradingMode: 'PAPER';
+      liveAuthorized: false;
+    }>('/auth/admin/identity'),
+
+  enrollAdminIdentity: (payload: {
+    displayName?: string;
+    email: string;
+    phone: string;
+    verificationKey: string;
+    currentVerificationKey?: string;
+    rotateTotp?: boolean;
+  }) =>
+    requestJson<{
+      enrolled: boolean;
+      displayName: string;
+      emailMasked: string;
+      phoneMasked: string;
+      authenticatorSetup: {
+        issuer: string;
+        secretBase32: string;
+        otpauthUri: string;
+        digits: number;
+        periodSeconds: number;
+        instructionsAr: string;
+      };
+      tradingMode: 'PAPER';
+      liveAuthorized: false;
+    }>('/auth/admin/enroll', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  confirmAdminTotp: (payload: { verificationKey: string; totpCode: string }) =>
+    requestJson<{ totpVerified: boolean; brandMonogram: string }>('/auth/admin/totp/confirm', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  loginAdminMfa: async (payload: {
+    email: string;
+    phone: string;
+    verificationKey: string;
+    totpCode: string;
+  }) => {
+    const res = await requestJson<{
+      authenticated: boolean;
+      displayName: string;
+      emailMasked: string;
+      phoneMasked: string;
+      brandMonogram: string;
+      sessionToken: string;
+      csrfToken: string;
+      expiresAtEpoch: number;
+      tradingMode: 'PAPER';
+      liveAuthorized: false;
+    }>('/auth/admin/login', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    if (res.csrfToken) {
+      setActiveCsrfToken(res.csrfToken);
+    }
+    return res;
+  },
 };
 
 export interface MarketWsTick {

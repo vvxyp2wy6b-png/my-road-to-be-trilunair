@@ -174,11 +174,13 @@ async def lifespan(_app: FastAPI):
     init_db()
     ensure_passkey_tables()
     try:
+        from app.admin_identity import ensure_admin_identity_tables
         from app.binance_personal_account import ensure_binance_personal_tables
         from app.binance_spot_execution_adapter import ensure_spot_execution_tables
         from app.quantum_hub import ensure_quantum_tables
         from app.wealth_architect import ensure_wealth_architect_tables
 
+        ensure_admin_identity_tables()
         ensure_quantum_tables()
         ensure_wealth_architect_tables()
         ensure_binance_personal_tables()
@@ -1070,10 +1072,12 @@ try:
 except Exception:
     pass
 
+from app.admin_identity import admin_identity_router
 from app.binance_personal_account import binance_personal_router
 from app.binance_spot_execution_adapter import spot_execution_router
 from app.wealth_architect import wealth_router
 
+app.include_router(admin_identity_router)
 app.include_router(wealth_router)
 app.include_router(binance_personal_router)
 app.include_router(spot_execution_router)

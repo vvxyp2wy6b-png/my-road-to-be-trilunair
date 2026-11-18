@@ -38,8 +38,8 @@ export function formatSignedPct(value: number): string {
 
 export const UI_TEXT = {
   ar: {
-    brandTitle: 'طريقي إلى التريليون — د. مجـووووود',
-    brandSubtitle: 'My Road to be Trilunair Dr.MaJoOoOoOoD • مركز القيادة الهولوغرامي',
+    brandTitle: 'طريقي إلى التريليون — د. ماجد',
+    brandSubtitle: 'TRM (Trilunair • Road • Majed) • مسار الثروة السيادية والذكاء الكمي المنضبط نحو التريليون',
     navTerminal: 'قاعة التداول الحية',
     navPortfolio: 'المحفظة ومسار التريليون',
     navGovernance: 'بوابة التصاريح والأمان',
@@ -60,8 +60,8 @@ export const UI_TEXT = {
     quickThemeLabel: 'السمة النشطة',
   },
   en: {
-    brandTitle: 'My Road to be Trilunair Dr.MaJoOoOoOoD',
-    brandSubtitle: 'Holographic Financial Command Center & Voice-First AI Council',
+    brandTitle: 'TRM • My Road to be Trilunair — Dr. Majed',
+    brandSubtitle: 'Trilunair • Road • Majed — Sovereign Wealth & Disciplined Quantum Intelligence',
     navTerminal: 'Live Terminal',
     navPortfolio: 'Portfolio & $1T Roadmap',
     navGovernance: 'Authorization & Safety',

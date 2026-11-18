@@ -134,6 +134,7 @@ def main() -> None:
     db_desc = _configure_native_database()
     redis_desc = _configure_native_redis()
 
+    from app.admin_identity import ensure_admin_identity_tables
     from app.binance_personal_account import ensure_binance_personal_tables
     from app.binance_spot_execution_adapter import ensure_spot_execution_tables
     from app.database import init_db
@@ -143,6 +144,7 @@ def main() -> None:
 
     init_db()
     ensure_passkey_tables()
+    ensure_admin_identity_tables()
     ensure_quantum_tables()
     ensure_wealth_architect_tables()
     ensure_binance_personal_tables()

@@ -74,6 +74,7 @@ cmd_build() {
   PYTHONPATH="$BACKEND_DIR" "$py_bin" - <<'PY'
 from app.database import init_db
 from app.webauthn_passkeys import ensure_passkey_tables
+from app.admin_identity import ensure_admin_identity_tables
 from app.quantum_hub import ensure_quantum_tables
 from app.wealth_architect import ensure_wealth_architect_tables
 from app.binance_personal_account import ensure_binance_personal_tables
@@ -81,6 +82,7 @@ from app.binance_spot_execution_adapter import ensure_spot_execution_tables
 
 init_db()
 ensure_passkey_tables()
+ensure_admin_identity_tables()
 ensure_quantum_tables()
 ensure_wealth_architect_tables()
 ensure_binance_personal_tables()

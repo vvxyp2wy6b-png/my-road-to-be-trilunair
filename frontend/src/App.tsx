@@ -20,6 +20,7 @@ import {
   Crosshair,
   Gauge,
   Globe,
+  KeyRound,
   Maximize2,
   Minimize2,
   Palette,
@@ -30,6 +31,11 @@ import {
 } from 'lucide-react';
 import { connectMarketStream, trilunairApi } from './api/client';
 import { quantumApi } from './api/quantumClient';
+import {
+  AdminSovereignGateModal,
+  TrmMonogramCrest,
+  type AdminIdentitySummary,
+} from './components/Auth/AdminSovereignGateModal';
 import { BinanceLiveAccountView } from './components/BinanceLive/BinanceLiveAccountView';
 import { CommandDock } from './components/CommandDock/CommandDock';
 import { GovernanceView, type SwitchTradingModePayload } from './components/Governance/GovernanceView';
@@ -99,6 +105,8 @@ export const App: React.FC = () => {
   const [isSendingCommand, setIsSendingCommand] = useState<boolean>(false);
   const [wsConnected, setWsConnected] = useState<boolean>(false);
   const [toastNotice, setToastNotice] = useState<string | null>(null);
+  const [adminIdentity, setAdminIdentity] = useState<AdminIdentitySummary | null>(null);
+  const [isAdminGateOpen, setIsAdminGateOpen] = useState<boolean>(false);
 
   const sendVoiceCommandRef = useRef<(text: string, lang: Language) => void>(() => {});
 
@@ -146,6 +154,12 @@ export const App: React.FC = () => {
         setLatestMeeting(historyRes.latestMeeting);
       }
       setAuditLogs(logsRes);
+      if (typeof trilunairApi.getAdminIdentity === 'function') {
+        trilunairApi
+          .getAdminIdentity()
+          .then((idRes) => setAdminIdentity(idRes))
+          .catch(() => {});
+      }
     } catch {
       // الاحتفاظ بآخر حالة صالحة عند تأخر الاتصال
     }
@@ -430,33 +444,23 @@ export const App: React.FC = () => {
 
   return (
     <div className="app-shell">
-      {/* شريط القيادة العلوي (Top Holographic Command Bar) */}
+      {/* الهيدر السيادي للمنصة بشعار الأحرف الثلاثة المترابطة (TRM = Trilunair × Road × Majed) */}
       <header className="top-command-bar" role="banner">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '10px',
-              background:
-                'linear-gradient(135deg, var(--accent-primary), color-mix(in srgb, var(--accent-secondary) 65%, transparent))',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#05070c',
-              fontWeight: 800,
-              fontSize: '1.1rem',
-              boxShadow: 'var(--shadow-glow-strong)',
-            }}
-            aria-hidden="true"
-          >
-            ₮
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+          <TrmMonogramCrest size={50} />
           <div>
-            <h1 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, letterSpacing: '-0.01em' }}>
-              {t(language, 'brandTitle')}
-            </h1>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+              <h1 style={{ margin: 0, fontSize: '1.12rem', fontWeight: 900, letterSpacing: '-0.01em' }}>
+                {t(language, 'brandTitle')}
+              </h1>
+              <span
+                className="holo-badge holo-badge-accent"
+                style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.12rem 0.48rem' }}
+              >
+                TRM • ت ر م
+              </span>
+            </div>
+            <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
               {t(language, 'brandSubtitle')}
             </div>
           </div>
@@ -625,6 +629,28 @@ export const App: React.FC = () => {
           </select>
 
           <button
+            id="trm-admin-gate-btn"
+            type="button"
+            className={`holo-btn ${adminIdentity?.authenticated ? '' : 'holo-btn-primary'}`}
+            style={{ minHeight: '38px', padding: '0.3rem 0.7rem', fontSize: '0.8rem', fontWeight: 800 }}
+            onClick={() => setIsAdminGateOpen(true)}
+            title={
+              isAr
+                ? 'نظام دخول وتأسيس أدمن المنصة (البريد + الجوال + مفتاح التحقق + Authenticator)'
+                : 'Platform Admin 4-Factor Login & Authenticator Setup'
+            }
+          >
+            <KeyRound size={14} />
+            {adminIdentity?.authenticated
+              ? isAr
+                ? `د. ماجد (موثق)`
+                : 'Admin Verified'
+              : isAr
+              ? 'دخول الأدمن (MFA)'
+              : 'Admin MFA Login'}
+          </button>
+
+          <button
             id="language-dir-toggle"
             type="button"
             className="holo-btn"
@@ -786,6 +812,18 @@ export const App: React.FC = () => {
           setExecutionError(null);
         }}
         onConfirmExecution={handleConfirmExecution}
+      />
+
+      {/* بوابة الهوية والدخول السيادي متعدد العوامل لأدمن المنصة (TRM Admin MFA Gate) */}
+      <AdminSovereignGateModal
+        isOpen={isAdminGateOpen}
+        language={language}
+        identity={adminIdentity}
+        onClose={() => setIsAdminGateOpen(false)}
+        onAuthenticated={(updated, notice) => {
+          setAdminIdentity(updated);
+          showToast(notice);
+        }}
       />
 
       {/* غرفة الأوامر الصوتية والنصية المستديمة عبر كافة الشاشات (Voice-First AI Command Dock) */}
