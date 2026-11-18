@@ -201,15 +201,16 @@ html[data-high-contrast='true'] body::before {
   outline-offset: 2px;
 }
 
-/* البطاقات الزجاجية الهولوغرامية (Glassmorphism Layered Panels) */
+/* البطاقات الموشورية الهولوغرامية المشطوفة (Chamfered Holographic Prisms) */
 .holo-panel {
   position: relative;
-  background: rgba(var(--bg-surface-rgb), var(--fx-panel-opacity));
-  backdrop-filter: blur(var(--fx-blur-radius)) saturate(145%);
-  -webkit-backdrop-filter: blur(var(--fx-blur-radius)) saturate(145%);
+  background:
+    linear-gradient(155deg, rgba(14, 27, 52, 0.74) 0%, rgba(var(--bg-surface-rgb), var(--fx-panel-opacity)) 58%, rgba(8, 18, 38, 0.82) 100%);
+  backdrop-filter: blur(var(--fx-blur-radius)) saturate(155%);
+  -webkit-backdrop-filter: blur(var(--fx-blur-radius)) saturate(155%);
   border: 1px solid var(--border-holo);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-holo);
+  clip-path: polygon(0 14px, 14px 0, calc(100% - 20px) 0, 100% 20px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 20px 100%, 0 calc(100% - 20px));
+  box-shadow: var(--shadow-holo), inset 0 1px 0 rgba(255, 255, 255, 0.14);
   transition:
     border-color var(--fx-transition-fast),
     box-shadow var(--fx-transition-fast),
@@ -221,15 +222,17 @@ html[data-high-contrast='true'] body::before {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(
-    135deg,
-    rgba(var(--accent-primary-rgb), calc(0.11 * var(--fx-glow-intensity))) 0%,
-    transparent 38%,
-    transparent 72%,
-    color-mix(in srgb, var(--accent-secondary) 8%, transparent) 100%
-  );
+  background:
+    linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.75) 0 9px, transparent 9px),
+    linear-gradient(-45deg, color-mix(in srgb, var(--accent-tertiary) 75%, transparent) 0 9px, transparent 9px),
+    linear-gradient(
+      135deg,
+      rgba(var(--accent-primary-rgb), calc(0.12 * var(--fx-glow-intensity))) 0%,
+      transparent 38%,
+      transparent 72%,
+      color-mix(in srgb, var(--accent-tertiary) 10%, transparent) 100%
+    );
 }
 
 html[data-low-power='true'] .holo-panel {
@@ -243,26 +246,26 @@ html[data-high-contrast='true'] .holo-panel {
 }
 
 .holo-panel-subtle {
-  background: color-mix(in srgb, var(--bg-elevated) 82%, transparent);
+  background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
+  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
 }
 
-/* الأزرار التفاعلية */
+/* الشفرات التفاعلية الهولوغرامية (Cyber Holographic Blades) */
 .holo-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
   min-height: 40px;
-  padding: 0.5rem 0.95rem;
+  padding: 0.5rem 1.05rem;
   font-family: var(--font-sans);
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
-  background: color-mix(in srgb, var(--bg-surface) 88%, var(--accent-primary) 12%);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--bg-surface) 84%, var(--accent-tertiary) 16%), var(--bg-base));
   border: 1px solid var(--border-holo);
-  border-radius: var(--radius-sm);
+  clip-path: polygon(11px 0, 100% 0, calc(100% - 11px) 100%, 0 100%);
   cursor: pointer;
   transition:
     transform var(--fx-transition-fast),
@@ -284,13 +287,14 @@ html[data-high-contrast='true'] .holo-panel {
 
 .holo-btn-primary {
   background: linear-gradient(
-    135deg,
+    130deg,
     var(--accent-primary) 0%,
-    color-mix(in srgb, var(--accent-primary) 72%, var(--accent-secondary)) 100%
+    color-mix(in srgb, var(--accent-primary) 68%, var(--accent-secondary)) 60%,
+    var(--accent-tertiary) 135%
   );
-  color: #05070c;
-  border-color: var(--accent-primary);
-  font-weight: 700;
+  color: #030711;
+  border-color: transparent;
+  font-weight: 900;
 }
 
 .holo-btn-buy {
