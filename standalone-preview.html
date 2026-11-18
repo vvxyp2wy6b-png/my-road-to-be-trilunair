@@ -1,19 +1,17 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-cockpit="false" data-focus="false" data-spectrum="royal-nebula">
+<html lang="ar" dir="rtl" data-layout="auto" data-effective="desktop" data-focus="false">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TMJ ASTROLABE | المِسطَبَة الهولوغرامية السيادية — تريلماجد (د. ماجد)</title>
-  <meta name="description" content="المسطبة الهولوغرامية السيادية لمنصة تريلماجد (TMJ) — نظام قيادة كمي عبقري التصميم لدكتور ماجد نحو التريليون" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>TMJ ASTROLABE | المِسطَبَة الهولوغرامية المتكيفة — تريلماجد (د. ماجد)</title>
+  <meta name="description" content="المسطبة الهولوغرامية السيادية لمنصة تريلماجد (TMJ) — نظام ديناميكي متكيف مع داشبورد جوال هولوغرامي مستقل" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
       --void-0: #020409;
-      --void-1: #060b16;
-      --holo-glass: rgba(8, 16, 32, 0.62);
-      --holo-glass-deep: rgba(4, 9, 20, 0.82);
+      --void-1: #060c18;
       --pri: #f7c948;
       --pri-rgb: 247, 201, 72;
       --sec: #00f5d4;
@@ -24,35 +22,26 @@
       --txt-1: #f4f9ff;
       --txt-2: #b8cde8;
       --txt-3: #6c87a8;
-      --edge-pri: rgba(var(--pri-rgb), 0.52);
-      --edge-sec: rgba(var(--sec-rgb), 0.34);
-      --rx: 0deg;
-      --ry: 0deg;
       --mx: 50%;
-      --my: 30%;
-      --cut-md: polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px);
-      --cut-blade: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
-      --cut-panel: polygon(0 14px, 14px 0, calc(100% - 22px) 0, 100% 22px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 22px 100%, 0 calc(100% - 22px));
+      --my: 28%;
+      --dock-clearance: 84px;
+      --cut-panel: polygon(0 12px, 12px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 16px 100%, 0 calc(100% - 16px));
+      --cut-md: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+      --cut-blade: polygon(9px 0, 100% 0, calc(100% - 9px) 100%, 0 100%);
     }
 
-    html[data-cockpit="true"] {
-      --holo-glass: rgba(5, 10, 22, 0.88);
-    }
-    html[data-focus="true"] .hide-focus {
-      display: none !important;
-    }
-
-    * { box-sizing: border-box; }
+    html[data-focus="true"] .hide-focus { display: none !important; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
     html, body {
       margin: 0;
       padding: 0;
-      min-height: 100vh;
+      min-height: 100dvh;
       background: var(--void-0);
       color: var(--txt-1);
       font-family: 'Cairo', system-ui, -apple-system, sans-serif;
       overflow-x: hidden;
-      line-height: 1.5;
+      line-height: 1.48;
     }
 
     h1, h2, h3, h4, button, input, select, textarea {
@@ -67,7 +56,7 @@
       display: inline-block;
     }
 
-    /* خلفية الفضاء الهولوغرامي الحي ثلاثي الأبعاد */
+    /* خلفية الفضاء الهولوغرامي الحي */
     #holo-cosmos {
       position: fixed;
       inset: 0;
@@ -76,20 +65,15 @@
       z-index: 0;
       pointer-events: none;
     }
-
-    /* طبقة انكسار الضوء الهولوغرامي المتفاعلة مع المؤشر */
     .caustic-aura {
       position: fixed;
       inset: 0;
       z-index: 1;
       pointer-events: none;
       background:
-        radial-gradient(650px circle at var(--mx) var(--my), rgba(var(--sec-rgb), 0.09), rgba(var(--pri-rgb), 0.06) 35%, transparent 70%),
-        radial-gradient(ellipse at 50% -10%, rgba(var(--pri-rgb), 0.16), transparent 55%),
-        radial-gradient(ellipse at 10% 95%, rgba(var(--sec-rgb), 0.11), transparent 50%);
+        radial-gradient(560px circle at var(--mx) var(--my), rgba(var(--sec-rgb), 0.09), rgba(var(--pri-rgb), 0.05) 36%, transparent 70%),
+        radial-gradient(ellipse at 50% -10%, rgba(var(--pri-rgb), 0.15), transparent 55%);
     }
-
-    /* شعاع المسح الضوئي الرقيق */
     .scan-beam {
       position: fixed;
       left: 0;
@@ -97,56 +81,50 @@
       height: 2px;
       z-index: 2;
       pointer-events: none;
-      background: linear-gradient(90deg, transparent 0%, rgba(var(--sec-rgb), 0.35) 35%, rgba(var(--pri-rgb), 0.7) 50%, rgba(var(--sec-rgb), 0.35) 65%, transparent 100%);
-      box-shadow: 0 0 18px rgba(var(--sec-rgb), 0.5);
-      animation: beamSweep 9s ease-in-out infinite;
-      opacity: 0.55;
+      background: linear-gradient(90deg, transparent 0%, rgba(var(--sec-rgb), 0.35) 35%, rgba(var(--pri-rgb), 0.65) 50%, rgba(var(--sec-rgb), 0.35) 65%, transparent 100%);
+      animation: beamSweep 10s ease-in-out infinite;
+      opacity: 0.45;
     }
     @keyframes beamSweep {
-      0%, 100% { top: 4%; opacity: 0.15; }
-      50% { top: 94%; opacity: 0.65; }
+      0%, 100% { top: 4%; opacity: 0.12; }
+      50% { top: 93%; opacity: 0.55; }
     }
 
+    /* حاوية المسرح الديناميكية بحجز دقيق لمساحة الشريط السفلي (صفر تداخل!) */
     .holo-stage {
       position: relative;
       z-index: 5;
-      max-width: 1420px;
+      width: min(1440px, 100%);
       margin: 0 auto;
-      padding: 10px 14px 96px;
+      padding: clamp(8px, 1.4vw, 14px) clamp(8px, 1.6vw, 16px) calc(var(--dock-clearance) + env(safe-area-inset-bottom, 0px) + 18px);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(8px, 1.2vw, 13px);
     }
 
     /* =====================================================================
-       1. الجسر الهولوغرامي المداري (Sculpted Sci-Fi Orbital Bridge Header)
+       قواعد التبديل بين وضع المكتب الفضائي وداشبورد الجوال الهولوغرامي المستقل
+       ===================================================================== */
+    .mobile-only, .mobile-only-grid, .mobile-only-block { display: none !important; }
+    html[data-effective="mobile"] .desktop-only { display: none !important; }
+    html[data-effective="mobile"] .mobile-only { display: flex !important; }
+    html[data-effective="mobile"] .mobile-only-grid,
+    html[data-effective="mobile"] .mob-deck-switcher,
+    html[data-effective="mobile"] .mobile-bottom-nav { display: grid !important; }
+    html[data-effective="mobile"] .mobile-only-block { display: block !important; }
+
+    /* =====================================================================
+       1A. الهيدر المكتبي الفضائي (Desktop Orbital Bridge)
        ===================================================================== */
     .orbital-bridge {
       position: relative;
-      background:
-        linear-gradient(125deg, rgba(var(--pri-rgb), 0.14) 0%, rgba(7, 15, 32, 0.86) 38%, rgba(4, 10, 24, 0.9) 70%, rgba(var(--sec-rgb), 0.12) 100%);
+      background: linear-gradient(125deg, rgba(var(--pri-rgb), 0.13) 0%, rgba(7, 15, 32, 0.88) 40%, rgba(4, 10, 24, 0.92) 72%, rgba(var(--sec-rgb), 0.11) 100%);
       clip-path: var(--cut-panel);
       border: 1px solid rgba(var(--pri-rgb), 0.36);
-      box-shadow:
-        0 18px 48px -12px rgba(0, 0, 0, 0.9),
-        inset 0 1px 0 rgba(255, 255, 255, 0.18),
-        inset 0 0 32px rgba(var(--sec-rgb), 0.06);
       backdrop-filter: blur(18px);
-      padding: 10px 16px 12px;
-      margin-bottom: 14px;
-      transition: transform 0.2s ease-out;
+      padding: 10px 15px;
+      box-shadow: 0 14px 40px -12px rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     }
-
-    /* زوايا التصويب الليزرية (HUD Reticles) */
-    .orbital-bridge::before,
-    .holo-prism::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background:
-        linear-gradient(135deg, rgba(var(--pri-rgb), 0.85) 0 10px, transparent 10px),
-        linear-gradient(-45deg, rgba(var(--sec-rgb), 0.85) 0 10px, transparent 10px);
-      opacity: 0.7;
-    }
-
     .bridge-top {
       display: flex;
       align-items: center;
@@ -154,53 +132,40 @@
       gap: 12px;
       flex-wrap: wrap;
     }
-
     .crest-nexus {
       display: flex;
       align-items: center;
       gap: 12px;
       min-width: 0;
+      flex: 1 1 320px;
     }
-
-    /* النواة الهولوغرامية الطافية للشعار (3D Levitating Gyro Crest) */
     .gyro-emblem {
-      position: relative;
-      width: 68px;
-      height: 68px;
+      width: 62px;
+      height: 62px;
       flex-shrink: 0;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      filter: drop-shadow(0 0 14px rgba(var(--pri-rgb), 0.55)) drop-shadow(0 0 24px rgba(var(--sec-rgb), 0.28));
+      filter: drop-shadow(0 0 12px rgba(var(--pri-rgb), 0.5));
       animation: holoLevitate 4.2s ease-in-out infinite;
     }
     @keyframes holoLevitate {
-      0%, 100% { transform: translateY(0px) scale(1); }
-      50% { transform: translateY(-4px) scale(1.03); }
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
     }
-    .gyro-ring-cw {
-      transform-origin: 50% 50%;
-      animation: spinCW 18s linear infinite;
-    }
-    .gyro-ring-ccw {
-      transform-origin: 50% 50%;
-      animation: spinCCW 12s linear infinite;
-    }
+    .gyro-ring-cw { transform-origin: 50% 50%; animation: spinCW 18s linear infinite; }
+    .gyro-ring-ccw { transform-origin: 50% 50%; animation: spinCCW 12s linear infinite; }
     @keyframes spinCW { to { transform: rotate(360deg); } }
     @keyframes spinCCW { to { transform: rotate(-360deg); } }
 
-    .brand-holo-text {
-      min-width: 0;
-    }
     .micro-coords {
       font-size: 10px;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.12em;
       color: var(--sec);
-      opacity: 0.9;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       flex-wrap: wrap;
     }
     .pulse-beacon {
@@ -208,77 +173,170 @@
       height: 7px;
       border-radius: 50%;
       background: var(--sec);
-      box-shadow: 0 0 10px var(--sec), 0 0 20px var(--pri);
+      box-shadow: 0 0 9px var(--sec);
       display: inline-block;
-      animation: beaconBlink 1.8s infinite;
     }
-    @keyframes beaconBlink {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.5); opacity: 0.45; }
-    }
-
     .sovereign-h1 {
       margin: 1px 0 2px;
-      font-size: clamp(16.5px, 2.1vw, 22px);
+      font-size: clamp(16px, 1.85vw, 21px);
       font-weight: 900;
-      letter-spacing: -0.01em;
       color: var(--txt-1);
-      text-shadow: 0 0 22px rgba(var(--pri-rgb), 0.42);
       display: flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
     }
-
-    .mono-Runes {
-      display: inline-flex;
-      gap: 4px;
-      align-items: center;
-    }
-    .rune-chip {
-      border: 1px solid rgba(var(--pri-rgb), 0.35);
-      background: rgba(var(--pri-rgb), 0.08);
+    .sovereign-sub {
+      margin: 0;
+      font-size: clamp(11px, 1.05vw, 12.2px);
       color: var(--txt-2);
-      font-size: 10.5px;
+    }
+
+    /* =====================================================================
+       1B. هيدر داشبورد الجوال الهولوغرامي المستقل (56px Compact Mobile Bar!)
+       لا يأكل الشاشة أبداً ولا يلتف بشكل فوضوي!
+       ===================================================================== */
+    .mobile-top-hud {
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 10px;
+      background: linear-gradient(120deg, rgba(8, 18, 38, 0.94), rgba(4, 10, 22, 0.96));
+      border: 1px solid rgba(var(--pri-rgb), 0.42);
+      clip-path: var(--cut-md);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75);
+    }
+    .mob-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .mob-crest {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      cursor: pointer;
+      filter: drop-shadow(0 0 8px rgba(var(--pri-rgb), 0.5));
+    }
+    .mob-title-stack {
+      min-width: 0;
+    }
+    .mob-title-main {
+      font-size: 13.5px;
+      font-weight: 900;
+      color: var(--txt-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .mob-title-sub {
+      font-size: 10px;
+      color: var(--sec);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .mob-actions {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    /* شريط النبض المالي الأفقي المدمج للجوال (54px فقط بدلاً من 300px!) */
+    .mobile-pulse-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+    }
+    .mob-kpi-pill {
+      background: linear-gradient(160deg, rgba(12, 24, 48, 0.84), rgba(4, 9, 20, 0.92));
+      border: 1px solid rgba(var(--sec-rgb), 0.28);
+      clip-path: var(--cut-md);
+      padding: 6px 8px;
+      min-width: 0;
+    }
+    .mob-kpi-lbl {
+      font-size: 9.8px;
+      color: var(--txt-2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mob-kpi-val {
+      font-size: 12.5px;
+      font-weight: 900;
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* شريط الأصول الأفقي السريع للجوال (تحت/فوق القبة مباشرة) */
+    .mobile-asset-ribbon {
+      overflow-x: auto;
+      scrollbar-width: none;
+      gap: 6px;
+      padding: 2px 0;
+    }
+    .mobile-asset-ribbon::-webkit-scrollbar { display: none; }
+    .mob-asset-chip {
+      flex-shrink: 0;
+      padding: 5px 10px;
+      background: rgba(8, 18, 36, 0.85);
+      border: 1px solid rgba(var(--sec-rgb), 0.28);
+      clip-path: var(--cut-blade);
+      font-size: 11.5px;
       font-weight: 800;
-      padding: 1px 8px;
+      color: var(--txt-2);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mob-asset-chip.active {
+      background: linear-gradient(120deg, rgba(var(--pri-rgb), 0.28), rgba(var(--sec-rgb), 0.18));
+      border-color: var(--pri);
+      color: var(--txt-1);
+    }
+
+    /* =====================================================================
+       الأزرار والشفرات الهولوغرامية (Fluid Cyber Blades & Runes)
+       ===================================================================== */
+    .rune-chip {
+      border: 1px solid rgba(var(--pri-rgb), 0.38);
+      background: rgba(var(--pri-rgb), 0.09);
+      color: var(--txt-2);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 9px;
       clip-path: var(--cut-blade);
       cursor: pointer;
-      transition: all 0.18s;
+      transition: all 0.16s;
+      white-space: nowrap;
     }
     .rune-chip.active, .rune-chip:hover {
       background: linear-gradient(90deg, var(--pri), #ffe58f);
-      color: #050811;
+      color: #040812;
       border-color: transparent;
-      box-shadow: 0 0 14px rgba(var(--pri-rgb), 0.6);
-    }
-
-    .sovereign-sub {
-      margin: 0;
-      font-size: 11.8px;
-      color: var(--txt-2);
-      opacity: 0.92;
-    }
-
-    /* كبسولات التحكم الفضائية (Right/Left Telemetry Controls) */
-    .bridge-telemetry {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      flex-wrap: wrap;
+      box-shadow: 0 0 12px rgba(var(--pri-rgb), 0.5);
     }
 
     .cyber-blade {
-      position: relative;
-      border: 1px solid rgba(var(--sec-rgb), 0.32);
-      background: linear-gradient(160deg, rgba(12, 24, 46, 0.85), rgba(5, 11, 24, 0.92));
+      border: 1px solid rgba(var(--sec-rgb), 0.34);
+      background: linear-gradient(160deg, rgba(12, 24, 46, 0.88), rgba(5, 11, 24, 0.94));
       color: var(--txt-1);
-      padding: 6px 15px;
+      padding: 6px 14px;
       font-size: 12px;
       font-weight: 700;
       clip-path: var(--cut-blade);
       cursor: pointer;
-      transition: all 0.18s ease;
+      transition: all 0.18s;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -287,211 +345,140 @@
     .cyber-blade:hover {
       border-color: var(--pri);
       color: var(--pri);
-      transform: translateY(-1px);
-      box-shadow: 0 0 18px rgba(var(--pri-rgb), 0.28);
     }
     .cyber-blade-gold {
-      background: linear-gradient(135deg, var(--pri) 0%, #ffe694 55%, var(--sec) 130%);
+      background: linear-gradient(130deg, var(--pri) 0%, #ffe694 58%, var(--sec) 135%);
       color: #030711 !important;
       font-weight: 900;
       border: none;
-      box-shadow: 0 0 22px rgba(var(--pri-rgb), 0.45);
-    }
-    .cyber-blade-gold:hover {
-      filter: brightness(1.08);
-      box-shadow: 0 0 30px rgba(var(--pri-rgb), 0.72);
+      box-shadow: 0 0 18px rgba(var(--pri-rgb), 0.4);
     }
     .cyber-blade-ok {
       border-color: rgba(0, 245, 160, 0.55);
-      background: rgba(0, 245, 160, 0.11);
+      background: rgba(0, 245, 160, 0.12);
       color: var(--ok);
     }
 
-    /* شريط الملاحة الموشوري المدمج (Single Prismatic Navigation Ribbon) */
     .prism-nav {
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-top: 10px;
-      padding-top: 9px;
+      margin-top: 9px;
+      padding-top: 8px;
       border-top: 1px solid rgba(var(--sec-rgb), 0.18);
       overflow-x: auto;
       scrollbar-width: none;
     }
     .prism-nav::-webkit-scrollbar { display: none; }
-
     .nav-shard {
-      position: relative;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(9, 18, 36, 0.65);
+      background: rgba(9, 18, 36, 0.68);
       color: var(--txt-2);
       padding: 6px 13px;
-      font-size: 12.2px;
+      font-size: 12px;
       font-weight: 800;
       clip-path: var(--cut-blade);
       cursor: pointer;
       white-space: nowrap;
-      transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
       flex-shrink: 0;
-    }
-    .nav-shard:hover {
-      color: var(--txt-1);
-      border-color: rgba(var(--sec-rgb), 0.5);
-      background: rgba(var(--sec-rgb), 0.1);
+      transition: all 0.18s;
     }
     .nav-shard.active {
       color: #030712;
       background: linear-gradient(120deg, var(--pri) 0%, #ffe89e 65%, var(--sec) 135%);
       border-color: transparent;
-      box-shadow: 0 0 22px rgba(var(--pri-rgb), 0.52);
+      box-shadow: 0 0 18px rgba(var(--pri-rgb), 0.45);
     }
 
     /* =====================================================================
-       2. قوس التفرد التريليوني (Panoramic Holographic Singularity Visor)
-       بديل عبقري عن الصناديق الخمسة التقليدية!
+       2. قوس التفرد التريليوني المكتبي المتمدد ديناميكياً
        ===================================================================== */
     .singularity-visor {
-      position: relative;
       display: grid;
-      grid-template-columns: 1.08fr 1.34fr 1.08fr;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.35fr) minmax(0, 1.05fr);
       gap: 10px;
       align-items: center;
-      background:
-        radial-gradient(circle at 50% 50%, rgba(var(--pri-rgb), 0.13), rgba(5, 12, 26, 0.78) 62%),
-        linear-gradient(90deg, rgba(var(--sec-rgb), 0.08), transparent 25%, transparent 75%, rgba(var(--pri-rgb), 0.09));
+      background: radial-gradient(circle at 50% 50%, rgba(var(--pri-rgb), 0.12), rgba(5, 12, 26, 0.82) 65%);
       clip-path: var(--cut-panel);
-      border: 1px solid rgba(var(--sec-rgb), 0.34);
-      padding: 10px 15px;
-      margin-bottom: 12px;
+      border: 1px solid rgba(var(--sec-rgb), 0.32);
+      padding: 10px 14px;
       backdrop-filter: blur(16px);
-      box-shadow: inset 0 0 40px rgba(var(--sec-rgb), 0.07), 0 14px 36px rgba(0, 0, 0, 0.75);
     }
-    @media (max-width: 960px) {
+    @media (max-width: 980px) {
       .singularity-visor {
-        grid-template-columns: 1fr 1.25fr 1fr;
-        padding: 8px 11px;
-        gap: 8px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
-      .reactor-svg-wrap { width: 84px !important; height: 84px !important; }
-      .reactor-svg-wrap svg { width: 84px !important; height: 84px !important; }
-      .beam-val { font-size: 15.5px !important; }
-    }
-    @media (max-width: 700px) {
-      .singularity-visor {
-        grid-template-columns: 1fr;
+      .astrolabe-reactor {
+        grid-column: 1 / -1;
+        order: -1;
       }
     }
-
-    .visor-wing {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
+    .visor-wing { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
     .holo-metric-beam {
-      position: relative;
       padding: 6px 10px;
       background: linear-gradient(90deg, rgba(var(--pri-rgb), 0.09), rgba(255, 255, 255, 0.02));
       border-right: 3px solid var(--pri);
-      clip-path: polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 9px 100%, 0 calc(100% - 9px));
+      min-width: 0;
     }
     .holo-metric-beam.cyan-beam {
       background: linear-gradient(90deg, rgba(var(--sec-rgb), 0.1), rgba(255, 255, 255, 0.02));
       border-right-color: var(--sec);
     }
-    .beam-lbl {
-      font-size: 10.5px;
-      color: var(--txt-2);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .beam-val {
-      font-size: 18px;
-      font-weight: 900;
-      letter-spacing: 0.02em;
-      text-shadow: 0 0 16px rgba(var(--pri-rgb), 0.45);
-    }
+    .beam-lbl { font-size: 10.5px; color: var(--txt-2); display: flex; justify-content: space-between; gap: 6px; }
+    .beam-val { font-size: clamp(15px, 1.6vw, 18.5px); font-weight: 900; }
 
-    /* مفاعل التريليون الوسطي الدوار (Center Astrolabe Singularity Core) */
     .astrolabe-reactor {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 11px;
-      padding: 2px 6px;
-      position: relative;
+      gap: 10px;
+      min-width: 0;
     }
-    .reactor-svg-wrap {
-      width: 104px;
-      height: 104px;
-      flex-shrink: 0;
-      position: relative;
-      filter: drop-shadow(0 0 16px rgba(var(--sec-rgb), 0.4));
-    }
-    .reactor-readout {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .hex-shields-row {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-      margin-top: 3px;
-    }
+    .reactor-svg-wrap { width: 92px; height: 92px; flex-shrink: 0; }
+    .hex-shields-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
     .hex-shield {
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 800;
       padding: 2px 7px;
       background: rgba(var(--sec-rgb), 0.11);
-      border: 1px solid rgba(var(--sec-rgb), 0.4);
+      border: 1px solid rgba(var(--sec-rgb), 0.38);
       color: var(--sec);
-      clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 6px 100%, 0 50%);
+      clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 50%, calc(100% - 5px) 100%, 5px 100%, 0 50%);
+      white-space: nowrap;
     }
 
     /* =====================================================================
-       3. الموشورات الزجاجية الهولوغرامية (Holographic Chamfered Prisms)
+       3. الموشورات الزجاجية والتخطيط الديناميكي المرن (Fluid Responsive Grids)
        ===================================================================== */
     .holo-prism {
       position: relative;
-      background:
-        linear-gradient(155deg, rgba(14, 27, 52, 0.72) 0%, rgba(5, 11, 24, 0.86) 60%, rgba(10, 22, 44, 0.76) 100%);
+      background: linear-gradient(155deg, rgba(14, 27, 52, 0.76) 0%, rgba(5, 11, 24, 0.88) 62%, rgba(10, 22, 44, 0.8) 100%);
       clip-path: var(--cut-panel);
       border: 1px solid rgba(var(--sec-rgb), 0.28);
-      padding: 13px;
+      padding: clamp(10px, 1.4vw, 14px);
       backdrop-filter: blur(16px);
-      box-shadow:
-        0 16px 40px -14px rgba(0, 0, 0, 0.88),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12),
-        inset 0 0 26px rgba(var(--pri-rgb), 0.04);
-      transform: perspective(1200px) rotateX(var(--rx)) rotateY(var(--ry));
-      transition: border-color 0.25s, box-shadow 0.25s;
+      box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.11);
+      min-width: 0;
     }
-    .holo-prism:hover {
-      border-color: rgba(var(--pri-rgb), 0.55);
-      box-shadow:
-        0 18px 44px -12px rgba(0, 0, 0, 0.92),
-        0 0 24px rgba(var(--sec-rgb), 0.12),
-        inset 0 0 30px rgba(var(--pri-rgb), 0.06);
-    }
-
     .holo-chamber {
-      background: rgba(3, 8, 19, 0.72);
+      background: rgba(3, 8, 19, 0.75);
       border: 1px solid rgba(var(--sec-rgb), 0.22);
       clip-path: var(--cut-md);
-      padding: 10px 12px;
+      padding: 9px 11px;
+      min-width: 0;
     }
 
-    /* تخطيط قاعة المدار الكمي المتجاوب بذكاء في 800px و 1400px */
+    /* شبكة قاعة القيادة الديناميكية: 3 أعمدة (مكتبي عريض) -> عمودان (لوحي) -> عمود واحد منظم (جوال) */
     .deck-matrix {
       display: grid;
-      grid-template-columns: 235px 1fr 295px;
+      grid-template-columns: 230px minmax(0, 1fr) 290px;
       gap: 12px;
       align-items: start;
     }
-    @media (max-width: 1180px) {
+    @media (max-width: 1160px) {
       .deck-matrix {
-        grid-template-columns: 1.35fr 275px;
+        grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.9fr);
       }
       .constellation-rail {
         grid-column: 1 / -1;
@@ -503,18 +490,51 @@
         gap: 7px;
       }
     }
-    @media (max-width: 740px) {
-      .deck-matrix {
-        grid-template-columns: 1fr;
-      }
+    html[data-effective="mobile"] .deck-matrix {
+      grid-template-columns: 1fr !important;
+      gap: 10px;
+    }
+    html[data-effective="mobile"] .constellation-rail {
+      display: none !important; /* يُستبدل بشريط الأصول الأفقي الرشيق أعلى القبة! */
     }
 
-    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-    @media (max-width: 860px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+    /* حاوية لوحة الهولوغرام ذات التحجيم الديناميكي الحقيقي */
+    .holo-canvas-box {
+      position: relative;
+      width: 100%;
+      height: clamp(235px, 34vh, 305px);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    html[data-effective="mobile"] .holo-canvas-box {
+      height: clamp(220px, 33dvh, 265px);
+    }
+    #candle-cv {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+      touch-action: pan-y;
+    }
+
+    /* تبديل فرعي ذكي على الجوال بين تذكرة التداول ومصفوفة الوكلاء لمنع التكديس الطولي! */
+    .mob-deck-switcher {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    html[data-effective="mobile"] .grid-2,
+    html[data-effective="mobile"] .grid-3 {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .grid-2-keep { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 
     .row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-    .muted { color: var(--txt-2); font-size: 12px; }
+    .muted { color: var(--txt-2); font-size: 11.8px; }
     .text-pri { color: var(--pri); }
     .text-sec { color: var(--sec); }
     .text-ok { color: var(--ok); }
@@ -522,242 +542,264 @@
     .text-err { color: var(--hot); }
     .hidden { display: none !important; }
 
-    /* مدخلات ليزرية منحوتة */
     .holo-inp {
       width: 100%;
-      background: rgba(2, 6, 15, 0.85);
-      border: 1px solid rgba(var(--sec-rgb), 0.32);
+      background: rgba(2, 6, 15, 0.88);
+      border: 1px solid rgba(var(--sec-rgb), 0.34);
       color: var(--txt-1);
-      padding: 8px 12px;
+      padding: 8px 11px;
       font-size: 13px;
-      clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+      clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
       outline: none;
-      transition: all 0.18s;
     }
     .holo-inp:focus {
       border-color: var(--pri);
-      box-shadow: 0 0 18px rgba(var(--pri-rgb), 0.32), inset 0 0 10px rgba(var(--sec-rgb), 0.12);
+      box-shadow: 0 0 14px rgba(var(--pri-rgb), 0.28);
     }
 
-    /* شفرات كوكبة الأصول */
     .orbit-asset {
-      padding: 8px 11px;
-      margin-top: 6px;
-      background: linear-gradient(90deg, rgba(12, 24, 48, 0.68), rgba(4, 10, 22, 0.78));
+      padding: 8px 10px;
+      margin-top: 5px;
+      background: linear-gradient(90deg, rgba(12, 24, 48, 0.7), rgba(4, 10, 22, 0.8));
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-right: 3px solid transparent;
       clip-path: var(--cut-blade);
       cursor: pointer;
-      transition: all 0.18s;
     }
-    .orbit-asset:hover, .orbit-asset.active {
+    .orbit-asset.active, .orbit-asset:hover {
       border-color: rgba(var(--sec-rgb), 0.45);
       border-right-color: var(--pri);
-      background: linear-gradient(90deg, rgba(var(--pri-rgb), 0.15), rgba(var(--sec-rgb), 0.07));
-      transform: translateX(-2px);
+      background: linear-gradient(90deg, rgba(var(--pri-rgb), 0.16), rgba(var(--sec-rgb), 0.07));
     }
 
-    /* =====================================================================
-       4. مدار التخاطر الكمي للوكلاء الخمسة (5-Agent Neural Synapse Pentagon)
-       ===================================================================== */
     .synapse-arena {
-      position: relative;
       display: grid;
-      grid-template-columns: 230px 1fr;
-      gap: 12px;
+      grid-template-columns: 205px minmax(0, 1fr);
+      gap: 10px;
       align-items: center;
     }
-    @media (max-width: 720px) {
-      .synapse-arena { grid-template-columns: 1fr; }
+    html[data-effective="mobile"] .synapse-arena {
+      grid-template-columns: 1fr;
     }
-    .synapse-svg-box {
-      width: 220px;
-      height: 205px;
-      margin: 0 auto;
-      filter: drop-shadow(0 0 14px rgba(var(--sec-rgb), 0.35));
-    }
-    .energy-pulse {
-      stroke-dasharray: 6 8;
-      animation: dashFlow 1.4s linear infinite;
-    }
-    @keyframes dashFlow {
-      to { stroke-dashoffset: -28; }
-    }
+    .synapse-svg-box { width: 195px; height: 185px; margin: 0 auto; }
+    .energy-pulse { stroke-dasharray: 6 8; animation: dashFlow 1.4s linear infinite; }
+    @keyframes dashFlow { to { stroke-dashoffset: -28; } }
 
-    /* =====================================================================
-       5. كريبتيكس الأدمن رباعي الحلقات (4-Ring Sovereign Quantum Cryptex)
-       ===================================================================== */
+    /* كريبتيكس الأدمن متجاوب بالكامل بين المكتب والجوال */
     .cryptex-layout {
       display: grid;
-      grid-template-columns: 330px 1fr;
-      gap: 16px;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 14px;
       align-items: start;
     }
-    @media (max-width: 960px) {
-      .cryptex-layout { grid-template-columns: 1fr; }
+    html[data-effective="mobile"] .cryptex-layout {
+      grid-template-columns: 1fr;
+      gap: 10px;
     }
     .cryptex-wheel-stage {
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      gap: 10px;
+      gap: 8px;
+    }
+    html[data-effective="mobile"] #cryptex-svg {
+      width: 146px !important;
+      height: 146px !important;
+    }
+    html[data-effective="mobile"] .cryptex-wheel-stage {
+      padding: 8px 10px;
+      gap: 6px;
     }
     .cryptex-ring-anim {
       transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.4s;
       transform-origin: 140px 140px;
     }
+    .totp-laser-track { height: 5px; width: 100%; background: rgba(255, 255, 255, 0.08); overflow: hidden; margin-top: 5px; }
+    .totp-laser-fill { height: 100%; background: linear-gradient(90deg, var(--sec), var(--pri)); transition: width 0.3s linear; }
 
-    .totp-laser-track {
-      height: 5px;
-      width: 100%;
-      background: rgba(255, 255, 255, 0.08);
-      overflow: hidden;
-      margin-top: 6px;
-      clip-path: var(--cut-blade);
-    }
-    .totp-laser-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--sec), var(--pri));
-      box-shadow: 0 0 12px var(--sec);
-      transition: width 0.3s linear;
+    /* =====================================================================
+       6A. شريط التخاطر المكتبي النحيل (سطر واحد فقط بدون التفاف!)
+       ===================================================================== */
+    .desktop-neural-dock {
+      position: fixed;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(1180px, calc(100vw - 24px));
+      z-index: 45;
+      background: linear-gradient(120deg, rgba(6, 14, 30, 0.94), rgba(10, 20, 42, 0.94));
+      border: 1px solid rgba(var(--sec-rgb), 0.42);
+      clip-path: var(--cut-panel);
+      padding: 7px 14px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.9);
     }
 
     /* =====================================================================
-       6. شريط التخاطر الصوتي والنصي العائم (Levitating Neural Visor Dock)
+       6B. شريط التبويب السفلي الأصيل للجوال (Native Mobile Bottom Dock — 60px)
+       صفر تداخل، صفر التفاف، وتجربة تطبيق جوال هولوغرامي أصيل!
        ===================================================================== */
-    .neural-visor-dock {
+    .mobile-bottom-nav {
       position: fixed;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: min(1180px, calc(100vw - 20px));
-      z-index: 45;
-      background: linear-gradient(120deg, rgba(6, 14, 30, 0.92), rgba(12, 24, 48, 0.9), rgba(5, 12, 26, 0.94));
-      border: 1px solid rgba(var(--sec-rgb), 0.45);
-      clip-path: var(--cut-panel);
-      padding: 8px 14px;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      height: calc(60px + env(safe-area-inset-bottom, 0px));
+      padding: 4px 6px calc(4px + env(safe-area-inset-bottom, 0px));
+      background: linear-gradient(180deg, rgba(6, 14, 30, 0.97), rgba(2, 5, 13, 0.99));
+      border-top: 1px solid rgba(var(--pri-rgb), 0.42);
       backdrop-filter: blur(22px);
-      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.92), 0 0 28px rgba(var(--sec-rgb), 0.18);
+      box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.9);
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 3px;
+      align-items: center;
     }
-    .eq-bars {
-      display: inline-flex;
-      align-items: flex-end;
+    .mob-tab-btn {
+      border: none;
+      background: transparent;
+      color: var(--txt-2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       gap: 2px;
-      height: 18px;
-      padding: 0 4px;
+      padding: 4px 2px;
+      font-size: 10.2px;
+      font-weight: 800;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.16s;
     }
-    .eq-bars span {
-      width: 3px;
-      background: linear-gradient(180deg, var(--pri), var(--sec));
-      animation: eqDance 1.1s ease-in-out infinite;
-    }
-    .eq-bars span:nth-child(1) { height: 7px; animation-delay: 0s; }
-    .eq-bars span:nth-child(2) { height: 15px; animation-delay: 0.15s; }
-    .eq-bars span:nth-child(3) { height: 10px; animation-delay: 0.3s; }
-    .eq-bars span:nth-child(4) { height: 18px; animation-delay: 0.45s; }
-    .eq-bars span:nth-child(5) { height: 8px; animation-delay: 0.6s; }
-    @keyframes eqDance {
-      0%, 100% { transform: scaleY(0.45); opacity: 0.65; }
-      50% { transform: scaleY(1.1); opacity: 1; }
+    .mob-tab-btn .ico { font-size: 16px; line-height: 1.1; }
+    .mob-tab-btn.active {
+      color: var(--pri);
+      background: rgba(var(--pri-rgb), 0.13);
+      box-shadow: inset 0 2px 0 var(--pri);
     }
 
-    /* نوافذ منبثقة هولوغرامية */
+    /* نافذة الأوامر الذكية المنزلقة للجوال (Slide-Up AI Command Drawer) */
+    .ai-drawer-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 75;
+      background: rgba(1, 4, 11, 0.8);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .ai-drawer-sheet {
+      width: min(640px, 100%);
+      background: linear-gradient(180deg, rgba(10, 22, 46, 0.98), rgba(4, 9, 20, 0.99));
+      border-top: 2px solid var(--pri);
+      padding: 14px 14px calc(18px + env(safe-area-inset-bottom, 0px));
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .eq-bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 16px; }
+    .eq-bars span { width: 3px; background: linear-gradient(180deg, var(--pri), var(--sec)); animation: eqDance 1.1s ease-in-out infinite; }
+    .eq-bars span:nth-child(1) { height: 7px; }
+    .eq-bars span:nth-child(2) { height: 14px; animation-delay: 0.18s; }
+    .eq-bars span:nth-child(3) { height: 9px; animation-delay: 0.35s; }
+    .eq-bars span:nth-child(4) { height: 15px; animation-delay: 0.5s; }
+    @keyframes eqDance { 0%, 100% { transform: scaleY(0.45); } 50% { transform: scaleY(1.05); } }
+
     .holo-modal-bg {
       position: fixed;
       inset: 0;
-      z-index: 80;
-      background: radial-gradient(circle at 50% 45%, rgba(6, 16, 36, 0.84), rgba(1, 3, 8, 0.94));
-      backdrop-filter: blur(14px);
+      z-index: 85;
+      background: rgba(1, 3, 9, 0.88);
+      backdrop-filter: blur(12px);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 12px;
+      overflow-y: auto;
     }
-
     .holo-toast {
-      margin-bottom: 12px;
-      padding: 10px 15px;
-      background: linear-gradient(90deg, rgba(var(--pri-rgb), 0.2), rgba(var(--sec-rgb), 0.12));
+      padding: 9px 13px;
+      background: linear-gradient(90deg, rgba(var(--pri-rgb), 0.22), rgba(var(--sec-rgb), 0.14));
       border: 1px solid var(--pri);
-      clip-path: var(--cut-blade);
-      font-size: 12.8px;
+      clip-path: var(--cut-md);
+      font-size: 12.2px;
       font-weight: 700;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      box-shadow: 0 0 24px rgba(var(--pri-rgb), 0.25);
+      gap: 8px;
     }
-
     .step-orb {
-      width: 25px;
-      height: 25px;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-weight: 900;
-      font-size: 12px;
+      font-size: 11.5px;
       color: #030712;
       background: linear-gradient(135deg, var(--pri), var(--sec));
       clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
     }
 
-    table { width: 100%; border-collapse: collapse; font-size: 12.2px; }
-    th, td { padding: 8px 9px; text-align: right; border-bottom: 1px solid rgba(var(--sec-rgb), 0.14); }
-    th { color: var(--sec); font-weight: 800; font-size: 11px; letter-spacing: 0.04em; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid rgba(var(--sec-rgb), 0.14); }
+    th { color: var(--sec); font-weight: 800; font-size: 10.8px; }
   </style>
 </head>
 <body>
-  <!-- الفضاء الهولوغرامي الحي ثلاثي الأبعاد -->
   <canvas id="holo-cosmos"></canvas>
   <div class="caustic-aura"></div>
   <div class="scan-beam"></div>
 
-  <div class="holo-stage">
+  <div id="holo-stage" class="holo-stage">
     <!-- ================================================================
-         1. الجسر الهولوغرامي المداري (TMJ Sovereign Orbital Bridge)
+         1A. الجسر المداري لسطح المكتب واللوحي (Desktop Orbital Bridge)
          ================================================================ -->
-    <header class="orbital-bridge">
+    <header class="orbital-bridge desktop-only" style="flex-direction:column;">
       <div class="bridge-top">
-        <!-- النواة المدارية للشعار الثلاثي (TMJ / MTR / DMT) -->
         <div class="crest-nexus">
-          <div id="header-gyro-crest" class="gyro-emblem" onclick="ui.cycleMonogram()" title="اضغط للتبديل الهولوغرامي بين الشعارات الثلاثة: TMJ / MTR / DMT"></div>
-          <div class="brand-holo-text">
+          <div id="header-gyro-crest" class="gyro-emblem" onclick="ui.cycleMonogram()" title="اضغط للتبديل بين الشعارات الثلاثة: TMJ / MTR / DMT"></div>
+          <div style="min-width:0;">
             <div class="micro-coords num">
               <span class="pulse-beacon"></span>
-              <span>ASTROLABE.OS // v1.3 QUANTUM</span>
+              <span>ASTROLABE.OS // ADAPTIVE v1.3</span>
               <span>•</span>
               <span id="hdr-coord-mono">CORE: TMJ-HEX</span>
             </div>
             <h1 class="sovereign-h1">
               <span id="brand-main-title">تريلماجد — المِسطَبَة الهولوغرامية للتريليون</span>
-              <span class="mono-Runes">
+              <span style="display:inline-flex;gap:4px;">
                 <button type="button" id="pill-mono-TMJ" class="rune-chip active" onclick="ui.setMonogram('TMJ')">★ TMJ</button>
                 <button type="button" id="pill-mono-MTR" class="rune-chip" onclick="ui.setMonogram('MTR')">MTR</button>
                 <button type="button" id="pill-mono-DMT" class="rune-chip" onclick="ui.setMonogram('DMT')">DMT</button>
               </span>
             </h1>
             <p id="brand-sub-meaning" class="sovereign-sub">
-              الاندماج السيادي بين <strong class="text-pri">التريليون</strong> و<strong class="text-sec">د. ماجد</strong> — قيادة كمية هولوغرامية من انضباط الدخل إلى أفق <span class="num text-pri">$1.00T</span>
+              الاندماج السيادي بين <strong class="text-pri">التريليون</strong> و<strong class="text-sec">د. ماجد</strong> — قيادة كمية هولوغرامية متكيفة نحو أفق <span class="num text-pri">$1.00T</span>
             </p>
           </div>
         </div>
 
-        <!-- مفاتيح القيادة الفضائية المدمجة -->
-        <div class="bridge-telemetry">
-          <span class="cyber-blade cyber-blade-ok num" title="التداول الحقيقي مقفل برمجياً — محاكاة ورقية آمنة">⚡ PAPER•LOCK</span>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="cyber-blade cyber-blade-ok num">⚡ PAPER•LOCK</span>
           <button type="button" id="admin-gate-pill" class="cyber-blade cyber-blade-gold" onclick="ui.tab('admin')">
             <span id="admin-gate-label">👑 كريبتيكس الأدمن (MFA)</span>
           </button>
-          <button type="button" class="cyber-blade" onclick="ui.lockAdminSession()" title="قفل المنصة ببوابة الكريبتيكس">🔒 قفل</button>
-          <button type="button" id="sfx-btn" class="cyber-blade" onclick="ui.toggleAudio()" title="تفعيل/كتم الرنين الهولوغرامي التفاعلي">🔊 رنين ضوئي</button>
-          <button type="button" id="focus-btn" class="cyber-blade" onclick="ui.toggleFocus()" title="وضع انعدام الجاذبية والتركيز البصري">🌌 تركيز</button>
+          <button type="button" class="cyber-blade" onclick="ui.toggleDeviceMode()" title="التبديل الفوري بين داشبورد الجوال المستقل ومسرح المكتب">
+            <span id="device-mode-lbl">📱 معاينة الجوال</span>
+          </button>
+          <button type="button" class="cyber-blade" onclick="ui.lockAdminSession()">🔒 قفل</button>
+          <button type="button" id="sfx-btn" class="cyber-blade" onclick="ui.toggleAudio()">🔊</button>
         </div>
       </div>
 
-      <!-- شريط الشظايا الموشورية للتنقل (سطر واحد انسيابي فائق الأناقة) -->
-      <nav class="prism-nav" aria-label="الملاحة الهولوغرامية">
+      <nav class="prism-nav" aria-label="الملاحة المكتبية">
         <button type="button" class="nav-shard active" data-tab="terminal" onclick="ui.tab('terminal')">🛸 مدار التداول والتخاطر</button>
         <button type="button" class="nav-shard" data-tab="admin" onclick="ui.tab('admin')">🔮 كريبتيكس الأدمن (TMJ MFA)</button>
         <button type="button" class="nav-shard" data-tab="binance" onclick="ui.tab('binance')">📡 مرصد Binance الحي</button>
@@ -767,38 +809,77 @@
       </nav>
     </header>
 
+    <!-- ================================================================
+         1B. هيدر داشبورد الجوال الهولوغرامي المستقل (56px Ultra-Clean!)
+         يظهر تلقائياً على الشاشات العمودية والهواتف الذكية
+         ================================================================ -->
+    <header class="mobile-top-hud mobile-only">
+      <div class="mob-brand">
+        <div id="mob-gyro-crest" class="mob-crest" onclick="ui.cycleMonogram()"></div>
+        <div class="mob-title-stack">
+          <div class="mob-title-main">
+            <span id="mob-brand-title">تريلماجد</span>
+            <button type="button" id="mob-mono-badge" class="rune-chip active num" style="padding:1px 6px;font-size:9.5px;" onclick="ui.cycleMonogram()">TMJ ★</button>
+          </div>
+          <div class="mob-title-sub num">
+            <span class="pulse-beacon" style="width:5px;height:5px;"></span>
+            <span>PAPER•SIM</span>
+            <span>•</span>
+            <span id="mob-mfa-mini" class="text-warn">MFA: INIT</span>
+          </div>
+        </div>
+      </div>
+      <div class="mob-actions">
+        <button type="button" class="rune-chip active" onclick="ui.tab('admin')" title="كريبتيكس الأدمن">🔮 الأدمن</button>
+        <button type="button" class="rune-chip" onclick="ui.tab('themes')" title="تغيير الطيف الضوئي">🌈</button>
+        <button type="button" class="rune-chip" onclick="ui.toggleDeviceMode()" title="التبديل إلى العرض المكتبي الكامل">🖥️</button>
+      </div>
+    </header>
+
     <!-- إشعار طيفي فوري -->
     <div id="toast" class="holo-toast hidden">
       <span id="toast-msg"></span>
-      <button type="button" class="cyber-blade" style="padding:2px 9px;font-size:11px;" onclick="document.getElementById('toast').classList.add('hidden')">✕</button>
+      <button type="button" class="rune-chip" onclick="document.getElementById('toast').classList.add('hidden')">✕</button>
     </div>
 
     <!-- ================================================================
-         2. قوس التفرد التريليوني (Panoramic Singularity Visor)
+         2A. شريط النبض المالي الأفقي الرشيق للجوال (54px فقط!)
          ================================================================ -->
-    <section class="singularity-visor hide-focus">
-      <!-- الجناح الأيمن: طيف المحفظة الورقية الحية -->
+    <section class="mobile-pulse-strip mobile-only-block">
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;">
+        <div class="mob-kpi-pill">
+          <div class="mob-kpi-lbl">⚡ المحفظة الورقية</div>
+          <div id="mob-kpi-eq" class="mob-kpi-val num text-pri">$1,001,420</div>
+        </div>
+        <div class="mob-kpi-pill">
+          <div class="mob-kpi-lbl">🌊 عائد اليوم</div>
+          <div id="mob-kpi-pnl" class="mob-kpi-val num text-ok">+$1,420.5</div>
+        </div>
+        <div class="mob-kpi-pill">
+          <div class="mob-kpi-lbl">🌀 أفق التريليون</div>
+          <div class="mob-kpi-val num text-sec">$1T • 32.5%</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         2B. قوس التفرد التريليوني لسطح المكتب واللوحي
+         ================================================================ -->
+    <section class="singularity-visor desktop-only hide-focus">
       <div class="visor-wing">
         <div class="holo-metric-beam">
-          <div class="beam-lbl">
-            <span>⚡ صافي الطاقة المالية (PAPER EQUITY)</span>
-            <span class="num text-sec" style="font-size:10px;">LIVE•SIM</span>
-          </div>
+          <div class="beam-lbl"><span>⚡ صافي الطاقة المالية (PAPER)</span><span class="num text-sec" style="font-size:10px;">LIVE•SIM</span></div>
           <div id="kpi-eq" class="beam-val num">$1,001,420.50</div>
         </div>
         <div class="holo-metric-beam cyan-beam">
-          <div class="beam-lbl">
-            <span>🌊 التدفق اليومي & السيولة الحرة</span>
-            <span id="kpi-cash" class="num text-pri" style="font-size:11.5px;font-weight:700;">Cash: $912,450</span>
-          </div>
-          <div id="kpi-pnl" class="num text-ok" style="font-size:16px;font-weight:900;">+$1,420.50 (+0.14%)</div>
+          <div class="beam-lbl"><span>🌊 التدفق اليومي & السيولة</span><span id="kpi-cash" class="num text-pri" style="font-size:11px;font-weight:700;">$912,450</span></div>
+          <div id="kpi-pnl" class="num text-ok" style="font-size:15px;font-weight:900;">+$1,420.50 (+0.14%)</div>
         </div>
       </div>
 
-      <!-- القلب الوسطي: مفاعل الإسطرلاب اللوغاريتمي نحو التريليون ($1.00T) -->
       <div class="astrolabe-reactor">
         <div class="reactor-svg-wrap">
-          <svg viewBox="0 0 120 120" width="108" height="108">
+          <svg viewBox="0 0 120 120" width="92" height="92">
             <defs>
               <linearGradient id="singularityGrad" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="var(--sec)" />
@@ -808,19 +889,16 @@
             </defs>
             <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1.2" stroke-dasharray="3 4" class="gyro-ring-cw" />
             <circle cx="60" cy="60" r="46" fill="none" stroke="rgba(0,245,212,0.18)" stroke-width="6" />
-            <!-- قوس التقدم اللوغاريتمي -->
-            <circle id="trillion-arc" cx="60" cy="60" r="46" fill="none" stroke="url(#singularityGrad)" stroke-width="6"
-              stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="195" transform="rotate(-90 60 60)" />
-            <polygon points="60,18 63,24 57,24" fill="var(--pri)" class="gyro-ring-ccw" />
+            <circle cx="60" cy="60" r="46" fill="none" stroke="url(#singularityGrad)" stroke-width="6" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="195" transform="rotate(-90 60 60)" />
             <circle cx="60" cy="60" r="33" fill="rgba(4,10,24,0.88)" stroke="rgba(247,201,72,0.4)" stroke-width="1" />
-            <text x="60" y="55" text-anchor="middle" fill="var(--pri)" font-family="IBM Plex Mono, monospace" font-size="12.5" font-weight="800">$1.00T</text>
-            <text id="trillion-pct-svg" x="60" y="70" text-anchor="middle" fill="var(--sec)" font-family="IBM Plex Mono, monospace" font-size="9.5" font-weight="700">LOG 32.5%</text>
+            <text direction="ltr" unicode-bidi="isolate" x="60" y="56" text-anchor="middle" fill="var(--pri)" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="800">$1.00T</text>
+            <text direction="ltr" unicode-bidi="isolate" x="60" y="70" text-anchor="middle" fill="var(--sec)" font-family="IBM Plex Mono, monospace" font-size="9" font-weight="700">LOG 32.5%</text>
           </svg>
         </div>
-        <div class="reactor-readout">
+        <div style="min-width:0;">
           <div style="font-size:13px;font-weight:900;color:var(--pri);">🌀 مفاعل التريليون اللوغاريتمي</div>
-          <div class="muted" style="font-size:11.3px;">قياس فلكي لوغاريتمي من نواة المليون إلى <span class="num text-sec">$1,000,000,000,000</span></div>
-          <div class="hex-shields-row" title="دروع المخاطر الخمسة غير القابلة للكسر">
+          <div class="muted" style="font-size:11px;">من نواة المليون الورقي إلى <span class="num text-sec">$1.00T</span></div>
+          <div class="hex-shields-row">
             <span class="hex-shield num">0.5% صفقة</span>
             <span class="hex-shield num">25% أصل</span>
             <span class="hex-shield num">2% يومي</span>
@@ -829,101 +907,96 @@
         </div>
       </div>
 
-      <!-- الجناح الأيسر: حالة النواة الأمنية والطيفيّة -->
       <div class="visor-wing">
         <div class="holo-metric-beam cyan-beam">
-          <div class="beam-lbl">
-            <span>🔮 حالة الختم السيادي (CRYPTEX)</span>
-            <span id="visor-mfa-tag" class="num text-warn" style="font-size:10.5px;font-weight:800;">AWAITING•INIT</span>
-          </div>
-          <div id="visor-admin-Identity" style="font-size:13.5px;font-weight:800;color:var(--txt-1);margin-top:2px;">د. ماجد • بوابة تريلماجد الرباعية</div>
+          <div class="beam-lbl"><span>🔮 حالة الختم السيادي</span><span id="visor-mfa-tag" class="num text-warn" style="font-size:10px;font-weight:800;">AWAITING•INIT</span></div>
+          <div id="visor-admin-Identity" style="font-size:13px;font-weight:800;margin-top:2px;">د. ماجد • بوابة تريلماجد الرباعية</div>
         </div>
         <div class="holo-metric-beam">
-          <div class="beam-lbl">
-            <span>🛰️ نبض الإجماع الكمي النشط</span>
-            <span class="num text-ok" style="font-size:10.5px;">5/5 AGENTS</span>
-          </div>
-          <div id="visor-consensus-line" style="font-size:12.5px;font-weight:800;color:var(--pri);margin-top:2px;">BTCUSDT: تجميع كمي صاعد (ثقة 84%)</div>
+          <div class="beam-lbl"><span>🛰️ نبض الإجماع الكمي</span><span class="num text-ok" style="font-size:10px;">5/5 AGENTS</span></div>
+          <div id="visor-consensus-line" style="font-size:12px;font-weight:800;color:var(--pri);margin-top:2px;">BTCUSDT: توافق طيفي صاعد (86%)</div>
         </div>
       </div>
     </section>
 
     <!-- ================================================================
-         الشاشة 1: مدار التداول والتخاطر الهولوغرامي (Main Command Deck)
+         الشاشة 1: قاعة المدار والتداول الهولوغرامي (مرتبة بعبقرية للجوال والمكتب!)
          ================================================================ -->
     <main id="scr-terminal" class="deck-matrix">
-      <!-- أ. كوكبة الأصول المدارية -->
+      <!-- أ. كوكبة الأصول الجانبية (تظهر في المكتب واللوحي) -->
       <aside class="holo-prism constellation-rail">
-        <div class="row-between" style="margin-bottom:8px;">
-          <strong style="font-size:13.5px;color:var(--sec);">🪐 كوكبة الأصول المدارية</strong>
-          <span class="num" style="font-size:10.5px;color:var(--pri);">6 PULSES</span>
+        <div class="row-between" style="margin-bottom:7px;">
+          <strong style="font-size:13px;color:var(--sec);">🪐 كوكبة الأصول المدارية</strong>
+          <span class="num" style="font-size:10px;color:var(--pri);">6 PULSES</span>
         </div>
-        <input id="sym-search" class="holo-inp" placeholder="تصفية طيفية (BTC, ETH, SOL)..." oninput="ui.renderWatchlist()" />
-        <div id="watchlist" style="margin-top:6px;"></div>
+        <input id="sym-search" class="holo-inp" placeholder="تصفية طيفية (BTC, ETH)..." oninput="ui.renderWatchlist()" />
+        <div id="watchlist" style="margin-top:5px;"></div>
       </aside>
 
-      <!-- ب. مسرح شموع البلازما الهولوغرامي + مصفوفة التخاطر الخماسية -->
-      <section style="display:flex;flex-direction:column;gap:14px;min-width:0;">
-        <!-- مسرح البلازما الضوئي -->
+      <!-- ب. قلب المسرح الهولوغرامي (يظهر أولاً في الجوال والمكتب!) -->
+      <section style="display:flex;flex-direction:column;gap:10px;min-width:0;">
+        <!-- شريط اختيار الأصول السريع باللمس للجوال -->
+        <div id="mob-asset-ribbon" class="mobile-asset-ribbon mobile-only"></div>
+
+        <!-- القبة الهولوغرامية ثلاثية الأبعاد + شموع البلازما بتحجيم ديناميكي حقيقي -->
         <div class="holo-prism">
-          <div class="row-between" style="padding-bottom:9px;margin-bottom:10px;border-bottom:1px solid rgba(var(--sec-rgb),0.2);">
+          <div class="row-between" style="padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid rgba(var(--sec-rgb),0.2);">
             <div>
-              <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
-                <strong id="ch-sym" class="num" style="font-size:19px;letter-spacing:0.04em;">BTCUSDT</strong>
-                <span id="ch-badge" class="hex-shield num">SPOT•HOLO</span>
-                <strong id="ch-price" class="num text-pri" style="font-size:20px;text-shadow:0 0 16px rgba(var(--pri-rgb),0.55);">$96,540.00</strong>
+              <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+                <strong id="ch-sym" class="num" style="font-size:clamp(16px, 2vw, 19px);">BTCUSDT</strong>
+                <span class="hex-shield num">SPOT•HOLO</span>
+                <strong id="ch-price" class="num text-pri" style="font-size:clamp(16.5px, 2vw, 20px);">$96,540.00</strong>
               </div>
-              <div id="ch-meta" class="muted num" style="font-size:11px;margin-top:2px;">ZENITH: $97,210 • NADIR: $95,480 • QUANTUM SPREAD: 1.8 bps</div>
+              <div id="ch-meta" class="muted num" style="font-size:10.5px;margin-top:2px;">HIGH: $97,210 • LOW: $95,480 • SPREAD: 1.8 bps</div>
             </div>
-            <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">
-              <button type="button" id="mode-btn-3d" class="rune-chip active" onclick="ui.setHoloMode('3d')">🌐 قبة الهولوغرام 3D</button>
-              <button type="button" id="mode-btn-candles" class="rune-chip" onclick="ui.setHoloMode('candles')">🕯️ شموع البلازما</button>
-              <span style="opacity:0.35;">|</span>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">
+              <button type="button" id="mode-btn-3d" class="rune-chip active" onclick="ui.setHoloMode('3d')">🌐 قبة 3D</button>
+              <button type="button" id="mode-btn-candles" class="rune-chip" onclick="ui.setHoloMode('candles')">🕯️ البلازما</button>
               <button type="button" class="rune-chip num" onclick="ui.setTf('5m', this)">5M</button>
               <button type="button" class="rune-chip active num" onclick="ui.setTf('15m', this)">15M</button>
               <button type="button" class="rune-chip num" onclick="ui.setTf('1h', this)">1H</button>
-              <button type="button" class="rune-chip num" onclick="ui.setTf('4h', this)">4H</button>
             </div>
           </div>
-          <!-- لوحة الإسقاط الهولوغرامي المزدوج: قبة المدار ثلاثية الأبعاد (قابلة للتدوير بالماوس) + شموع البلازما -->
-          <canvas id="candle-cv" width="780" height="270" style="width:100%;height:270px;display:block;border-radius:4px;cursor:grab;"></canvas>
+          <div id="canvas-wrap" class="holo-canvas-box">
+            <canvas id="candle-cv"></canvas>
+          </div>
         </div>
 
-        <!-- مصفوفة التخاطر الخماسية للوكلاء (Pentagon Neural Synapse) -->
-        <div class="holo-prism">
-          <div class="row-between" style="padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid rgba(var(--sec-rgb),0.2);">
+        <!-- مبدّل ذكي خاص بداشبورد الجوال للتنقل بين التذكرة والوكلاء بدون تكديس عمودي مزعج! -->
+        <div class="mob-deck-switcher mobile-only">
+          <button type="button" id="mob-sub-ticket" class="cyber-blade cyber-blade-gold" style="justify-content:center;" onclick="ui.setMobSubPanel('ticket')">🎯 تذكرة الإطلاق الورقي</button>
+          <button type="button" id="mob-sub-council" class="cyber-blade" style="justify-content:center;" onclick="ui.setMobSubPanel('council')">🧠 بلورة الوكلاء (86%)</button>
+        </div>
+
+        <!-- مصفوفة التخاطر الخماسية للوكلاء -->
+        <div id="panel-council-box" class="holo-prism">
+          <div class="row-between" style="padding-bottom:7px;margin-bottom:9px;border-bottom:1px solid rgba(var(--sec-rgb),0.2);">
             <div>
-              <strong style="font-size:14.5px;color:var(--pri);">🧠 مصفوفة التخاطر الخماسية للوكلاء (Neural Pentagon)</strong>
-              <div class="muted" style="font-size:11.5px;">خمسة عقول كمية متصلة بشبكة ليزر ببلورة الإجماع — القرار النهائي بيد د. ماجد حصراً.</div>
+              <strong style="font-size:14px;color:var(--pri);">🧠 مصفوفة التخاطر الخماسية للوكلاء (Neural Pentagon)</strong>
+              <div class="muted" style="font-size:11px;">خمسة عقول كمية متصلة بشبكة ليزر ببلورة الإجماع — القرار النهائي بيد د. ماجد.</div>
             </div>
-            <button type="button" class="cyber-blade cyber-blade-gold" onclick="ui.conveneCouncil()">⚡ إطلاق نبضة تخاطر فورية</button>
+            <button type="button" class="cyber-blade cyber-blade-gold" style="padding:5px 11px;font-size:11.5px;" onclick="ui.conveneCouncil()">⚡ نبضة تخاطر</button>
           </div>
 
           <div class="synapse-arena">
-            <!-- رسم هندسي خماسي حي يربط الوكلاء الخمسة ببلورة الإجماع -->
             <div class="synapse-svg-box">
-              <svg id="pentagon-svg" viewBox="0 0 220 205" width="220" height="205">
+              <svg id="pentagon-svg" viewBox="0 0 220 205" width="195" height="185">
                 <defs>
                   <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stop-color="rgba(0,245,212,0.55)" />
-                    <stop offset="60%" stop-color="rgba(247,201,72,0.18)" />
+                    <stop offset="0%" stop-color="rgba(0,245,212,0.52)" />
+                    <stop offset="60%" stop-color="rgba(247,201,72,0.16)" />
                     <stop offset="100%" stop-color="transparent" />
                   </radialGradient>
                 </defs>
-                <circle cx="110" cy="106" r="78" fill="url(#coreGlow)" />
+                <circle cx="110" cy="106" r="76" fill="url(#coreGlow)" />
                 <polygon points="110,24 190,82 160,176 60,176 30,82" fill="none" stroke="rgba(0,245,212,0.28)" stroke-width="1.2" />
-                <!-- خطوط التخاطر المتدفقة إلى المركز -->
-                <line x1="110" y1="24" x2="110" y2="106" stroke="var(--pri)" stroke-width="1.6" class="energy-pulse" />
-                <line x1="190" y1="82" x2="110" y2="106" stroke="var(--sec)" stroke-width="1.6" class="energy-pulse" />
-                <line x1="160" y1="176" x2="110" y2="106" stroke="var(--pri)" stroke-width="1.6" class="energy-pulse" />
-                <line x1="60" y1="176" x2="110" y2="106" stroke="var(--sec)" stroke-width="1.6" class="energy-pulse" />
-                <line x1="30" y1="82" x2="110" y2="106" stroke="var(--ok)" stroke-width="1.6" class="energy-pulse" />
-
-                <!-- بلورة الإجماع في القلب -->
-                <polygon points="110,84 130,106 110,128 90,106" fill="rgba(4,12,26,0.94)" stroke="var(--pri)" stroke-width="2" />
-                <text id="pent-score" direction="ltr" unicode-bidi="isolate" x="110" y="109" text-anchor="middle" fill="var(--pri)" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="800">84% OK</text>
-
-                <!-- عقد الوكلاء الخمسة -->
+                <line x1="110" y1="24" x2="110" y2="106" stroke="var(--pri)" stroke-width="1.5" class="energy-pulse" />
+                <line x1="190" y1="82" x2="110" y2="106" stroke="var(--sec)" stroke-width="1.5" class="energy-pulse" />
+                <line x1="160" y1="176" x2="110" y2="106" stroke="var(--pri)" stroke-width="1.5" class="energy-pulse" />
+                <line x1="60" y1="176" x2="110" y2="106" stroke="var(--sec)" stroke-width="1.5" class="energy-pulse" />
+                <line x1="30" y1="82" x2="110" y2="106" stroke="var(--ok)" stroke-width="1.5" class="energy-pulse" />
+                <polygon points="110,80 144,106 110,132 76,106" fill="rgba(4,12,26,0.94)" stroke="var(--pri)" stroke-width="2" />
+                <text id="pent-score" direction="ltr" unicode-bidi="isolate" x="110" y="109" text-anchor="middle" fill="var(--pri)" font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="800">86% OK</text>
                 <g><circle cx="110" cy="24" r="15" fill="#071226" stroke="var(--pri)" stroke-width="1.6"/><text x="110" y="28" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">ماكرو</text></g>
                 <g><circle cx="190" cy="82" r="15" fill="#071226" stroke="var(--sec)" stroke-width="1.6"/><text x="190" y="86" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">سيولة</text></g>
                 <g><circle cx="160" cy="176" r="15" fill="#071226" stroke="var(--pri)" stroke-width="1.6"/><text x="160" y="180" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">كمي</text></g>
@@ -931,78 +1004,76 @@
                 <g><circle cx="30" cy="82" r="15" fill="#071226" stroke="var(--ok)" stroke-width="1.6"/><text x="30" y="86" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">حوكمة</text></g>
               </svg>
             </div>
-            <div id="council-cards" class="grid-2" style="gap:8px;"></div>
+            <div id="council-cards" class="grid-2" style="gap:7px;"></div>
           </div>
         </div>
       </section>
 
-      <!-- ج. موجه التنفيذ الورقي والختم الهولوغرامي -->
-      <aside class="holo-prism">
-        <div class="row-between" style="margin-bottom:10px;">
+      <!-- ج. موجه الإطلاق الورقي والختم الهولوغرامي -->
+      <aside id="panel-ticket-box" class="holo-prism">
+        <div class="row-between" style="margin-bottom:9px;">
           <strong style="font-size:14px;color:var(--pri);">🎯 مُوجّه الإطلاق الورقي</strong>
           <span class="hex-shield num">SIM•SAFE</span>
         </div>
 
-        <div class="grid-2" style="gap:7px;margin-bottom:10px;">
-          <button type="button" id="btn-buy" class="cyber-blade cyber-blade-gold" style="justify-content:center;" onclick="ui.setSide('BUY')">▲ شراء طيفي (BUY)</button>
-          <button type="button" id="btn-sell" class="cyber-blade" style="justify-content:center;" onclick="ui.setSide('SELL')">▼ بيع طيفي (SELL)</button>
+        <div class="grid-2-keep" style="margin-bottom:9px;">
+          <button type="button" id="btn-buy" class="cyber-blade cyber-blade-gold" style="justify-content:center;" onclick="ui.setSide('BUY')">▲ شراء (BUY)</button>
+          <button type="button" id="btn-sell" class="cyber-blade" style="justify-content:center;" onclick="ui.setSide('SELL')">▼ بيع (SELL)</button>
         </div>
 
-        <div style="display:grid;gap:9px;margin-bottom:10px;">
+        <div style="display:grid;gap:8px;margin-bottom:9px;">
           <label class="muted">حجم الموجة (<span id="tk-sym" class="num text-sec">BTCUSDT</span>)
-            <input id="ord-qty" type="number" step="0.01" value="0.05" class="holo-inp num" style="margin-top:4px;" oninput="ui.calcRisk()" />
+            <input id="ord-qty" type="number" step="0.01" value="0.05" class="holo-inp num" style="margin-top:3px;" oninput="ui.calcRisk()" />
           </label>
-          <div class="grid-2" style="gap:8px;">
+          <div class="grid-2-keep">
             <label class="muted">حاجز الحماية (SL)
-              <input id="ord-sl" type="number" value="95100" class="holo-inp num" style="margin-top:4px;" oninput="ui.calcRisk()" />
+              <input id="ord-sl" type="number" value="95100" class="holo-inp num" style="margin-top:3px;" oninput="ui.calcRisk()" />
             </label>
             <label class="muted">مدار الهدف (TP)
-              <input id="ord-tp" type="number" value="99400" class="holo-inp num" style="margin-top:4px;" oninput="ui.calcRisk()" />
+              <input id="ord-tp" type="number" value="99400" class="holo-inp num" style="margin-top:3px;" oninput="ui.calcRisk()" />
             </label>
           </div>
         </div>
 
-        <div id="risk-box" class="holo-chamber" style="font-size:12px;line-height:1.8;margin-bottom:11px;"></div>
+        <div id="risk-box" class="holo-chamber" style="font-size:11.8px;line-height:1.75;margin-bottom:10px;"></div>
 
         <button type="button" class="cyber-blade cyber-blade-gold" style="width:100%;justify-content:center;min-height:42px;" onclick="ui.openSeal()">
           🔏 إسقاط ختم التصريح الهولوغرامي
         </button>
 
-        <div id="paper-orders-mini" style="margin-top:10px;font-size:11.5px;"></div>
+        <div id="paper-orders-mini" style="margin-top:8px;font-size:11.5px;"></div>
       </aside>
     </main>
 
     <!-- ================================================================
-         الشاشة 2: كريبتيكس الأدمن رباعي الحلقات (TMJ 4-Ring Quantum Cryptex MFA)
+         الشاشة 2: كريبتيكس الأدمن رباعي الحلقات (متجاوب بسلاسة على الجوال والمكتب)
          ================================================================ -->
-    <main id="scr-admin" class="hidden" style="display:flex;flex-direction:column;gap:14px;">
-      <!-- لافتة علوية تشرح الكريبتيكس الرباعي بدون أي التباس -->
+    <main id="scr-admin" class="hidden" style="display:flex;flex-direction:column;gap:12px;">
       <div class="holo-prism">
         <div class="row-between">
           <div>
-            <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
-              <strong style="font-size:17px;color:var(--pri);">🔮 الكريبتيكس الهولوغرامي الرباعي لأدمن المنصة — د. ماجد (TMJ Cryptex)</strong>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <strong style="font-size:clamp(14.5px, 1.8vw, 17px);color:var(--pri);">🔮 الكريبتيكس الهولوغرامي الرباعي — د. ماجد (TMJ MFA)</strong>
               <span id="adm-page-pill" class="hex-shield">بانتظار محاذاة الحلقات الأربع</span>
             </div>
-            <div class="muted" style="margin-top:5px;font-size:12.4px;">
-              تُفتح النواة السيادية بمحاذاة <strong>4 حلقات مشفرة</strong>: البريد + الجوال + <strong class="text-pri">(أ) كلمة سر الأدمن الثابتة (تقبل 6 خانات فأكثر)</strong> + <strong class="text-sec">(ب) رمز المصادقة المتغير (6 أرقام كل 30 ثانية)</strong>.
+            <div class="muted" style="margin-top:4px;font-size:11.8px;">
+              تُفتح النواة بمحاذاة <strong>4 حلقات</strong>: البريد + الجوال + <strong class="text-pri">(أ) كلمة سر ثابتة (تقبل 6 خانات فأكثر)</strong> + <strong class="text-sec">(ب) رمز المصادقة المتغير (6 أرقام)</strong>.
             </div>
           </div>
-          <button type="button" class="cyber-blade" onclick="ui.resetAdminDemo()">🧹 تصفير الحلقات</button>
+          <button type="button" class="rune-chip" onclick="ui.resetAdminDemo()">🧹 تصفير</button>
         </div>
       </div>
 
-      <!-- إشعار الحارس الذكي عند الخلط بين الخانتين -->
       <div id="enr-smart-hint" class="holo-toast hidden" style="border-color:var(--ok);">
         <span id="enr-smart-hint-txt"></span>
-        <button type="button" class="cyber-blade" style="padding:3px 10px;font-size:11px;" onclick="document.getElementById('enr-smart-hint').classList.add('hidden')">تم الفهم ✓</button>
+        <button type="button" class="rune-chip" onclick="document.getElementById('enr-smart-hint').classList.add('hidden')">حسناً ✓</button>
       </div>
 
       <div class="cryptex-layout">
-        <!-- اليمين: مجسم الكريبتيكس الهولوغرامي الحي ذو الحلقات الأربع الدوارة! -->
+        <!-- مجسم الكريبتيكس رباعي الحلقات -->
         <section class="holo-prism cryptex-wheel-stage">
-          <div style="font-size:13.5px;font-weight:900;color:var(--sec);">⚙️ مجسّم المحاذاة السيادي الحي</div>
-          <svg id="cryptex-svg" viewBox="0 0 280 280" width="256" height="256" style="max-width:100%;filter:drop-shadow(0 0 20px rgba(0,245,212,0.28));">
+          <div style="font-size:13px;font-weight:900;color:var(--sec);">⚙️ مجسّم المحاذاة السيادي الحي</div>
+          <svg id="cryptex-svg" viewBox="0 0 280 280" width="235" height="235" style="max-width:100%;filter:drop-shadow(0 0 16px rgba(0,245,212,0.28));">
             <defs>
               <radialGradient id="cryptexCore" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stop-color="rgba(247,201,72,0.32)" />
@@ -1010,311 +1081,328 @@
                 <stop offset="100%" stop-color="#02050d" />
               </radialGradient>
             </defs>
-            <!-- الحلقة 1: البريد الإلكتروني -->
             <g id="c-ring-1" class="cryptex-ring-anim" style="transform:rotate(42deg);">
               <circle cx="140" cy="140" r="126" fill="none" stroke="rgba(0,245,212,0.28)" stroke-width="10" stroke-dasharray="28 8" />
               <polygon points="140,6 145,16 135,16" fill="var(--sec)" />
             </g>
-            <!-- الحلقة 2: رقم الهاتف الدولي -->
             <g id="c-ring-2" class="cryptex-ring-anim" style="transform:rotate(-58deg);">
               <circle cx="140" cy="140" r="104" fill="none" stroke="rgba(0,245,160,0.28)" stroke-width="10" stroke-dasharray="22 7" />
               <polygon points="140,28 145,38 135,38" fill="var(--ok)" />
             </g>
-            <!-- الحلقة 3: كلمة سر الأدمن الثابتة (6+) -->
             <g id="c-ring-3" class="cryptex-ring-anim" style="transform:rotate(74deg);">
               <circle cx="140" cy="140" r="82" fill="none" stroke="rgba(247,201,72,0.32)" stroke-width="10" stroke-dasharray="18 6" />
               <polygon points="140,50 145,60 135,60" fill="var(--pri)" />
             </g>
-            <!-- الحلقة 4: رمز المصادقة المتغير (6 أرقام) -->
             <g id="c-ring-4" class="cryptex-ring-anim" style="transform:rotate(-85deg);">
               <circle cx="140" cy="140" r="60" fill="none" stroke="rgba(255,159,28,0.35)" stroke-width="9" stroke-dasharray="14 5" />
               <polygon points="140,72 145,82 135,82" fill="var(--warn)" />
             </g>
-            <!-- خط المؤشر العلوي الذهبي (0° Lock Line) -->
             <line x1="140" y1="0" x2="140" y2="90" stroke="rgba(247,201,72,0.55)" stroke-width="1.5" stroke-dasharray="2 3" />
-            <!-- قلب الكريبتيكس -->
             <circle cx="140" cy="140" r="44" fill="url(#cryptexCore)" stroke="var(--pri)" stroke-width="1.8" />
             <text id="cryptex-lock-txt" direction="ltr" unicode-bidi="isolate" x="140" y="136" text-anchor="middle" fill="var(--pri)" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="900">1/4 ALIGN</text>
             <text id="cryptex-sub-txt" direction="ltr" unicode-bidi="isolate" x="140" y="153" text-anchor="middle" fill="var(--sec)" font-family="IBM Plex Mono, monospace" font-size="9.5" font-weight="700">TMJ•VAULT</text>
           </svg>
 
-          <div id="cryptex-legend" class="holo-chamber" style="width:100%;text-align:right;font-size:11.8px;line-height:1.85;"></div>
+          <div id="cryptex-legend" class="holo-chamber" style="width:100%;text-align:right;font-size:11.5px;line-height:1.8;"></div>
 
-          <!-- اختيار الشعار الهولوغرامي الثلاثي -->
-          <div class="holo-chamber" style="width:100%;text-align:right;">
-            <div style="font-size:12px;font-weight:800;color:var(--pri);margin-bottom:7px;">✨ تبديل ختم المونوغرام الثلاثي:</div>
-            <div style="display:grid;gap:6px;">
+          <div class="holo-chamber desktop-only" style="width:100%;text-align:right;flex-direction:column;">
+            <div style="font-size:11.8px;font-weight:800;color:var(--pri);margin-bottom:6px;">✨ ختم المونوغرام الثلاثي النشط:</div>
+            <div style="display:grid;gap:5px;">
               <div id="card-mono-TMJ" class="orbit-asset active row-between" onclick="ui.setMonogram('TMJ')">
-                <span><strong>A • TMJ</strong> — تريلماجد (الموصى به ★)</span>
-                <span class="num text-pri" style="font-size:11px;">HEXAGON</span>
+                <span><strong>A • TMJ</strong> — تريلماجد ★</span><span class="num text-pri" style="font-size:10.5px;">HEX</span>
               </div>
               <div id="card-mono-MTR" class="orbit-asset row-between" onclick="ui.setMonogram('MTR')">
-                <span><strong>B • MTR</strong> — ماج تريليون</span>
-                <span class="num text-sec" style="font-size:11px;">ORBITAL</span>
+                <span><strong>B • MTR</strong> — ماج تريليون</span><span class="num text-sec" style="font-size:10.5px;">ORB</span>
               </div>
               <div id="card-mono-DMT" class="orbit-asset row-between" onclick="ui.setMonogram('DMT')">
-                <span><strong>C • DMT</strong> — د. ماجد التريليونير</span>
-                <span class="num text-ok" style="font-size:11px;">AEGIS</span>
+                <span><strong>C • DMT</strong> — د. ماجد التريليونير</span><span class="num text-ok" style="font-size:10.5px;">SHIELD</span>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- اليسار: لوحتا التأسيس الموحد والدخول السريع -->
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          <!-- اللوحة 1: تأسيس وتفعيل بخطوة واحدة واضحة 100% -->
+        <!-- نموذجا التأسيس الموحد والدخول اليومي -->
+        <div style="display:flex;flex-direction:column;gap:12px;min-width:0;">
           <section class="holo-prism">
-            <div class="row-between" style="border-bottom:1px solid rgba(var(--sec-rgb),0.2);padding-bottom:8px;margin-bottom:11px;">
-              <div style="display:flex;align-items:center;gap:8px;">
+            <div class="row-between" style="border-bottom:1px solid rgba(var(--sec-rgb),0.2);padding-bottom:7px;margin-bottom:10px;">
+              <div style="display:flex;align-items:center;gap:7px;">
                 <span class="step-orb">1</span>
-                <strong style="font-size:15px;">تأسيس ومحاذاة حلقات الأدمن الأربع (خطوة واحدة)</strong>
+                <strong style="font-size:14.2px;">تأسيس وتفعيل حساب الأدمن (خطوة واحدة)</strong>
               </div>
-              <span class="hex-shield num">MIN 6+ CHARS ✓</span>
+              <span class="hex-shield num">6+ CHARS ✓</span>
             </div>
 
-            <form novalidate onsubmit="event.preventDefault();ui.enrollAndActivateOneStep();" style="display:grid;gap:10px;">
-              <div class="grid-2" style="gap:9px;">
-                <label class="muted">الاسم السيادي للأدمن
-                  <input id="enr-name" class="holo-inp" value="د. ماجد (أدمن المنصة)" oninput="ui.syncCryptexRings()" style="margin-top:4px;" />
+            <form novalidate onsubmit="event.preventDefault();ui.enrollAndActivateOneStep();" style="display:grid;gap:9px;">
+              <div class="grid-2">
+                <label class="muted">الاسم السيادي
+                  <input id="enr-name" class="holo-inp" value="د. ماجد (أدمن المنصة)" oninput="ui.syncCryptexRings()" style="margin-top:3px;" />
                 </label>
-                <label class="muted">الحلقة 2: رقم الجوال الشخصي (دولي)
-                  <input id="enr-phone" type="tel" dir="ltr" class="holo-inp num" placeholder="+9665XXXXXXXX" value="+966500000000" oninput="ui.syncCryptexRings()" style="margin-top:4px;" />
+                <label class="muted">الحلقة 2: رقم الجوال الدولي
+                  <input id="enr-phone" type="tel" dir="ltr" class="holo-inp num" placeholder="+9665XXXXXXXX" value="+966500000000" oninput="ui.syncCryptexRings()" style="margin-top:3px;" />
                 </label>
               </div>
 
-              <label class="muted">الحلقة 1: البريد الإلكتروني الرسمي لأدمن المنصة
-                <input id="enr-email" type="email" dir="ltr" class="holo-inp num" placeholder="majed@trilmajed.sa" oninput="ui.syncCryptexRings()" style="margin-top:4px;" />
+              <label class="muted">الحلقة 1: البريد الإلكتروني للأدمن
+                <input id="enr-email" type="email" dir="ltr" class="holo-inp num" placeholder="majed@trilmajed.sa" oninput="ui.syncCryptexRings()" style="margin-top:3px;" />
               </label>
 
-              <!-- الخانة (أ): كلمة السر الثابتة (6 خانات فأكثر) -->
               <div class="holo-chamber" style="border-color:rgba(var(--pri-rgb),0.55);">
-                <div class="row-between" style="margin-bottom:5px;">
-                  <strong style="font-size:12.8px;color:var(--pri);">🔑 الحلقة 3 — (أ) كلمة سر الأدمن الثابتة الخاصة بك (6 خانات فأكثر)</strong>
-                  <div style="display:flex;gap:5px;">
-                    <button type="button" class="rune-chip active" onclick="ui.generateStaticPass()">🎲 توليد فوري</button>
-                    <button type="button" class="rune-chip" onclick="ui.togglePassVis('enr-vkey', this)">👁️ إخفاء</button>
+                <div class="row-between" style="margin-bottom:4px;">
+                  <strong style="font-size:12.2px;color:var(--pri);">🔑 الحلقة 3 — (أ) كلمة سر الأدمن الثابتة (6 خانات فأكثر)</strong>
+                  <div style="display:flex;gap:4px;">
+                    <button type="button" class="rune-chip active" onclick="ui.generateStaticPass()">🎲 توليد</button>
+                    <button type="button" class="rune-chip" onclick="ui.togglePassVis('enr-vkey', this)">👁️</button>
                   </div>
                 </div>
-                <div class="muted" style="font-size:11.3px;margin-bottom:6px;">
-                  اكتب أي رقم سري أو كلمة مرور ثابتة تختارها أنت من <strong>6 خانات أو أكثر</strong> (مثال: <span class="num">908070</span> أو <span class="num">Majed9</span>).
-                </div>
-                <input id="enr-vkey" type="text" dir="ltr" class="holo-inp num" placeholder="اكتب كلمة سرك الثابتة (6 خانات فأكثر)..." minlength="6" oninput="ui.syncCryptexRings()" />
+                <div class="muted" style="font-size:11px;margin-bottom:5px;">رقمك السري الثابت من 6 خانات أو أكثر (مثال: <span class="num">908070</span> أو <span class="num">Majed9</span>).</div>
+                <input id="enr-vkey" type="text" dir="ltr" class="holo-inp num" placeholder="كلمة السر الثابتة (6 خانات فأكثر)..." minlength="6" oninput="ui.syncCryptexRings()" />
               </div>
 
-              <!-- الخانة (ب): رمز المصادقة المتغير (6 أرقام كل 30 ثانية) -->
               <div class="holo-chamber" style="border-color:rgba(var(--sec-rgb),0.55);background:rgba(0,245,212,0.05);">
                 <div class="row-between">
-                  <strong style="font-size:12.8px;color:var(--sec);">📲 الحلقة 4 — (ب) رمز تطبيق المصادقة المتغير (Authenticator • 6 أرقام)</strong>
-                  <span class="hex-shield num">RFC 6238 • 30S</span>
+                  <strong style="font-size:12.2px;color:var(--sec);">📲 الحلقة 4 — (ب) رمز المصادقة المتغير (6 أرقام)</strong>
+                  <span class="hex-shield num">30S TOTP</span>
                 </div>
-                <div class="row-between" style="margin-top:7px;padding:6px 10px;background:rgba(0,0,0,0.5);border:1px solid rgba(var(--sec-rgb),0.22);">
-                  <div>
-                    <div class="muted" style="font-size:10.5px;">مفتاح البذرة لتطبيق Google / Apple Authenticator:</div>
-                    <strong id="totp-secret-view" class="num text-pri" style="font-size:13px;letter-spacing:1px;">—</strong>
+                <div class="row-between" style="margin-top:6px;padding:6px 8px;background:rgba(0,0,0,0.45);border:1px solid rgba(var(--sec-rgb),0.2);">
+                  <div style="min-width:0;overflow:hidden;">
+                    <div class="muted" style="font-size:10px;">مفتاح الإقران لتطبيق Authenticator:</div>
+                    <strong id="totp-secret-view" class="num text-pri" style="font-size:11.5px;word-break:break-all;">—</strong>
                   </div>
-                  <div style="display:flex;gap:5px;">
-                    <button type="button" class="rune-chip" onclick="ui.copyTotpSecret()">📋 نسخ</button>
-                    <button type="button" class="rune-chip" onclick="ui.rotateTotpSecret()">🔄 تدوير</button>
+                  <div style="display:flex;gap:4px;">
+                    <button type="button" class="rune-chip" onclick="ui.copyTotpSecret()">📋</button>
+                    <button type="button" class="rune-chip" onclick="ui.rotateTotpSecret()">🔄</button>
                   </div>
                 </div>
 
-                <div class="row-between" style="margin-top:8px;">
+                <div class="row-between" style="margin-top:7px;">
                   <div>
-                    <span class="muted">الرمز المتزامن الآن (6 أرقام): </span>
-                    <strong id="totp-live-preview" class="num text-ok" style="font-size:18px;letter-spacing:3px;">------</strong>
+                    <span class="muted">الرمز المتزامن: </span>
+                    <strong id="totp-live-preview" class="num text-ok" style="font-size:17px;letter-spacing:2px;">------</strong>
                   </div>
-                  <button type="button" class="cyber-blade cyber-blade-ok" style="padding:4px 10px;font-size:11.5px;" onclick="ui.autofillCurrentTotp('enr-totp')">⚡ إسقاط الـ 6 أرقام للخانة أدناه</button>
+                  <button type="button" class="cyber-blade cyber-blade-ok" style="padding:4px 9px;font-size:11px;" onclick="ui.autofillCurrentTotp('enr-totp')">⚡ إسقاط الـ 6 أرقام</button>
                 </div>
                 <div class="totp-laser-track"><div id="totp-bar-fill" class="totp-laser-fill" style="width:100%;"></div></div>
                 <div class="row-between" style="margin-top:3px;">
-                  <span class="muted" style="font-size:10.8px;">أدخل الـ 6 أرقام من تطبيق جوالك أو اضغط زر الإسقاط الفوري أعلاه:</span>
-                  <span id="totp-countdown-lbl" class="muted num" style="font-size:10.8px;">30s</span>
+                  <span class="muted" style="font-size:10.5px;">أدخل الـ 6 أرقام أو اضغط زر الإسقاط:</span>
+                  <span id="totp-countdown-lbl" class="muted num" style="font-size:10.5px;">30s</span>
                 </div>
-                <input id="enr-totp" type="text" inputmode="numeric" maxlength="6" dir="ltr" class="holo-inp num" style="margin-top:6px;font-size:19px;font-weight:900;text-align:center;letter-spacing:8px;" placeholder="000000" oninput="ui.syncCryptexRings()" />
+                <input id="enr-totp" type="text" inputmode="numeric" maxlength="6" dir="ltr" class="holo-inp num" style="margin-top:5px;font-size:18px;font-weight:900;text-align:center;letter-spacing:7px;" placeholder="000000" oninput="ui.syncCryptexRings()" />
               </div>
 
-              <button type="submit" class="cyber-blade cyber-blade-gold" style="justify-content:center;min-height:44px;font-size:14px;">
-                ⚡ قفل المحاذاة الرباعية وتفعيل قيادة الأدمن الآن
+              <button type="submit" class="cyber-blade cyber-blade-gold" style="justify-content:center;min-height:42px;font-size:13.2px;">
+                ⚡ قفل المحاذاة الرباعية وتفعيل قيادة الأدمن
               </button>
             </form>
           </section>
 
-          <!-- اللوحة 2: دخول الأدمن السريع بعد التأسيس -->
           <section class="holo-prism">
-            <div class="row-between" style="border-bottom:1px solid rgba(var(--sec-rgb),0.2);padding-bottom:8px;margin-bottom:10px;">
-              <div style="display:flex;align-items:center;gap:8px;">
+            <div class="row-between" style="border-bottom:1px solid rgba(var(--sec-rgb),0.2);padding-bottom:7px;margin-bottom:9px;">
+              <div style="display:flex;align-items:center;gap:7px;">
                 <span class="step-orb">2</span>
-                <strong style="font-size:14.5px;">بوابة العبور اليومي للأدمن (بعد التأسيس)</strong>
+                <strong style="font-size:14px;">بوابة العبور اليومي للأدمن</strong>
               </div>
-              <span id="mfa-session-badge" class="hex-shield">جلسة غير مفعلة</span>
+              <span id="mfa-session-badge" class="hex-shield">غير مسجل</span>
             </div>
-
-            <form novalidate onsubmit="event.preventDefault();ui.verifyAdminLogin('inline');" style="display:grid;gap:9px;">
-              <div class="grid-2" style="gap:8px;">
+            <form novalidate onsubmit="event.preventDefault();ui.verifyAdminLogin('inline');" style="display:grid;gap:8px;">
+              <div class="grid-2">
                 <input id="lgn-email" type="email" dir="ltr" class="holo-inp num" placeholder="البريد المعتمد..." />
                 <input id="lgn-phone" type="tel" dir="ltr" class="holo-inp num" placeholder="+9665XXXXXXXX" />
               </div>
-              <div class="grid-2" style="gap:8px;">
-                <div>
-                  <div class="row-between" style="margin-bottom:3px;">
-                    <span class="muted" style="font-size:11px;">🔑 كلمة السر الثابتة (6+)</span>
-                    <button type="button" class="rune-chip" onclick="ui.togglePassVis('lgn-vkey', this)">👁️</button>
-                  </div>
-                  <input id="lgn-vkey" type="password" dir="ltr" class="holo-inp num" placeholder="••••••" />
-                </div>
-                <div>
-                  <div class="row-between" style="margin-bottom:3px;">
-                    <span class="muted" style="font-size:11px;">📲 رمز الـ 6 أرقام</span>
-                    <button type="button" class="rune-chip active" onclick="ui.autofillCurrentTotp('lgn-totp')">⚡ تعبئة</button>
-                  </div>
-                  <input id="lgn-totp" type="text" inputmode="numeric" maxlength="6" dir="ltr" class="holo-inp num" style="text-align:center;letter-spacing:5px;font-weight:800;" placeholder="000000" />
+              <div class="grid-2">
+                <input id="lgn-vkey" type="password" dir="ltr" class="holo-inp num" placeholder="كلمة السر الثابتة (6+)..." />
+                <div style="display:flex;gap:5px;">
+                  <input id="lgn-totp" type="text" inputmode="numeric" maxlength="6" dir="ltr" class="holo-inp num" style="text-align:center;letter-spacing:4px;font-weight:800;" placeholder="000000" />
+                  <button type="button" class="rune-chip active" onclick="ui.autofillCurrentTotp('lgn-totp')">⚡</button>
                 </div>
               </div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button type="submit" class="cyber-blade cyber-blade-gold" style="flex:2;justify-content:center;min-height:40px;">🛡️ فتح النواة السيادية (TMJ)</button>
-                <button type="button" class="cyber-blade" style="flex:1;justify-content:center;min-height:40px;" onclick="ui.stepUpBio()">🪪 بصمة Passkey</button>
+              <div style="display:flex;gap:7px;flex-wrap:wrap;">
+                <button type="submit" class="cyber-blade cyber-blade-gold" style="flex:2;justify-content:center;min-height:40px;">🛡️ فتح النواة السيادية</button>
+                <button type="button" class="cyber-blade" style="flex:1;justify-content:center;min-height:40px;" onclick="ui.stepUpBio()">🪪 Passkey</button>
               </div>
             </form>
-            <div id="admin-factors-summary" class="holo-chamber" style="margin-top:10px;font-size:12px;line-height:1.85;"></div>
+            <div id="admin-factors-summary" class="holo-chamber" style="margin-top:9px;font-size:11.5px;line-height:1.8;"></div>
           </section>
         </div>
       </div>
     </main>
 
-    <!-- ================================================================
-         الشاشة 3: مرصد Binance الشخصي الحي (قراءة فقط — Zero Execution)
-         ================================================================ -->
-    <main id="scr-binance" class="hidden" style="display:flex;flex-direction:column;gap:14px;">
-      <div class="holo-prism">
-        <div class="row-between">
-          <div>
-            <strong style="font-size:16.5px;color:var(--sec);">📡 مرصد حساب Binance الحقيقي — قراءة طيفية معزولة (Read-Only)</strong>
-            <div class="muted">يقرأ أرصدة حسابك الفوري عبر خزنة <span class="num">AES-256-GCM</span> مع حظر برمجي قاطع لأي أمر تداول أو سحب.</div>
-          </div>
-          <span class="cyber-blade cyber-blade-ok num">SPOT_EXECUTION = BLOCKED</span>
+    <!-- الشاشة 3: مرصد Binance الشخصي الحي -->
+    <main id="scr-binance" class="hidden" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="holo-prism row-between">
+        <div>
+          <strong style="font-size:15.5px;color:var(--sec);">📡 مرصد حساب Binance الحقيقي (قراءة فقط — معزول)</strong>
+          <div class="muted">يقرأ الأرصدة الفورية عبر <span class="num">AES-256-GCM</span> مع حظر برمجي قاطع لأي تنفيذ أو سحب.</div>
         </div>
+        <span class="cyber-blade cyber-blade-ok num">READ•ONLY</span>
       </div>
       <div class="grid-2">
-        <section class="holo-prism" style="display:grid;gap:10px;">
-          <strong style="color:var(--pri);">🔑 ربط مفاتيح القراءة فقط</strong>
+        <section class="holo-prism" style="display:grid;gap:9px;">
+          <strong style="color:var(--pri);">🔑 مفاتيح القراءة فقط</strong>
           <input id="bn-key" class="holo-inp num" placeholder="Binance Read-Only API Key..." />
           <input id="bn-sec" type="password" class="holo-inp num" placeholder="Binance Secret Key..." />
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button type="button" class="cyber-blade cyber-blade-gold" onclick="ui.connectBinanceDemo()">⚡ تشغيل محاكاة الرصد الحي</button>
-            <button type="button" class="cyber-blade" onclick="ui.disconnectBinance()">🧹 مسح المفاتيح</button>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;">
+            <button type="button" class="cyber-blade cyber-blade-gold" onclick="ui.connectBinanceDemo()">⚡ محاكاة الرصد الحي</button>
+            <button type="button" class="cyber-blade" onclick="ui.disconnectBinance()">🧹 مسح</button>
           </div>
-          <div id="bn-status" class="holo-chamber muted">الحالة: بانتظار الإقران أو تفعيل المحاكاة الفورية.</div>
+          <div id="bn-status" class="holo-chamber muted">بانتظار الإقران أو تفعيل المحاكاة.</div>
         </section>
-        <section class="holo-prism">
+        <section class="holo-prism" style="overflow-x:auto;">
           <div class="row-between" style="margin-bottom:8px;">
-            <strong style="color:var(--sec);">💰 الكتلة المالية المرصودة</strong>
-            <strong id="bn-total" class="num text-pri" style="font-size:18px;">—</strong>
+            <strong style="color:var(--sec);">💰 الأرصدة المرصودة</strong>
+            <strong id="bn-total" class="num text-pri" style="font-size:17px;">—</strong>
           </div>
           <table>
-            <thead><tr><th>الأصل</th><th>الكمية</th><th>التقييم (USDT)</th><th>النسبة</th></tr></thead>
-            <tbody id="bn-tbody"><tr><td colspan="4" class="muted">اضغط «تشغيل محاكاة الرصد الحي» لعرض التوزيع الطيفي.</td></tr></tbody>
+            <thead><tr><th>الأصل</th><th>الكمية</th><th>القيمة</th><th>النسبة</th></tr></thead>
+            <tbody id="bn-tbody"><tr><td colspan="4" class="muted">اضغط «محاكاة الرصد الحي» لعرض المحفظة.</td></tr></tbody>
           </table>
         </section>
       </div>
     </main>
 
-    <!-- ================================================================
-         الشاشة 4: مفاعل المدير المالي الشخصي (20,000 ر.س شهرياً)
-         ================================================================ -->
-    <main id="scr-cfo" class="hidden" style="display:flex;flex-direction:column;gap:14px;">
+    <!-- الشاشة 4: مفاعل المدير المالي (20,000 ر.س) -->
+    <main id="scr-cfo" class="hidden" style="display:flex;flex-direction:column;gap:12px;">
       <div class="grid-2">
-        <section class="holo-prism" style="display:grid;gap:10px;">
+        <section class="holo-prism" style="display:grid;gap:9px;">
           <div class="row-between">
-            <strong style="font-size:15.5px;color:var(--pri);">💎 مفاعل التدفق الشهري الشخصي (20,000 ر.س)</strong>
-            <span class="hex-shield num">SAR•ENGINE</span>
+            <strong style="font-size:15px;color:var(--pri);">💎 مفاعل الـ 20,000 ر.س الشهري</strong>
+            <span class="hex-shield num">SAR•CFO</span>
           </div>
-          <div class="grid-2">
-            <label class="muted">الدخل الشهري (ر.س)<input id="cfo-inc" type="number" value="20000" class="holo-inp num" style="margin-top:4px;" oninput="ui.calcCFO()" /></label>
-            <label class="muted">الالتزامات الثابتة (ر.س)<input id="cfo-fix" type="number" value="8500" class="holo-inp num" style="margin-top:4px;" oninput="ui.calcCFO()" /></label>
-            <label class="muted">المعيشة المتغيرة (ر.س)<input id="cfo-var" type="number" value="4500" class="holo-inp num" style="margin-top:4px;" oninput="ui.calcCFO()" /></label>
-            <label class="muted">صندوق الطوارئ الحالي (ر.س)<input id="cfo-emg" type="number" value="42000" class="holo-inp num" style="margin-top:4px;" oninput="ui.calcCFO()" /></label>
+          <div class="grid-2-keep">
+            <label class="muted">الدخل (ر.س)<input id="cfo-inc" type="number" value="20000" class="holo-inp num" style="margin-top:3px;" oninput="ui.calcCFO()" /></label>
+            <label class="muted">الثابتة (ر.س)<input id="cfo-fix" type="number" value="8500" class="holo-inp num" style="margin-top:3px;" oninput="ui.calcCFO()" /></label>
+            <label class="muted">المتغيرة (ر.س)<input id="cfo-var" type="number" value="4500" class="holo-inp num" style="margin-top:3px;" oninput="ui.calcCFO()" /></label>
+            <label class="muted">الطوارئ (ر.س)<input id="cfo-emg" type="number" value="42000" class="holo-inp num" style="margin-top:3px;" oninput="ui.calcCFO()" /></label>
           </div>
-          <div id="cfo-out" class="holo-chamber" style="font-size:12.8px;line-height:1.9;"></div>
+          <div id="cfo-out" class="holo-chamber" style="font-size:12.2px;line-height:1.85;"></div>
         </section>
         <section class="holo-prism">
-          <strong style="font-size:15px;color:var(--sec);">🧭 دستور الانضباط المالي لتريلماجد</strong>
-          <div class="holo-chamber" style="margin-top:10px;font-size:12.5px;line-height:1.95;">
-            <div>1. تغطية صندوق الطوارئ لـ <strong>6 أشهر كاملة</strong> قبل زيادة أي مخاطرة استثمارية.</div>
+          <strong style="font-size:14.5px;color:var(--sec);">🧭 دستور الانضباط المالي لتريلماجد</strong>
+          <div class="holo-chamber" style="margin-top:9px;font-size:12px;line-height:1.9;">
+            <div>1. تغطية صندوق الطوارئ لـ 6 أشهر كاملة قبل رفع المخاطرة.</div>
             <div>2. عزل مطلق بين ميزانية المعيشة بالريال ومحفظة المحاكاة الورقية.</div>
-            <div>3. التراكم الهادئ والمنضبط هو الجسر الحقيقي نحو المليون ثم المليار فالتريليون.</div>
+            <div>3. النمو المركب المنضبط هو المسار الهندسي نحو التريليون.</div>
           </div>
         </section>
       </div>
     </main>
 
-    <!-- ================================================================
-         الشاشة 5: أقمار الوكلاء الخمسة التفصيلية
-         ================================================================ -->
-    <main id="scr-quantum" class="hidden" style="display:flex;flex-direction:column;gap:14px;">
+    <!-- الشاشة 5: أقمار الوكلاء الخمسة -->
+    <main id="scr-quantum" class="hidden" style="display:flex;flex-direction:column;gap:12px;">
       <div class="holo-prism row-between">
-        <div>
-          <strong style="font-size:16px;color:var(--pri);">🧬 المدار الكامل لأقمار الوكلاء الخمسة</strong>
-          <div class="muted">تفكيك الأوزان الكمية لكل وكيل داخل بلورة الإجماع الهولوغرامية.</div>
-        </div>
-        <button type="button" class="cyber-blade cyber-blade-gold" onclick="ui.conveneCouncil()">🔄 تحديث القياسات الطيفية</button>
+        <strong style="font-size:15.5px;color:var(--pri);">🧬 المدار الكامل لأقمار الوكلاء الخمسة</strong>
+        <button type="button" class="cyber-blade cyber-blade-gold" onclick="ui.conveneCouncil()">🔄 تحديث</button>
       </div>
       <div id="quantum-detail-grid" class="grid-3"></div>
     </main>
 
-    <!-- ================================================================
-         الشاشة 6: الأطياف الهولوغرامية الستة (6 Holographic Light Spectrums)
-         ================================================================ -->
+    <!-- الشاشة 6: الأطياف الهولوغرامية الستة -->
     <main id="scr-themes" class="hidden">
       <div class="holo-prism">
-        <strong style="font-size:16px;color:var(--pri);">🌈 محول الأطياف الضوئية الهولوغرامية (6 ترددات بصرية)</strong>
-        <p class="muted">غيّر فيزياء الضوء والانكسار اللوني لكامل المسطبة الهولوغرامية ومجسّمات الكريبتيكس والشموع بضغطة واحدة:</p>
-        <div id="themes-grid" class="grid-3" style="margin-top:12px;"></div>
+        <strong style="font-size:15.5px;color:var(--pri);">🌈 الأطياف الضوئية الهولوغرامية (6 ترددات)</strong>
+        <p class="muted">غيّر فيزياء الضوء والانكسار اللوني لكامل المسطبة الهولوغرامية وداشبورد الجوال بضغطة واحدة:</p>
+        <div id="themes-grid" class="grid-3" style="margin-top:10px;"></div>
       </div>
     </main>
   </div>
 
   <!-- ================================================================
-       نافذة قفل الكريبتيكس المنبثقة عند قفل المنصة
+       6A. شريط التخاطر النحيل لسطح المكتب فقط (سطر واحد أنيق بلا تداخل!)
        ================================================================ -->
-  <div id="admin-modal" class="holo-modal-bg hidden">
-    <div class="holo-prism" style="max-width:520px;width:100%;display:flex;flex-direction:column;gap:11px;">
-      <div class="row-between" style="border-bottom:1px solid rgba(var(--sec-rgb),0.25);padding-bottom:8px;">
-        <strong id="adm-modal-title" style="font-size:15.5px;color:var(--pri);">🔮 بوابة العبور السيادي — كريبتيكس تريلماجد</strong>
-        <button type="button" id="adm-modal-close" class="rune-chip" onclick="ui.closeAdminModal()">✕</button>
+  <aside id="desktop-dock" class="desktop-neural-dock desktop-only" style="flex-direction:column;">
+    <div id="chat-log" class="hidden holo-chamber" style="margin-bottom:7px;max-height:110px;overflow-y:auto;font-size:12px;line-height:1.65;"></div>
+    <div style="display:flex;gap:7px;align-items:center;width:100%;">
+      <div class="eq-bars"><span></span><span></span><span></span><span></span></div>
+      <button type="button" class="rune-chip" onclick="document.getElementById('chat-log').classList.toggle('hidden')">📜 السجل</button>
+      <button type="button" class="rune-chip active" onclick="ui.quickCmd('افتح كريبتيكس الأدمن')">🔮 الكريبتيكس</button>
+      <button type="button" class="rune-chip" onclick="ui.quickCmd('حلل البيتكوين وأطلق التخاطر')">⚡ تخاطر BTC</button>
+      <form style="flex:1;display:flex;gap:6px;min-width:0;" onsubmit="event.preventDefault();ui.sendChat('chat-inp');">
+        <input id="chat-inp" class="holo-inp" style="padding:6px 10px;font-size:12px;" placeholder="خاطب النواة الهولوغرامية بالعربية (مثال: افتح الكريبتيكس، حلل الإيثيريوم، طيف الزمرد)..." />
+        <button type="submit" class="cyber-blade cyber-blade-gold" style="padding:5px 13px;">إرسال ↵</button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- ================================================================
+       6B. شريط التبويب السفلي المستقل للجوال (Native Mobile Cockpit Bar)
+       5 أيقونات متساوية، ارتفاع ثابت 60px، صفر تغطية أو تداخل مع المحتوى!
+       ================================================================ -->
+  <nav id="mobile-dock" class="mobile-bottom-nav mobile-only" aria-label="تنقل الجوال">
+    <button type="button" class="mob-tab-btn active" data-mob-tab="terminal" onclick="ui.tab('terminal')">
+      <span class="ico">🛸</span><span>المدار 3D</span>
+    </button>
+    <button type="button" class="mob-tab-btn" data-mob-tab="admin" onclick="ui.tab('admin')">
+      <span class="ico">🔮</span><span>الأدمن MFA</span>
+    </button>
+    <button type="button" class="mob-tab-btn" data-mob-tab="binance" onclick="ui.tab('binance')">
+      <span class="ico">📡</span><span>Binance</span>
+    </button>
+    <button type="button" class="mob-tab-btn" data-mob-tab="cfo" onclick="ui.tab('cfo')">
+      <span class="ico">💎</span><span>20K ر.س</span>
+    </button>
+    <button type="button" class="mob-tab-btn" data-mob-tab="ai" onclick="ui.openMobileAI()">
+      <span class="ico">💬</span><span>المساعد</span>
+    </button>
+  </nav>
+
+  <!-- نافذة الأوامر الذكية المنزلقة للجوال (بدلاً من تغطية الشاشة العمودية!) -->
+  <div id="mob-ai-drawer" class="ai-drawer-bg hidden" onclick="if(event.target===this)ui.closeMobileAI()">
+    <div class="ai-drawer-sheet">
+      <div class="row-between">
+        <strong style="color:var(--pri);font-size:14.5px;">💬 مساعد التخاطر الكمي — تريلماجد</strong>
+        <button type="button" class="rune-chip" onclick="ui.closeMobileAI()">إغلاق ✕</button>
       </div>
-      <div id="adm-modal-err" class="holo-chamber hidden" style="border-color:var(--hot);color:#ff8fa3;font-size:12.2px;"></div>
-      <form novalidate onsubmit="event.preventDefault();ui.verifyAdminLogin('modal');" style="display:grid;gap:9px;">
-        <div class="grid-2" style="gap:8px;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button type="button" class="rune-chip active" onclick="ui.quickCmd('افتح كريبتيكس الأدمن');ui.closeMobileAI();">🔮 كريبتيكس الأدمن</button>
+        <button type="button" class="rune-chip" onclick="ui.quickCmd('حلل البيتكوين وأطلق التخاطر');ui.closeMobileAI();">⚡ تخاطر BTC</button>
+        <button type="button" class="rune-chip" onclick="ui.quickCmd('حلل الإيثيريوم');ui.closeMobileAI();">🪐 إيثيريوم ETH</button>
+        <button type="button" class="rune-chip" onclick="ui.quickCmd('طيف الزمرد');ui.closeMobileAI();">🌈 طيف الزمرد</button>
+      </div>
+      <div id="mob-chat-log" class="holo-chamber" style="max-height:150px;overflow-y:auto;font-size:12px;line-height:1.7;">
+        <div class="muted">اكتب أي أمر بالعربية للتحكم الفوري بالمنصة...</div>
+      </div>
+      <form style="display:flex;gap:6px;" onsubmit="event.preventDefault();ui.sendChat('mob-chat-inp');">
+        <input id="mob-chat-inp" class="holo-inp" placeholder="مثال: افتح الكريبتيكس، حلل سولانا..." />
+        <button type="submit" class="cyber-blade cyber-blade-gold">إرسال</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- نافذة قفل الكريبتيكس المنبثقة -->
+  <div id="admin-modal" class="holo-modal-bg hidden">
+    <div class="holo-prism" style="max-width:480px;width:100%;display:flex;flex-direction:column;gap:10px;">
+      <div class="row-between" style="border-bottom:1px solid rgba(var(--sec-rgb),0.25);padding-bottom:7px;">
+        <strong style="font-size:15px;color:var(--pri);">🔮 بوابة العبور السيادي — كريبتيكس تريلماجد</strong>
+        <button type="button" class="rune-chip" onclick="ui.closeAdminModal()">✕</button>
+      </div>
+      <div id="adm-modal-err" class="holo-chamber hidden" style="border-color:var(--hot);color:#ff8fa3;font-size:12px;"></div>
+      <form novalidate onsubmit="event.preventDefault();ui.verifyAdminLogin('modal');" style="display:grid;gap:8px;">
+        <div class="grid-2">
           <input id="mdl-email" type="email" dir="ltr" class="holo-inp num" placeholder="majed@trilmajed.sa" />
           <input id="mdl-phone" type="tel" dir="ltr" class="holo-inp num" placeholder="+9665XXXXXXXX" />
         </div>
+        <input id="mdl-vkey" type="password" dir="ltr" class="holo-inp num" placeholder="كلمة سر الأدمن الثابتة (6 خانات فأكثر)..." />
         <div class="row-between">
-          <span class="muted" style="font-size:11.5px;">🔑 كلمة سر الأدمن الثابتة (6 خانات فأكثر)</span>
-          <button type="button" class="rune-chip" onclick="ui.togglePassVis('mdl-vkey', this)">👁️ إظهار</button>
-        </div>
-        <input id="mdl-vkey" type="password" dir="ltr" class="holo-inp num" placeholder="••••••" />
-        <div class="row-between">
-          <span class="muted" style="font-size:11.5px;">📲 رمز المصادقة المتغير (6 أرقام)</span>
+          <span class="muted" style="font-size:11px;">📲 رمز المصادقة المتغير (6 أرقام)</span>
           <button type="button" class="rune-chip active" onclick="ui.autofillCurrentTotp('mdl-totp')">⚡ إسقاط الـ 6 أرقام</button>
         </div>
         <input id="mdl-totp" type="text" inputmode="numeric" maxlength="6" dir="ltr" class="holo-inp num" style="font-size:18px;font-weight:900;text-align:center;letter-spacing:7px;" placeholder="000000" />
-        <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
           <button type="submit" class="cyber-blade cyber-blade-gold" style="flex:2;justify-content:center;">⚡ فتح القفل السيادي</button>
-          <button type="button" class="cyber-blade" style="flex:1;justify-content:center;" onclick="ui.closeAdminModal();ui.tab('admin');">⚙️ تأسيس / تعديل</button>
+          <button type="button" class="cyber-blade" style="flex:1;justify-content:center;" onclick="ui.closeAdminModal();ui.tab('admin');">⚙️ تأسيس</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- نافذة ختم التصريح الورقي الهولوغرامي -->
+  <!-- نافذة ختم التصريح الورقي -->
   <div id="seal-modal" class="holo-modal-bg hidden">
-    <div class="holo-prism" style="max-width:480px;width:100%;display:flex;flex-direction:column;gap:12px;">
-      <div class="row-between" style="border-bottom:1px solid rgba(var(--sec-rgb),0.24);padding-bottom:8px;">
+    <div class="holo-prism" style="max-width:460px;width:100%;display:flex;flex-direction:column;gap:11px;">
+      <div class="row-between" style="border-bottom:1px solid rgba(var(--sec-rgb),0.24);padding-bottom:7px;">
         <strong style="color:var(--pri);">🔏 ختم التصريح الهولوغرامي الموحد (TMJ PAPER)</strong>
         <button type="button" class="rune-chip" onclick="ui.closeSeal()">✕</button>
       </div>
-      <div id="seal-summary" class="holo-chamber" style="font-size:12.5px;line-height:1.85;"></div>
-      <label style="font-size:12.3px;display:flex;gap:8px;align-items:center;cursor:pointer;">
+      <div id="seal-summary" class="holo-chamber" style="font-size:12.2px;line-height:1.8;"></div>
+      <label style="font-size:12px;display:flex;gap:8px;align-items:center;cursor:pointer;">
         <input type="checkbox" id="seal-chk" style="width:auto;" onchange="document.getElementById('seal-go').disabled=!this.checked" />
         <span>أصادق أنا د. ماجد على مراجعة معايير المخاطر وتنفيذ الأمر في مدار المحاكاة الورقية.</span>
       </label>
@@ -1325,24 +1413,6 @@
     </div>
   </div>
 
-  <!-- ================================================================
-       شريط التخاطر الصوتي والنصي العائم (Levitating Neural Visor Dock)
-       ================================================================ -->
-  <aside class="neural-visor-dock">
-    <div id="chat-log" class="hidden holo-chamber" style="margin-bottom:8px;max-height:120px;overflow-y:auto;font-size:12px;line-height:1.7;"></div>
-    <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
-      <div class="eq-bars" title="موجة التخاطر الطيفي نشطة"><span></span><span></span><span></span><span></span><span></span></div>
-      <button type="button" class="rune-chip" onclick="document.getElementById('chat-log').classList.toggle('hidden')">📜 السجل</button>
-      <button type="button" class="rune-chip active" onclick="ui.quickCmd('افتح كريبتيكس الأدمن')">🔮 الكريبتيكس</button>
-      <button type="button" class="rune-chip" onclick="ui.quickCmd('حلل البيتكوين وأطلق التخاطر')">⚡ تخاطر BTC</button>
-      <button type="button" class="rune-chip" onclick="ui.quickCmd('افتح الأطياف الضوئية')">🌈 الأطياف</button>
-      <form style="flex:1;display:flex;gap:6px;min-width:190px;" onsubmit="event.preventDefault();ui.sendChat();">
-        <input id="chat-inp" class="holo-inp" style="padding:6px 11px;font-size:12.2px;" placeholder="خاطب النواة الهولوغرامية بالعربية (مثال: افتح الكريبتيكس، حلل الإيثيريوم، طيف الزمرد)..." />
-        <button type="submit" class="cyber-blade cyber-blade-gold" style="padding:6px 14px;">إرسال ↵</button>
-      </form>
-    </div>
-  </aside>
-
   <script>
     // =======================================================================
     // 1. محرك الصوت الطيفي التفاعلي (WebAudio Sci-Fi Harmonic Synthesizer)
@@ -1350,7 +1420,7 @@
     const sfx = {
       enabled: true,
       ctx: null,
-      beep(freq = 640, dur = 0.07, type = 'sine', vol = 0.035) {
+      beep(freq = 640, dur = 0.06, type = 'sine', vol = 0.03) {
         if (!this.enabled) return;
         try {
           const AC = window.AudioContext || window.webkitAudioContext;
@@ -1361,7 +1431,7 @@
           const gain = this.ctx.createGain();
           osc.type = type;
           osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(freq * 1.35, this.ctx.currentTime + dur);
+          osc.frequency.exponentialRampToValueAtTime(freq * 1.3, this.ctx.currentTime + dur);
           gain.gain.setValueAtTime(vol, this.ctx.currentTime);
           gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + dur);
           osc.connect(gain);
@@ -1371,112 +1441,63 @@
         } catch (_) {}
       },
       chord() {
-        [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
-          setTimeout(() => this.beep(f, 0.14, 'triangle', 0.03), i * 55);
-        });
+        [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => setTimeout(() => this.beep(f, 0.13, 'triangle', 0.028), i * 50));
       }
     };
 
     // =======================================================================
-    // 2. محرك الفضاء الهولوغرامي ثلاثي الأبعاد (3D Quantum Astrolabe Canvas)
+    // 2. خلفية الفضاء الهولوغرامي المتجاوبة (3D Cosmos Canvas)
     // =======================================================================
     (function initHoloCosmos() {
       const cv = document.getElementById('holo-cosmos');
       if (!cv) return;
       const ctx = cv.getContext('2d');
       let w = 0, h = 0, t = 0;
-      let pointerX = 0.5, pointerY = 0.35;
-
-      const stars = Array.from({ length: 75 }, () => ({
-        x: Math.random() * 2 - 1,
-        y: Math.random() * 2 - 1,
-        z: Math.random(),
-        s: 0.6 + Math.random() * 1.6
-      }));
-
-      function resize() {
-        w = cv.width = window.innerWidth;
-        h = cv.height = window.innerHeight;
-      }
+      const stars = Array.from({ length: 55 }, () => ({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random(), s: 0.6 + Math.random() * 1.4 }));
+      function resize() { w = cv.width = window.innerWidth; h = cv.height = window.innerHeight; }
       window.addEventListener('resize', resize);
       resize();
-
       window.addEventListener('pointermove', (e) => {
-        pointerX = e.clientX / Math.max(1, w);
-        pointerY = e.clientY / Math.max(1, h);
-        document.documentElement.style.setProperty('--mx', (pointerX * 100).toFixed(1) + '%');
-        document.documentElement.style.setProperty('--my', (pointerY * 100).toFixed(1) + '%');
-        const ry = ((pointerX - 0.5) * 2.2).toFixed(2) + 'deg';
-        const rx = ((0.5 - pointerY) * 1.8).toFixed(2) + 'deg';
-        document.documentElement.style.setProperty('--rx', rx);
-        document.documentElement.style.setProperty('--ry', ry);
+        document.documentElement.style.setProperty('--mx', ((e.clientX / Math.max(1, w)) * 100).toFixed(1) + '%');
+        document.documentElement.style.setProperty('--my', ((e.clientY / Math.max(1, h)) * 100).toFixed(1) + '%');
       });
-
       function frame() {
-        t += 0.008;
+        t += 0.007;
         ctx.clearRect(0, 0, w, h);
-
-        const cx = w * 0.5 + (pointerX - 0.5) * 45;
-        const cy = h * 0.44 + (pointerY - 0.5) * 35;
-
-        // شبكة أفق هولوغرامية منظور ثلاثي الأبعاد في قاع المشهد
-        ctx.save();
-        ctx.strokeStyle = 'rgba(0, 245, 212, 0.055)';
-        ctx.lineWidth = 1;
-        const horizon = h * 0.68;
-        for (let i = -8; i <= 8; i++) {
-          ctx.beginPath();
-          ctx.moveTo(cx + i * 38, horizon);
-          ctx.lineTo(cx + i * 210, h + 40);
-          ctx.stroke();
-        }
-        for (let r = 1; r <= 5; r++) {
-          const yy = horizon + Math.pow(r / 5, 1.8) * (h - horizon);
-          ctx.beginPath();
-          ctx.moveTo(0, yy);
-          ctx.lineTo(w, yy);
-          ctx.stroke();
-        }
-        ctx.restore();
-
-        // حلقات إسطرلاب كونية عملاقة تدور بهدوء في الخلفية
+        const cx = w * 0.5, cy = h * 0.45;
         ctx.save();
         ctx.translate(cx, cy);
-        for (let ring = 0; ring < 3; ring++) {
+        for (let r = 0; r < 2; r++) {
           ctx.save();
-          ctx.rotate(t * (ring % 2 === 0 ? 0.35 : -0.25) + ring * 1.1);
-          ctx.scale(1, 0.42 + ring * 0.14);
+          ctx.rotate(t * (r === 0 ? 0.3 : -0.22));
+          ctx.scale(1, 0.48);
           ctx.beginPath();
-          ctx.arc(0, 0, Math.min(w, h) * (0.28 + ring * 0.13), 0, Math.PI * 2);
-          ctx.strokeStyle = ring === 1 ? 'rgba(247, 201, 72, 0.09)' : 'rgba(0, 245, 212, 0.07)';
-          ctx.lineWidth = 1.3;
-          ctx.setLineDash([12, 18]);
+          ctx.arc(0, 0, Math.min(w, h) * (0.34 + r * 0.14), 0, Math.PI * 2);
+          ctx.strokeStyle = r === 0 ? 'rgba(0,245,212,0.06)' : 'rgba(247,201,72,0.07)';
+          ctx.setLineDash([10, 16]);
           ctx.stroke();
           ctx.restore();
         }
         ctx.restore();
-
-        // غبار ضوئي عائم
         stars.forEach((st) => {
-          st.z -= 0.0018;
-          if (st.z <= 0.05) st.z = 1;
+          st.z -= 0.0016;
+          if (st.z <= 0.06) st.z = 1;
           const sx = cx + (st.x / st.z) * (w * 0.42);
           const sy = cy + (st.y / st.z) * (h * 0.42);
           if (sx < 0 || sx > w || sy < 0 || sy > h) return;
-          const alpha = (1 - st.z) * 0.65;
-          ctx.fillStyle = st.s > 1.4 ? `rgba(247,201,72,${alpha})` : `rgba(0,245,212,${alpha})`;
+          const a = (1 - st.z) * 0.55;
+          ctx.fillStyle = st.s > 1.3 ? `rgba(247,201,72,${a})` : `rgba(0,245,212,${a})`;
           ctx.beginPath();
-          ctx.arc(sx, sy, st.s * (1.2 - st.z * 0.6), 0, Math.PI * 2);
+          ctx.arc(sx, sy, st.s, 0, Math.PI * 2);
           ctx.fill();
         });
-
         requestAnimationFrame(frame);
       }
       requestAnimationFrame(frame);
     })();
 
     // =======================================================================
-    // 3. محرك التشفير القياسي TOTP RFC 6238 (WebCrypto HMAC-SHA1)
+    // 3. محرك TOTP RFC 6238 القياسي
     // =======================================================================
     const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
     function randomBase32(len = 32) {
@@ -1507,9 +1528,7 @@
         const offset = sig[sig.length - 1] & 0x0f;
         const bin = ((sig[offset] & 0x7f) << 24) | ((sig[offset + 1] & 0xff) << 16) | ((sig[offset + 2] & 0xff) << 8) | (sig[offset + 3] & 0xff);
         return String(bin % 1000000).padStart(6, '0');
-      } catch (_) {
-        return '482910';
-      }
+      } catch (_) { return '482910'; }
     }
     async function sha256Hex(txt) {
       const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
@@ -1517,54 +1536,47 @@
     }
 
     // =======================================================================
-    // 4. المجسمات الهولوغرامية للشعارات الثلاثة (TMJ / MTR / DMT Gyro Crests)
+    // 4. الشعارات الثلاثة والبيانات الأساسية
     // =======================================================================
     const MONOGRAMS = {
       TMJ: {
-        code: 'TMJ',
-        coord: 'CORE: TMJ-HEX',
+        code: 'TMJ', shortTitle: 'تريلماجد', coord: 'CORE: TMJ-HEX',
         title: 'تريلماجد — المِسطَبَة الهولوغرامية للتريليون',
-        sub: 'الاندماج السيادي بين <strong class="text-pri">التريليون</strong> و<strong class="text-sec">د. ماجد</strong> — قيادة كمية هولوغرامية من انضباط الدخل إلى أفق <span class="num text-pri">$1.00T</span>',
-        svg(sz = 68) {
+        sub: 'الاندماج السيادي بين <strong class="text-pri">التريليون</strong> و<strong class="text-sec">د. ماجد</strong> — قيادة كمية متكيفة نحو <span class="num text-pri">$1.00T</span>',
+        svg(sz = 62) {
           return `<svg width="${sz}" height="${sz}" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="47" stroke="rgba(0,245,212,0.45)" stroke-width="1.2" stroke-dasharray="6 5" class="gyro-ring-cw"/>
-            <circle cx="50" cy="50" r="42" stroke="rgba(247,201,72,0.35)" stroke-width="1" stroke-dasharray="14 8" class="gyro-ring-ccw"/>
-            <polygon points="50,9 86,29 86,71 50,91 14,71 14,29" fill="rgba(5,12,26,0.92)" stroke="var(--pri)" stroke-width="2.6"/>
-            <polygon points="50,15 80,32 80,68 50,85 20,68 20,32" fill="none" stroke="var(--sec)" stroke-width="0.9" opacity="0.75"/>
-            <polyline points="37,31 44,24 50,29 56,24 63,31" fill="none" stroke="var(--pri)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
-            <text x="50" y="57" text-anchor="middle" fill="var(--pri)" font-family="Georgia, Cairo, serif" font-weight="900" font-size="22" letter-spacing="1">TMJ</text>
-            <text x="50" y="71" text-anchor="middle" fill="var(--sec)" font-family="IBM Plex Mono, monospace" font-weight="700" font-size="6.2" letter-spacing="2">TRILMAJED</text>
+            <circle cx="50" cy="50" r="47" stroke="rgba(0,245,212,0.45)" stroke-width="1.3" stroke-dasharray="6 5" class="gyro-ring-cw"/>
+            <polygon points="50,9 86,29 86,71 50,91 14,71 14,29" fill="rgba(5,12,26,0.94)" stroke="var(--pri)" stroke-width="2.8"/>
+            <polyline points="37,31 44,24 50,29 56,24 63,31" fill="none" stroke="var(--pri)" stroke-width="2.2" stroke-linecap="round"/>
+            <text x="50" y="58" text-anchor="middle" fill="var(--pri)" font-family="Georgia, Cairo, serif" font-weight="900" font-size="22">TMJ</text>
+            <text x="50" y="72" text-anchor="middle" fill="var(--sec)" font-family="IBM Plex Mono, monospace" font-weight="700" font-size="6.2" letter-spacing="1.8">TRILMAJED</text>
           </svg>`;
         }
       },
       MTR: {
-        code: 'MTR',
-        coord: 'CORE: MTR-ORB',
+        code: 'MTR', shortTitle: 'ماج تريليون', coord: 'CORE: MTR-ORB',
         title: 'ماج تريليون — المِسطَبَة الهولوغرامية للتريليون',
-        sub: 'المدار السيادي لـ <strong class="text-pri">MajTrillion</strong> — منظومة د. ماجد الكمية المتكاملة',
-        svg(sz = 68) {
+        sub: 'المدار السيادي لـ <strong class="text-pri">MajTrillion</strong> — منظومة د. ماجد الكمية',
+        svg(sz = 62) {
           return `<svg width="${sz}" height="${sz}" viewBox="0 0 100 100" fill="none">
             <circle cx="50" cy="50" r="47" stroke="rgba(247,201,72,0.5)" stroke-width="1.4" stroke-dasharray="8 6" class="gyro-ring-cw"/>
-            <circle cx="50" cy="50" r="39" fill="rgba(5,12,26,0.92)" stroke="var(--pri)" stroke-width="2.6"/>
-            <circle cx="50" cy="50" r="33" stroke="var(--sec)" stroke-width="1" stroke-dasharray="2 3" class="gyro-ring-ccw"/>
+            <circle cx="50" cy="50" r="39" fill="rgba(5,12,26,0.94)" stroke="var(--pri)" stroke-width="2.8"/>
             <polyline points="43,29 50,21 57,29" fill="none" stroke="var(--pri)" stroke-width="2.2" stroke-linecap="round"/>
-            <text x="50" y="56" text-anchor="middle" fill="var(--pri)" font-family="Georgia, Cairo, serif" font-weight="900" font-size="20.5" letter-spacing="1">MTR</text>
-            <text x="50" y="70" text-anchor="middle" fill="var(--sec)" font-family="IBM Plex Mono, monospace" font-weight="700" font-size="5.6" letter-spacing="1.5">MAJ TRILLION</text>
+            <text x="50" y="57" text-anchor="middle" fill="var(--pri)" font-family="Georgia, Cairo, serif" font-weight="900" font-size="20.5">MTR</text>
+            <text x="50" y="71" text-anchor="middle" fill="var(--sec)" font-family="IBM Plex Mono, monospace" font-weight="700" font-size="5.6">MAJ TRILLION</text>
           </svg>`;
         }
       },
       DMT: {
-        code: 'DMT',
-        coord: 'CORE: DMT-AEGIS',
+        code: 'DMT', shortTitle: 'د. ماجد التريليونير', coord: 'CORE: DMT-AEGIS',
         title: 'د. ماجد التريليونير — الدرع الهولوغرامي الكمي',
-        sub: 'درع القيادة السيادية لـ <strong class="text-pri">Dr. Majed Trillionaire</strong> — حوكمة ذكية صارمة',
-        svg(sz = 68) {
+        sub: 'درع القيادة السيادية لـ <strong class="text-pri">Dr. Majed Trillionaire</strong>',
+        svg(sz = 62) {
           return `<svg width="${sz}" height="${sz}" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="47" stroke="rgba(0,245,160,0.42)" stroke-width="1.2" stroke-dasharray="5 5" class="gyro-ring-cw"/>
-            <path d="M50 10 L84 23 V50 C84 71 69 84 50 91 C31 84 16 71 16 50 V23 Z" fill="rgba(5,12,26,0.92)" stroke="var(--pri)" stroke-width="2.6"/>
-            <polyline points="32,36 43,29 49,33 61,22 68,25" fill="none" stroke="var(--sec)" stroke-width="2.1" stroke-linecap="round"/>
-            <text x="50" y="58" text-anchor="middle" fill="var(--pri)" font-family="Georgia, Cairo, serif" font-weight="900" font-size="20.5" letter-spacing="1">DMT</text>
-            <text x="50" y="72" text-anchor="middle" fill="var(--sec)" font-family="IBM Plex Mono, monospace" font-weight="700" font-size="5.3" letter-spacing="1.4">DR.MAJED•TRIL</text>
+            <circle cx="50" cy="50" r="47" stroke="rgba(0,245,160,0.42)" stroke-width="1.3" stroke-dasharray="5 5" class="gyro-ring-cw"/>
+            <path d="M50 10 L84 23 V50 C84 71 69 84 50 91 C31 84 16 71 16 50 V23 Z" fill="rgba(5,12,26,0.94)" stroke="var(--pri)" stroke-width="2.8"/>
+            <text x="50" y="58" text-anchor="middle" fill="var(--pri)" font-family="Georgia, Cairo, serif" font-weight="900" font-size="20.5">DMT</text>
+            <text x="50" y="72" text-anchor="middle" fill="var(--sec)" font-family="IBM Plex Mono, monospace" font-weight="700" font-size="5.4">DR.MAJED</text>
           </svg>`;
         }
       }
@@ -1573,7 +1585,7 @@
     const SPECTRUMS = [
       { id: 'royal-nebula', name: 'سديم الذهب والسيان (الافتراضي ★)', pri: '#f7c948', priRgb: '247, 201, 72', sec: '#00f5d4', secRgb: '0, 245, 212' },
       { id: 'quantum-emerald', name: 'طيف الزمرد الكمي الفائق', pri: '#00f5a0', priRgb: '0, 245, 160', sec: '#38bdf8', secRgb: '56, 189, 248' },
-      { id: 'solar-plasma', name: 'بلازما التاج الشمسي المتوهج', pri: '#ff9f1c', priRgb: '255, 159, 28', sec: '#ffd166', secRgb: '255, 209, 102' },
+      { id: 'solar-plasma', name: 'بلازما التاج الشمسي', pri: '#ff9f1c', priRgb: '255, 159, 28', sec: '#ffd166', secRgb: '255, 209, 102' },
       { id: 'cryo-diamond', name: 'الألماس الجليدي السيبراني', pri: '#e0fbfc', priRgb: '224, 251, 252', sec: '#00bbf9', secRgb: '0, 187, 249' },
       { id: 'crimson-nova', name: 'مستعر الياقوت والذهب', pri: '#ff4d6d', priRgb: '255, 77, 109', sec: '#f7c948', secRgb: '247, 201, 72' },
       { id: 'oasis-titanium', name: 'تيتانيوم الدرعية الملكي', pri: '#d4af37', priRgb: '212, 175, 55', sec: '#2ec4b6', secRgb: '46, 196, 182' }
@@ -1583,44 +1595,43 @@
       { sym: 'BTCUSDT', name: 'بيتكوين', price: 96540.0, chg: 1.84, high: 97210, low: 95480, sl: 95100, tp: 99400 },
       { sym: 'ETHUSDT', name: 'إيثيريوم', price: 3420.5, chg: 2.41, high: 3490, low: 3340, sl: 3340, tp: 3610 },
       { sym: 'SOLUSDT', name: 'سولانا', price: 214.8, chg: 4.12, high: 221, low: 205, sl: 206, tp: 232 },
-      { sym: 'BNBUSDT', name: 'بينانس كوين', price: 654.2, chg: 0.92, high: 662, low: 645, sl: 640, tp: 682 },
+      { sym: 'BNBUSDT', name: 'بينانس', price: 654.2, chg: 0.92, high: 662, low: 645, sl: 640, tp: 682 },
       { sym: 'XRPUSDT', name: 'ريبل', price: 2.46, chg: -0.65, high: 2.55, low: 2.39, sl: 2.36, tp: 2.68 },
-      { sym: 'PAXGUSDT', name: 'الذهب الرقمي', price: 2688.0, chg: 0.44, high: 2701, low: 2675, sl: 2655, tp: 2745 }
+      { sym: 'PAXGUSDT', name: 'ذهب رقمي', price: 2688.0, chg: 0.44, high: 2701, low: 2675, sl: 2655, tp: 2745 }
     ];
 
     const AGENTS = [
-      { name: 'وكيل الماكرو الكوني', en: 'Macro Sentinel', score: 86, stance: 'دعم سيادي صاعد', note: 'انحسار عوائد السندات يعزز تدفقات الأصول النادرة.' },
-      { name: 'وكيل نبض السيولة', en: 'Orderflow Radar', score: 82, stance: 'امتصاص شرائي', note: 'جدران طلب مؤسسية كثيفة أسفل المستوى الحالي.' },
-      { name: 'وكيل التردد الكمي', en: 'Quant Regimes', score: 88, stance: 'زخم إيجابي نشط', note: 'انحراف معياري منضبط يدعم استمرارية المسار.' },
-      { name: 'درع المخاطر الصارم', en: 'Risk Guardian', score: 91, stance: 'مُصادق (≤ 0.5%)', note: 'الحجم ضمن سقف المخاطرة الذهبي بوقف خسارة محكم.' },
-      { name: 'مراجع الحوكمة', en: 'Audit Sentinel', score: 95, stance: 'PAPER LOCKED', note: 'العزل البرمجي للتنفيذ الحقيقي مفعل 100%.' }
+      { name: 'وكيل الماكرو الكوني', score: 86, stance: 'دعم سيادي صاعد', note: 'انحسار عوائد السندات يعزز الأصول النادرة.' },
+      { name: 'وكيل نبض السيولة', score: 82, stance: 'امتصاص شرائي', note: 'جدران طلب مؤسسية كثيفة أسفل السعر.' },
+      { name: 'وكيل التردد الكمي', score: 88, stance: 'زخم إيجابي نشط', note: 'انحراف معياري منضبط يدعم المسار.' },
+      { name: 'درع المخاطر الصارم', score: 91, stance: 'مُصادق (≤ 0.5%)', note: 'الحجم ضمن سقف المخاطرة الذهبي.' },
+      { name: 'مراجع الحوكمة', score: 95, stance: 'PAPER LOCKED', note: 'العزل البرمجي للتنفيذ الحقيقي مفعل 100%.' }
     ];
 
     const STORAGE_KEY = 'tmj_astrolabe_admin_v2';
     const state = {
+      layoutPref: 'auto', // 'auto' | 'mobile' | 'desktop'
+      effectiveDevice: 'desktop',
+      mobSubPanel: 'ticket', // 'ticket' | 'council'
+      activeTab: 'terminal',
       monogram: localStorage.getItem('tmj_mono_choice') || 'TMJ',
       activeSym: 'BTCUSDT',
+      holoMode: '3d',
+      orbYaw: 0.55,
+      orbPitch: 0.3,
+      cvCssW: 760,
+      cvCssH: 260,
       tf: '15m',
       side: 'BUY',
       equity: 1001420.50,
-      cash: 912450.00,
       dayPnl: 1420.50,
       orders: [],
-      totpLive: '------',
       admin: (() => {
         try {
-          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-          if (saved && saved.totpSecret) return saved;
+          const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+          if (s && s.totpSecret) return s;
         } catch (_) {}
-        return {
-          enrolled: false,
-          authenticated: false,
-          name: 'د. ماجد (أدمن المنصة)',
-          email: '',
-          phone: '+966500000000',
-          vkeyHash: '',
-          totpSecret: randomBase32(32)
-        };
+        return { enrolled: false, authenticated: false, name: 'د. ماجد (أدمن المنصة)', email: '', phone: '+966500000000', vkeyHash: '', totpSecret: randomBase32(32) };
       })()
     };
 
@@ -1629,7 +1640,60 @@
     }
 
     // =======================================================================
-    // 5. وحدة التحكم الهولوغرامية الشاملة (UI Controller)
+    // 5. محرك التشكّل المكاني الديناميكي (Dynamic Spatial Viewport Engine)
+    // يضبط تلقائياً داشبورد الجوال المستقل أو المكتب ويقيس ارتفاع الشريط السفلي بدقة!
+    // =======================================================================
+    function syncViewportArchitecture() {
+      const isNarrow = window.innerWidth <= 768;
+      const eff = state.layoutPref === 'auto' ? (isNarrow ? 'mobile' : 'desktop') : state.layoutPref;
+      state.effectiveDevice = eff;
+      document.documentElement.setAttribute('data-effective', eff);
+
+      // إظهار/إخفاء اللوحة الفرعية على الجوال في الشاشة الرئيسية لمنع التكديس
+      const ticketBox = document.getElementById('panel-ticket-box');
+      const councilBox = document.getElementById('panel-council-box');
+      if (ticketBox && councilBox) {
+        if (eff === 'mobile') {
+          ticketBox.classList.toggle('hidden', state.mobSubPanel !== 'ticket');
+          councilBox.classList.toggle('hidden', state.mobSubPanel !== 'council');
+        } else {
+          ticketBox.classList.remove('hidden');
+          councilBox.classList.remove('hidden');
+        }
+      }
+
+      // قياس دقيق لارتفاع الشريط السفلي الفعلي لحجز المساحة ومنع أي تداخل 100%!
+      const activeDock = eff === 'mobile' ? document.getElementById('mobile-dock') : document.getElementById('desktop-dock');
+      const dockH = activeDock ? activeDock.getBoundingClientRect().height : 72;
+      document.documentElement.style.setProperty('--dock-clearance', Math.ceil(dockH + 14) + 'px');
+
+      const lbl = document.getElementById('device-mode-lbl');
+      if (lbl) lbl.textContent = eff === 'mobile' ? '🖥️ وضع المكتب' : '📱 داشبورد الجوال';
+
+      // إعادة ضبط أبعاد لوحة الهولوغرام بدقة Retina الحقيقية لحجم الشاشة!
+      syncHoloCanvasSize();
+    }
+
+    function syncHoloCanvasSize() {
+      const wrap = document.getElementById('canvas-wrap');
+      const cv = document.getElementById('candle-cv');
+      if (!wrap || !cv) return;
+      const rect = wrap.getBoundingClientRect();
+      if (rect.width < 20 || rect.height < 20) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      state.cvCssW = rect.width;
+      state.cvCssH = rect.height;
+      const targetW = Math.round(rect.width * dpr);
+      const targetH = Math.round(rect.height * dpr);
+      if (cv.width !== targetW || cv.height !== targetH) {
+        cv.width = targetW;
+        cv.height = targetH;
+      }
+      if (window.ui) ui.drawCandles();
+    }
+
+    // =======================================================================
+    // 6. وحدة التحكم الهولوغرامية الشاملة
     // =======================================================================
     const ui = {
       toast(msg) {
@@ -1637,19 +1701,42 @@
         document.getElementById('toast-msg').textContent = msg;
         el.classList.remove('hidden');
         clearTimeout(this._tt);
-        this._tt = setTimeout(() => el.classList.add('hidden'), 5200);
+        this._tt = setTimeout(() => el.classList.add('hidden'), 4800);
+      },
+
+      toggleDeviceMode() {
+        if (state.effectiveDevice === 'desktop') {
+          state.layoutPref = 'mobile';
+          this.toast('📱 تم التبديل إلى «داشبورد الجوال الهولوغرامي المستقل».');
+        } else {
+          state.layoutPref = window.innerWidth <= 768 ? 'desktop' : 'auto';
+          this.toast('🖥️ تم التبديل إلى «مسرح القيادة المكتبي الكامل».');
+        }
+        syncViewportArchitecture();
+        sfx.chord();
+      },
+
+      setMobSubPanel(which) {
+        state.mobSubPanel = which;
+        document.getElementById('mob-sub-ticket')?.classList.toggle('cyber-blade-gold', which === 'ticket');
+        document.getElementById('mob-sub-council')?.classList.toggle('cyber-blade-gold', which === 'council');
+        syncViewportArchitecture();
+        sfx.beep(700, 0.05);
+      },
+
+      openMobileAI() {
+        document.getElementById('mob-ai-drawer').classList.remove('hidden');
+        sfx.beep(760, 0.06);
+      },
+      closeMobileAI() {
+        document.getElementById('mob-ai-drawer').classList.add('hidden');
       },
 
       toggleAudio() {
         sfx.enabled = !sfx.enabled;
-        document.getElementById('sfx-btn').textContent = sfx.enabled ? '🔊 رنين ضوئي' : '🔇 صامت';
+        const btn = document.getElementById('sfx-btn');
+        if (btn) btn.textContent = sfx.enabled ? '🔊' : '🔇';
         if (sfx.enabled) sfx.chord();
-      },
-
-      toggleFocus() {
-        const cur = document.documentElement.getAttribute('data-focus') === 'true';
-        document.documentElement.setAttribute('data-focus', String(!cur));
-        sfx.beep(720, 0.08);
       },
 
       setMonogram(code) {
@@ -1657,41 +1744,43 @@
         state.monogram = code;
         try { localStorage.setItem('tmj_mono_choice', code); } catch (_) {}
         const m = MONOGRAMS[code];
-        document.getElementById('header-gyro-crest').innerHTML = m.svg(68);
+        const dCrest = document.getElementById('header-gyro-crest');
+        if (dCrest) dCrest.innerHTML = m.svg(62);
+        const mCrest = document.getElementById('mob-gyro-crest');
+        if (mCrest) mCrest.innerHTML = m.svg(40);
         document.getElementById('hdr-coord-mono').textContent = m.coord;
         document.getElementById('brand-main-title').textContent = m.title;
         document.getElementById('brand-sub-meaning').innerHTML = m.sub;
+        document.getElementById('mob-brand-title').textContent = m.shortTitle;
+        document.getElementById('mob-mono-badge').textContent = code + ' ★';
 
         ['TMJ', 'MTR', 'DMT'].forEach((k) => {
-          const pill = document.getElementById('pill-mono-' + k);
-          if (pill) pill.classList.toggle('active', k === code);
-          const card = document.getElementById('card-mono-' + k);
-          if (card) card.classList.toggle('active', k === code);
+          document.getElementById('pill-mono-' + k)?.classList.toggle('active', k === code);
+          document.getElementById('card-mono-' + k)?.classList.toggle('active', k === code);
         });
-        sfx.beep(840, 0.08, 'triangle');
+        sfx.beep(840, 0.06, 'triangle');
       },
 
       cycleMonogram() {
         const order = ['TMJ', 'MTR', 'DMT'];
         const next = order[(order.indexOf(state.monogram) + 1) % order.length];
         this.setMonogram(next);
-        this.toast(`✨ تم التحويل الهولوغرامي إلى شعار: ${next}`);
+        this.toast(`✨ تم تفعيل ختم المونوغرام: ${next}`);
       },
 
       tab(id) {
+        state.activeTab = id;
         ['terminal', 'admin', 'binance', 'cfo', 'quantum', 'themes'].forEach((t) => {
-          const scr = document.getElementById('scr-' + t);
-          if (scr) scr.classList.toggle('hidden', t !== id);
+          document.getElementById('scr-' + t)?.classList.toggle('hidden', t !== id);
         });
-        document.querySelectorAll('.nav-shard').forEach((b) => {
-          b.classList.toggle('active', b.getAttribute('data-tab') === id);
-        });
-        sfx.beep(580, 0.06);
-        if (id === 'terminal') this.drawCandles();
+        document.querySelectorAll('.nav-shard').forEach((b) => b.classList.toggle('active', b.getAttribute('data-tab') === id));
+        document.querySelectorAll('.mob-tab-btn').forEach((b) => b.classList.toggle('active', b.getAttribute('data-mob-tab') === id));
+        sfx.beep(580, 0.05);
+        if (id === 'terminal') setTimeout(syncHoloCanvasSize, 20);
         if (id === 'admin') this.syncCryptexRings();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       },
 
-      // محاذاة حلقات الكريبتيكس الأربع بصرياً في الوقت الفعلي!
       syncCryptexRings() {
         const email = (document.getElementById('enr-email')?.value || '').trim();
         const phone = (document.getElementById('enr-phone')?.value || '').trim();
@@ -1707,8 +1796,7 @@
           const el = document.getElementById(id);
           if (!el) return;
           el.style.transform = ok ? 'rotate(0deg)' : `rotate(${idleDeg}deg)`;
-          const c = el.querySelector('circle');
-          if (c) c.setAttribute('stroke', ok ? 'var(--pri)' : 'rgba(0,245,212,0.25)');
+          el.querySelector('circle')?.setAttribute('stroke', ok ? 'var(--pri)' : 'rgba(0,245,212,0.25)');
         };
         setRing('c-ring-1', r1Ok, 42);
         setRing('c-ring-2', r2Ok, -58);
@@ -1724,10 +1812,10 @@
         const leg = document.getElementById('cryptex-legend');
         if (leg) {
           leg.innerHTML = `
-            <div>${r1Ok ? '🟡' : '⚪'} الحلقة 1 (البريد السيادي): <strong>${r1Ok ? 'محاذية 0° ✓' : 'بانتظار الإدخال'}</strong></div>
-            <div>${r2Ok ? '🟡' : '⚪'} الحلقة 2 (الجوال الدولي): <strong>${r2Ok ? 'محاذية 0° ✓' : 'بانتظار الإدخال'}</strong></div>
-            <div>${r3Ok ? '🟡' : '⚪'} الحلقة 3 (كلمة السر الثابتة 6+): <strong>${r3Ok ? 'محاذية 0° ✓' : 'أدخل 6 خانات فأكثر'}</strong></div>
-            <div>${r4Ok ? '🟡' : '⚪'} الحلقة 4 (رمز المصادقة 6 أرقام): <strong>${r4Ok ? 'محاذية 0° ✓' : 'اضغط إسقاط الـ 6 أرقام'}</strong></div>
+            <div>${r1Ok ? '🟡' : '⚪'} الحلقة 1 (البريد): <strong>${r1Ok ? 'محاذية 0° ✓' : 'بانتظار الإدخال'}</strong></div>
+            <div>${r2Ok ? '🟡' : '⚪'} الحلقة 2 (الجوال): <strong>${r2Ok ? 'محاذية 0° ✓' : 'بانتظار الإدخال'}</strong></div>
+            <div>${r3Ok ? '🟡' : '⚪'} الحلقة 3 (كلمة السر 6+): <strong>${r3Ok ? 'محاذية 0° ✓' : 'أدخل 6 خانات+'}</strong></div>
+            <div>${r4Ok ? '🟡' : '⚪'} الحلقة 4 (رمز 6 أرقام): <strong>${r4Ok ? 'محاذية 0° ✓' : 'اضغط إسقاط'}</strong></div>
           `;
         }
       },
@@ -1742,7 +1830,7 @@
         inp.type = 'text';
         inp.value = code;
         this.syncCryptexRings();
-        sfx.beep(780, 0.08);
+        sfx.beep(780, 0.07);
         this.toast(`🎲 تم توليد كلمة سر ثابتة جاهزة: ${code}`);
       },
 
@@ -1750,12 +1838,12 @@
         const el = document.getElementById(id);
         if (!el) return;
         el.type = el.type === 'password' ? 'text' : 'password';
-        if (btn) btn.textContent = el.type === 'password' ? '👁️ إظهار' : '👁️ إخفاء';
+        if (btn) btn.textContent = el.type === 'password' ? '👁️' : '🙈';
       },
 
       copyTotpSecret() {
         navigator.clipboard?.writeText(state.admin.totpSecret).catch(() => {});
-        this.toast(`📋 تم نسخ مفتاح الإقران: ${state.admin.totpSecret}`);
+        this.toast(`📋 تم نسخ مفتاح الإقران بنجاح.`);
       },
 
       async rotateTotpSecret() {
@@ -1764,7 +1852,7 @@
         saveAdmin();
         await this.refreshTotpTick();
         this.renderAdminState();
-        this.toast('🔄 تم تدوير مفتاح البذرة التشفيري بنجاح.');
+        this.toast('🔄 تم تدوير مفتاح المصادقة.');
       },
 
       async autofillCurrentTotp(targetId) {
@@ -1772,10 +1860,9 @@
         const el = document.getElementById(targetId);
         if (el) el.value = code;
         this.syncCryptexRings();
-        sfx.beep(920, 0.07);
+        sfx.beep(920, 0.06);
       },
 
-      // التأسيس والتفعيل الموحد بخطوة واحدة + الحارس الذكي لمنع التباس الـ 6 أرقام!
       async enrollAndActivateOneStep() {
         const name = document.getElementById('enr-name').value.trim() || 'د. ماجد';
         const email = document.getElementById('enr-email').value.trim().toLowerCase();
@@ -1786,55 +1873,36 @@
         const live0 = await computeTOTP(state.admin.totpSecret, 0);
         const livePrev = await computeTOTP(state.admin.totpSecret, -1);
 
-        // الحارس الذكي: إذا كتب المستخدم رمز الـ 6 أرقام المتغير في خانة (أ) بالخطأ!
         if ((vkey === live0 || vkey === livePrev) && (!totpInput || totpInput === vkey)) {
           document.getElementById('enr-totp').value = vkey;
           document.getElementById('enr-vkey').value = '';
           document.getElementById('enr-vkey').focus();
-          const hint = document.getElementById('enr-smart-hint');
           document.getElementById('enr-smart-hint-txt').textContent =
-            `💡 تنبيه ذكي: الرقم (${vkey}) هو رمز المصادقة المتغير وقد نقلناه تلقائياً لخانة (ب) بالأسفل! الآن اكتب في خانة (أ) كلمة سر ثابتة خاصة بك (6 خانات فأكثر) أو اضغط «🎲 توليد فوري».`;
-          hint.classList.remove('hidden');
+            `💡 تنبيه ذكي: الرقم (${vkey}) هو رمز المصادقة المتغير وقد نقلناه تلقائياً لخانة (ب)! اكتب في خانة (أ) كلمة سر ثابتة (6 خانات فأكثر) أو اضغط «🎲 توليد».`;
+          document.getElementById('enr-smart-hint').classList.remove('hidden');
           this.syncCryptexRings();
-          sfx.beep(520, 0.12, 'triangle');
+          sfx.beep(520, 0.1, 'triangle');
           return;
         }
 
-        if (!email || !email.includes('@')) {
-          this.toast('⚠️ يرجى إدخال البريد الإلكتروني الرسمي للأدمن في الحلقة 1.');
-          document.getElementById('enr-email').focus();
-          return;
-        }
-        if (phone.replace(/\D/g, '').length < 8) {
-          this.toast('⚠️ يرجى إدخال رقم جوال دولي صحيح في الحلقة 2.');
-          return;
-        }
-        if (vkey.length < 6) {
-          this.toast('⚠️ كلمة سر الأدمن الثابتة في الخانة (أ) يجب أن تكون 6 خانات أو أكثر (أو اضغط 🎲 توليد فوري).');
-          document.getElementById('enr-vkey').focus();
-          return;
-        }
+        if (!email || !email.includes('@')) { this.toast('⚠️ يرجى إدخال البريد الإلكتروني للأدمن.'); return; }
+        if (phone.replace(/\D/g, '').length < 8) { this.toast('⚠️ يرجى إدخال رقم جوال دولي صحيح.'); return; }
+        if (vkey.length < 6) { this.toast('⚠️ كلمة سر الأدمن الثابتة في الخانة (أ) يجب أن تكون 6 خانات أو أكثر.'); return; }
         const liveNext = await computeTOTP(state.admin.totpSecret, 1);
         if (![live0, livePrev, liveNext].includes(totpInput)) {
-          this.toast('⚠️ رمز الـ 6 أرقام في الخانة (ب) غير مطابق للرمز المتزامن — اضغط «⚡ إسقاط الـ 6 أرقام» لتعبئته فوراً.');
+          this.toast('⚠️ رمز الـ 6 أرقام غير مطابق — اضغط «⚡ إسقاط الـ 6 أرقام» لتعبئته.');
           return;
         }
 
-        state.admin.name = name;
-        state.admin.email = email;
-        state.admin.phone = phone;
-        state.admin.vkeyHash = await sha256Hex('TMJ::' + vkey);
-        state.admin.enrolled = true;
-        state.admin.authenticated = true;
+        state.admin = { ...state.admin, name, email, phone, vkeyHash: await sha256Hex('TMJ::' + vkey), enrolled: true, authenticated: true };
         saveAdmin();
-
         document.getElementById('enr-smart-hint').classList.add('hidden');
         document.getElementById('lgn-email').value = email;
         document.getElementById('lgn-phone').value = phone;
         this.renderAdminState();
         this.syncCryptexRings();
         sfx.chord();
-        this.toast('👑 اكتملت محاذاة حلقات الكريبتيكس الأربع! تم تفعيل الجلسة السيادية لدكتور ماجد بنجاح.');
+        this.toast('👑 اكتملت محاذاة الكريبتيكس 4/4! تم تفعيل الجلسة السيادية لدكتور ماجد.');
       },
 
       async verifyAdminLogin(mode) {
@@ -1843,40 +1911,24 @@
         const phone = document.getElementById(pfx + '-phone').value.trim();
         const vkey = document.getElementById(pfx + '-vkey').value.trim();
         const totp = document.getElementById(pfx + '-totp').value.replace(/\s+/g, '');
-
         const showErr = (m) => {
-          if (mode === 'modal') {
-            const box = document.getElementById('adm-modal-err');
-            box.textContent = m;
-            box.classList.remove('hidden');
-          } else {
-            this.toast(m);
-          }
+          if (mode === 'modal') { const b = document.getElementById('adm-modal-err'); b.textContent = m; b.classList.remove('hidden'); }
+          else this.toast(m);
         };
-
-        if (!state.admin.enrolled) {
-          showErr('⚠️ لم يتم تأسيس بيانات الكريبتيكس بعد — أكمل اللوحة (1) أولاً بخطوة واحدة.');
-          return;
-        }
-        if (email !== state.admin.email) return showErr('❌ البريد الإلكتروني غير مطابق للبريد السيادي المسجل.');
-        if (phone.replace(/\D/g, '') !== state.admin.phone.replace(/\D/g, '')) return showErr('❌ رقم الهاتف غير مطابق للرقم المسجل.');
-        if (vkey.length < 6) return showErr('❌ كلمة سر الأدمن الثابتة تتكون من 6 خانات فأكثر.');
-        const hash = await sha256Hex('TMJ::' + vkey);
-        if (hash !== state.admin.vkeyHash) return showErr('❌ كلمة سر الأدمن الثابتة غير صحيحة.');
-
-        const c0 = await computeTOTP(state.admin.totpSecret, 0);
-        const cm1 = await computeTOTP(state.admin.totpSecret, -1);
-        const cp1 = await computeTOTP(state.admin.totpSecret, 1);
-        if (![c0, cm1, cp1].includes(totp)) return showErr('❌ رمز المصادقة ذو الـ 6 أرقام غير مطابق أو انتهت صلاحيته.');
+        if (!state.admin.enrolled) return showErr('⚠️ أكمل اللوحة (1) أولاً بخطوة واحدة.');
+        if (email !== state.admin.email) return showErr('❌ البريد غير مطابق.');
+        if (phone.replace(/\D/g, '') !== state.admin.phone.replace(/\D/g, '')) return showErr('❌ رقم الجوال غير مطابق.');
+        if (vkey.length < 6 || (await sha256Hex('TMJ::' + vkey)) !== state.admin.vkeyHash) return showErr('❌ كلمة السر الثابتة غير صحيحة.');
+        const c0 = await computeTOTP(state.admin.totpSecret, 0), cm1 = await computeTOTP(state.admin.totpSecret, -1), cp1 = await computeTOTP(state.admin.totpSecret, 1);
+        if (![c0, cm1, cp1].includes(totp)) return showErr('❌ رمز الـ 6 أرقام غير مطابق.');
 
         state.admin.authenticated = true;
         saveAdmin();
         document.getElementById('admin-modal').classList.add('hidden');
-        document.getElementById('adm-modal-err').classList.add('hidden');
         this.renderAdminState();
         this.syncCryptexRings();
         sfx.chord();
-        this.toast('🛡️ تم فتح القفل السيادي الرباعي بنجاح — مرحباً د. ماجد.');
+        this.toast('🛡️ تم فتح القفل السيادي الرباعي بنجاح.');
       },
 
       lockAdminSession() {
@@ -1886,36 +1938,19 @@
         document.getElementById('mdl-email').value = state.admin.email || '';
         document.getElementById('mdl-phone').value = state.admin.phone || '+966500000000';
         document.getElementById('admin-modal').classList.remove('hidden');
-        sfx.beep(420, 0.09);
       },
-
-      closeAdminModal() {
-        document.getElementById('admin-modal').classList.add('hidden');
-      },
-
+      closeAdminModal() { document.getElementById('admin-modal').classList.add('hidden'); },
       resetAdminDemo() {
-        state.admin = {
-          enrolled: false,
-          authenticated: false,
-          name: 'د. ماجد (أدمن المنصة)',
-          email: '',
-          phone: '+966500000000',
-          vkeyHash: '',
-          totpSecret: randomBase32(32)
-        };
+        state.admin = { enrolled: false, authenticated: false, name: 'د. ماجد (أدمن المنصة)', email: '', phone: '+966500000000', vkeyHash: '', totpSecret: randomBase32(32) };
         saveAdmin();
         document.getElementById('enr-email').value = '';
         document.getElementById('enr-vkey').value = '';
         document.getElementById('enr-totp').value = '';
         this.renderAdminState();
         this.syncCryptexRings();
-        this.toast('🧹 تمت إعادة ضبط حلقات الكريبتيكس للتأسيس من جديد.');
+        this.toast('🧹 تمت إعادة ضبط حلقات الكريبتيكس.');
       },
-
-      stepUpBio() {
-        sfx.chord();
-        this.toast('🪪 تم إرسال نبضة التحقق البيومتري (WebAuthn Passkey FIDO2) للجهاز المحلي.');
-      },
+      stepUpBio() { sfx.chord(); this.toast('🪪 تم إرسال نبضة التحقق البيومتري (WebAuthn Passkey).'); },
 
       renderAdminState() {
         const a = state.admin;
@@ -1924,72 +1959,66 @@
         const pagePill = document.getElementById('adm-page-pill');
         const sessBadge = document.getElementById('mfa-session-badge');
         const visorTag = document.getElementById('visor-mfa-tag');
-        const visorId = document.getElementById('visor-admin-Identity');
+        const mobMfa = document.getElementById('mob-mfa-mini');
 
         if (a.authenticated) {
-          gateLbl.textContent = '👑 د. ماجد • موثق 4/4 ✓';
+          if (gateLbl) gateLbl.textContent = '👑 د. ماجد • موثق 4/4 ✓';
           pagePill.textContent = '✓ الحساب مؤسس والجلسة موثقة بالكامل';
           sessBadge.textContent = '✓ جلسة أدمن موثقة نشطة';
-          visorTag.textContent = '4/4 LOCKED•OK';
-          visorTag.className = 'num text-ok';
-          visorId.textContent = `${a.name} • ختم الكريبتيكس نشط`;
-        } else if (a.enrolled) {
-          gateLbl.textContent = '🔐 دخول الأدمن (مقفل)';
-          pagePill.textContent = 'الحساب مؤسس — بانتظار فتح القفل';
-          sessBadge.textContent = 'يتطلب التحقق';
-          visorTag.textContent = 'SEAL•STANDBY';
-          visorTag.className = 'num text-pri';
+          if (visorTag) { visorTag.textContent = '4/4 LOCKED•OK'; visorTag.className = 'num text-ok'; }
+          if (mobMfa) { mobMfa.textContent = 'MFA: 4/4 OK'; mobMfa.className = 'text-ok'; }
         } else {
-          gateLbl.textContent = '👑 كريبتيكس الأدمن (MFA)';
-          pagePill.textContent = 'بانتظار محاذاة الحلقات الأربع';
+          if (gateLbl) gateLbl.textContent = a.enrolled ? '🔐 دخول الأدمن' : '👑 كريبتيكس الأدمن (MFA)';
+          pagePill.textContent = a.enrolled ? 'الحساب مؤسس — بانتظار الدخول' : 'بانتظار محاذاة الحلقات الأربع';
           sessBadge.textContent = 'غير مسجل الدخول';
-          visorTag.textContent = 'AWAITING•INIT';
-          visorTag.className = 'num text-warn';
+          if (mobMfa) { mobMfa.textContent = a.enrolled ? 'MFA: LOCKED' : 'MFA: INIT'; mobMfa.className = 'text-warn'; }
         }
 
         const maskMail = a.email ? a.email.slice(0, 2) + '••••@' + a.email.split('@')[1] : 'غير مسجل بعد';
-        const maskPhone = a.phone ? a.phone.slice(0, 4) + '••••••' + a.phone.slice(-2) : '—';
         document.getElementById('admin-factors-summary').innerHTML = `
-          <div>1. البريد السيادي: <strong class="num text-sec">${maskMail}</strong></div>
-          <div>2. الهاتف الدولي: <strong class="num text-sec">${maskPhone}</strong></div>
-          <div>3. كلمة السر الثابتة (6+): <strong class="${a.enrolled ? 'text-ok' : 'text-warn'}">${a.enrolled ? '✓ مشفرة SHA-256' : 'بانتظار الإعداد'}</strong></div>
-          <div>4. مولّد المصادقة (6 أرقام): <strong class="${a.authenticated ? 'text-ok' : 'text-pri'}">${a.authenticated ? '✓ متزامن وموثق' : 'جاهز للإقران'}</strong></div>
+          <div>1. البريد: <strong class="num text-sec">${maskMail}</strong> • 2. الجوال: <strong class="num text-sec">${a.phone}</strong></div>
+          <div>3. كلمة السر (6+): <strong class="${a.enrolled ? 'text-ok' : 'text-warn'}">${a.enrolled ? '✓ مشفرة SHA-256' : 'بانتظار الإعداد'}</strong> • 4. المصادقة: <strong class="${a.authenticated ? 'text-ok' : 'text-pri'}">${a.authenticated ? '✓ موثق' : 'جاهز'}</strong></div>
         `;
       },
 
       async refreshTotpTick() {
         const secRem = 30 - (Math.floor(Date.now() / 1000) % 30);
         const code = await computeTOTP(state.admin.totpSecret, 0);
-        state.totpLive = code;
         const prev = document.getElementById('totp-live-preview');
         if (prev) prev.textContent = code;
         const bar = document.getElementById('totp-bar-fill');
         if (bar) bar.style.width = ((secRem / 30) * 100).toFixed(1) + '%';
         const lbl = document.getElementById('totp-countdown-lbl');
-        if (lbl) lbl.textContent = `يتجدد خلال ${secRem} ث`;
+        if (lbl) lbl.textContent = `${secRem}s`;
       },
 
       // =====================================================================
-      // 6. كوكبة الأصول ومسرح شموع البلازما بانعكاس ضوئي (Plasma Candlestick)
+      // 7. كوكبة الأصول والقبة الهولوغرامية المتكيفة مع أبعاد الجوال والمكتب!
       // =====================================================================
       renderWatchlist() {
         const q = (document.getElementById('sym-search')?.value || '').trim().toUpperCase();
         const box = document.getElementById('watchlist');
-        if (!box) return;
-        box.innerHTML = ASSETS.filter((a) => !q || a.sym.includes(q) || a.name.includes(q)).map((a) => {
-          const act = a.sym === state.activeSym ? 'active' : '';
-          const col = a.chg >= 0 ? 'text-ok' : 'text-err';
-          return `<div class="orbit-asset ${act}" onclick="ui.selectAsset('${a.sym}')">
-            <div class="row-between">
-              <strong class="num" style="font-size:13px;">${a.sym}</strong>
-              <span class="num ${col}" style="font-size:11.5px;font-weight:800;">${a.chg >= 0 ? '+' : ''}${a.chg.toFixed(2)}%</span>
-            </div>
-            <div class="row-between" style="margin-top:2px;">
-              <span class="muted" style="font-size:11px;">${a.name}</span>
-              <strong class="num text-pri" style="font-size:12.5px;">$${a.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
-            </div>
-          </div>`;
-        }).join('');
+        if (box) {
+          box.innerHTML = ASSETS.filter((a) => !q || a.sym.includes(q) || a.name.includes(q)).map((a) => {
+            const act = a.sym === state.activeSym ? 'active' : '';
+            const col = a.chg >= 0 ? 'text-ok' : 'text-err';
+            return `<div class="orbit-asset ${act}" onclick="ui.selectAsset('${a.sym}')">
+              <div class="row-between"><strong class="num" style="font-size:12.5px;">${a.sym}</strong><span class="num ${col}" style="font-size:11px;font-weight:800;">${a.chg >= 0 ? '+' : ''}${a.chg.toFixed(2)}%</span></div>
+              <div class="row-between" style="margin-top:2px;"><span class="muted" style="font-size:10.5px;">${a.name}</span><strong class="num text-pri" style="font-size:12px;">$${a.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></div>
+            </div>`;
+          }).join('');
+        }
+        // شريط الجوال الأفقي الرشيق
+        const mobRib = document.getElementById('mob-asset-ribbon');
+        if (mobRib) {
+          mobRib.innerHTML = ASSETS.map((a) => {
+            const act = a.sym === state.activeSym ? 'active' : '';
+            return `<button type="button" class="mob-asset-chip ${act}" onclick="ui.selectAsset('${a.sym}')">
+              <span class="num">${a.sym.replace('USDT', '')}</span>
+              <span class="num ${a.chg >= 0 ? 'text-ok' : 'text-err'}" style="font-size:10px;">${a.chg >= 0 ? '+' : ''}${a.chg.toFixed(1)}%</span>
+            </button>`;
+          }).join('');
+        }
       },
 
       selectAsset(sym) {
@@ -1999,13 +2028,13 @@
         document.getElementById('ch-sym').textContent = a.sym;
         document.getElementById('tk-sym').textContent = a.sym;
         document.getElementById('ch-price').textContent = '$' + a.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('ch-meta').textContent = `ZENITH: $${a.high} • NADIR: $${a.low} • QUANTUM SPREAD: 1.6 bps`;
+        document.getElementById('ch-meta').textContent = `HIGH: $${a.high} • LOW: $${a.low} • SPREAD: 1.6 bps`;
         document.getElementById('ord-sl').value = a.sl;
         document.getElementById('ord-tp').value = a.tp;
         this.renderWatchlist();
         this.calcRisk();
         this.drawCandles();
-        sfx.beep(690, 0.06);
+        sfx.beep(690, 0.05);
       },
 
       setHoloMode(mode) {
@@ -2018,359 +2047,264 @@
 
       setTf(tf, btn) {
         state.tf = tf;
-        if (btn && btn.parentElement) {
-          btn.parentElement.querySelectorAll('.rune-chip.num').forEach((b) => b.classList.remove('active'));
-          btn.classList.add('active');
-        }
+        btn?.parentElement?.querySelectorAll('.rune-chip.num').forEach((b) => b.classList.remove('active'));
+        btn?.classList.add('active');
         this.drawCandles();
-        sfx.beep(760, 0.05);
       },
 
+      // رسم القبة الهولوغرامية ثلاثية الأبعاد بتكيّف ذكي: مركزية نقية على الجوال، ومزدوجة على المكتب!
       draw3DDome(ctx, W, H) {
         const priCol = getComputedStyle(document.documentElement).getPropertyValue('--pri').trim() || '#f7c948';
         const secCol = getComputedStyle(document.documentElement).getPropertyValue('--sec').trim() || '#00f5d4';
+        const compact = W < 520; // وضع الجوال العمودي النقي بدون أي ضغط عرضي!
 
-        // خلفية كونية عميقة مع مخروط إسقاط هولوغرامي من القاعدة!
-        const bg = ctx.createRadialGradient(W * 0.62, H * 0.52, 12, W * 0.62, H * 0.52, W * 0.55);
+        const cx = compact ? W * 0.5 : W * 0.64;
+        const cy = compact ? H * 0.46 : H * 0.48;
+        const R = compact ? Math.min(W * 0.31, H * 0.35) : Math.min(W * 0.23, H * 0.36);
+        const yaw = state.orbYaw || 0;
+        const pitch = state.orbPitch || 0.3;
+
+        const bg = ctx.createRadialGradient(cx, cy, 10, cx, cy, Math.max(W, H) * 0.65);
         bg.addColorStop(0, 'rgba(0, 245, 212, 0.14)');
         bg.addColorStop(0.55, 'rgba(5, 13, 28, 0.92)');
-        bg.addColorStop(1, 'rgba(2, 5, 13, 0.97)');
+        bg.addColorStop(1, 'rgba(2, 5, 13, 0.98)');
         ctx.fillStyle = bg;
         ctx.fillRect(0, 0, W, H);
 
-        const cx = W * 0.64;
-        const cy = H * 0.48;
-        const R = Math.min(W * 0.24, H * 0.37);
-        const yaw = state.orbYaw || 0;
-        const pitch = state.orbPitch || 0.32;
-
-        // قاعدة جهاز الإسقاط الليزري بالأسفل + مخروط الأشعة الصاعدة
+        // مخروط الباعث الهولوغرامي السفلي
         ctx.save();
-        const coneGrad = ctx.createLinearGradient(cx, H - 12, cx, cy - R);
+        const coneGrad = ctx.createLinearGradient(cx, H - 10, cx, cy - R);
         coneGrad.addColorStop(0, 'rgba(0, 245, 212, 0.34)');
         coneGrad.addColorStop(0.5, 'rgba(247, 201, 72, 0.08)');
         coneGrad.addColorStop(1, 'transparent');
         ctx.fillStyle = coneGrad;
         ctx.beginPath();
-        ctx.moveTo(cx - 38, H - 14);
-        ctx.lineTo(cx - R * 1.28, cy + 10);
-        ctx.lineTo(cx + R * 1.28, cy + 10);
-        ctx.lineTo(cx + 38, H - 14);
+        ctx.moveTo(cx - 32, H - 12);
+        ctx.lineTo(cx - R * 1.25, cy + 8);
+        ctx.lineTo(cx + R * 1.25, cy + 8);
+        ctx.lineTo(cx + 32, H - 12);
         ctx.closePath();
         ctx.fill();
 
-        // قرص الباعث الهولوغرامي السفلي
         ctx.beginPath();
-        ctx.ellipse(cx, H - 14, 54, 9, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx, H - 12, 46, 7.5, 0, 0, Math.PI * 2);
         ctx.strokeStyle = secCol;
-        ctx.lineWidth = 1.6;
+        ctx.lineWidth = 1.4;
         ctx.stroke();
         ctx.beginPath();
-        ctx.ellipse(cx, H - 14, 30, 5, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx, H - 12, 24, 4, 0, 0, Math.PI * 2);
         ctx.fillStyle = priCol;
         ctx.fill();
         ctx.restore();
 
-        // دالة إسقاط ثلاثية الأبعاد
         const proj = (x, y, z) => {
           const x1 = x * Math.cos(yaw) - z * Math.sin(yaw);
           const z1 = x * Math.sin(yaw) + z * Math.cos(yaw);
           const y2 = y * Math.cos(pitch) - z1 * Math.sin(pitch);
           const z2 = y * Math.sin(pitch) + z1 * Math.cos(pitch);
-          const fov = 320 / (320 + z2);
+          const fov = 300 / (300 + z2);
           return { sx: cx + x1 * fov, sy: cy + y2 * fov, z: z2, s: fov };
         };
 
-        // رسم خطوط الطول والعرض للقبة الهولوغرامية 3D
+        // خطوط القبة المدارية 3D
         ctx.save();
         for (let lat = -60; lat <= 60; lat += 30) {
           const phi = (lat * Math.PI) / 180;
           ctx.beginPath();
-          for (let lon = 0; lon <= 360; lon += 12) {
+          for (let lon = 0; lon <= 360; lon += 15) {
             const th = (lon * Math.PI) / 180;
             const p = proj(R * Math.cos(phi) * Math.cos(th), R * Math.sin(phi), R * Math.cos(phi) * Math.sin(th));
             if (lon === 0) ctx.moveTo(p.sx, p.sy); else ctx.lineTo(p.sx, p.sy);
           }
           ctx.strokeStyle = lat === 0 ? 'rgba(247, 201, 72, 0.36)' : 'rgba(0, 245, 212, 0.14)';
-          ctx.lineWidth = lat === 0 ? 1.4 : 0.9;
+          ctx.lineWidth = lat === 0 ? 1.3 : 0.85;
           ctx.stroke();
         }
         for (let lon = 0; lon < 180; lon += 45) {
           const th = (lon * Math.PI) / 180;
           ctx.beginPath();
-          for (let a = 0; a <= 360; a += 12) {
+          for (let a = 0; a <= 360; a += 15) {
             const rad = (a * Math.PI) / 180;
             const p = proj(R * Math.cos(rad) * Math.cos(th), R * Math.sin(rad), R * Math.cos(rad) * Math.sin(th));
             if (a === 0) ctx.moveTo(p.sx, p.sy); else ctx.lineTo(p.sx, p.sy);
           }
-          ctx.strokeStyle = 'rgba(0, 245, 212, 0.13)';
-          ctx.lineWidth = 0.9;
+          ctx.strokeStyle = 'rgba(0, 245, 212, 0.12)';
           ctx.stroke();
         }
         ctx.restore();
 
-        // مجسم الأوكتاهيدرون الذهبي النابض في قلب القبة (TMJ Singularity Crystal)
+        // بلورة الأوكتاهيدرون الذهبية الطافية (TMJ Crystal)
         const cr = R * 0.32;
-        const oct = [
-          proj(0, -cr * 1.25, 0), proj(0, cr * 1.25, 0),
-          proj(-cr, 0, 0), proj(cr, 0, 0), proj(0, 0, -cr), proj(0, 0, cr)
-        ];
-        const edges = [[0,2],[0,3],[0,4],[0,5],[1,2],[1,3],[1,4],[1,5],[2,4],[4,3],[3,5],[5,2]];
+        const oct = [proj(0, -cr * 1.25, 0), proj(0, cr * 1.25, 0), proj(-cr, 0, 0), proj(cr, 0, 0), proj(0, 0, -cr), proj(0, 0, cr)];
         ctx.save();
         ctx.strokeStyle = priCol;
         ctx.shadowColor = priCol;
-        ctx.shadowBlur = 12;
-        ctx.lineWidth = 1.6;
-        edges.forEach(([i, j]) => {
-          ctx.beginPath();
-          ctx.moveTo(oct[i].sx, oct[i].sy);
-          ctx.lineTo(oct[j].sx, oct[j].sy);
-          ctx.stroke();
+        ctx.shadowBlur = 10;
+        ctx.lineWidth = 1.5;
+        [[0,2],[0,3],[0,4],[0,5],[1,2],[1,3],[1,4],[1,5],[2,4],[4,3],[3,5],[5,2]].forEach(([i, j]) => {
+          ctx.beginPath(); ctx.moveTo(oct[i].sx, oct[i].sy); ctx.lineTo(oct[j].sx, oct[j].sy); ctx.stroke();
         });
         ctx.fillStyle = '#fff';
-        ctx.font = '900 11px "IBM Plex Mono", monospace';
+        ctx.font = '900 10.5px "IBM Plex Mono", monospace';
         ctx.textAlign = 'center';
         ctx.fillText(state.monogram, cx, cy + 4);
         ctx.restore();
 
-        // كواكب الأصول الستة التي تدور في الفضاء ثلاثي الأبعاد حول البلورة!
+        // الكواكب الستة في المدار 3D
         state._planetHits = [];
         const nodes = ASSETS.map((a, idx) => {
           const ang = (idx / ASSETS.length) * Math.PI * 2 + yaw * 0.6;
-          const elev = Math.sin(idx * 1.7 + yaw) * (R * 0.36);
-          const orbitR = R * 1.16;
-          const p = proj(Math.cos(ang) * orbitR, elev, Math.sin(ang) * orbitR);
+          const elev = Math.sin(idx * 1.7 + yaw) * (R * 0.34);
+          const p = proj(Math.cos(ang) * R * 1.15, elev, Math.sin(ang) * R * 1.15);
           return { a, ...p };
         }).sort((u, v) => v.z - u.z);
 
         nodes.forEach((n) => {
           const isSel = n.a.sym === state.activeSym;
-          const rad = (isSel ? 9.5 : 6.5) * n.s;
-          state._planetHits.push({ sym: n.a.sym, x: n.sx, y: n.sy, r: 18 });
-
-          // شعاع ربط ليزري بالنواة
+          const rad = (isSel ? 8.5 : 5.8) * n.s;
+          state._planetHits.push({ sym: n.a.sym, x: n.sx, y: n.sy, r: 20 });
           ctx.save();
-          ctx.beginPath();
-          ctx.moveTo(cx, cy);
-          ctx.lineTo(n.sx, n.sy);
-          ctx.strokeStyle = isSel ? priCol : 'rgba(0, 245, 212, 0.24)';
-          ctx.lineWidth = isSel ? 1.7 : 0.9;
-          if (!isSel) ctx.setLineDash([3, 4]);
+          ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(n.sx, n.sy);
+          ctx.strokeStyle = isSel ? priCol : 'rgba(0, 245, 212, 0.22)';
+          ctx.lineWidth = isSel ? 1.6 : 0.85;
           ctx.stroke();
 
-          // الكوكب المضيء
-          ctx.beginPath();
-          ctx.arc(n.sx, n.sy, rad, 0, Math.PI * 2);
+          ctx.beginPath(); ctx.arc(n.sx, n.sy, rad, 0, Math.PI * 2);
           ctx.fillStyle = isSel ? priCol : secCol;
           ctx.shadowColor = isSel ? priCol : secCol;
-          ctx.shadowBlur = isSel ? 18 : 9;
+          ctx.shadowBlur = isSel ? 15 : 8;
           ctx.fill();
 
           ctx.shadowBlur = 0;
           ctx.fillStyle = isSel ? priCol : '#dff9ff';
-          ctx.font = `${isSel ? '900 11.5px' : '700 10px'} "IBM Plex Mono", monospace`;
+          ctx.font = `${isSel ? '900 11px' : '700 9.5px'} "IBM Plex Mono", monospace`;
           ctx.textAlign = 'center';
-          ctx.fillText(n.a.sym.replace('USDT', ''), n.sx, n.sy - rad - 5);
+          ctx.fillText(n.a.sym.replace('USDT', ''), n.sx, n.sy - rad - 4);
           ctx.restore();
         });
 
-        // الجناح الأيسر من اللوحة: موجة البلازما الحية للأصل المحدد + تليمترية ثلاثية الأبعاد!
-        const panelW = W * 0.36;
+        // نافذة موجة البلازما الجانبية: تظهر فقط عندما يتسع العرض (> 520px) وتتحول لشريط سفلي شفاف أنيق على الجوال!
         const active = ASSETS.find((x) => x.sym === state.activeSym) || ASSETS[0];
-        ctx.save();
-        ctx.fillStyle = 'rgba(4, 12, 26, 0.72)';
-        ctx.strokeStyle = 'rgba(0, 245, 212, 0.28)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(16, 16);
-        ctx.lineTo(panelW, 16);
-        ctx.lineTo(panelW + 12, 28);
-        ctx.lineTo(panelW + 12, H - 18);
-        ctx.lineTo(16, H - 18);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
+        if (!compact) {
+          const panelW = W * 0.36;
+          ctx.save();
+          ctx.fillStyle = 'rgba(4, 12, 26, 0.74)';
+          ctx.strokeStyle = 'rgba(0, 245, 212, 0.28)';
+          ctx.beginPath();
+          ctx.moveTo(14, 14); ctx.lineTo(panelW, 14); ctx.lineTo(panelW + 10, 24); ctx.lineTo(panelW + 10, H - 16); ctx.lineTo(14, H - 16); ctx.closePath();
+          ctx.fill(); ctx.stroke();
+          ctx.fillStyle = priCol; ctx.font = '800 11.5px Cairo, sans-serif'; ctx.textAlign = 'left';
+          ctx.fillText(`⚡ ${active.sym} // PLASMA`, 24, 34);
+          ctx.fillStyle = secCol; ctx.font = '700 9.8px "IBM Plex Mono", monospace';
+          ctx.fillText('DRAG 3D ORB • TAP PLANET', 24, 50);
 
-        ctx.fillStyle = priCol;
-        ctx.font = '800 12px Cairo, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(`⚡ ${active.sym} // PLASMA WAVE`, 28, 38);
-        ctx.fillStyle = secCol;
-        ctx.font = '700 10.5px "IBM Plex Mono", monospace';
-        ctx.fillText(`DRAG 3D ORB • CLICK PLANET`, 28, 55);
-
-        // رسم موجة طيفية مضيئة داخل الجناح الأيسر
-        const pts = 24;
-        let seed = active.sym.charCodeAt(0) * 29 + state.tf.charCodeAt(0) * 13;
-        const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-        const waveY0 = 82, waveH = H - 122;
-        ctx.beginPath();
-        for (let i = 0; i <= pts; i++) {
-          const px = 26 + (i / pts) * (panelW - 22);
-          const py = waveY0 + (0.5 + (rnd() - 0.5) * 0.78 * Math.sin(i * 0.45 + yaw)) * waveH;
-          if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+          let seed = active.sym.charCodeAt(0) * 29;
+          const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+          ctx.beginPath();
+          for (let i = 0; i <= 22; i++) {
+            const px = 22 + (i / 22) * (panelW - 18);
+            const py = 74 + (0.5 + (rnd() - 0.5) * 0.76 * Math.sin(i * 0.45 + yaw)) * (H - 112);
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+          }
+          ctx.strokeStyle = secCol; ctx.lineWidth = 1.9; ctx.stroke();
+          ctx.fillStyle = 'rgba(255,255,255,0.78)';
+          ctx.fillText(`TP: $${active.tp} | SL: $${active.sl}`, 24, H - 25);
+          ctx.restore();
+        } else {
+          ctx.save();
+          ctx.fillStyle = 'rgba(255,255,255,0.65)';
+          ctx.font = '700 10px Cairo, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('اسحب القبة بإصبعك للتدوير 360° أو المس أي كوكب', cx, 16);
+          ctx.restore();
         }
-        ctx.strokeStyle = secCol;
-        ctx.shadowColor = secCol;
-        ctx.shadowBlur = 10;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-
-        ctx.fillStyle = 'rgba(255,255,255,0.75)';
-        ctx.font = '700 10.5px "IBM Plex Mono", monospace';
-        ctx.fillText(`TARGET: $${active.tp}  |  STOP: $${active.sl}`, 28, H - 28);
-        ctx.restore();
       },
 
       drawCandles() {
         const cv = document.getElementById('candle-cv');
         if (!cv) return;
         const ctx = cv.getContext('2d');
-        const W = cv.width, H = cv.height;
+        const W = state.cvCssW || 720;
+        const H = state.cvCssH || 250;
+        const dpr = cv.width / Math.max(1, W);
+        ctx.save();
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.clearRect(0, 0, W, H);
-        if ((state.holoMode || '3d') === '3d') {
+
+        if (state.holoMode === '3d') {
           this.draw3DDome(ctx, W, H);
+          ctx.restore();
           return;
         }
 
-        // خلفية المسرح الطيفي مع أفق انعكاس
         const bg = ctx.createLinearGradient(0, 0, 0, H);
-        bg.addColorStop(0, 'rgba(3, 9, 22, 0.88)');
-        bg.addColorStop(0.76, 'rgba(6, 16, 36, 0.92)');
-        bg.addColorStop(1, 'rgba(0, 245, 212, 0.09)');
+        bg.addColorStop(0, 'rgba(3, 9, 22, 0.9)');
+        bg.addColorStop(0.76, 'rgba(6, 16, 36, 0.94)');
+        bg.addColorStop(1, 'rgba(0, 245, 212, 0.1)');
         ctx.fillStyle = bg;
         ctx.fillRect(0, 0, W, H);
 
-        const horizonY = H * 0.77;
-
-        // شبكة ليزر دقيقة
-        ctx.strokeStyle = 'rgba(0, 245, 212, 0.08)';
-        ctx.lineWidth = 1;
-        for (let i = 1; i <= 4; i++) {
-          const y = (horizonY / 5) * i;
-          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-        }
+        const horizonY = H * 0.76;
         ctx.strokeStyle = 'rgba(247, 201, 72, 0.35)';
         ctx.beginPath(); ctx.moveTo(0, horizonY); ctx.lineTo(W, horizonY); ctx.stroke();
 
         const asset = ASSETS.find((x) => x.sym === state.activeSym) || ASSETS[0];
-        const count = 36;
-        let cur = asset.price * 0.986;
-        const candles = [];
-        let seed = asset.sym.charCodeAt(0) * 17 + state.tf.charCodeAt(0) * 31;
+        const count = W < 460 ? 22 : 34;
+        let cur = asset.price * 0.986, seed = asset.sym.charCodeAt(0) * 17 + state.tf.charCodeAt(0) * 31;
         const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-
+        const candles = [];
         for (let i = 0; i < count; i++) {
-          const o = cur;
-          const delta = (rand() - 0.46) * asset.price * 0.0065;
-          const c = i === count - 1 ? asset.price : o + delta;
-          const hi = Math.max(o, c) + rand() * asset.price * 0.003;
-          const lo = Math.min(o, c) - rand() * asset.price * 0.003;
-          const vol = 0.25 + rand() * 0.75;
-          candles.push({ o, c, hi, lo, vol });
+          const o = cur, c = i === count - 1 ? asset.price : o + (rand() - 0.46) * asset.price * 0.006;
+          candles.push({ o, c, hi: Math.max(o, c) + rand() * asset.price * 0.003, lo: Math.min(o, c) - rand() * asset.price * 0.003, vol: 0.25 + rand() * 0.75 });
           cur = c;
         }
-
-        const minP = Math.min(...candles.map((k) => k.lo));
-        const maxP = Math.max(...candles.map((k) => k.hi));
+        const minP = Math.min(...candles.map((k) => k.lo)), maxP = Math.max(...candles.map((k) => k.hi));
         const span = Math.max(0.0001, maxP - minP);
-        const yOf = (p) => 16 + (1 - (p - minP) / span) * (horizonY - 28);
-
-        const step = (W - 36) / count;
-        const priCol = getComputedStyle(document.documentElement).getPropertyValue('--pri').trim() || '#f7c948';
+        const yOf = (p) => 14 + (1 - (p - minP) / span) * (horizonY - 24);
+        const step = (W - 24) / count;
         const secCol = getComputedStyle(document.documentElement).getPropertyValue('--sec').trim() || '#00f5d4';
 
-        // خط مسار طيفي ناعم يربط الإغلاقات
-        ctx.save();
-        ctx.beginPath();
         candles.forEach((k, idx) => {
-          const x = 18 + idx * step + step * 0.5;
-          const y = yOf(k.c);
-          if (idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        });
-        ctx.strokeStyle = 'rgba(247, 201, 72, 0.35)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.restore();
-
-        // رسم شموع البلازما المضيئة + انعكاس السيولة المائي أسفل الأفق!
-        candles.forEach((k, idx) => {
-          const x = 18 + idx * step + step * 0.5;
-          const up = k.c >= k.o;
-          const col = up ? secCol : '#ff3366';
-
+          const x = 12 + idx * step + step * 0.5, up = k.c >= k.o, col = up ? secCol : '#ff3366';
           ctx.save();
-          ctx.strokeStyle = col;
-          ctx.fillStyle = col;
-          ctx.shadowColor = col;
-          ctx.shadowBlur = up ? 10 : 7;
-
-          // الفتيل
-          ctx.lineWidth = 1.4;
-          ctx.beginPath();
-          ctx.moveTo(x, yOf(k.hi));
-          ctx.lineTo(x, yOf(k.lo));
-          ctx.stroke();
-
-          // جسم الشمعة الهولوغرامي
-          const top = yOf(Math.max(k.o, k.c));
-          const bot = yOf(Math.min(k.o, k.c));
-          const bh = Math.max(3, bot - top);
-          ctx.globalAlpha = up ? 0.88 : 0.78;
+          ctx.strokeStyle = col; ctx.fillStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 7;
+          ctx.beginPath(); ctx.moveTo(x, yOf(k.hi)); ctx.lineTo(x, yOf(k.lo)); ctx.stroke();
+          const top = yOf(Math.max(k.o, k.c)), bh = Math.max(3, yOf(Math.min(k.o, k.c)) - top);
           ctx.fillRect(x - step * 0.28, top, step * 0.56, bh);
           ctx.restore();
 
-          // انعكاس مائي مقلوب للسيولة أسفل خط الأفق!
-          const refH = k.vol * (H - horizonY - 10);
-          const refGrad = ctx.createLinearGradient(0, horizonY, 0, horizonY + refH);
-          refGrad.addColorStop(0, up ? 'rgba(0, 245, 212, 0.42)' : 'rgba(255, 51, 102, 0.38)');
-          refGrad.addColorStop(1, 'transparent');
-          ctx.fillStyle = refGrad;
-          ctx.fillRect(x - step * 0.25, horizonY + 2, step * 0.5, refH);
+          const refH = k.vol * (H - horizonY - 8);
+          const rg = ctx.createLinearGradient(0, horizonY, 0, horizonY + refH);
+          rg.addColorStop(0, up ? 'rgba(0,245,212,0.38)' : 'rgba(255,51,102,0.34)');
+          rg.addColorStop(1, 'transparent');
+          ctx.fillStyle = rg;
+          ctx.fillRect(x - step * 0.24, horizonY + 2, step * 0.48, refH);
         });
-
-        // شعاع ليزر السعر الحي
-        const lastY = yOf(asset.price);
-        ctx.save();
-        ctx.setLineDash([5, 5]);
-        ctx.strokeStyle = priCol;
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.moveTo(0, lastY);
-        ctx.lineTo(W, lastY);
-        ctx.stroke();
         ctx.restore();
       },
 
-      // =====================================================================
-      // 7. مداولة الوكلاء وموجه المخاطر والمدير المالي
-      // =====================================================================
       conveneCouncil() {
         const boost = Math.floor(Math.random() * 5) - 2;
-        const avg = Math.min(96, Math.max(78, 86 + boost));
+        const avg = Math.min(96, Math.max(80, 86 + boost));
         const pScore = document.getElementById('pent-score');
         if (pScore) pScore.textContent = `${avg}% OK`;
-        document.getElementById('visor-consensus-line').textContent =
-          `${state.activeSym}: توافق طيفي صاعد (ثقة ${avg}%)`;
+        const mobBtn = document.getElementById('mob-sub-council');
+        if (mobBtn) mobBtn.textContent = `🧠 بلورة الوكلاء (${avg}%)`;
+        const vLine = document.getElementById('visor-consensus-line');
+        if (vLine) vLine.textContent = `${state.activeSym}: توافق طيفي صاعد (${avg}%)`;
 
         const html = AGENTS.map((ag) => {
-          const sc = Math.min(98, Math.max(75, ag.score + boost));
-          return `<div class="holo-chamber" style="padding:8px 10px;">
-            <div class="row-between">
-              <strong style="font-size:12px;color:var(--pri);">${ag.name}</strong>
-              <span class="num text-sec" style="font-size:11px;font-weight:800;">${sc}%</span>
-            </div>
-            <div style="font-size:11px;color:var(--ok);font-weight:700;margin:2px 0;">${ag.stance}</div>
-            <div class="muted" style="font-size:10.8px;">${ag.note}</div>
+          const sc = Math.min(98, Math.max(76, ag.score + boost));
+          return `<div class="holo-chamber" style="padding:7px 9px;">
+            <div class="row-between"><strong style="font-size:11.8px;color:var(--pri);">${ag.name}</strong><span class="num text-sec" style="font-size:11px;font-weight:800;">${sc}%</span></div>
+            <div style="font-size:10.8px;color:var(--ok);font-weight:700;">${ag.stance}</div>
+            <div class="muted" style="font-size:10.5px;">${ag.note}</div>
           </div>`;
         }).join('');
         const cc = document.getElementById('council-cards');
         if (cc) cc.innerHTML = html;
-
         const qg = document.getElementById('quantum-detail-grid');
         if (qg) qg.innerHTML = html;
-        sfx.beep(860, 0.09, 'triangle');
       },
 
       setSide(s) {
@@ -2391,16 +2325,12 @@
         const riskPct = (riskUsd / state.equity) * 100;
         const rr = riskUsd > 0 ? (rewardUsd / riskUsd).toFixed(2) : '—';
         const safe = riskPct <= 0.5;
-
-        const box = document.getElementById('risk-box');
-        if (box) {
-          box.innerHTML = `
-            <div class="row-between"><span>قيمة الموجة:</span><strong class="num">$${notional.toFixed(2)}</strong></div>
-            <div class="row-between"><span>المخاطرة الفعلية:</span><strong class="num ${safe ? 'text-ok' : 'text-err'}">$${riskUsd.toFixed(2)} (${riskPct.toFixed(3)}%)</strong></div>
-            <div class="row-between"><span>نسبة العائد للمخاطرة:</span><strong class="num text-pri">1 : ${rr}</strong></div>
-            <div class="row-between"><span>حكم الدرع (≤ 0.5%):</span><strong class="${safe ? 'text-ok' : 'text-err'}">${safe ? '✓ ضمن النطاق الذهبي' : '⚠️ يتجاوز سقف 0.5%'}</strong></div>
-          `;
-        }
+        document.getElementById('risk-box').innerHTML = `
+          <div class="row-between"><span>قيمة الموجة:</span><strong class="num">$${notional.toFixed(2)}</strong></div>
+          <div class="row-between"><span>المخاطرة:</span><strong class="num ${safe ? 'text-ok' : 'text-err'}">$${riskUsd.toFixed(2)} (${riskPct.toFixed(3)}%)</strong></div>
+          <div class="row-between"><span>العائد للمخاطرة:</span><strong class="num text-pri">1 : ${rr}</strong></div>
+          <div class="row-between"><span>حكم الدرع (≤ 0.5%):</span><strong class="${safe ? 'text-ok' : 'text-err'}">${safe ? '✓ ضمن النطاق الذهبي' : '⚠️ يتجاوز 0.5%'}</strong></div>
+        `;
       },
 
       openSeal() {
@@ -2408,52 +2338,38 @@
         const qty = parseFloat(document.getElementById('ord-qty').value || '0.05');
         document.getElementById('seal-summary').innerHTML = `
           <div>الأمر الطيفي: <strong class="num text-pri">${state.side} ${qty} ${a.sym}</strong> @ <strong class="num">$${a.price.toLocaleString()}</strong></div>
-          <div>بيئة الإطلاق: <strong class="text-ok">مدار المحاكاة الورقية المعزول (PAPER ONLY)</strong></div>
-          <div>المصادق السيادي: <strong>د. ماجد (${state.monogram})</strong></div>
+          <div>بيئة الإطلاق: <strong class="text-ok">مدار المحاكاة الورقية (PAPER ONLY)</strong></div>
         `;
         document.getElementById('seal-chk').checked = false;
         document.getElementById('seal-go').disabled = true;
         document.getElementById('seal-modal').classList.remove('hidden');
-        sfx.beep(740, 0.07);
       },
-
-      closeSeal() {
-        document.getElementById('seal-modal').classList.add('hidden');
-      },
-
+      closeSeal() { document.getElementById('seal-modal').classList.add('hidden'); },
       execPaperOrder() {
         const a = ASSETS.find((x) => x.sym === state.activeSym) || ASSETS[0];
         const qty = parseFloat(document.getElementById('ord-qty').value || '0.05');
-        state.orders.unshift({ sym: a.sym, side: state.side, qty, price: a.price, ts: new Date().toLocaleTimeString('ar-SA') });
+        state.orders.unshift({ sym: a.sym, side: state.side, qty, price: a.price });
         this.closeSeal();
-        const mini = document.getElementById('paper-orders-mini');
-        if (mini) {
-          mini.innerHTML = state.orders.slice(0, 3).map((o) =>
-            `<div class="holo-chamber" style="padding:5px 9px;margin-top:5px;" class="row-between">
-              <span class="text-ok">✓ ${o.side}</span> <span class="num">${o.qty} ${o.sym} @ $${o.price}</span>
-            </div>`
-          ).join('');
-        }
+        document.getElementById('paper-orders-mini').innerHTML = state.orders.slice(0, 2).map((o) =>
+          `<div class="holo-chamber" style="padding:5px 8px;margin-top:4px;"><span class="text-ok">✓ ${o.side}</span> <span class="num">${o.qty} ${o.sym} @ $${o.price}</span></div>`
+        ).join('');
         sfx.chord();
-        this.toast(`🚀 تم إطلاق الأمر الورقي (${state.side} ${qty} ${a.sym}) بختم تريلماجد بنجاح.`);
+        this.toast(`🚀 تم إطلاق الأمر الورقي (${state.side} ${qty} ${a.sym}) بنجاح.`);
       },
 
       connectBinanceDemo() {
-        document.getElementById('bn-status').innerHTML = '<span class="text-ok">✓ متصل بوضع الرصد الطيفي المعزول (قراءة فقط — تنفيذ الصفقات محظور برمجياً).</span>';
-        document.getElementById('bn-total').textContent = '$48,920.40 USDT';
+        document.getElementById('bn-status').innerHTML = '<span class="text-ok">✓ متصل بوضع الرصد الطيفي (قراءة فقط — التنفيذ محظور).</span>';
+        document.getElementById('bn-total').textContent = '$48,920.40';
         document.getElementById('bn-tbody').innerHTML = `
-          <tr><td class="num">USDT</td><td class="num">24,500.00</td><td class="num">$24,500.00</td><td class="num text-sec">50.1%</td></tr>
-          <tr><td class="num">BTC</td><td class="num">0.1850</td><td class="num">$17,859.90</td><td class="num text-pri">36.5%</td></tr>
-          <tr><td class="num">ETH</td><td class="num">1.9180</td><td class="num">$6,560.50</td><td class="num text-ok">13.4%</td></tr>
+          <tr><td class="num">USDT</td><td class="num">24,500</td><td class="num">$24,500</td><td class="num text-sec">50.1%</td></tr>
+          <tr><td class="num">BTC</td><td class="num">0.185</td><td class="num">$17,860</td><td class="num text-pri">36.5%</td></tr>
+          <tr><td class="num">ETH</td><td class="num">1.918</td><td class="num">$6,560</td><td class="num text-ok">13.4%</td></tr>
         `;
         sfx.chord();
       },
-
       disconnectBinance() {
-        document.getElementById('bn-key').value = '';
-        document.getElementById('bn-sec').value = '';
         document.getElementById('bn-total').textContent = '—';
-        document.getElementById('bn-status').textContent = 'تم تطهير الخزنة المحلية بنجاح.';
+        document.getElementById('bn-status').textContent = 'تم مسح المفاتيح.';
         document.getElementById('bn-tbody').innerHTML = '<tr><td colspan="4" class="muted">لا توجد مفاتيح نشطة.</td></tr>';
       },
 
@@ -2464,30 +2380,23 @@
         const emg = parseFloat(document.getElementById('cfo-emg')?.value || '42000');
         const free = Math.max(0, inc - fix - vr);
         const targetEmg = (fix + vr) * 6;
-        const emgPct = Math.min(100, (emg / Math.max(1, targetEmg)) * 100);
-        const out = document.getElementById('cfo-out');
-        if (out) {
-          out.innerHTML = `
-            <div>الفائض الشهري القابل للتوجيه: <strong class="num text-ok">${free.toLocaleString()} ر.س</strong> (${((free / Math.max(1, inc)) * 100).toFixed(1)}%)</div>
-            <div>درع الطوارئ المستهدف (6 أشهر): <strong class="num text-pri">${targetEmg.toLocaleString()} ر.س</strong> (مكتمل بنسبة <span class="num text-sec">${emgPct.toFixed(1)}%</span>)</div>
-            <div>التوزيع المقترح: <strong class="num">${(free * 0.6).toFixed(0)} ر.س</strong> ادخار آمن • <strong class="num">${(free * 0.4).toFixed(0)} ر.س</strong> تراكم استثماري طويل الأجل.</div>
-          `;
-        }
+        document.getElementById('cfo-out').innerHTML = `
+          <div>الفائض الشهري الحر: <strong class="num text-ok">${free.toLocaleString()} ر.س</strong></div>
+          <div>درع الطوارئ (6 أشهر): <strong class="num text-pri">${targetEmg.toLocaleString()} ر.س</strong> (${Math.min(100, (emg / Math.max(1, targetEmg)) * 100).toFixed(1)}%)</div>
+          <div>التوجيه المقترح: <strong class="num">${(free * 0.6).toFixed(0)} ر.س</strong> ادخار • <strong class="num">${(free * 0.4).toFixed(0)} ر.س</strong> تراكم استثماري.</div>
+        `;
       },
 
       renderSpectrums() {
-        const g = document.getElementById('themes-grid');
-        if (!g) return;
-        g.innerHTML = SPECTRUMS.map((sp) => `
+        document.getElementById('themes-grid').innerHTML = SPECTRUMS.map((sp) => `
           <div class="holo-chamber orbit-asset" onclick="ui.applySpectrum('${sp.id}')">
             <div class="row-between">
               <strong style="color:${sp.pri};">${sp.name}</strong>
               <span style="display:inline-flex;gap:4px;">
-                <i style="width:14px;height:14px;background:${sp.pri};display:inline-block;border-radius:50%;"></i>
-                <i style="width:14px;height:14px;background:${sp.sec};display:inline-block;border-radius:50%;"></i>
+                <i style="width:13px;height:13px;background:${sp.pri};display:inline-block;border-radius:50%;"></i>
+                <i style="width:13px;height:13px;background:${sp.sec};display:inline-block;border-radius:50%;"></i>
               </span>
             </div>
-            <div class="muted num" style="font-size:10.5px;margin-top:4px;">SPECTRUM // ${sp.id.toUpperCase()}</div>
           </div>
         `).join('');
       },
@@ -2495,55 +2404,48 @@
       applySpectrum(id) {
         const sp = SPECTRUMS.find((x) => x.id === id);
         if (!sp) return;
-        const root = document.documentElement;
-        root.style.setProperty('--pri', sp.pri);
-        root.style.setProperty('--pri-rgb', sp.priRgb);
-        root.style.setProperty('--sec', sp.sec);
-        root.style.setProperty('--sec-rgb', sp.secRgb);
+        const r = document.documentElement;
+        r.style.setProperty('--pri', sp.pri);
+        r.style.setProperty('--pri-rgb', sp.priRgb);
+        r.style.setProperty('--sec', sp.sec);
+        r.style.setProperty('--sec-rgb', sp.secRgb);
         this.drawCandles();
         sfx.chord();
-        this.toast(`🌈 تم ضبط التردد الضوئي على: ${sp.name}`);
+        this.toast(`🌈 تم تفعيل: ${sp.name}`);
       },
 
       quickCmd(cmd) {
-        document.getElementById('chat-inp').value = cmd;
-        this.sendChat();
+        const inp = document.getElementById('chat-inp');
+        if (inp) inp.value = cmd;
+        this.sendChat('chat-inp', cmd);
       },
 
-      sendChat() {
-        const inp = document.getElementById('chat-inp');
-        const q = inp.value.trim();
+      sendChat(inputId = 'chat-inp', forcedText = '') {
+        const inp = document.getElementById(inputId);
+        const q = (forcedText || inp?.value || '').trim();
         if (!q) return;
-        inp.value = '';
-        let rep = '⚡ تم تنفيذ التوجيه الطيفي وتحديث القياسات الحية.';
-        if (q.includes('كريبتيكس') || q.includes('أدمن') || q.includes('دخول')) {
-          this.tab('admin');
-          rep = '🔮 تم فتح بوابة الكريبتيكس الهولوغرامي الرباعي لدكتور ماجد.';
-        } else if (q.includes('أطياف') || q.includes('طيف') || q.includes('زمرد')) {
-          if (q.includes('زمرد')) this.applySpectrum('quantum-emerald');
-          else this.tab('themes');
-          rep = '🌈 تم فتح محول الأطياف الضوئية الهولوغرامية.';
-        } else if (q.includes('إيثيريوم') || q.toUpperCase().includes('ETH')) {
-          this.tab('terminal');
-          this.selectAsset('ETHUSDT');
-          rep = '🪐 تم توجيه المسرح الهولوغرامي نحو الإيثيريوم (ETHUSDT).';
-        } else if (q.includes('بيتكوين') || q.toUpperCase().includes('BTC') || q.includes('تخاطر')) {
-          this.tab('terminal');
-          this.selectAsset('BTCUSDT');
-          this.conveneCouncil();
-          rep = '🧠 أُطلقت نبضة التخاطر الخماسية على البيتكوين (BTCUSDT).';
-        } else if (q.toLowerCase().includes('binance')) {
-          this.tab('binance');
-          rep = '📡 تم فتح مرصد Binance المعزول للقراءة فقط.';
-        }
-        const log = document.getElementById('chat-log');
-        log.classList.remove('hidden');
-        log.innerHTML = `<div><strong class="text-pri">د. ماجد:</strong> ${q}</div><div style="margin-bottom:6px;"><strong class="text-sec">نواة تريلماجد:</strong> ${rep}</div>` + log.innerHTML;
-        sfx.beep(780, 0.07);
+        if (inp) inp.value = '';
+        let rep = '⚡ تم تنفيذ التوجيه الطيفي.';
+        if (q.includes('كريبتيكس') || q.includes('أدمن')) { this.tab('admin'); rep = '🔮 تم فتح بوابة الكريبتيكس الرباعي.'; }
+        else if (q.includes('زمرد')) { this.applySpectrum('quantum-emerald'); rep = '🌈 تم تفعيل طيف الزمرد الكمي.'; }
+        else if (q.includes('أطياف') || q.includes('طيف')) { this.tab('themes'); rep = '🌈 تم فتح محول الأطياف.'; }
+        else if (q.includes('إيثيريوم') || q.toUpperCase().includes('ETH')) { this.tab('terminal'); this.selectAsset('ETHUSDT'); rep = '🪐 تم التوجيه إلى ETHUSDT.'; }
+        else if (q.includes('سولانا') || q.toUpperCase().includes('SOL')) { this.tab('terminal'); this.selectAsset('SOLUSDT'); rep = '🪐 تم التوجيه إلى SOLUSDT.'; }
+        else if (q.includes('بيتكوين') || q.toUpperCase().includes('BTC') || q.includes('تخاطر')) { this.tab('terminal'); this.selectAsset('BTCUSDT'); this.conveneCouncil(); rep = '🧠 أُطلقت نبضة التخاطر على BTCUSDT.'; }
+
+        const line = `<div><strong class="text-pri">د. ماجد:</strong> ${q}</div><div style="margin-bottom:5px;"><strong class="text-sec">تريلماجد:</strong> ${rep}</div>`;
+        const dLog = document.getElementById('chat-log');
+        if (dLog) { dLog.classList.remove('hidden'); dLog.innerHTML = line + dLog.innerHTML; }
+        const mLog = document.getElementById('mob-chat-log');
+        if (mLog) mLog.innerHTML = line + mLog.innerHTML;
+        sfx.beep(780, 0.06);
       }
     };
+    window.ui = ui;
 
-    // تشغيل أولي متكامل
+    // =======================================================================
+    // 8. التشغيل الأولي ومراقب التحجيم الديناميكي (ResizeObserver)
+    // =======================================================================
     (function boot() {
       ui.setMonogram(state.monogram);
       ui.renderWatchlist();
@@ -2554,33 +2456,34 @@
       ui.renderAdminState();
       ui.syncCryptexRings();
       ui.refreshTotpTick();
-      state.holoMode = '3d';
-      state.orbYaw = 0.55;
-      state.orbPitch = 0.32;
+      syncViewportArchitecture();
 
+      window.addEventListener('resize', syncViewportArchitecture);
+      if (window.ResizeObserver) {
+        const ro = new ResizeObserver(() => syncHoloCanvasSize());
+        const wrap = document.getElementById('canvas-wrap');
+        if (wrap) ro.observe(wrap);
+      }
+
+      // تفاعل السحب 360° والنقر على الكواكب
       const ccv = document.getElementById('candle-cv');
       if (ccv) {
         let dragging = false, lx = 0, ly = 0, moved = 0;
-        ccv.addEventListener('pointerdown', (e) => {
-          dragging = true; lx = e.clientX; ly = e.clientY; moved = 0;
-          ccv.style.cursor = 'grabbing';
-        });
+        ccv.addEventListener('pointerdown', (e) => { dragging = true; lx = e.clientX; ly = e.clientY; moved = 0; });
         window.addEventListener('pointermove', (e) => {
           if (!dragging) return;
           const dx = e.clientX - lx, dy = e.clientY - ly;
           moved += Math.abs(dx) + Math.abs(dy);
           state.orbYaw += dx * 0.011;
-          state.orbPitch = Math.max(-0.85, Math.min(0.85, state.orbPitch + dy * 0.009));
+          state.orbPitch = Math.max(-0.8, Math.min(0.8, state.orbPitch + dy * 0.009));
           lx = e.clientX; ly = e.clientY;
         });
         window.addEventListener('pointerup', (e) => {
           if (!dragging) return;
           dragging = false;
-          ccv.style.cursor = 'grab';
-          if (moved < 6 && state.holoMode === '3d' && state._planetHits) {
+          if (moved < 7 && state.holoMode === '3d' && state._planetHits) {
             const rect = ccv.getBoundingClientRect();
-            const sx = ((e.clientX - rect.left) / rect.width) * ccv.width;
-            const sy = ((e.clientY - rect.top) / rect.height) * ccv.height;
+            const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
             const hit = state._planetHits.find((p) => Math.hypot(p.x - sx, p.y - sy) <= p.r);
             if (hit) ui.selectAsset(hit.sym);
           }
@@ -2588,34 +2491,30 @@
       }
 
       function spinOrb() {
-        if (state.holoMode === '3d' && !document.getElementById('scr-terminal')?.classList.contains('hidden')) {
-          state.orbYaw += 0.0065;
+        if (state.holoMode === '3d' && state.activeTab === 'terminal') {
+          state.orbYaw += 0.006;
           ui.drawCandles();
         }
         requestAnimationFrame(spinOrb);
       }
       requestAnimationFrame(spinOrb);
-      window.addEventListener('resize', () => ui.drawCandles());
 
-      // نبض حي للسوق كل 2.6 ثانية + تحديث عداد TOTP كل ثانية
       setInterval(() => ui.refreshTotpTick(), 1000);
       setInterval(() => {
-        ASSETS.forEach((a) => {
-          const drift = (Math.random() - 0.492) * a.price * 0.0012;
-          a.price = Math.max(0.01, a.price + drift);
-        });
-        state.dayPnl += (Math.random() - 0.48) * 38;
+        ASSETS.forEach((a) => { a.price = Math.max(0.01, a.price + (Math.random() - 0.492) * a.price * 0.0011); });
+        state.dayPnl += (Math.random() - 0.48) * 32;
         state.equity = 1000000 + state.dayPnl;
-        document.getElementById('kpi-eq').textContent = '$' + state.equity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const pnlEl = document.getElementById('kpi-pnl');
+        const eqStr = '$' + state.equity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const eqEl = document.getElementById('kpi-eq'); if (eqEl) eqEl.textContent = eqStr;
+        const mEq = document.getElementById('mob-kpi-eq'); if (mEq) mEq.textContent = '$' + Math.round(state.equity).toLocaleString('en-US');
         const sign = state.dayPnl >= 0 ? '+' : '';
-        pnlEl.textContent = `${sign}$${state.dayPnl.toFixed(2)} (${sign}${((state.dayPnl / 1000000) * 100).toFixed(2)}%)`;
-        pnlEl.className = 'num ' + (state.dayPnl >= 0 ? 'text-ok' : 'text-err');
+        const pnlEl = document.getElementById('kpi-pnl');
+        if (pnlEl) { pnlEl.textContent = `${sign}$${state.dayPnl.toFixed(2)} (${sign}${((state.dayPnl / 1000000) * 100).toFixed(2)}%)`; pnlEl.className = 'num ' + (state.dayPnl >= 0 ? 'text-ok' : 'text-err'); }
+        const mPnl = document.getElementById('mob-kpi-pnl');
+        if (mPnl) { mPnl.textContent = `${sign}$${state.dayPnl.toFixed(0)}`; mPnl.className = 'mob-kpi-val num ' + (state.dayPnl >= 0 ? 'text-ok' : 'text-err'); }
 
         const cur = ASSETS.find((x) => x.sym === state.activeSym);
-        if (cur) {
-          document.getElementById('ch-price').textContent = '$' + cur.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
+        if (cur) document.getElementById('ch-price').textContent = '$' + cur.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         ui.renderWatchlist();
         if (state.holoMode !== '3d') ui.drawCandles();
       }, 2600);
