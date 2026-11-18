@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-layout="auto" data-effective="desktop" data-focus="false">
+<html lang="ar" dir="rtl" data-layout="auto" data-focus="false">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -96,22 +96,42 @@
       z-index: 5;
       width: min(1440px, 100%);
       margin: 0 auto;
-      padding: clamp(8px, 1.4vw, 14px) clamp(8px, 1.6vw, 16px) calc(var(--dock-clearance) + env(safe-area-inset-bottom, 0px) + 18px);
+      padding: clamp(7px, 1.4vw, 14px) clamp(7px, 1.6vw, 16px) calc(var(--dock-clearance) + env(safe-area-inset-bottom, 0px) + 20px);
       display: flex;
       flex-direction: column;
-      gap: clamp(8px, 1.2vw, 13px);
+      gap: clamp(7px, 1.2vw, 13px);
+    }
+
+    /* عند تفعيل داشبورد الجوال يدوياً على شاشة مكتبية عريضة: إطار جهاز جوال هولوغرامي مستقل متمركز! */
+    html[data-layout="mobile"] .holo-stage {
+      max-width: 450px;
+      min-height: 100dvh;
+      border-inline: 1px solid rgba(var(--sec-rgb), 0.25);
+      background: rgba(3, 7, 16, 0.55);
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
     }
 
     /* =====================================================================
-       قواعد التبديل بين وضع المكتب الفضائي وداشبورد الجوال الهولوغرامي المستقل
+       قواعد التبديل النقية بـ CSS (تعمل في اللحظة 0ms حتى داخل أي Sandbox!)
        ===================================================================== */
     .mobile-only, .mobile-only-grid, .mobile-only-block { display: none !important; }
-    html[data-effective="mobile"] .desktop-only { display: none !important; }
-    html[data-effective="mobile"] .mobile-only { display: flex !important; }
-    html[data-effective="mobile"] .mobile-only-grid,
-    html[data-effective="mobile"] .mob-deck-switcher,
-    html[data-effective="mobile"] .mobile-bottom-nav { display: grid !important; }
-    html[data-effective="mobile"] .mobile-only-block { display: block !important; }
+
+    html[data-layout="mobile"] .desktop-only { display: none !important; }
+    html[data-layout="mobile"] .mobile-only { display: flex !important; }
+    html[data-layout="mobile"] .mobile-only-grid,
+    html[data-layout="mobile"] .mob-deck-switcher,
+    html[data-layout="mobile"] .mobile-bottom-nav { display: grid !important; }
+    html[data-layout="mobile"] .mobile-only-block { display: block !important; }
+
+    @media (max-width: 880px) {
+      html[data-layout="auto"] .desktop-only { display: none !important; }
+      html[data-layout="auto"] .mobile-only { display: flex !important; }
+      html[data-layout="auto"] .mobile-only-grid,
+      html[data-layout="auto"] .mob-deck-switcher,
+      html[data-layout="auto"] .mobile-bottom-nav { display: grid !important; }
+      html[data-layout="auto"] .mobile-only-block { display: block !important; }
+      :root { --dock-clearance: 76px; }
+    }
 
     /* =====================================================================
        1A. الهيدر المكتبي الفضائي (Desktop Orbital Bridge)
@@ -137,7 +157,7 @@
       align-items: center;
       gap: 12px;
       min-width: 0;
-      flex: 1 1 320px;
+      flex: 1 1 260px;
     }
     .gyro-emblem {
       width: 62px;
@@ -178,7 +198,7 @@
     }
     .sovereign-h1 {
       margin: 1px 0 2px;
-      font-size: clamp(16px, 1.85vw, 21px);
+      font-size: clamp(15px, 1.85vw, 21px);
       font-weight: 900;
       color: var(--txt-1);
       display: flex;
@@ -193,14 +213,13 @@
     }
 
     /* =====================================================================
-       1B. هيدر داشبورد الجوال الهولوغرامي المستقل (56px Compact Mobile Bar!)
-       لا يأكل الشاشة أبداً ولا يلتف بشكل فوضوي!
+       1B. هيدر داشبورد الجوال الهولوغرامي المستقل (مرن من 260px حتى 880px!)
        ===================================================================== */
     .mobile-top-hud {
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      padding: 7px 10px;
+      gap: 6px;
+      padding: 6px 8px;
       background: linear-gradient(120deg, rgba(8, 18, 38, 0.94), rgba(4, 10, 22, 0.96));
       border: 1px solid rgba(var(--pri-rgb), 0.42);
       clip-path: var(--cut-md);
@@ -210,12 +229,13 @@
     .mob-brand {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       min-width: 0;
+      flex: 1 1 auto;
     }
     .mob-crest {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       flex-shrink: 0;
       cursor: pointer;
       filter: drop-shadow(0 0 8px rgba(var(--pri-rgb), 0.5));
@@ -224,7 +244,7 @@
       min-width: 0;
     }
     .mob-title-main {
-      font-size: 13.5px;
+      font-size: clamp(12px, 3.6vw, 14px);
       font-weight: 900;
       color: var(--txt-1);
       white-space: nowrap;
@@ -232,44 +252,47 @@
       text-overflow: ellipsis;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
     .mob-title-sub {
-      font-size: 10px;
+      font-size: 9.5px;
       color: var(--sec);
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .mob-actions {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       flex-shrink: 0;
     }
 
-    /* شريط النبض المالي الأفقي المدمج للجوال (54px فقط بدلاً من 300px!) */
+    /* شريط النبض المالي الأفقي المدمج للجوال */
     .mobile-pulse-strip {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 6px;
+      gap: 5px;
     }
     .mob-kpi-pill {
       background: linear-gradient(160deg, rgba(12, 24, 48, 0.84), rgba(4, 9, 20, 0.92));
       border: 1px solid rgba(var(--sec-rgb), 0.28);
       clip-path: var(--cut-md);
-      padding: 6px 8px;
+      padding: 5px 6px;
       min-width: 0;
     }
     .mob-kpi-lbl {
-      font-size: 9.8px;
+      font-size: clamp(8.8px, 2.5vw, 10px);
       color: var(--txt-2);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .mob-kpi-val {
-      font-size: 12.5px;
+      font-size: clamp(10.8px, 3.3vw, 12.8px);
       font-weight: 900;
       margin-top: 1px;
       white-space: nowrap;
@@ -277,11 +300,11 @@
       text-overflow: ellipsis;
     }
 
-    /* شريط الأصول الأفقي السريع للجوال (تحت/فوق القبة مباشرة) */
+    /* شريط الأصول الأفقي السريع للجوال */
     .mobile-asset-ribbon {
       overflow-x: auto;
       scrollbar-width: none;
-      gap: 6px;
+      gap: 5px;
       padding: 2px 0;
     }
     .mobile-asset-ribbon::-webkit-scrollbar { display: none; }
@@ -413,6 +436,11 @@
         order: -1;
       }
     }
+    @media (max-width: 720px) {
+      .singularity-visor {
+        grid-template-columns: 1fr !important;
+      }
+    }
     .visor-wing { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
     .holo-metric-beam {
       padding: 6px 10px;
@@ -456,7 +484,7 @@
       background: linear-gradient(155deg, rgba(14, 27, 52, 0.76) 0%, rgba(5, 11, 24, 0.88) 62%, rgba(10, 22, 44, 0.8) 100%);
       clip-path: var(--cut-panel);
       border: 1px solid rgba(var(--sec-rgb), 0.28);
-      padding: clamp(10px, 1.4vw, 14px);
+      padding: clamp(9px, 1.4vw, 14px);
       backdrop-filter: blur(16px);
       box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.11);
       min-width: 0;
@@ -465,7 +493,7 @@
       background: rgba(3, 8, 19, 0.75);
       border: 1px solid rgba(var(--sec-rgb), 0.22);
       clip-path: var(--cut-md);
-      padding: 9px 11px;
+      padding: 8px 10px;
       min-width: 0;
     }
 
@@ -476,7 +504,7 @@
       gap: 12px;
       align-items: start;
     }
-    @media (max-width: 1160px) {
+    @media (max-width: 1160px) and (min-width: 881px) {
       .deck-matrix {
         grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.9fr);
       }
@@ -490,24 +518,36 @@
         gap: 7px;
       }
     }
-    html[data-effective="mobile"] .deck-matrix {
+    @media (max-width: 880px) {
+      .deck-matrix {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+      }
+      html[data-layout="auto"] .constellation-rail {
+        display: none !important;
+      }
+    }
+    html[data-layout="mobile"] .deck-matrix {
       grid-template-columns: 1fr !important;
       gap: 10px;
     }
-    html[data-effective="mobile"] .constellation-rail {
-      display: none !important; /* يُستبدل بشريط الأصول الأفقي الرشيق أعلى القبة! */
+    html[data-layout="mobile"] .constellation-rail {
+      display: none !important;
     }
 
     /* حاوية لوحة الهولوغرام ذات التحجيم الديناميكي الحقيقي */
     .holo-canvas-box {
       position: relative;
       width: 100%;
-      height: clamp(235px, 34vh, 305px);
+      height: clamp(220px, 33vh, 300px);
       border-radius: 6px;
       overflow: hidden;
     }
-    html[data-effective="mobile"] .holo-canvas-box {
-      height: clamp(220px, 33dvh, 265px);
+    @media (max-width: 880px) {
+      .holo-canvas-box { height: clamp(205px, 31dvh, 255px); }
+    }
+    html[data-layout="mobile"] .holo-canvas-box {
+      height: 235px;
     }
     #candle-cv {
       width: 100%;
@@ -523,17 +563,26 @@
       grid-template-columns: 1fr 1fr;
       gap: 6px;
     }
+    .mob-deck-switcher .cyber-blade,
+    .grid-2-keep .cyber-blade {
+      padding: 6px 6px;
+      font-size: clamp(10.5px, 3vw, 12px);
+      justify-content: center;
+    }
 
     .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-    html[data-effective="mobile"] .grid-2,
-    html[data-effective="mobile"] .grid-3 {
+    @media (max-width: 880px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 8px; }
+    }
+    html[data-layout="mobile"] .grid-2,
+    html[data-layout="mobile"] .grid-3 {
       grid-template-columns: 1fr;
       gap: 8px;
     }
-    .grid-2-keep { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .grid-2-keep { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
 
-    .row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .row-between { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
     .muted { color: var(--txt-2); font-size: 11.8px; }
     .text-pri { color: var(--pri); }
     .text-sec { color: var(--sec); }
@@ -544,10 +593,11 @@
 
     .holo-inp {
       width: 100%;
+      min-width: 0;
       background: rgba(2, 6, 15, 0.88);
       border: 1px solid rgba(var(--sec-rgb), 0.34);
       color: var(--txt-1);
-      padding: 8px 11px;
+      padding: 8px 10px;
       font-size: 13px;
       clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
       outline: none;
@@ -578,10 +628,13 @@
       gap: 10px;
       align-items: center;
     }
-    html[data-effective="mobile"] .synapse-arena {
+    @media (max-width: 880px) {
+      .synapse-arena { grid-template-columns: 1fr; }
+    }
+    html[data-layout="mobile"] .synapse-arena {
       grid-template-columns: 1fr;
     }
-    .synapse-svg-box { width: 195px; height: 185px; margin: 0 auto; }
+    .synapse-svg-box { width: 185px; height: 175px; margin: 0 auto; max-width: 100%; }
     .energy-pulse { stroke-dasharray: 6 8; animation: dashFlow 1.4s linear infinite; }
     @keyframes dashFlow { to { stroke-dashoffset: -28; } }
 
@@ -592,9 +645,22 @@
       gap: 14px;
       align-items: start;
     }
-    html[data-effective="mobile"] .cryptex-layout {
+    @media (max-width: 880px) {
+      .cryptex-layout { grid-template-columns: 1fr; gap: 10px; }
+      #cryptex-svg { width: 144px !important; height: 144px !important; }
+      .cryptex-wheel-stage { padding: 8px 10px; gap: 6px; }
+    }
+    html[data-layout="mobile"] .cryptex-layout {
       grid-template-columns: 1fr;
       gap: 10px;
+    }
+    html[data-layout="mobile"] #cryptex-svg {
+      width: 144px !important;
+      height: 144px !important;
+    }
+    html[data-layout="mobile"] .cryptex-wheel-stage {
+      padding: 8px 10px;
+      gap: 6px;
     }
     .cryptex-wheel-stage {
       display: flex;
@@ -602,14 +668,6 @@
       align-items: center;
       text-align: center;
       gap: 8px;
-    }
-    html[data-effective="mobile"] #cryptex-svg {
-      width: 146px !important;
-      height: 146px !important;
-    }
-    html[data-effective="mobile"] .cryptex-wheel-stage {
-      padding: 8px 10px;
-      gap: 6px;
     }
     .cryptex-ring-anim {
       transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.4s;
@@ -638,7 +696,6 @@
 
     /* =====================================================================
        6B. شريط التبويب السفلي الأصيل للجوال (Native Mobile Bottom Dock — 60px)
-       صفر تداخل، صفر التفاف، وتجربة تطبيق جوال هولوغرامي أصيل!
        ===================================================================== */
     .mobile-bottom-nav {
       position: fixed;
@@ -647,15 +704,23 @@
       right: 0;
       z-index: 50;
       height: calc(60px + env(safe-area-inset-bottom, 0px));
-      padding: 4px 6px calc(4px + env(safe-area-inset-bottom, 0px));
+      padding: 4px 4px calc(4px + env(safe-area-inset-bottom, 0px));
       background: linear-gradient(180deg, rgba(6, 14, 30, 0.97), rgba(2, 5, 13, 0.99));
       border-top: 1px solid rgba(var(--pri-rgb), 0.42);
       backdrop-filter: blur(22px);
       box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.9);
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 3px;
+      gap: 2px;
       align-items: center;
+    }
+    html[data-layout="mobile"] .mobile-bottom-nav {
+      max-width: 450px;
+      left: 50%;
+      right: auto;
+      width: 100%;
+      transform: translateX(-50%);
+      border-inline: 1px solid rgba(var(--sec-rgb), 0.25);
     }
     .mob-tab-btn {
       border: none;
@@ -666,12 +731,14 @@
       align-items: center;
       justify-content: center;
       gap: 2px;
-      padding: 4px 2px;
-      font-size: 10.2px;
+      padding: 4px 1px;
+      font-size: clamp(9px, 2.7vw, 10.4px);
       font-weight: 800;
       cursor: pointer;
       border-radius: 8px;
       transition: all 0.16s;
+      white-space: nowrap;
+      overflow: hidden;
     }
     .mob-tab-btn .ico { font-size: 16px; line-height: 1.1; }
     .mob-tab-btn.active {
@@ -964,8 +1031,8 @@
 
         <!-- مبدّل ذكي خاص بداشبورد الجوال للتنقل بين التذكرة والوكلاء بدون تكديس عمودي مزعج! -->
         <div class="mob-deck-switcher mobile-only">
-          <button type="button" id="mob-sub-ticket" class="cyber-blade cyber-blade-gold" style="justify-content:center;" onclick="ui.setMobSubPanel('ticket')">🎯 تذكرة الإطلاق الورقي</button>
-          <button type="button" id="mob-sub-council" class="cyber-blade" style="justify-content:center;" onclick="ui.setMobSubPanel('council')">🧠 بلورة الوكلاء (86%)</button>
+          <button type="button" id="mob-sub-ticket" class="cyber-blade cyber-blade-gold" style="justify-content:center;" onclick="ui.setMobSubPanel('ticket')">🎯 تذكرة التداول</button>
+          <button type="button" id="mob-sub-council" class="cyber-blade" style="justify-content:center;" onclick="ui.setMobSubPanel('council')">🧠 الوكلاء (86%)</button>
         </div>
 
         <!-- مصفوفة التخاطر الخماسية للوكلاء -->
@@ -1497,12 +1564,28 @@
     })();
 
     // =======================================================================
-    // 3. محرك TOTP RFC 6238 القياسي
+    // 3. مخزن آمن ضد قيود Sandbox Iframe + محرك TOTP RFC 6238 القياسي
     // =======================================================================
+    const MEM_VAULT = {};
+    const safeStore = {
+      get(k) {
+        try { return window.localStorage.getItem(k); } catch (_) { return Object.prototype.hasOwnProperty.call(MEM_VAULT, k) ? MEM_VAULT[k] : null; }
+      },
+      set(k, v) {
+        MEM_VAULT[k] = String(v);
+        try { window.localStorage.setItem(k, String(v)); } catch (_) {}
+      }
+    };
+
     const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-    function randomBase32(len = 32) {
+    function safeRandomBytes(len) {
       const arr = new Uint8Array(len);
-      crypto.getRandomValues(arr);
+      try { crypto.getRandomValues(arr); }
+      catch (_) { for (let i = 0; i < len; i++) arr[i] = Math.floor(Math.random() * 256); }
+      return arr;
+    }
+    function randomBase32(len = 32) {
+      const arr = safeRandomBytes(len);
       let out = '';
       for (let i = 0; i < len; i++) out += B32[arr[i] % 32];
       return out;
@@ -1515,24 +1598,75 @@
       for (let i = 0; i < out.length; i++) out[i] = parseInt(bits.slice(i * 8, i * 8 + 8), 2);
       return out;
     }
+    // SHA-1 و HMAC-SHA1 نقي بلغة JS كبديل فوري إذا حُجب crypto.subtle داخل iframe معزول
+    function sha1Pure(msg) {
+      const ml = msg.length * 8;
+      const withOne = new Uint8Array(((msg.length + 9 + 63) >> 6) << 6);
+      withOne.set(msg);
+      withOne[msg.length] = 0x80;
+      const dv = new DataView(withOne.buffer);
+      dv.setUint32(withOne.length - 4, ml >>> 0, false);
+      dv.setUint32(withOne.length - 8, Math.floor(ml / 0x100000000), false);
+      let h0 = 0x67452301, h1 = 0xefcdab89, h2 = 0x98badcfe, h3 = 0x10325476, h4 = 0xc3d2e1f0;
+      const w = new Int32Array(80);
+      for (let i = 0; i < withOne.length; i += 64) {
+        for (let j = 0; j < 16; j++) w[j] = dv.getInt32(i + j * 4, false);
+        for (let j = 16; j < 80; j++) { const n = w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16]; w[j] = (n << 1) | (n >>> 31); }
+        let a = h0, b = h1, c = h2, d = h3, e = h4;
+        for (let j = 0; j < 80; j++) {
+          const f = j < 20 ? ((b & c) | (~b & d)) + 0x5a827999 : j < 40 ? (b ^ c ^ d) + 0x6ed9eba1 : j < 60 ? ((b & c) | (b & d) | (c & d)) + 0x8f1bbcdc : (b ^ c ^ d) + 0xca62c1d6;
+          const temp = (((a << 5) | (a >>> 27)) + f + e + w[j]) | 0;
+          e = d; d = c; c = (b << 30) | (b >>> 2); b = a; a = temp;
+        }
+        h0 = (h0 + a) | 0; h1 = (h1 + b) | 0; h2 = (h2 + c) | 0; h3 = (h3 + d) | 0; h4 = (h4 + e) | 0;
+      }
+      const out = new Uint8Array(20);
+      const odv = new DataView(out.buffer);
+      [h0, h1, h2, h3, h4].forEach((v, idx) => odv.setInt32(idx * 4, v, false));
+      return out;
+    }
+    function hmacSha1Pure(keyBytes, msgBytes) {
+      const block = 64;
+      let k = keyBytes.length > block ? sha1Pure(keyBytes) : keyBytes;
+      const kp = new Uint8Array(block); kp.set(k);
+      const ipad = new Uint8Array(block + msgBytes.length);
+      const opad = new Uint8Array(block + 20);
+      for (let i = 0; i < block; i++) { ipad[i] = kp[i] ^ 0x36; opad[i] = kp[i] ^ 0x5c; }
+      ipad.set(msgBytes, block);
+      opad.set(sha1Pure(ipad), block);
+      return sha1Pure(opad);
+    }
     async function computeTOTP(secretB32, stepOffset = 0) {
+      const keyBytes = base32ToBytes(secretB32);
+      const counter = Math.floor(Date.now() / 1000 / 30) + stepOffset;
+      const buf = new ArrayBuffer(8);
+      const view = new DataView(buf);
+      view.setUint32(0, Math.floor(counter / 0x100000000), false);
+      view.setUint32(4, counter >>> 0, false);
+      let sig;
       try {
-        const keyBytes = base32ToBytes(secretB32);
-        const counter = Math.floor(Date.now() / 1000 / 30) + stepOffset;
-        const buf = new ArrayBuffer(8);
-        const view = new DataView(buf);
-        view.setUint32(0, Math.floor(counter / 0x100000000), false);
-        view.setUint32(4, counter >>> 0, false);
-        const key = await crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
-        const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, buf));
-        const offset = sig[sig.length - 1] & 0x0f;
-        const bin = ((sig[offset] & 0x7f) << 24) | ((sig[offset + 1] & 0xff) << 16) | ((sig[offset + 2] & 0xff) << 8) | (sig[offset + 3] & 0xff);
-        return String(bin % 1000000).padStart(6, '0');
-      } catch (_) { return '482910'; }
+        if (window.crypto && crypto.subtle) {
+          const key = await crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
+          sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, buf));
+        } else {
+          sig = hmacSha1Pure(keyBytes, new Uint8Array(buf));
+        }
+      } catch (_) {
+        sig = hmacSha1Pure(keyBytes, new Uint8Array(buf));
+      }
+      const offset = sig[sig.length - 1] & 0x0f;
+      const bin = ((sig[offset] & 0x7f) << 24) | ((sig[offset + 1] & 0xff) << 16) | ((sig[offset + 2] & 0xff) << 8) | (sig[offset + 3] & 0xff);
+      return String(bin % 1000000).padStart(6, '0');
     }
     async function sha256Hex(txt) {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
-      return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+      const enc = new TextEncoder().encode(txt);
+      try {
+        if (window.crypto && crypto.subtle) {
+          const buf = await crypto.subtle.digest('SHA-256', enc);
+          return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+        }
+      } catch (_) {}
+      return Array.from(sha1Pure(enc)).map((b) => b.toString(16).padStart(2, '0')).join('');
     }
 
     // =======================================================================
@@ -1611,16 +1745,16 @@
     const STORAGE_KEY = 'tmj_astrolabe_admin_v2';
     const state = {
       layoutPref: 'auto', // 'auto' | 'mobile' | 'desktop'
-      effectiveDevice: 'desktop',
+      effectiveDevice: 'mobile',
       mobSubPanel: 'ticket', // 'ticket' | 'council'
       activeTab: 'terminal',
-      monogram: localStorage.getItem('tmj_mono_choice') || 'TMJ',
+      monogram: safeStore.get('tmj_mono_choice') || 'TMJ',
       activeSym: 'BTCUSDT',
       holoMode: '3d',
       orbYaw: 0.55,
       orbPitch: 0.3,
-      cvCssW: 760,
-      cvCssH: 260,
+      cvCssW: 360,
+      cvCssH: 240,
       tf: '15m',
       side: 'BUY',
       equity: 1001420.50,
@@ -1628,7 +1762,7 @@
       orders: [],
       admin: (() => {
         try {
-          const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+          const s = JSON.parse(safeStore.get(STORAGE_KEY) || 'null');
           if (s && s.totpSecret) return s;
         } catch (_) {}
         return { enrolled: false, authenticated: false, name: 'د. ماجد (أدمن المنصة)', email: '', phone: '+966500000000', vkeyHash: '', totpSecret: randomBase32(32) };
@@ -1636,20 +1770,18 @@
     };
 
     function saveAdmin() {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.admin)); } catch (_) {}
+      safeStore.set(STORAGE_KEY, JSON.stringify(state.admin));
     }
 
     // =======================================================================
     // 5. محرك التشكّل المكاني الديناميكي (Dynamic Spatial Viewport Engine)
-    // يضبط تلقائياً داشبورد الجوال المستقل أو المكتب ويقيس ارتفاع الشريط السفلي بدقة!
     // =======================================================================
     function syncViewportArchitecture() {
-      const isNarrow = window.innerWidth <= 768;
+      const isNarrow = window.innerWidth <= 880;
       const eff = state.layoutPref === 'auto' ? (isNarrow ? 'mobile' : 'desktop') : state.layoutPref;
       state.effectiveDevice = eff;
-      document.documentElement.setAttribute('data-effective', eff);
+      document.documentElement.setAttribute('data-layout', state.layoutPref);
 
-      // إظهار/إخفاء اللوحة الفرعية على الجوال في الشاشة الرئيسية لمنع التكديس
       const ticketBox = document.getElementById('panel-ticket-box');
       const councilBox = document.getElementById('panel-council-box');
       if (ticketBox && councilBox) {
@@ -1662,15 +1794,13 @@
         }
       }
 
-      // قياس دقيق لارتفاع الشريط السفلي الفعلي لحجز المساحة ومنع أي تداخل 100%!
       const activeDock = eff === 'mobile' ? document.getElementById('mobile-dock') : document.getElementById('desktop-dock');
-      const dockH = activeDock ? activeDock.getBoundingClientRect().height : 72;
-      document.documentElement.style.setProperty('--dock-clearance', Math.ceil(dockH + 14) + 'px');
+      const dockH = activeDock ? activeDock.getBoundingClientRect().height : 68;
+      document.documentElement.style.setProperty('--dock-clearance', Math.ceil(Math.max(64, dockH) + 14) + 'px');
 
       const lbl = document.getElementById('device-mode-lbl');
       if (lbl) lbl.textContent = eff === 'mobile' ? '🖥️ وضع المكتب' : '📱 داشبورد الجوال';
 
-      // إعادة ضبط أبعاد لوحة الهولوغرام بدقة Retina الحقيقية لحجم الشاشة!
       syncHoloCanvasSize();
     }
 
@@ -1709,7 +1839,7 @@
           state.layoutPref = 'mobile';
           this.toast('📱 تم التبديل إلى «داشبورد الجوال الهولوغرامي المستقل».');
         } else {
-          state.layoutPref = window.innerWidth <= 768 ? 'desktop' : 'auto';
+          state.layoutPref = window.innerWidth <= 880 ? 'desktop' : 'auto';
           this.toast('🖥️ تم التبديل إلى «مسرح القيادة المكتبي الكامل».');
         }
         syncViewportArchitecture();
@@ -1742,12 +1872,12 @@
       setMonogram(code) {
         if (!MONOGRAMS[code]) return;
         state.monogram = code;
-        try { localStorage.setItem('tmj_mono_choice', code); } catch (_) {}
+        safeStore.set('tmj_mono_choice', code);
         const m = MONOGRAMS[code];
         const dCrest = document.getElementById('header-gyro-crest');
         if (dCrest) dCrest.innerHTML = m.svg(62);
         const mCrest = document.getElementById('mob-gyro-crest');
-        if (mCrest) mCrest.innerHTML = m.svg(40);
+        if (mCrest) mCrest.innerHTML = m.svg(36);
         document.getElementById('hdr-coord-mono').textContent = m.coord;
         document.getElementById('brand-main-title').textContent = m.title;
         document.getElementById('brand-sub-meaning').innerHTML = m.sub;
@@ -1822,8 +1952,7 @@
 
       generateStaticPass() {
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
-        const rnd = new Uint8Array(6);
-        crypto.getRandomValues(rnd);
+        const rnd = safeRandomBytes(6);
         let code = 'TMJ-';
         for (let i = 0; i < 6; i++) code += chars[rnd[i] % chars.length];
         const inp = document.getElementById('enr-vkey');
@@ -2289,7 +2418,7 @@
         const pScore = document.getElementById('pent-score');
         if (pScore) pScore.textContent = `${avg}% OK`;
         const mobBtn = document.getElementById('mob-sub-council');
-        if (mobBtn) mobBtn.textContent = `🧠 بلورة الوكلاء (${avg}%)`;
+        if (mobBtn) mobBtn.textContent = `🧠 الوكلاء (${avg}%)`;
         const vLine = document.getElementById('visor-consensus-line');
         if (vLine) vLine.textContent = `${state.activeSym}: توافق طيفي صاعد (${avg}%)`;
 
