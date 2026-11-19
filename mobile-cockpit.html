@@ -618,193 +618,345 @@
     html[data-layout="mobile"] .mob-subnav-strip.show-in-trading { display: flex !important; }
 
 
-    /* === تصميم الداشبورد الهولوغرامي الفاخر (مطابق للصورة المرفقة + 3 أعمدة: الجانبين الصفقات المقترحة والمنتصف أعلى صفقة ربحية قصيرة المدى) === */
+    /* === تصميم V9 الهولوغرامي ثلاثي الأبعاد الفاخر: هيدر صف واحد + شعار التطبيق من الجهتين + أزرار جوهرية ثلاثية الأبعاد === */
     body {
       background:
-        radial-gradient(ellipse 80% 50% at 50% 62%, rgba(0, 212, 170, 0.11), transparent 70%),
-        radial-gradient(ellipse 65% 40% at 50% 0%, rgba(212, 165, 55, 0.10), transparent 60%),
-        linear-gradient(180deg, #050a12 0%, #07121e 52%, #040911 100%) !important;
+        radial-gradient(ellipse 78% 52% at 50% 60%, rgba(0, 218, 174, 0.13), transparent 70%),
+        radial-gradient(ellipse 65% 38% at 50% 0%, rgba(245, 184, 46, 0.12), transparent 60%),
+        linear-gradient(180deg, #040912 0%, #071322 52%, #03070f 100%) !important;
       position: relative;
     }
-    /* شبكة الأفق الهولوغرامية ثلاثية الأبعاد في الخلفية كما في التصميم المرفق */
+    /* شبكة الأفق الهولوغرامية ثلاثية الأبعاد في الخلفية */
     body::before {
       content: "";
-      position: fixed; left: 0; right: 0; bottom: 0; height: 48vh; pointer-events: none; z-index: 0;
+      position: fixed; left: 0; right: 0; bottom: 0; height: 50vh; pointer-events: none; z-index: 0;
       background-image:
-        linear-gradient(rgba(212, 165, 55, 0.11) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 245, 212, 0.09) 1px, transparent 1px);
-      background-size: 56px 34px;
-      transform: perspective(520px) rotateX(62deg);
+        linear-gradient(rgba(245, 184, 46, 0.13) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 245, 212, 0.11) 1px, transparent 1px);
+      background-size: 54px 32px;
+      transform: perspective(480px) rotateX(63deg);
       transform-origin: bottom center;
-      opacity: 0.85;
+      opacity: 0.9;
     }
     html[data-pnl-glow="on"] body::after {
       content: "";
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
       box-shadow: inset 0 0 95px rgba(0, 232, 150, 0.14), inset 0 0 32px rgba(34, 211, 238, 0.10);
     }
-    .holo-stage { position: relative; z-index: 1; max-width: 1540px; padding: 8px 16px 14px !important; gap: 6px !important; }
+    .holo-stage { position: relative; z-index: 1; max-width: 1540px; padding: 8px 14px 14px !important; gap: 7px !important; }
 
-    /* الهيدر العلوي الفاخر وشريط الكبسولة الذهبية للتنقل في سطر واحد متناسق على سطح المكتب */
+    /* === تصميم الأزرار المبتكر الفاخر ثلاثي الأبعاد (3D Sculpted Jewel Keycaps) === */
+    .btn-3d {
+      position: relative;
+      border-radius: 10px !important;
+      background: linear-gradient(180deg, #213d68 0%, #112440 54%, #081324 100%) !important;
+      color: #f8fbff !important;
+      border: 1px solid rgba(125, 211, 252, 0.46) !important;
+      box-shadow:
+        0 4px 0 #040a14,
+        0 8px 16px rgba(0, 0, 0, 0.72),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.34),
+        inset 0 -1px 0 rgba(34, 211, 238, 0.24) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+      transition: transform 0.14s cubic-bezier(.2,.8,.2,1), box-shadow 0.14s ease, border-color 0.14s ease !important;
+    }
+    .btn-3d:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      border-color: rgba(247, 201, 72, 0.78) !important;
+      box-shadow:
+        0 6px 0 #040a14,
+        0 12px 22px rgba(0, 0, 0, 0.8),
+        0 0 15px rgba(56, 189, 248, 0.38),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.48) !important;
+    }
+    .btn-3d:active:not(:disabled) {
+      transform: translateY(2.5px) !important;
+      box-shadow:
+        0 1px 0 #040a14,
+        0 3px 8px rgba(0, 0, 0, 0.75),
+        inset 0 1px 2px rgba(0, 0, 0, 0.45) !important;
+    }
+    /* سبيكة الذهب ثلاثية الأبعاد (التبويب النشط والأزرار القيادية) */
+    .btn-3d-gold, .btn-3d-gold:hover:not(:disabled) {
+      background: linear-gradient(180deg, #ffec94 0%, #f5b82e 54%, #c27d0c 100%) !important;
+      color: #07111e !important;
+      border: 1px solid #fff0a8 !important;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+      box-shadow:
+        0 4px 0 #694004,
+        0 8px 20px rgba(245, 184, 46, 0.42),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.72) !important;
+    }
+    /* سبيكة الزمرد ثلاثية الأبعاد (أزرار الشراء والمايك والموسيقى النشطة) */
+    .btn-3d-buy, .btn-3d-buy:hover:not(:disabled),
+    .btn-music-on, .btn-music-on:hover:not(:disabled) {
+      background: linear-gradient(180deg, #6efce9 0%, #10e898 52%, #059663 100%) !important;
+      color: #031811 !important;
+      border: 1px solid #a7f3d0 !important;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.38) !important;
+      box-shadow:
+        0 4px 0 #03472f,
+        0 8px 20px rgba(16, 232, 152, 0.40),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.65) !important;
+    }
+    /* سبيكة الياقوت ثلاثية الأبعاد (الطوارئ والخروج والإغلاق) */
+    .kill-btn-3d, .kill-btn-3d:hover:not(:disabled),
+    .btn-3d-sell, .btn-3d-sell:hover:not(:disabled) {
+      background: linear-gradient(180deg, #e11d48 0%, #be123c 55%, #881337 100%) !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(253, 164, 175, 0.75) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65) !important;
+      box-shadow:
+        0 4px 0 #4c0519,
+        0 8px 18px rgba(225, 29, 72, 0.42),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.35) !important;
+    }
+
+    /* === الهيدر الملكي ثلاثي الأبعاد في صف واحد متكامل مع شعار التطبيق من الجهتين === */
     .sovereign-bridge {
-      background: linear-gradient(180deg, rgba(9, 18, 31, 0.95), rgba(6, 13, 24, 0.93)) !important;
-      border: 1px solid rgba(56, 189, 248, 0.24) !important;
-      border-radius: 16px !important;
-      padding: 7px 13px !important;
-      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+      background:
+        linear-gradient(180deg, rgba(16, 30, 52, 0.96) 0%, rgba(8, 16, 30, 0.98) 60%, rgba(5, 11, 21, 0.99) 100%) !important;
+      border: 1px solid rgba(125, 211, 252, 0.34) !important;
+      border-top: 1.5px solid rgba(247, 201, 72, 0.58) !important;
+      border-radius: 18px !important;
+      padding: 7px 11px 10px !important;
+      box-shadow:
+        0 7px 0 #030811,
+        0 20px 44px rgba(0, 0, 0, 0.82),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.16) !important;
     }
-    .lux-top-bar {
-      display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: nowrap;
+    .lux-one-row-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: nowrap;
     }
-    .lux-brand-cluster {
-      display: flex; align-items: center; gap: 10px; min-width: 0; flex-shrink: 1;
+    .lux-brand-side {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
     }
-    .lux-hex-emblem {
-      min-width: 52px; height: 40px; padding: 0 9px; border-radius: 11px;
-      background: linear-gradient(145deg, #11223b 0%, #091322 100%) !important;
-      border: 1.5px solid rgba(247, 201, 72, 0.78) !important;
-      box-shadow: 0 0 18px rgba(247, 201, 72, 0.25), inset 0 1px 0 rgba(255, 228, 132, 0.22) !important;
-      display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;
-      font-weight: 900; font-size: 12.5px; color: #ffe484 !important; letter-spacing: 0.05em; cursor: pointer;
+    /* شعار التطبيق الملكي السداسي ثلاثي الأبعاد (يمين + يسار الهيدر) */
+    .lux-twin-crest {
+      width: 42px; height: 42px; padding: 0 !important;
+      border-radius: 12px !important;
+      background: linear-gradient(145deg, #1b3154 0%, #091324 100%) !important;
+      border: 1.5px solid rgba(247, 201, 72, 0.88) !important;
+      box-shadow:
+        0 4px 0 #5b3804,
+        0 8px 18px rgba(0, 0, 0, 0.72),
+        0 0 18px rgba(247, 201, 72, 0.30),
+        inset 0 1.5px 0 rgba(255, 236, 153, 0.45) !important;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #ffe484 !important; font-weight: 900; font-size: 11px;
+      cursor: pointer; flex-shrink: 0;
     }
-    .lux-top-bar .btn-3d-sm {
-      padding: 4px 9px !important; font-size: 11px !important; white-space: nowrap;
+    /* حاضنات الأزرار الغائرة ثلاثية الأبعاد داخل الصف الواحد */
+    .lux-dock-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      flex: 1;
+      min-width: 0;
+      flex-wrap: nowrap;
     }
-    .lux-top-bar .music-vol-range { width: 54px !important; }
-    .lux-pill-nav-track {
-      margin-top: 6px; padding: 3px 6px; border-radius: 999px;
-      background: rgba(6, 13, 24, 0.94);
-      border: 1px solid rgba(148, 197, 255, 0.19);
-      display: flex; align-items: center; justify-content: space-between; gap: 3px; flex-wrap: nowrap;
+    .lux-3d-pod {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 5px 5px !important;
+      border-radius: 13px !important;
+      background: rgba(4, 10, 20, 0.78) !important;
+      border: 1px solid rgba(56, 189, 248, 0.20) !important;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.75), 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+      flex-wrap: nowrap !important;
     }
-    .lux-pill-nav-track .nav-logical-group {
-      padding: 2px 4px !important; gap: 3px !important; flex-wrap: nowrap !important;
+    .lux-one-row-header .btn-3d-sm {
+      padding: 5px 7.5px !important;
+      font-size: 10.3px !important;
+      font-weight: 800 !important;
+      white-space: nowrap;
+      line-height: 1.15;
     }
-    .lux-pill-nav-track .nav-group-lbl {
-      font-size: 9px !important; padding: 1px 4px !important; white-space: nowrap;
+    .lux-one-row-header .music-ctrl-pill {
+      padding: 0 3px 0 1px !important;
+      gap: 3px !important;
+      background: transparent !important;
+      border: 0 !important;
     }
-    .lux-pill-nav-track .nav-main-btn {
-      padding: 3px 7px !important; font-size: 10.2px !important; white-space: nowrap;
-    }
+    .lux-one-row-header .music-vol-range { width: 36px !important; }
 
-    /* عنوان القسم مع العمود المضيء الجانبي ( | لوحة المؤشرات ، | قاعة التداول ) */
+    /* عنوان القسم مع العمود المضيء الجانبي */
     .lux-sec-heading {
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      margin: 2px 2px 4px;
+      margin: 1px 2px 3px;
     }
     .lux-sec-title {
       display: inline-flex; align-items: center; gap: 7px;
-      font-size: 13.8px; font-weight: 900; color: #f8fafc;
+      font-size: 13.5px; font-weight: 900; color: #f8fafc;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
     }
     .lux-sec-title::before {
       content: ""; width: 3.5px; height: 15px; border-radius: 4px;
       background: linear-gradient(180deg, #22d3ee, #f7c948);
-      box-shadow: 0 0 10px rgba(34, 211, 238, 0.7);
+      box-shadow: 0 0 10px rgba(34, 211, 238, 0.75);
     }
 
-    /* صف كروت المؤشرات الخمسة الزجاجية (لوحة المؤشرات) */
+    /* === صف كروت المؤشرات الخمسة المجسّمة ثلاثية الأبعاد === */
     .lux-kpi-five-grid {
-      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 9px;
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px;
+      perspective: 1100px;
     }
     .lux-kpi-card {
-      padding: 8px 12px; border-radius: 14px;
-      background: linear-gradient(165deg, rgba(14, 28, 44, 0.89), rgba(7, 15, 26, 0.96));
-      border: 1px solid rgba(56, 189, 248, 0.27);
-      box-shadow: 0 8px 22px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.06);
+      position: relative;
+      padding: 8px 12px 10px; border-radius: 15px;
+      background: linear-gradient(165deg, rgba(19, 37, 60, 0.93) 0%, rgba(8, 17, 31, 0.98) 100%);
+      border: 1px solid rgba(125, 211, 252, 0.32);
+      border-top: 1.5px solid rgba(247, 201, 72, 0.42);
+      box-shadow:
+        0 6px 0 #040a14,
+        0 16px 30px rgba(0, 0, 0, 0.65),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.14);
+      transform: rotateX(2deg);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
       display: flex; flex-direction: column; justify-content: space-between; gap: 4px;
+    }
+    .lux-kpi-card:hover {
+      transform: translateY(-2px) rotateX(0deg);
+      box-shadow: 0 8px 0 #040a14, 0 20px 36px rgba(0, 0, 0, 0.75), 0 0 20px rgba(34, 211, 238, 0.16);
     }
     .lux-kpi-top {
       display: flex; align-items: center; justify-content: space-between; gap: 6px;
     }
     .lux-gold-ico {
       width: 26px; height: 26px; border-radius: 8px;
-      background: rgba(247, 201, 72, 0.13);
-      border: 1px solid rgba(247, 201, 72, 0.44);
+      background: linear-gradient(145deg, rgba(247, 201, 72, 0.24), rgba(15, 28, 48, 0.9));
+      border: 1px solid rgba(247, 201, 72, 0.58);
+      box-shadow: 0 2px 0 #4d3004, inset 0 1px 0 rgba(255, 255, 255, 0.25);
       color: #ffe484; font-size: 13px;
       display: inline-flex; align-items: center; justify-content: center;
     }
     .lux-kpi-val {
       font-size: clamp(16px, 1.35vw, 20.5px); font-weight: 900; letter-spacing: 0.01em; color: #ffffff;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
     }
     .lux-kpi-foot {
       display: flex; align-items: center; justify-content: space-between;
       font-size: 10px; color: #9fb4d4;
     }
 
-    /* شريط مسار التريليون الذهبي-السيان العريض ($1 -> $1K -> $1M -> $1B -> $1T) من اليسار لليمين كما في الصورة المرفقة */
+    /* === شريط مسار التريليون المجسّم ثلاثي الأبعاد ($1 -> $1T) === */
     .lux-1t-ribbon {
-      margin-top: 6px; padding: 7px 14px; border-radius: 14px;
-      background: linear-gradient(165deg, rgba(12, 25, 40, 0.91), rgba(6, 14, 25, 0.97));
-      border: 1px solid rgba(34, 211, 238, 0.34);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.48), 0 0 22px rgba(34, 211, 238, 0.07);
+      margin-top: 5px; padding: 7px 14px 9px; border-radius: 15px;
+      background: linear-gradient(165deg, rgba(16, 32, 52, 0.94), rgba(6, 14, 26, 0.98));
+      border: 1px solid rgba(56, 189, 248, 0.36);
+      box-shadow:
+        0 6px 0 #040a14,
+        0 14px 28px rgba(0, 0, 0, 0.62),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.12);
     }
     .lux-1t-track {
       direction: ltr;
-      height: 10px; border-radius: 999px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.09);
+      height: 11px; border-radius: 999px;
+      background: rgba(3, 8, 16, 0.88);
+      border: 1px solid rgba(148, 197, 255, 0.16);
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.85);
       overflow: hidden; margin: 5px 0 4px;
     }
     .lux-1t-fill {
       height: 100%; border-radius: 999px;
-      background: linear-gradient(90deg, #c99a2e 0%, #eab308 38%, #34d399 76%, #22d3ee 100%);
-      box-shadow: 0 0 16px rgba(34, 211, 238, 0.72);
+      background: linear-gradient(90deg, #c99a2e 0%, #facc15 38%, #34d399 75%, #22d3ee 100%);
+      box-shadow: 0 0 16px rgba(34, 211, 238, 0.78), inset 0 2px 2px rgba(255, 255, 255, 0.55);
       transition: width 0.35s ease;
     }
 
-    /* قاعة التداول ثلاثية الأعمدة: [الجانب الأيمن: صفقات مقترحة] | [المنتصف الكبير: أعلى صفقة ربحية قصيرة المدى] | [الجانب الأيسر: صفقات مقترحة] */
+    /* === قاعة التداول المنحنية ثلاثية الأبعاد (Curved 3D Wrap-Around Cockpit) === */
     .lux-trading-tri-arena {
       display: grid;
-      grid-template-columns: minmax(250px, 0.92fr) minmax(490px, 2.08fr) minmax(250px, 0.92fr);
-      gap: 10px;
+      grid-template-columns: minmax(248px, 0.92fr) minmax(495px, 2.10fr) minmax(248px, 0.92fr);
+      gap: 12px;
       align-items: stretch;
+      perspective: 1350px;
     }
     .lux-side-column {
-      padding: 8px 10px; border-radius: 16px;
-      background: linear-gradient(170deg, rgba(12, 24, 39, 0.91), rgba(6, 13, 24, 0.97));
-      border: 1px solid rgba(56, 189, 248, 0.26);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.54);
+      padding: 8px 10px 10px; border-radius: 17px;
+      background: linear-gradient(170deg, rgba(16, 31, 52, 0.94), rgba(6, 13, 24, 0.98));
+      border: 1px solid rgba(56, 189, 248, 0.32);
+      border-top: 1.5px solid rgba(125, 211, 252, 0.45);
+      box-shadow:
+        0 7px 0 #030913,
+        0 18px 36px rgba(0, 0, 0, 0.68),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.12);
       display: flex; flex-direction: column; justify-content: space-between; gap: 6px;
+      transition: transform 0.2s ease;
     }
+    .lux-side-right-3d { transform: rotateY(-3.2deg); transform-origin: right center; }
+    .lux-side-left-3d  { transform: rotateY(3.2deg);  transform-origin: left center; }
+    .lux-side-column:hover { transform: rotateY(0deg); }
+
     .lux-side-deal-card {
-      padding: 7px 9px; border-radius: 12px;
-      background: linear-gradient(165deg, rgba(16, 31, 50, 0.89), rgba(8, 17, 30, 0.96));
-      border: 1px solid rgba(148, 197, 255, 0.17);
-      transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.12s ease;
+      padding: 7px 9px 8px; border-radius: 13px;
+      background: linear-gradient(165deg, rgba(20, 38, 62, 0.92), rgba(8, 17, 30, 0.97));
+      border: 1px solid rgba(148, 197, 255, 0.22);
+      box-shadow:
+        0 4px 0 #040a14,
+        0 10px 20px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
+      transition: transform 0.15s ease, border-color 0.16s ease, box-shadow 0.16s ease;
       cursor: pointer;
       display: flex; flex-direction: column; gap: 3px;
     }
     .lux-side-deal-card:hover, .lux-side-deal-card.active-hero {
-      border-color: rgba(34, 211, 238, 0.75);
-      box-shadow: 0 0 18px rgba(34, 211, 238, 0.20);
+      transform: translateY(-2px);
+      border-color: rgba(34, 211, 238, 0.82);
+      box-shadow:
+        0 6px 0 #040a14,
+        0 14px 24px rgba(0, 0, 0, 0.65),
+        0 0 18px rgba(34, 211, 238, 0.24);
     }
     .lux-hero-center-panel {
-      padding: 10px 13px; border-radius: 16px;
+      padding: 10px 14px 12px; border-radius: 18px;
       background:
-        radial-gradient(circle at 50% 45%, rgba(0, 232, 150, 0.09), transparent 68%),
-        linear-gradient(170deg, rgba(13, 27, 44, 0.93), rgba(6, 13, 24, 0.98));
-      border: 1.5px solid rgba(34, 211, 238, 0.45);
-      box-shadow: 0 16px 44px rgba(0,0,0,0.68), 0 0 34px rgba(0, 245, 212, 0.12);
+        radial-gradient(circle at 50% 45%, rgba(0, 232, 150, 0.11), transparent 68%),
+        linear-gradient(170deg, rgba(17, 34, 56, 0.95), rgba(6, 13, 24, 0.99));
+      border: 1.5px solid rgba(34, 211, 238, 0.52);
+      border-top: 2px solid rgba(247, 201, 72, 0.62);
+      box-shadow:
+        0 8px 0 #030812,
+        0 26px 54px rgba(0, 0, 0, 0.82),
+        0 0 38px rgba(0, 245, 212, 0.15),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.18);
+      transform: translateZ(10px);
       display: flex; flex-direction: column; justify-content: space-between; gap: 7px;
     }
     .lux-hero-canvas-wrap {
       position: relative; width: 100%; border-radius: 13px; overflow: hidden;
-      background: radial-gradient(ellipse at 50% 88%, rgba(0, 212, 170, 0.17), rgba(4, 11, 22, 0.97) 72%);
-      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: radial-gradient(ellipse at 50% 88%, rgba(0, 212, 170, 0.18), rgba(4, 11, 22, 0.98) 72%);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.8);
     }
     .lux-tf-pill-group {
-      display: inline-flex; gap: 4px; padding: 2px 4px; border-radius: 9px;
-      background: rgba(6, 14, 26, 0.92); border: 1px solid rgba(148, 197, 255, 0.2);
+      display: inline-flex; gap: 4px; padding: 3px 5px 5px; border-radius: 11px;
+      background: rgba(4, 10, 20, 0.92); border: 1px solid rgba(148, 197, 255, 0.22);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.75);
     }
-    @media (max-width: 1320px) {
-      .lux-top-bar, .lux-pill-nav-track { flex-wrap: wrap; }
+    @media (max-width: 1340px) {
+      .lux-one-row-header, .lux-dock-center { flex-wrap: wrap; }
     }
     @media (max-width: 1120px) {
       .lux-kpi-five-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .lux-trading-tri-arena { grid-template-columns: 1fr; }
+      .lux-side-right-3d, .lux-side-left-3d, .lux-hero-center-panel, .lux-kpi-card { transform: none !important; }
     }
     html[data-layout="mobile"] .lux-kpi-five-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     html[data-layout="mobile"] .lux-trading-tri-arena { grid-template-columns: 1fr; }
+    html[data-layout="mobile"] .lux-side-right-3d,
+    html[data-layout="mobile"] .lux-side-left-3d,
+    html[data-layout="mobile"] .lux-hero-center-panel,
+    html[data-layout="mobile"] .lux-kpi-card { transform: none !important; }
 
   </style>
 </head>
@@ -911,70 +1063,66 @@
   </section>
 
   <div id="app-cockpit-shell" class="holo-stage hidden">
-    <!-- 1A. الهيدر المكتبي الهولوغرامي الفاخر (مطابق للتصميم المرفق + كل المجموعات المنطقية وموسيقى التركيز وإضاءة P&L) -->
+    <!-- 1A. الهيدر الملكي ثلاثي الأبعاد في صف واحد + شعار التطبيق من الجهتين + أزرار جوهرية مرتبة منطقياً -->
     <header class="sovereign-bridge desktop-only">
-      <div class="lux-top-bar">
-        <!-- اليمين: الشعار السداسي الذهبي + اسم المنصة + توقيع المالك -->
-        <div class="lux-brand-cluster">
+      <div class="lux-one-row-header">
+        <!-- اليمين: شعار التطبيق الملكي ثلاثي الأبعاد + الاسم والتوقيع المختصر -->
+        <div class="lux-brand-side">
           <div id="hdr-crest-svg" style="display:none;"></div>
-          <button type="button" id="hdr-mono-tag" class="lux-hex-emblem num" onclick="ui.cycleMonogram()" title="تبديل الشعار الثلاثي">HTB</button>
-          <div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <h1 class="hdr-eng-title eng-crown" style="margin:0;font-size:18.5px;letter-spacing:0.05em;white-space:nowrap;">TRILMAJED · تريلماجد</h1>
-              <img class="sig-img" data-sig="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="توقيع د. ماجد حمدي" />
+          <button type="button" id="hdr-mono-tag" class="lux-twin-crest num" aria-label="شعار التطبيق الأيمن HTB" onclick="ui.cycleMonogram()" title="شعار التطبيق الملكي (تبديل المونوجرام)">HTB</button>
+          <div style="display:flex;flex-direction:column;gap:1px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <h1 class="hdr-eng-title eng-crown" style="margin:0;font-size:15.5px;letter-spacing:0.05em;white-space:nowrap;">TRILMAJED</h1>
+              <img class="sig-img" data-sig="1" style="height:17px;" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="توقيع د. ماجد حمدي" />
             </div>
-            <div class="muted" style="font-size:10.5px;color:#b8cbe4;white-space:nowrap;">
-              <strong style="color:#ffe484;">HOW TO BE A TRILLIONAIRE</strong> · Quantum AI Command Center — د. ماجد حمدي
-            </div>
+            <span class="muted" style="font-size:9.5px;color:#ffe484;font-weight:800;white-space:nowrap;">تريلماجد · د. ماجد حمدي</span>
           </div>
         </div>
 
-        <!-- اليسار: كبسولات التحكم الفاخرة (PAPER LOCKED + إضاءة P&L + موسيقى التركيز ومستوى الصوت + المفاتيح + الطوارئ + خروج) -->
-        <div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;">
-          <span class="hex-shield num" style="padding:4px 9px;border-radius:999px;color:#ffe484;border-color:rgba(247,201,72,0.55);background:rgba(247,201,72,0.10);white-space:nowrap;">● PAPER LOCKED</span>
-          <button type="button" id="btn-pnl-glow" class="btn-3d btn-3d-sm" style="border-radius:999px;" onclick="ui.togglePnlGlow()">💡 إضاءة P&amp;L</button>
-          <div class="music-ctrl-pill" style="border-radius:999px;padding:1px 6px;" title="الموسيقى الهادئة المساعدة على التركيز">
-            <button type="button" id="btn-ambient-music" class="btn-3d btn-3d-sm" style="border-radius:999px;" onclick="ui.toggleAmbientMusic()">🎵 موسيقى التركيز</button>
-            <input id="ambient-vol-slider" type="range" min="0" max="100" value="35" class="music-vol-range" aria-label="مستوى صوت موسيقى التركيز" oninput="ui.setAmbientVolume(this.value)" />
-            <span id="ambient-vol-lbl" class="num" style="font-size:10px;color:#eaf4ff;min-width:25px;">35%</span>
+        <!-- المنتصف: كل أزرار المنصة مرتبة باحترافية في صف واحد ثلاثي الأبعاد -->
+        <nav class="lux-dock-center" aria-label="شريط القيادة الموحد في صف واحد">
+          <!-- 1. التداول -->
+          <div class="lux-3d-pod nav-logical-group" data-group="trading">
+            <button type="button" class="btn-3d btn-3d-sm btn-3d-gold nav-main-btn" data-tab="elite90" onclick="ui.tab('elite90')">🏛️ التداول</button>
+            <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="charts3d" onclick="ui.tab('charts3d')">🕯️ 3D</button>
+            <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="stocks" onclick="ui.tab('stocks')">📈 الأسهم</button>
+            <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="testnet14" onclick="ui.tab('testnet14')">🧪 المعايرة</button>
           </div>
-          <button type="button" class="btn-3d btn-3d-sm" style="border-radius:999px;" onclick="ui.openBinanceModal()">🔑 Testnet</button>
-          <button type="button" class="btn-3d btn-3d-sm" style="border-radius:999px;" onclick="ui.toggleDeviceMode()"><span id="device-mode-lbl">📱 الجوال</span></button>
-          <button type="button" id="btn-kill-switch" class="btn-3d btn-3d-sm kill-btn-3d" style="border-radius:999px;" onclick="ui.triggerKillSwitch()">🛑 أوقف كل شيء</button>
-          <button type="button" id="btn-lock-app" class="btn-3d btn-3d-sm btn-3d-sell" style="border-radius:999px;" onclick="ui.lockCockpit()">🔒 خروج</button>
+
+          <!-- 2. الوكلاء والمحفظة والمدير المالي -->
+          <div class="lux-3d-pod nav-logical-group" data-group="agents">
+            <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="boardroom" onclick="ui.tab('boardroom')">🤖 الوكلاء</button>
+            <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="daily" onclick="ui.tab('daily')">📊 المحفظة</button>
+            <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="cfo" onclick="ui.tab('cfo')">💼 المدير المالي</button>
+          </div>
+          <span class="nav-logical-group hidden" data-group="portfolio"></span>
+          <span class="nav-logical-group hidden" data-group="cfo"></span>
+
+          <!-- 3. الصوت والإضاءة والإعدادات -->
+          <div class="lux-3d-pod nav-logical-group" data-group="settings">
+            <div class="music-ctrl-pill" title="موسيقى التركيز">
+              <button type="button" id="btn-ambient-music" class="btn-3d btn-3d-sm" onclick="ui.toggleAmbientMusic()">🎵 تركيز</button>
+              <input id="ambient-vol-slider" type="range" min="0" max="100" value="35" class="music-vol-range" aria-label="مستوى صوت موسيقى التركيز" oninput="ui.setAmbientVolume(this.value)" />
+              <span id="ambient-vol-lbl" class="num" style="font-size:9.5px;color:#eaf4ff;min-width:22px;">35%</span>
+            </div>
+            <button type="button" id="btn-pnl-glow" class="btn-3d btn-3d-sm btn-3d-gold" onclick="ui.togglePnlGlow()">💡 P&amp;L</button>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.openBinanceModal()">🔑 Testnet</button>
+            <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="settings" onclick="ui.tab('settings')">🎨 الإعدادات</button>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.toggleDeviceMode()"><span id="device-mode-lbl">📱 جوال</span></button>
+          </div>
+
+          <!-- 4. الطوارئ والخروج -->
+          <div class="lux-3d-pod">
+            <button type="button" id="btn-kill-switch" class="btn-3d btn-3d-sm kill-btn-3d" onclick="ui.triggerKillSwitch()">🛑 طوارئ</button>
+            <button type="button" id="btn-lock-app" class="btn-3d btn-3d-sm btn-3d-sell" onclick="ui.lockCockpit()">🔒 خروج</button>
+          </div>
+        </nav>
+
+        <!-- اليسار: شعار التطبيق الملكي المطابق من الجهة الثانية -->
+        <div class="lux-brand-side">
+          <button type="button" id="hdr-mono-tag-left" class="lux-twin-crest num" aria-label="شعار التطبيق الأيسر HTB" onclick="ui.cycleMonogram()" title="شعار التطبيق الملكي">HTB</button>
         </div>
       </div>
-
-      <!-- شريط الكبسولة الأفقي المقسّم منطقياً (التداول / الوكلاء / المحفظة / المدير المالي / الإعدادات والصوت) -->
-      <nav class="lux-pill-nav-track" aria-label="المجموعات المنطقية للمنصة">
-        <div class="nav-logical-group" data-group="trading" style="border-radius:999px;background:transparent;border-color:rgba(56,189,248,0.22);">
-          <span class="nav-group-lbl" style="border-radius:999px;">التداول</span>
-          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold nav-main-btn" style="border-radius:999px;" data-tab="elite90" onclick="ui.tab('elite90')">🏛️ قاعة التداول (<span dir="ltr">&ge;75%</span>)</button>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="charts3d" onclick="ui.tab('charts3d')">🕯️ مدار 3D</button>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="stocks" onclick="ui.tab('stocks')">📈 الأسهم</button>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="testnet14" onclick="ui.tab('testnet14')">🧪 المعايرة 14d</button>
-        </div>
-
-        <div class="nav-logical-group" data-group="agents" style="border-radius:999px;background:transparent;border-color:rgba(56,189,248,0.22);">
-          <span class="nav-group-lbl" style="border-radius:999px;">الوكلاء</span>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="boardroom" onclick="ui.tab('boardroom')">🤖 مركز الوكلاء (20%)</button>
-        </div>
-
-        <div class="nav-logical-group" data-group="portfolio" style="border-radius:999px;background:transparent;border-color:rgba(56,189,248,0.22);">
-          <span class="nav-group-lbl" style="border-radius:999px;">المحفظة</span>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="daily" onclick="ui.tab('daily')">📊 صفقات اليوم HWM</button>
-        </div>
-
-        <div class="nav-logical-group" data-group="cfo" style="border-radius:999px;background:transparent;border-color:rgba(56,189,248,0.22);">
-          <span class="nav-group-lbl" style="border-radius:999px;">المدير المالي</span>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="cfo" onclick="ui.tab('cfo')">💼 المدير المالي (20K ر.س)</button>
-        </div>
-
-        <div class="nav-logical-group" data-group="settings" style="border-radius:999px;background:transparent;border-color:rgba(56,189,248,0.22);">
-          <span class="nav-group-lbl" style="border-radius:999px;">الإعدادات والصوت</span>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="settings" onclick="ui.tab('settings')">🎨 الإعدادات والثيمات</button>
-        </div>
-      </nav>
     </header>
 
     <!-- 1B. هيدر الجوال مع زر موسيقى التركيز الواضح وأسماء كافة الأزرار -->
@@ -1007,112 +1155,102 @@
       <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="testnet14" style="flex:1;" onclick="ui.tab('testnet14')">🧪 المعايرة 14d</button>
     </div>
 
-    <!-- 2A. لوحة المؤشرات الخمسة الفاخرة + شريط مسار التريليون الذهبي-السيان + المساعد الصوتي المدمج -->
+    <!-- 2A. لوحة المؤشرات ثلاثية الأبعاد + شريط مسار التريليون المجسم -->
     <section class="lux-metrics-shell">
       <div class="lux-sec-heading">
         <span class="lux-sec-title">لوحة المؤشرات</span>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <span id="quant-header-telemetry" class="hex-shield num" style="color:var(--sec);border-color:rgba(34,211,238,0.4);">7 مؤهلة (75%+) • DSR 0.92 • Spot Long-Only</span>
-        </div>
+        <span id="quant-header-telemetry" class="hex-shield num" style="color:var(--sec);border-color:rgba(34,211,238,0.4);font-size:10px;">7 مؤهلة (&ge;75%) • DSR 0.92</span>
       </div>
 
       <div class="lux-kpi-five-grid">
-        <!-- 1. إجمالي حقوق الملكية -->
         <div class="lux-kpi-card">
           <div class="lux-kpi-top">
-            <span class="muted" style="font-size:11.8px;color:#cbd5e1;">إجمالي حقوق الملكية</span>
+            <span class="muted" style="font-size:11.5px;color:#cbd5e1;">إجمالي حقوق الملكية</span>
             <span class="lux-gold-ico">🏛️</span>
           </div>
           <div id="kpi-equity" class="lux-kpi-val num" dir="ltr" style="text-align:right;">$1,004,850.00</div>
           <div class="lux-kpi-foot"><span>Total Equity</span><span class="num">USD</span></div>
         </div>
 
-        <!-- 2. ربح / خسارة اليوم -->
         <div class="lux-kpi-card">
           <div class="lux-kpi-top">
-            <span class="muted" style="font-size:11.8px;color:#cbd5e1;">ربح / خسارة اليوم</span>
+            <span class="muted" style="font-size:11.5px;color:#cbd5e1;">ربح / خسارة اليوم</span>
             <span class="lux-gold-ico">📈</span>
           </div>
           <div id="kpi-net-profit" class="lux-kpi-val num" dir="ltr" style="text-align:right;color:#10f5a0;text-shadow:0 0 16px rgba(16,245,160,0.35);">+$4,850.00</div>
           <div class="lux-kpi-foot"><span id="kpi-bots-pool" class="num text-sec">20% Pool: $8,128</span><span id="kpi-pnl-pct" class="num text-ok">+0.49%</span></div>
         </div>
 
-        <!-- 3. سيولة USDT المتاحة -->
         <div class="lux-kpi-card">
           <div class="lux-kpi-top">
-            <span class="muted" style="font-size:11.8px;color:#cbd5e1;">سيولة USDT المتاحة</span>
+            <span class="muted" style="font-size:11.5px;color:#cbd5e1;">سيولة USDT المتاحة</span>
             <span class="lux-gold-ico">🪙</span>
           </div>
           <div id="kpi-avail-usdt" class="lux-kpi-val num" dir="ltr" style="text-align:right;">871,205 USDT</div>
           <div class="lux-kpi-foot"><span>Available</span><span id="kpi-elite-count" class="num text-pri">7 ELITE • 5 FILLED</span></div>
         </div>
 
-        <!-- 4. قاطع المخاطر / التراجع -->
         <div class="lux-kpi-card">
           <div class="lux-kpi-top">
-            <span class="muted" style="font-size:11.8px;color:#cbd5e1;">قاطع المخاطر / التراجع</span>
+            <span class="muted" style="font-size:11.5px;color:#cbd5e1;">قاطع المخاطر / التراجع</span>
             <span class="lux-gold-ico">🛡️</span>
           </div>
           <div id="kpi-dd-val" class="lux-kpi-val num" dir="ltr" style="text-align:right;">0.0%</div>
           <div style="height:4px;border-radius:99px;background:rgba(255,255,255,0.08);overflow:hidden;">
             <div id="kpi-dd-bar" style="width:8%;height:100%;background:linear-gradient(90deg,#10b981,#22d3ee);"></div>
           </div>
-          <div class="lux-kpi-foot"><span>1.5% نصف | 2.5% وقف</span><span class="num">حد القطع 3%</span></div>
+          <div class="lux-kpi-foot"><span>حد 3%</span><span class="num">سليم</span></div>
         </div>
 
-        <!-- 5. هدف التريليون (لوغاريتمي) -->
         <div class="lux-kpi-card">
           <div class="lux-kpi-top">
-            <span class="muted" style="font-size:11.8px;color:#cbd5e1;">هدف التريليون (لوغاريتمي)</span>
+            <span class="muted" style="font-size:11.5px;color:#cbd5e1;">هدف التريليون (لوغاريتمي)</span>
             <span class="lux-gold-ico">☆</span>
           </div>
           <div id="kpi-1t-log-pct" class="lux-kpi-val num" dir="ltr" style="text-align:right;">50.0%</div>
-          <div class="lux-kpi-foot"><span>$1T Goal · log</span><span class="num" dir="ltr">10¹² / 10⁶</span></div>
+          <div class="lux-kpi-foot"><span>$1T Goal</span><span class="num" dir="ltr">10¹² / 10⁶</span></div>
         </div>
       </div>
 
-      <!-- شريط مسار الهدف اللوغاريتمي ($1 -> $1K -> $1M -> $1B -> $1T) + دمج المساعد الصوتي والـ 5 آيجنت بأناقة -->
+      <!-- شريط مسار الهدف المجسم ($1 -> $1T) + الأوامر الصوتية المختصرة -->
       <div class="lux-1t-ribbon">
         <div class="row-between" style="flex-wrap:wrap;gap:8px;">
-          <div style="font-size:12.5px;font-weight:800;color:#e2e8f0;">
+          <div style="font-size:12px;font-weight:800;color:#e2e8f0;">
             مسار الهدف: <strong id="ribbon-cur-eq" class="num" style="color:#ffe484;">$1,004,850.00</strong>
             <span style="color:#64748b;margin:0 4px;">←</span>
             <strong class="num" style="color:#f8fafc;">$1,000,000,000,000</strong>
           </div>
 
-          <!-- شريط الأوامر الصوتية المدمج (المايك + الـ 5 آيجنت + رد المستشار) -->
-          <div id="holo-vocal-sanctum" data-voice-state="idle" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <canvas id="vocal-entity-cv" width="110" height="32" style="width:92px;height:28px;border-radius:8px;background:rgba(4,12,24,0.8);border:1px solid rgba(0,245,212,0.25);"></canvas>
-            <button type="button" id="btn-mic-orb" class="btn-3d btn-3d-buy btn-3d-sm" style="border-radius:999px;padding:4px 11px;" onclick="ui.toggleMicTalk()">
+          <div id="holo-vocal-sanctum" data-voice-state="idle" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+            <canvas id="vocal-entity-cv" width="100" height="30" style="width:84px;height:26px;border-radius:8px;background:rgba(4,12,24,0.85);border:1px solid rgba(0,245,212,0.28);"></canvas>
+            <button type="button" id="btn-mic-orb" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:4px 11px;" onclick="ui.toggleMicTalk()">
               🎙️ <span id="mic-orb-lbl">اضغط وتحدث</span>
             </button>
             <div id="five-ai-orbs" class="five-agent-orbs" style="display:inline-flex;gap:4px;"></div>
-            <select id="voice-persona-sel" class="holo-inp" style="font-size:10.5px;padding:2px 6px;border-radius:8px;" onchange="ui.onVoicePersonaChange()">
-              <option value="chief_fast">🔊 صوت 1 (حازم)</option>
-              <option value="sarah_risk">🔊 صوت 2 (رصين)</option>
-              <option value="wallst_en">🔊 Neural EN</option>
+            <select id="voice-persona-sel" class="holo-inp" style="font-size:10px;padding:2px 6px;border-radius:8px;" onchange="ui.onVoicePersonaChange()">
+              <option value="chief_fast">🔊 صوت 1</option>
+              <option value="sarah_risk">🔊 صوت 2</option>
+              <option value="wallst_en">🔊 EN</option>
             </select>
             <span id="vocal-state-pill" class="hidden"></span>
+            <span id="assistant-live-answer" style="font-size:10.5px;color:#9fb4d4;max-width:210px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🎙️ جاهز</span>
           </div>
 
-          <strong id="ribbon-1t-pct" class="num" style="font-size:16px;color:#ffe484;">50.0%</strong>
+          <strong id="ribbon-1t-pct" class="num" style="font-size:15.5px;color:#ffe484;">50.0%</strong>
         </div>
 
         <div class="lux-1t-track">
           <div id="ribbon-1t-fill" class="lux-1t-fill" style="width:50.02%;"></div>
         </div>
 
-        <div class="row-between num" dir="ltr" style="font-size:10.5px;color:#94a3b8;">
+        <div class="row-between num" dir="ltr" style="font-size:10px;color:#94a3b8;">
           <span>$1</span><span>$1K</span><span style="color:#22d3ee;font-weight:900;">$1M ●</span><span>$1B</span><span>$1T</span>
         </div>
 
-        <div id="assistant-live-answer" style="font-size:11px;color:#9fb4d4;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-          🎙️ المساعد الصوتي جاهز — الصوت يقترح فقط بتأكيد ضغطة واحدة (واستثناء «أوقف كل شيء» فوري).
-        </div>
         <div id="voice-proposal-bar" class="voice-proposal-bar hidden">
           <span id="voice-proposal-txt">🎯 اقتراح صوتي جاهز:</span>
           <div style="display:flex;gap:5px;">
-            <button type="button" id="btn-confirm-voice-prop" class="btn-3d btn-3d-buy btn-3d-sm" onclick="ui.confirmVoiceProposal()">✅ تأكيد التنفيذ</button>
+            <button type="button" id="btn-confirm-voice-prop" class="btn-3d btn-3d-buy btn-3d-sm" onclick="ui.confirmVoiceProposal()">✅ تأكيد</button>
             <button type="button" class="btn-3d btn-3d-sm" onclick="ui.cancelVoiceProposal()">✕ إلغاء</button>
           </div>
         </div>
@@ -1120,48 +1258,45 @@
     </section>
 
     <!-- ================================================================
-         التبويب 1 (الداشبورد الرئيسي — قاعة التداول الهولوغرامية ثلاثية الأعمدة):
-         الجانب الأيمن: الصفقات المقترحة (#1-#3) | المنتصف الكبير: أعلى صفقة ربحية على المدى القصير | الجانب الأيسر: الصفقات المقترحة (#4-#6)
+         التبويب 1: قاعة التداول المنحنية ثلاثية الأبعاد (يمين مقترحة | منتصف أعلى ربحية | يسار مقترحة)
          ================================================================ -->
-    <main id="sec-elite90" style="margin-top:6px;">
+    <main id="sec-elite90" style="margin-top:4px;">
       <div class="lux-sec-heading">
-        <span class="lux-sec-title">قاعة التداول — أعلى صفقة ربحية قصيرة المدى والصفقات المقترحة (<span dir="ltr">&ge;75% PAVA</span>)</span>
+        <span class="lux-sec-title">قاعة التداول</span>
         <div style="display:flex;gap:5px;flex-wrap:wrap;">
-          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold round-filter-btn" style="border-radius:999px;" data-rf="all" onclick="ui.filterDealsRound('all')">الكل <span dir="ltr">&ge;75%</span></button>
-          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" style="border-radius:999px;" data-rf="1h" onclick="ui.filterDealsRound('1h')">⚡ الساعة القادمة</button>
-          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" style="border-radius:999px;" data-rf="24h" onclick="ui.filterDealsRound('24h')">☀️ 24 ساعة</button>
-          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" style="border-radius:999px;" data-rf="vetoed" onclick="ui.filterDealsRound('vetoed')">🛡️ المحجوبة (<span dir="ltr">&lt;75%</span>)</button>
+          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold round-filter-btn" data-rf="all" onclick="ui.filterDealsRound('all')">الكل <span dir="ltr">&ge;75%</span></button>
+          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" data-rf="1h" onclick="ui.filterDealsRound('1h')">⚡ 1 ساعة</button>
+          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" data-rf="24h" onclick="ui.filterDealsRound('24h')">☀️ 24 ساعة</button>
+          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" data-rf="vetoed" onclick="ui.filterDealsRound('vetoed')">🛡️ المحجوبة</button>
         </div>
       </div>
 
-      <!-- حاوية الصفقات المحجوبة (<75%) عند اختيار فلتر المحجوبة -->
       <div id="vetoed-deals-drawer" class="deals-cards-grid hidden" style="margin-bottom:10px;"></div>
 
-      <!-- الساحة الثلاثية الرئيسية: يمين صفقات مقترحة | منتصف كبير أعلى صفقة ربحية قصيرة المدى | يسار صفقات مقترحة -->
       <div id="elite-90-cards" class="lux-trading-tri-arena">
-        <!-- الجانب الأيمن: الصفقات المقترحة (المجموعة 1) -->
-        <aside class="lux-side-column" aria-label="الصفقات المقترحة — الجانب الأيمن">
+        <!-- الجانب الأيمن المجسم ثلاثي الأبعاد: الصفقات المقترحة -->
+        <aside class="lux-side-column lux-side-right-3d" aria-label="الصفقات المقترحة — يمين">
           <div class="row-between">
-            <span class="lux-sec-title" style="font-size:13px;">الصفقات المقترحة (زخم سريع)</span>
-            <span class="hex-shield num" style="font-size:9.5px;color:#22d3ee;border-color:rgba(34,211,238,0.4);">SPOT · Kelly</span>
+            <span class="lux-sec-title" style="font-size:12.5px;">الصفقات المقترحة</span>
+            <span class="hex-shield num" style="font-size:9px;color:#22d3ee;border-color:rgba(34,211,238,0.4);">SPOT</span>
           </div>
-          <div id="lux-right-deals" style="display:flex;flex-direction:column;gap:8px;flex:1;justify-content:space-between;"></div>
+          <div id="lux-right-deals" style="display:flex;flex-direction:column;gap:7px;flex:1;justify-content:space-between;"></div>
         </aside>
 
-        <!-- اللوحة الكبيرة في المنتصف: أعلى صفقة ربحية على المدى القصير -->
+        <!-- المنتصف البارز ثلاثي الأبعاد: أعلى صفقة ربحية على المدى القصير -->
         <section id="lux-center-hero" class="lux-hero-center-panel" aria-label="أعلى صفقة ربحية على المدى القصير">
           <div class="row-between" style="flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <span id="hero-rank-badge" class="hex-shield" style="background:rgba(247,201,72,0.16);color:#ffe484;border-color:rgba(247,201,72,0.65);font-size:11px;padding:4px 9px;border-radius:999px;">
-                🔥 أعلى صفقة ربحية على المدى القصير
+              <span id="hero-rank-badge" class="hex-shield" style="background:rgba(247,201,72,0.18);color:#ffe484;border-color:rgba(247,201,72,0.68);font-size:10.5px;padding:3px 9px;border-radius:9px;">
+                🔥 الأعلى ربحية (+4.35% · 1H)
               </span>
               <strong id="hero-sym-title" class="num" style="font-size:19px;color:#ffffff;">SOLUSDT</strong>
-              <span id="hero-ar-name" class="muted" style="font-size:12.5px;color:#cbd5e1;">Solana • سولانا</span>
+              <span id="hero-ar-name" class="muted" style="font-size:12px;color:#cbd5e1;">سولانا</span>
               <span id="hero-pava-pill" class="hex-shield num" style="color:#10f5a0;border-color:rgba(16,245,160,0.45);">94.9% PAVA</span>
             </div>
 
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <button type="button" id="btn-reset-top-short" class="btn-3d btn-3d-sm btn-3d-gold hidden" style="border-radius:999px;" onclick="ui.selectHeroDeal('el-sol')">⚡ الأعلى ربحية قصيرة المدى (SOL)</button>
+              <button type="button" id="btn-reset-top-short" class="btn-3d btn-3d-sm btn-3d-gold hidden" onclick="ui.selectHeroDeal('el-sol')">⚡ الأعلى ربحية (SOL)</button>
               <div class="lux-tf-pill-group" dir="ltr">
                 <button type="button" class="btn-3d btn-3d-sm hero-tf-btn" data-htf="1D" onclick="ui.setHeroTimeframe('1D')">1D</button>
                 <button type="button" class="btn-3d btn-3d-sm hero-tf-btn" data-htf="4H" onclick="ui.setHeroTimeframe('4H')">4H</button>
@@ -1172,22 +1307,20 @@
             </div>
           </div>
 
-          <!-- الشارت الهولوغرامي الكبير للشموع اليابانية والمتوسط الذهبي ومستويات الربح -->
           <div class="lux-hero-canvas-wrap">
-            <canvas id="hero-short-term-cv" width="760" height="315" style="width:100%;height:305px;display:block;"></canvas>
+            <canvas id="hero-short-term-cv" width="760" height="272" style="width:100%;height:264px;display:block;"></canvas>
           </div>
 
-          <!-- شريط تفاصيل الصفقة القصيرة المدى والتنفيذ الفوري بضغطة واحدة -->
-          <div id="hero-exec-footer" class="holo-chamber" style="padding:9px 12px;border-radius:14px;background:rgba(8,18,33,0.92);border-color:rgba(34,211,238,0.3);"></div>
+          <div id="hero-exec-footer" class="holo-chamber" style="padding:7px 11px;border-radius:13px;background:rgba(8,18,33,0.94);border-color:rgba(34,211,238,0.32);box-shadow:inset 0 2px 6px rgba(0,0,0,0.7);"></div>
         </section>
 
-        <!-- الجانب الأيسر: الصفقات المقترحة (المجموعة 2) -->
-        <aside class="lux-side-column" aria-label="الصفقات المقترحة — الجانب الأيسر">
+        <!-- الجانب الأيسر المجسم ثلاثي الأبعاد: الصفقات المقترحة -->
+        <aside class="lux-side-column lux-side-left-3d" aria-label="الصفقات المقترحة — يسار">
           <div class="row-between">
-            <span class="lux-sec-title" style="font-size:13px;">الصفقات المقترحة (سيولة فورية)</span>
-            <span class="hex-shield num" style="font-size:9.5px;color:#ffe484;border-color:rgba(247,201,72,0.4);">PAVA &ge;75%</span>
+            <span class="lux-sec-title" style="font-size:12.5px;">الصفقات المقترحة</span>
+            <span class="hex-shield num" style="font-size:9px;color:#ffe484;border-color:rgba(247,201,72,0.4);">&ge;75%</span>
           </div>
-          <div id="lux-left-deals" style="display:flex;flex-direction:column;gap:8px;flex:1;justify-content:space-between;"></div>
+          <div id="lux-left-deals" style="display:flex;flex-direction:column;gap:7px;flex:1;justify-content:space-between;"></div>
         </aside>
       </div>
     </main>
@@ -2685,15 +2818,23 @@
       },
 
       renderCrest() {
-        const el = document.getElementById('hdr-crest-svg');
-        const tag = document.getElementById('hdr-mono-tag');
-        if (tag) tag.textContent = state.monogram + ' ★';
-        if (el) {
-          el.innerHTML = `<svg width="42" height="42" viewBox="0 0 100 100">
-            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="#061024" stroke="var(--pri)" stroke-width="3.4"/>
-            <text x="50" y="58" text-anchor="middle" fill="var(--pri)" font-family="Georgia, serif" font-weight="900" font-size="23">${state.monogram}</text>
-          </svg>`;
-        }
+        const crestSvg = `<svg width="36" height="36" viewBox="0 0 100 100" aria-hidden="true">
+          <defs>
+            <linearGradient id="g3d" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fff3a8"/>
+              <stop offset="50%" stop-color="#f5b82e"/>
+              <stop offset="100%" stop-color="#b46909"/>
+            </linearGradient>
+          </defs>
+          <polygon points="50,5 91,27 91,73 50,95 9,73 9,27" fill="#0a162c" stroke="url(#g3d)" stroke-width="5.5"/>
+          <polygon points="50,14 82,32 82,68 50,86 18,68 18,32" fill="none" stroke="rgba(34,211,238,0.55)" stroke-width="2"/>
+          <path d="M34,34 L42,24 L50,32 L58,24 L66,34 Z" fill="url(#g3d)"/>
+          <text x="50" y="64" text-anchor="middle" fill="#ffe885" font-family="system-ui, sans-serif" font-weight="900" font-size="24">${state.monogram}</text>
+        </svg><span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;">${state.monogram}</span>`;
+        ['hdr-mono-tag', 'hdr-mono-tag-left'].forEach((id) => {
+          const btn = document.getElementById(id);
+          if (btn) btn.innerHTML = crestSvg;
+        });
       },
 
       // رسم 5 أيقونات ملونة فقط بجانب الهولوغرام بدون أي أسماء بشرية!
@@ -2725,7 +2866,7 @@
         document.documentElement.setAttribute('data-pnl-glow', state.pnlGlow ? 'on' : 'off');
         const b = document.getElementById('btn-pnl-glow');
         if (b) b.classList.toggle('btn-3d-gold', state.pnlGlow);
-        this.toast(state.pnlGlow ? '💡 تم تفعيل إضاءة P&L المحيطية' : '💡 تم إيقاف إضاءة P&L المحيطية');
+        this.toast(state.pnlGlow ? '💡 إضاءة P&L مفعّلة' : '💡 إضاءة P&L متوقفة');
       },
 
       refreshKpis() {
@@ -2759,7 +2900,6 @@
         const elDdBar = document.getElementById('kpi-dd-bar');
         if (elDdBar) elDdBar.style.width = `${Math.max(6, Math.min(100, (ddPct / 3.0) * 100))}%`;
 
-        // المقياس اللوغاريتمي من $1 (10^0) إلى $1T (10^12): عند $1,000,000 = 50.0% تماماً كما في التصميم المرفق!
         const log12Pct = Math.max(1, Math.min(100, (Math.log10(Math.max(10, state.equity)) / 12) * 100));
         const elLog = document.getElementById('kpi-1t-log-pct');
         if (elLog) elLog.textContent = `${log12Pct.toFixed(1)}%`;
@@ -3051,7 +3191,6 @@
       getTopShortTermDeal(approvedList) {
         const list = approvedList && approvedList.length ? approvedList : ALL_CANDIDATE_DEALS.filter((d) => d.quant && d.quant.approved);
         if (!list.length) return ALL_CANDIDATE_DEALS[0];
-        // أعلى صفقة ربحية على المدى القصير: الأولوية لأفق الساعة (1h) ثم الـ 24 ساعة بأعلى ربحية وثقة معايرة >=75%
         const shortPool = list.filter((d) => d.bucket === '1h');
         const medPool = list.filter((d) => d.bucket === '24h');
         const pool = shortPool.length ? shortPool : (medPool.length ? medPool : list);
@@ -3068,10 +3207,9 @@
 
         const tel = document.getElementById('quant-header-telemetry');
         if (tel) {
-          tel.textContent = `${allApproved.length} مؤهلة (75%+) • ${vetoed.length} محجوبة • DSR ${state.deflatedSharpe} • HWM $${Math.round(state.highWaterMark).toLocaleString()}`;
+          tel.textContent = `${allApproved.length} مؤهلة (≥75%) • DSR ${state.deflatedSharpe}`;
         }
 
-        // عرض درج المحجوبة (<75%) عند طلب الفلتر أو تفعيل Kill Switch
         const vDrawer = document.getElementById('vetoed-deals-drawer');
         if (vDrawer) {
           const showVeto = (state.roundFilter === 'vetoed' || state.killSwitch) && vetoed.length > 0;
@@ -3080,12 +3218,10 @@
             vDrawer.innerHTML = vetoed.map((d) => `
               <article class="vetoed-deal-card">
                 <div class="row-between">
-                  <span class="hex-shield" style="color:var(--hot);border-color:var(--hot);">🛡️ محجوبة آلياً (&lt;75%)</span>
+                  <span class="hex-shield" style="color:var(--hot);border-color:var(--hot);">🛡️ محجوبة (&lt;75%)</span>
                   <strong style="font-size:13px;color:#ffd6e0;">${d.name} (${d.sym})</strong>
                 </div>
-                <div class="holo-chamber" style="border-color:rgba(255,56,104,0.35);font-size:11.2px;color:#ffccd5;">
-                  <div><strong>السبب الكمي:</strong> ${d.quant.vetoReason}</div>
-                </div>
+                <div class="holo-chamber" style="border-color:rgba(255,56,104,0.35);font-size:11px;color:#ffccd5;">${d.quant.vetoReason}</div>
               </article>
             `).join('');
           }
@@ -3099,18 +3235,17 @@
         const rankBadge = document.getElementById('hero-rank-badge');
         if (rankBadge) {
           rankBadge.textContent = isTopShort
-            ? `🔥 #1 أعلى صفقة ربحية على المدى القصير (+${(heroDeal.tpPct * 100).toFixed(2)}% في ${heroDeal.round})`
-            : `🔎 معاينة صفقة مقترحة (+${(heroDeal.tpPct * 100).toFixed(2)}% في ${heroDeal.round})`;
+            ? `🔥 #1 الأعلى ربحية (+${(heroDeal.tpPct * 100).toFixed(2)}% · ${heroDeal.round})`
+            : `🔎 معاينة (+${(heroDeal.tpPct * 100).toFixed(2)}% · ${heroDeal.round})`;
         }
         document.getElementById('btn-reset-top-short')?.classList.toggle('hidden', isTopShort);
         const symEl = document.getElementById('hero-sym-title');
         if (symEl) symEl.textContent = heroDeal.sym;
         const arEl = document.getElementById('hero-ar-name');
-        if (arEl) arEl.textContent = heroDeal.name;
+        if (arEl) arEl.textContent = (heroDeal.name.split('•')[1] || heroDeal.name).trim();
         const pvEl = document.getElementById('hero-pava-pill');
         if (pvEl) pvEl.textContent = `${heroDeal.conf}% PAVA`;
 
-        // شريط التنفيذ السفلي للبطاقة الكبيرة في المنتصف
         const hm = computeDealMetrics(heroDeal);
         const hOwned = +(state.spotHoldings[heroDeal.sym] || 0);
         const hUnit = heroDeal.sym.replace('USDT', '');
@@ -3120,28 +3255,28 @@
           heroFooter.innerHTML = `
             <div class="row-between" style="flex-wrap:wrap;gap:8px;">
               <div>
-                <div class="muted" style="font-size:10px;">حجم Kelly المخصص (${hm.portPct}% محفظة) • المملوك: <strong class="num text-pri">${hOwned} ${hUnit}</strong></div>
+                <div class="muted" style="font-size:10px;">Kelly (${hm.portPct}%) • المملوك: <strong class="num text-pri">${hOwned} ${hUnit}</strong></div>
                 <div style="display:flex;align-items:baseline;gap:8px;margin-top:1px;">
                   <strong class="num-3d" style="font-size:17px;">$${hm.invest.toLocaleString()}</strong>
-                  <span class="num text-sec" style="font-size:11.5px;">(${heroDeal.qty} ${hUnit} @ $${heroDeal.price.toLocaleString()})</span>
-                  <span class="num text-ok" style="font-size:11px;font-weight:900;">ربح مستهدف: +$${hm.maxProf.toLocaleString()} (+${hm.expPct}%)</span>
+                  <span class="num text-sec" style="font-size:11.5px;">(${heroDeal.qty} ${hUnit})</span>
+                  <span class="num text-ok" style="font-size:11px;font-weight:900;">+$${hm.maxProf.toLocaleString()} (+${hm.expPct}%)</span>
                 </div>
               </div>
 
               <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
                 <button type="button" class="btn-3d btn-stepper" onclick="ui.adjustDealQty('${heroDeal.id}', -1)" aria-label="إنقاص الكمية">−</button>
                 <button type="button" class="btn-3d btn-3d-gold btn-stepper" onclick="ui.adjustDealQty('${heroDeal.id}', 1)" aria-label="زيادة الكمية">+</button>
-                <div style="display:flex;gap:3px;margin:0 3px;" title="AI1-3 متنبئون | AI4 تحجيم Kelly | AI5 عتبة >=75%">
+                <div style="display:flex;gap:3px;margin:0 3px;">
                   ${AI_AGENTS.map((ag, i) => `<span class="ai-orb-sm num" style="--orb-c:${ag.col};--orb-g:${ag.glow};">${heroDeal.aiScores[i]}</span>`).join('')}
                 </div>
-                <button type="button" class="btn-3d btn-3d-buy" style="padding:7px 14px;font-size:12px;border-radius:10px;" onclick="ui.executeEliteDeal('${heroDeal.id}', 'BUY')">▲ شراء Maker فوري</button>
-                <button type="button" class="btn-3d ${hOwned > 0 ? 'btn-3d-sell' : 'btn-spot-neutral'}" style="padding:7px 11px;font-size:11px;border-radius:10px;" onclick="ui.executeEliteDeal('${heroDeal.id}', 'SELL')">${hOwned > 0 ? '▼ إغلاق مملوك' : '🔒 حياد Spot'}</button>
+                <button type="button" class="btn-3d btn-3d-buy" style="padding:7px 14px;font-size:12px;" onclick="ui.executeEliteDeal('${heroDeal.id}', 'BUY')">▲ شراء Maker</button>
+                <button type="button" class="btn-3d ${hOwned > 0 ? 'btn-3d-sell' : 'btn-spot-neutral'}" style="padding:7px 11px;font-size:11px;" onclick="ui.executeEliteDeal('${heroDeal.id}', 'SELL')">${hOwned > 0 ? '▼ إغلاق' : '🔒 حياد'}</button>
               </div>
             </div>
             <div class="row-between" style="margin-top:5px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.07);font-size:10.5px;flex-wrap:wrap;gap:8px;">
-              <span>الأهداف المتدرجة: <strong class="num text-ok">TP1 $${hm.tp1} (40%) • TP2 $${hm.tp} (35%)</strong></span>
-              <span>وقف الخسارة الحتمي: <strong class="num text-err">ATR SL $${hm.sl}</strong></span>
-              ${hStamp ? `<span class="num text-pri">✓ آخر تنفيذ: #${hStamp.orderId} (${hStamp.qty} ${hUnit})</span>` : `<span class="muted">صانع سوق LIMIT_MAKER بدون انزلاق سعري</span>`}
+              <strong class="num text-ok">TP1 $${hm.tp1} • TP2 $${hm.tp}</strong>
+              <strong class="num text-err">SL $${hm.sl}</strong>
+              <span class="num muted">${hStamp ? `✓ #${hStamp.orderId}` : `LIMIT_MAKER`}</span>
             </div>
           `;
         }
@@ -4193,7 +4328,7 @@
         const vol = state.musicVolume;
         const bDesk = document.getElementById('btn-ambient-music');
         if (bDesk) {
-          bDesk.textContent = on ? '🎵 موسيقى التركيز: تعمل 🔊' : '🎵 موسيقى التركيز: إيقاف';
+          bDesk.textContent = on ? '🎵 تركيز 🔊' : '🎵 تركيز';
           bDesk.classList.toggle('btn-music-on', on);
         }
         const bMob = document.getElementById('btn-ambient-music-mob');
