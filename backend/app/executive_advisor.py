@@ -1032,15 +1032,16 @@ def get_quant_engine_snapshot() -> dict[str, Any]:
         ("NVDA", "equity", 142.80, 2.45, 0.01, "BUY", {"AI1": 0.94, "AI2": 0.93, "AI3": 0.93}),
         ("ETHUSDT", "crypto", 3420.50, 48.0, 0.0001, "BUY", {"AI1": 0.93, "AI2": 0.93, "AI3": 0.92}),
         ("BNBUSDT", "crypto", 654.20, 8.90, 0.001, "BUY", {"AI1": 0.92, "AI2": 0.92, "AI3": 0.91}),
-        ("XRPUSDT", "crypto", 2.46, 0.045, 0.01, "SELL", {"AI1": 0.84, "AI2": 0.82, "AI3": 0.80}),
+        ("XRPUSDT", "crypto", 2.46, 0.045, 0.01, "BUY", {"AI1": 0.85, "AI2": 0.83, "AI3": 0.81}),
+        ("DOGEUSDT", "crypto", 0.395, 0.012, 1.0, "BUY", {"AI1": 0.71, "AI2": 0.69, "AI3": 0.68}),
     ]
     evaluated = []
     for sym, acls, price, atr, step, raw_side, p_map in candidates:
         raw_p = _QUANT_CONSENSUS.predict(p_map)
-        # Blend raw_p withotonic calibration preserving strict monotonicity
+        # Blend raw_p with isotonic calibration preserving strict monotonicity
         cal_p = round(0.5 * raw_p + 0.5 * _QUANT_CALIBRATOR(raw_p), 4)
         spot_chk = validate_spot_signal(raw_side, _RUNTIME_QUANT_STATE["spotHoldings"].get(sym, 0.0), step) if acls == "crypto" else {"executable": True, "action": "EQUITY_LONG"}
-        sizing = size_position(cal_p, BetaWinRate(34, 6), 2.2, price, atr, step, rs, sym, acls)
+        sizing = size_position(cal_p, BetaWinRate(34, 6), 2.2, price, atr, step, rs, sym, acls, min_calibrated_gate=0.75)
         exits = graduated_exit_plan(price, sizing.get("qty", 0.0) or round(1000 / price, 4), atr, step)
         evaluated.append({
             "symbol": sym,
@@ -1059,7 +1060,8 @@ def get_quant_engine_snapshot() -> dict[str, Any]:
     thompson_weights = thompson_allocate(_BOT_POSTERIORS, seed=2026)
     hwm_demo = compute_hwm_bots20_transfer(5120.0, 187_909.0, 1_000_000.0, 1_000_000.0)
     return {
-        "governingPrincipleAr": "عتبة 90% هي احتمالية مُعايَرة خارج العينة (Isotonic PAVA) وليست ضمان ربح ثابت؛ من الطبيعي انخفاض عدد الصفقات المؤهلة حمايةً لرأس المال.",
+        "minCalibratedGatePct": 75.0,
+        "governingPrincipleAr": "عتبة 75% هي احتمالية مُعايَرة خارج العينة (Isotonic PAVA >= 75%) لتحجيم الصفقات بمعيار Kelly الكسري مع حجب ما دون 75% حمايةً لرأس المال.",
         "predictorWeights": {k: round(v.weight, 4) for k, v in _QUANT_CONSENSUS.stats.items()},
         "deflatedSharpeRatio": round(deflated_sharpe(0.18, 500, -0.25, 4.6, 15, 0.0018), 4),
         "thompsonBotAllocation": {k: round(v, 4) for k, v in thompson_weights.items()},

@@ -67,9 +67,13 @@ def test_spot_long_only_and_hwm_net_of_fees() -> None:
 
 def test_kelly_veto_graduated_exits_thompson_and_dsr() -> None:
     rs_ok = RiskState(equity=100_000.0, day_start_equity=100_000.0, open_risk_usd=0.0)
-    vetoed_low_conf = size_position(0.84, BetaWinRate(30, 10), 2.2, 100.0, 1.2, 0.01, rs_ok, "SOLUSDT", "crypto")
+    vetoed_low_conf = size_position(0.71, BetaWinRate(30, 10), 2.2, 100.0, 1.2, 0.01, rs_ok, "DOGEUSDT", "crypto")
     assert vetoed_low_conf["approved"] is False
     assert vetoed_low_conf["veto_by"] == "AI5_CONFIDENCE_GATE"
+
+    approved_75_band = size_position(0.81, BetaWinRate(30, 10), 2.2, 2.46, 0.045, 0.01, rs_ok, "XRPUSDT", "crypto")
+    assert approved_75_band["approved"] is True
+    assert approved_75_band["qty"] > 0
 
     approved = size_position(0.93, BetaWinRate(30, 10), 2.2, 100.0, 1.2, 0.01, rs_ok, "SOLUSDT", "crypto")
     assert approved["approved"] is True
@@ -126,4 +130,5 @@ def test_executive_argon2id_and_separated_keys_endpoints() -> None:
 
     r_qe = client.get("/api/executive/quant-engine")
     assert r_qe.status_code == 200
-    assert len(r_qe.json()["evaluatedCandidates"]) == 6
+    assert r_qe.json()["minCalibratedGatePct"] == 75.0
+    assert len(r_qe.json()["evaluatedCandidates"]) == 7

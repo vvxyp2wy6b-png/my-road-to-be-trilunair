@@ -331,7 +331,7 @@
     }
     .mobile-bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 70;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       background: rgba(4, 10, 22, 0.98); border-top: 1.5px solid rgba(247,201,72,0.45);
       padding: 5px 4px calc(5px + env(safe-area-inset-bottom, 0px));
     }
@@ -448,6 +448,41 @@
       background: linear-gradient(160deg, rgba(28, 12, 26, 0.92), rgba(8, 6, 16, 0.98));
       border: 1.5px dashed rgba(255, 56, 104, 0.55);
     }
+
+
+    /* تنسيق صفحة المدير المالي الشخصي ومسار التريليون (Personal CFO & $1T Wealth Architect) */
+    .cfo-top-kpis {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; margin-bottom: 8px;
+    }
+    .cfo-milestones-grid {
+      display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin-top: 6px;
+    }
+    .cfo-mile-chip {
+      padding: 5px 6px; border-radius: 9px; text-align: center;
+      background: rgba(6, 15, 32, 0.88); border: 1px solid rgba(255,255,255,0.12);
+    }
+    .cfo-mile-chip.reached {
+      border-color: var(--ok); background: rgba(0, 232, 150, 0.12);
+    }
+    .cfo-main-grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-top: 8px;
+    }
+    .cfo-bucket-grid {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 6px;
+    }
+    .cfo-sleeves-grid {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 6px;
+    }
+    @media (max-width: 960px) {
+      .cfo-top-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .cfo-milestones-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .cfo-main-grid { grid-template-columns: 1fr; }
+      .cfo-bucket-grid, .cfo-sleeves-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    html[data-layout="mobile"] .cfo-top-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    html[data-layout="mobile"] .cfo-milestones-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    html[data-layout="mobile"] .cfo-main-grid { grid-template-columns: 1fr; }
+    html[data-layout="mobile"] .cfo-bucket-grid, html[data-layout="mobile"] .cfo-sleeves-grid { grid-template-columns: 1fr; }
 
   </style>
 </head>
@@ -583,11 +618,12 @@
 
       <!-- تنقل نظيف بشاشة واحدة لكل تبويب (بدون حشو طولي!) -->
       <nav class="prism-nav">
-        <button type="button" class="btn-3d btn-3d-sm btn-3d-gold nav-main-btn" data-tab="elite90" onclick="ui.tab('elite90')">🏆 قائمة أفضل الصفقات (&gt; 90%)</button>
+        <button type="button" class="btn-3d btn-3d-sm btn-3d-gold nav-main-btn" data-tab="elite90" onclick="ui.tab('elite90')">🏆 الصفقات المُعايَرة (<span dir="ltr">&ge;75%</span>)</button>
         <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="charts3d" onclick="ui.tab('charts3d')">🕯️ مدار 3D والشموع</button>
         <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="boardroom" onclick="ui.tab('boardroom')">🪑 طاولة الـ 5 آيجنت والـ 20%</button>
         <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="stocks" onclick="ui.tab('stocks')">📈 أفضل الأسهم</button>
         <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="daily" onclick="ui.tab('daily')">📊 صفقات اليوم والـ 20%</button>
+        <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="cfo" onclick="ui.tab('cfo')">💼 المدير المالي ومسار 1T$</button>
       </nav>
     </header>
 
@@ -678,14 +714,15 @@
     <main id="sec-elite90" class="holo-prism">
       <div class="row-between" style="margin-bottom:7px;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <strong style="font-size:14.8px;color:var(--pri);">🏆 الصفقات المُعايَرة (&ge; 90% PAVA • Spot Long-Only)</strong>
-          <span id="quant-header-telemetry" class="hex-shield num" style="color:var(--ok);border-color:var(--ok);">AI1-3 تنبؤ ⬅ AI4 حجم Kelly وفيتو ⬅ AI5 معايرة &ge;90% • DSR 0.92</span>
+          <strong style="font-size:14.8px;color:var(--pri);">🏆 الصفقات المُعايَرة والتحجيم (<span dir="ltr">&ge;75% PAVA • Spot Long-Only</span>)</strong>
+          <span id="quant-header-telemetry" class="hex-shield num" dir="ltr" style="color:var(--ok);border-color:var(--ok);">6 Qualified &ge;75% • DSR 0.92</span>
         </div>
         <div style="display:flex;gap:5px;flex-wrap:wrap;">
-          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold round-filter-btn" data-rf="all" onclick="ui.filterDealsRound('all')">الكل (6)</button>
+          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold round-filter-btn" data-rf="all" onclick="ui.filterDealsRound('all')">المؤهلة <span dir="ltr">&ge;75%</span> (6)</button>
           <button type="button" class="btn-3d btn-3d-sm round-filter-btn" data-rf="1h" onclick="ui.filterDealsRound('1h')">⚡ الساعة القادمة</button>
           <button type="button" class="btn-3d btn-3d-sm round-filter-btn" data-rf="24h" onclick="ui.filterDealsRound('24h')">☀️ 24 ساعة</button>
           <button type="button" class="btn-3d btn-3d-sm round-filter-btn" data-rf="7d" onclick="ui.filterDealsRound('7d')">📅 الأسبوع</button>
+          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" data-rf="vetoed" onclick="ui.filterDealsRound('vetoed')">🛡️ المحجوبة (<span dir="ltr">&lt;75%</span>)</button>
         </div>
       </div>
 
@@ -887,13 +924,227 @@
     </main>
   </div>
 
+
+    <!-- ================================================================
+         الصفحة 6: المدير المالي الشخصي ومعماري الثروة ومسار الـ 1T$ (كافة الإضافات دون أي نقص!)
+         ================================================================ -->
+    <main id="sec-cfo" class="holo-prism hidden">
+      <!-- 1. متتبع رحلة التريليون دولار اللوغاريتمي ($1,000,000,000,000) ومحاكي الـ CAGR -->
+      <div class="holo-chamber" style="margin-bottom:8px;">
+        <div class="row-between" style="flex-wrap:wrap;gap:6px;">
+          <div>
+            <strong style="font-size:14.8px;color:var(--pri);">🧭 مسار الوصول إلى $1,000,000,000,000 (1T$) — المدير المالي ومعماري الثروة</strong>
+            <div class="muted" style="font-size:11px;">مقياس نمو لوغاريتمي حي يوازن بين التراكم المركب وضوابط السحب الأقصى وعزل الميزانية الشخصية بالريال عن محفظة المحاكاة.</div>
+          </div>
+          <div style="text-align:left;">
+            <span class="muted" style="font-size:10px;">التقدم اللوغاريتمي نحو 1T$</span>
+            <div id="cfo-log-pct" class="num-3d" style="font-size:17px;">14.31%</div>
+          </div>
+        </div>
+
+        <div style="height:10px;border-radius:999px;background:rgba(2,8,20,0.92);border:1px solid rgba(0,245,212,0.28);overflow:hidden;margin-top:6px;">
+          <div id="cfo-log-bar" style="height:100%;width:14.31%;background:linear-gradient(90deg,var(--sec),var(--pri),var(--ok));"></div>
+        </div>
+
+        <div id="cfo-milestones-box" class="cfo-milestones-grid"></div>
+
+        <div class="row-between" style="margin-top:7px;flex-wrap:wrap;gap:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+            <span style="font-size:11.5px;font-weight:800;">📈 محاكاة العائد السنوي المركب المستهدف (CAGR):</span>
+            <button type="button" class="btn-3d btn-3d-sm cfo-cagr-btn" data-cagr="35" onclick="ui.setCfoCagr(35)">35%</button>
+            <button type="button" class="btn-3d btn-3d-sm btn-3d-gold cfo-cagr-btn" data-cagr="65" onclick="ui.setCfoCagr(65)">65%</button>
+            <button type="button" class="btn-3d btn-3d-sm cfo-cagr-btn" data-cagr="100" onclick="ui.setCfoCagr(100)">100%</button>
+            <button type="button" class="btn-3d btn-3d-sm cfo-cagr-btn" data-cagr="150" onclick="ui.setCfoCagr(150)">150%</button>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;">
+            <span>المدى الزمني التقديري لـ 1T$: <strong id="cfo-yrs-1t" class="num text-pri">27.6 سنة</strong></span>
+            <span>العائد منذ التأسيس: <strong id="cfo-since-inc" class="num text-ok">+0.49%</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. مؤشرات المخاطر والسيولة للمحفظة (Equity, Cash Reserve, VaR 95%, Drawdown Guard) -->
+      <div class="cfo-top-kpis">
+        <div class="holo-chamber">
+          <div class="muted">💼 إجمالي حقوق الملكية</div>
+          <div id="cfo-kpi-eq" class="num-3d" style="font-size:16.5px;">$1,004,850.00</div>
+          <div class="muted" style="font-size:10px;">رأس المال الأولي: $1,000,000</div>
+        </div>
+        <div class="holo-chamber">
+          <div class="muted">💧 السيولة النقدية المتاحة</div>
+          <div id="cfo-kpi-cash" class="num-3d-cyan" style="font-size:16.5px;">$848,210.00</div>
+          <div id="cfo-kpi-cash-pct" class="muted" style="font-size:10px;">احتياطي سيولة 84.4%</div>
+        </div>
+        <div class="holo-chamber">
+          <div class="muted">⚠️ القيمة المعرضة للمخاطر (VaR 95%)</div>
+          <div id="cfo-kpi-var" class="num text-pri" style="font-size:16.5px;font-weight:900;">$2,840.00</div>
+          <div class="muted" style="font-size:10px;">0.28% من حقوق الملكية</div>
+        </div>
+        <div class="holo-chamber">
+          <div class="muted">🛡️ السحب الحالي مقابل الحد الأقصى</div>
+          <div id="cfo-kpi-dd" class="num-3d-ok" style="font-size:16px;">0.00% / 3.0% يومي</div>
+          <div class="muted" style="font-size:10px;">قاطع فيتو AI-4 الآلي نشط ✓</div>
+        </div>
+      </div>
+
+      <!-- 3. التنبيهات المالية والتعاقدية الاستباقية (Financial & Legal Guardian Alerts) -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:6px;margin-bottom:8px;">
+        <div class="holo-chamber" style="border-right:3px solid var(--pri);font-size:11px;">
+          <strong style="color:var(--pri);">⚡ أولوية المتأخرات وحارس السيولة:</strong>
+          <span class="muted">تُغطى متأخرات تسهيل (1,700 ر.س) والإمارات دبي الوطني (1,800 ر.س) تلقائياً من مخصص الـ 6,000 ر.س قبل أي ضخ استثماري اختياري.</span>
+        </div>
+        <div class="holo-chamber" style="border-right:3px solid var(--sec);font-size:11px;">
+          <strong style="color:var(--sec);">⚖️ مهلة إشعار عدم تجديد العقد (60 يوماً):</strong>
+          <span class="muted">عقد محدد المدة (مباشرة 2024-10-10) — عدم التجديد عند انتهاء المدة يستحق 100% مكافأة نهاية خدمة (م84) ولا يُصنف كاستقالة.</span>
+        </div>
+        <div class="holo-chamber" style="border-right:3px solid var(--ok);font-size:11px;">
+          <strong style="color:var(--ok);">🔒 منع الازدواج الحسابي وعزل الأرصدة:</strong>
+          <span class="muted">تحويلات سداد البطاقات من الحساب الجاري لا تُسجل كمصروف ثانٍ، ومستحقات نهاية الخدمة معزولة كلياً عن التداول.</span>
+        </div>
+      </div>
+
+      <!-- 4. الشبكة الرئيسية للمدير المالي: (أ) راتب 20,000 ر.س وطوارئ + (ب) مخطط البطاقات + (ج) نظام العمل السعودي وقوى + (د) دفتر 2,125 ر.س وجسر Binance -->
+      <div class="cfo-main-grid">
+        <!-- أ) توزيع راتب الـ 20,000 ريال سعودي (يوم 28 ميلادي) وصندوق الطوارئ ومانع الازدواج -->
+        <section class="holo-chamber" style="display:flex;flex-direction:column;gap:6px;">
+          <div class="row-between">
+            <strong style="font-size:13.2px;color:var(--pri);">🏦 توزيع راتب الـ 20,000 ريال (يوم 28 ميلادي) وصندوق الطوارئ</strong>
+            <span id="cfo-salary-badge" class="hex-shield num" style="color:var(--ok);border-color:var(--ok);">SAR 20,000 / 20,000 ✓</span>
+          </div>
+          <div class="cfo-bucket-grid">
+            <label class="muted" style="font-size:10px;">المصروفات الشخصية (ر.س)
+              <input id="cfo-b-personal" type="number" value="8000" class="holo-inp num" style="width:100%;margin-top:2px;padding:4px 6px;" oninput="ui.recalcCfoSalary()" />
+            </label>
+            <label class="muted" style="font-size:10px;">سداد البطاقات (ر.س)
+              <input id="cfo-b-cards" type="number" value="6000" class="holo-inp num" style="width:100%;margin-top:2px;padding:4px 6px;" oninput="ui.recalcCfoSalary()" />
+            </label>
+            <label class="muted" style="font-size:10px;color:var(--ok);">مخصص استثمار Spot (ر.س)
+              <input id="cfo-b-invest" type="number" value="2125" class="holo-inp num" style="width:100%;margin-top:2px;padding:4px 6px;border-color:var(--ok);" oninput="ui.recalcCfoSalary()" />
+            </label>
+            <label class="muted" style="font-size:10px;">الادخار السائل (ر.س)
+              <input id="cfo-b-save" type="number" value="2000" class="holo-inp num" style="width:100%;margin-top:2px;padding:4px 6px;" oninput="ui.recalcCfoSalary()" />
+            </label>
+            <label class="muted" style="font-size:10px;">اشتراكات الـ AI (ر.س)
+              <input id="cfo-b-ai" type="number" value="1375" class="holo-inp num" style="width:100%;margin-top:2px;padding:4px 6px;" oninput="ui.recalcCfoSalary()" />
+            </label>
+            <label class="muted" style="font-size:10px;">تشغيل وكلاء المنصة (ر.س)
+              <input id="cfo-b-ops" type="number" value="500" class="holo-inp num" style="width:100%;margin-top:2px;padding:4px 6px;" oninput="ui.recalcCfoSalary()" />
+            </label>
+          </div>
+          <div class="row-between" style="gap:6px;flex-wrap:wrap;margin-top:2px;">
+            <label class="muted" style="font-size:10.5px;display:flex;align-items:center;gap:5px;">صندوق الطوارئ الحالي (ر.س):
+              <input id="cfo-emg-reserve" type="number" value="42000" class="holo-inp num" style="width:95px;padding:3px 6px;" oninput="ui.recalcCfoSalary()" />
+            </label>
+            <span id="cfo-emg-months" class="num text-sec" style="font-size:11px;font-weight:800;">تغطية الطوارئ: 5.25 أشهر</span>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.resetCfoSalaryDefaults()">↺ الافتراضي المعتمد</button>
+          </div>
+          <div id="cfo-salary-summary" class="muted" style="font-size:11px;padding:5px 7px;border-radius:7px;background:rgba(0,0,0,0.35);"></div>
+
+          <!-- فاحص منع الازدواج الحسابي لكشوف الحساب -->
+          <div style="display:flex;gap:5px;align-items:center;margin-top:2px;">
+            <input id="cfo-stmt-inp" class="holo-inp" style="flex:1;padding:4px 7px;font-size:11px;" placeholder="فحص بند كشف حساب (مثال: تحويل سداد بطاقة تسهيل 4200 ر.س أو مشتريات تموين)..." />
+            <button type="button" class="btn-3d btn-3d-sm btn-3d-gold" onclick="ui.checkStatementDeduplication()">🔍 فحص الازدواج</button>
+          </div>
+          <div id="cfo-stmt-result" class="muted" style="font-size:10.8px;"></div>
+        </section>
+
+        <!-- ب) مخطط سداد البطاقات الائتمانية (تسهيل + الإمارات دبي الوطني) وحارس السيولة -->
+        <section class="holo-chamber" style="display:flex;flex-direction:column;gap:6px;">
+          <div class="row-between">
+            <strong style="font-size:13.2px;color:var(--pri);">💳 مخطط سداد البطاقات ومفاضلة تكلفة التمويل</strong>
+            <span class="hex-shield num" style="color:var(--pri);">ميزانية السداد: 6,000 ر.س/شهرياً</span>
+          </div>
+          <div id="cfo-cards-box" style="display:grid;gap:6px;"></div>
+          <div class="muted" style="font-size:10.8px;line-height:1.5;">
+            💡 <strong>مفاضلة التمويل مقابل الاستثمار:</strong> تكلفة تمويل البطاقات المتأخرة أعلى يقيناً من أي عائد مضاربي غير مضمون؛ لذلك يسدد النظام المتأخرات أولاً مع إبقاء شريحة استثمارية منضبطة (<span class="num text-ok">2,125 ر.س</span>) لبناء عادة التراكم دون استنزاف السيولة.
+          </div>
+        </section>
+
+        <!-- ج) حاسبة نظام العمل السعودي (م55/م74/م84/م85/م111) ومتتبع مهلة الـ 60 يوماً وخزنة «قوى» -->
+        <section class="holo-chamber" style="display:flex;flex-direction:column;gap:6px;">
+          <div class="row-between">
+            <strong style="font-size:13.2px;color:var(--pri);">⚖️ حاسبة نظام العمل السعودي ومهلة إشعار الـ 60 يوماً (منصة قوى)</strong>
+            <span class="hex-shield" style="color:var(--pri);font-size:9.5px;">مستحق غير سائل • معزول عن التداول</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1.3fr 0.9fr 0.8fr;gap:5px;">
+            <select id="cfo-labor-scenario" class="holo-inp" style="font-size:11px;padding:4px 6px;" onchange="ui.recalcSaudiLabor()">
+              <option value="EXPIRY">انتهاء العقد المحدد وعدم التجديد (م84 — 100% مكافأة)</option>
+              <option value="EMPLOYER">إنهاء من صاحب العمل (م74/م84 — 100% مكافأة)</option>
+              <option value="RESIGN">استقالة عادية أثناء سريان العقد (م85 — ثلث/ثلثان)</option>
+              <option value="ART87">قوة قاهرة / حالات المادة 87 (100% مكافأة)</option>
+            </select>
+            <input id="cfo-contract-expiry" type="date" value="2027-10-10" class="holo-inp num" style="font-size:11px;padding:4px 6px;" onchange="ui.recalcSaudiLabor()" />
+            <input id="cfo-unused-leave" type="number" value="63" class="holo-inp num" style="font-size:11px;padding:4px 6px;" title="رصيد أيام الإجازة غير المستعملة" oninput="ui.recalcSaudiLabor()" />
+          </div>
+          <div id="cfo-saudi-calc-box" style="padding:6px 8px;border-radius:8px;background:rgba(0,0,0,0.38);font-size:11.2px;line-height:1.6;"></div>
+          <div style="display:flex;gap:5px;align-items:center;">
+            <input id="cfo-qiwa-proof-inp" class="holo-inp" style="flex:1;padding:4px 7px;font-size:11px;" placeholder="حفظ مرجع عقد «قوى» أو مسودة إشعار عدم التجديد في الخزنة..." />
+            <button type="button" id="btn-cfo-save-proof" class="btn-3d btn-3d-sm btn-3d-buy" onclick="ui.saveQiwaProof()">📎 حفظ إثبات</button>
+          </div>
+          <div id="cfo-qiwa-proof-list" class="muted" style="font-size:10.5px;">🔒 حماية صارمة: لا يرسل النظام أي إشعار عدم تجديد خارجي تلقائياً أبداً.</div>
+        </section>
+
+        <!-- د) دفتر رأس المال الاستثماري المخصص (2,125 ر.س/شهرياً) + جسر حساب Binance الفوري الشخصي -->
+        <section class="holo-chamber" style="display:flex;flex-direction:column;gap:6px;">
+          <div class="row-between" style="flex-wrap:wrap;gap:5px;">
+            <strong style="font-size:13.2px;color:var(--pri);">📒 دفتر الاستثمار المخصص (2,125 ر.س/شهرياً) وجسر Binance الشخصي</strong>
+            <button type="button" id="btn-cfo-log-2125" class="btn-3d btn-3d-sm btn-3d-gold" onclick="ui.logMonthly2125Allocation()">+ تسجيل دفعة 2,125 ر.س (PAPER)</button>
+          </div>
+          <div id="cfo-ledger-summary" class="num" style="font-size:11.3px;color:var(--ok);font-weight:800;"></div>
+          <div class="cfo-sleeves-grid">
+            <div style="padding:5px 7px;border-radius:8px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.1);font-size:10.5px;">
+              <div class="row-between"><strong>صناديق متنوعة</strong><span class="num text-pri">45%</span></div>
+              <div class="num muted">956.25 ر.س • تذبذب 12%</div>
+            </div>
+            <div style="padding:5px 7px;border-radius:8px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.1);font-size:10.5px;">
+              <div class="row-between"><strong>أسهم تداول</strong><span class="num text-sec">35%</span></div>
+              <div class="num muted">743.75 ر.س • تذبذب 18%</div>
+            </div>
+            <div style="padding:5px 7px;border-radius:8px;background:rgba(0,0,0,0.35);border:1px solid rgba(0,232,150,0.3);font-size:10.5px;">
+              <div class="row-between"><strong>عملات Spot</strong><span class="num text-ok">20%</span></div>
+              <div class="num muted">425.00 ر.س • بدون رافعة</div>
+            </div>
+          </div>
+
+          <!-- جسر مطابقة حساب Binance الشخصي (Read-Only) وبوابات الاعتماد الثماني -->
+          <div style="padding:6px 8px;border-radius:8px;background:rgba(0,245,212,0.06);border:1px solid rgba(0,245,212,0.28);font-size:11px;">
+            <div class="row-between" style="flex-wrap:wrap;gap:5px;">
+              <strong>🔐 جسر مطابقة حساب Binance الشخصي (قراءة فقط • معزول عن PAPER)</strong>
+              <div style="display:flex;gap:4px;">
+                <button type="button" class="btn-3d btn-3d-sm" onclick="ui.simulateBinanceReadOnlySync()">🔄 مزامنة قراءة فقط</button>
+                <button type="button" class="btn-3d btn-3d-sm btn-3d-gold" onclick="document.getElementById('modal-binance-vault').classList.remove('hidden')">🔑 خزنة المفاتيح</button>
+              </div>
+            </div>
+            <div id="cfo-bn-bridge-status" class="muted num" style="margin-top:4px;font-size:10.6px;">
+              المساهم التراكمي: SAR 2,125.00 ($566.67) • صافي ربح السوق بعد الرسوم: +SAR 148.50 • بوابة LIVE_SPOT #8: LOCKED (PAPER SAFE)
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- 5. جدول المراكز الاستثمارية المفتوحة الحية في المحفظة -->
+      <div class="holo-chamber" style="margin-top:8px;overflow-x:auto;">
+        <div class="row-between" style="margin-bottom:5px;">
+          <strong style="font-size:13.2px;color:var(--sec);">📊 المراكز الاستثمارية المفتوحة حالياً في المحفظة (مرتبطة حياً بالصفقات)</strong>
+          <span id="cfo-open-pos-badge" class="hex-shield num">3 مراكز نشطة</span>
+        </div>
+        <table style="width:100%;font-size:11.2px;">
+          <thead>
+            <tr><th>الأصل</th><th>الكمية المملوكة</th><th>السعر الحالي</th><th>القيمة السوقية</th><th>الوزن من المحفظة</th><th>إجراء سريع</th></tr>
+          </thead>
+          <tbody id="cfo-open-positions-tbody"></tbody>
+        </table>
+      </div>
+    </main>
+
   <!-- تنقل الجوال السفلي -->
   <nav id="mob-bottom-bar" class="mobile-bottom-nav mobile-only hidden">
-    <button type="button" class="mob-tab-btn active" data-mob-tab="elite90" onclick="ui.tab('elite90')"><span>🏆</span><span>الصفقات</span></button>
-    <button type="button" class="mob-tab-btn" data-mob-tab="charts3d" onclick="ui.tab('charts3d')"><span>🕯️</span><span>الشموع و3D</span></button>
+    <button type="button" class="mob-tab-btn active" data-mob-tab="elite90" onclick="ui.tab('elite90')"><span>🏆</span><span dir="ltr">&ge;75%</span></button>
+    <button type="button" class="mob-tab-btn" data-mob-tab="charts3d" onclick="ui.tab('charts3d')"><span>🕯️</span><span>الشموع</span></button>
     <button type="button" class="mob-tab-btn" data-mob-tab="boardroom" onclick="ui.tab('boardroom')"><span>🪑</span><span>الطاولة</span></button>
     <button type="button" class="mob-tab-btn" data-mob-tab="stocks" onclick="ui.tab('stocks')"><span>📈</span><span>الأسهم</span></button>
-    <button type="button" class="mob-tab-btn" data-mob-tab="daily" onclick="ui.tab('daily')"><span>📊</span><span>صفقات اليوم</span></button>
+    <button type="button" class="mob-tab-btn" data-mob-tab="daily" onclick="ui.tab('daily')"><span>📊</span><span>اليوم</span></button>
+    <button type="button" class="mob-tab-btn" data-mob-tab="cfo" onclick="ui.tab('cfo')"><span>💼</span><span>المدير المالي</span></button>
   </nav>
 
   <!-- إيصال تأكيد الشراء أو البيع الفوري -->
@@ -1217,7 +1468,7 @@
       { id: 'AI-2', role: 'PREDICTOR', roleAr: 'متنبئ الشموع والزخم المتعدد', icon: '⬡', col: '#00e896', glow: 'rgba(0,232,150,0.45)', alloc: 1480, bal: 1572.10, hrGrowth: 0.34, acc: 93.8, thompsonW: 0.14, investedIn: 'BTCUSDT Spot (60%) + ETHUSDT Spot (40%)' },
       { id: 'AI-3', role: 'PREDICTOR', roleAr: 'متنبئ سيولة المحافظ الكبرى', icon: '◉', col: '#a855f7', glow: 'rgba(168,85,247,0.45)', alloc: 1480, bal: 1658.50, hrGrowth: 0.56, acc: 93.1, thompsonW: 0.25, investedIn: 'NVDA (70%) + AVGO (30%)' },
       { id: 'AI-4', role: 'RISK_VETO', roleAr: 'تحجيم Kelly الكسري وفيتو المخاطر', icon: '⚡', col: '#ff9f1c', glow: 'rgba(255,159,28,0.45)', alloc: 1480, bal: 1598.00, hrGrowth: 0.43, acc: 96.0, thompsonW: 0.17, investedIn: 'BNBUSDT Spot (55%) + PAXG الذهب (45%)' },
-      { id: 'AI-5', role: 'CALIB_GATE', roleAr: 'معايرة PAVA وبوابة الثقة >=90%', icon: '★', col: '#f7c948', glow: 'rgba(247,201,72,0.50)', alloc: 1480, bal: 1681.20, hrGrowth: 0.62, acc: 95.5, thompsonW: 0.23, investedIn: 'ETHUSDT Spot (55%) + MSFT (45%)' }
+      { id: 'AI-5', role: 'CALIB_GATE', roleAr: 'معايرة PAVA وبوابة التحجيم >=75%', icon: '★', col: '#f7c948', glow: 'rgba(247,201,72,0.50)', alloc: 1480, bal: 1681.20, hrGrowth: 0.62, acc: 95.5, thompsonW: 0.23, investedIn: 'ETHUSDT Spot (55%) + MSFT (45%)' }
     ];
 
     // سجل صفقات اليوم المحققة (Spot Long-Only: البيع إغلاق لمركز مملوك مسبقاً + صافي بعد الرسوم + فوق High-Water-Mark)
@@ -1267,7 +1518,15 @@
       gaVerified: safeStore.get('htb_ga_verified') === '1',
       passkeyRegistered: safeStore.get('htb_passkey_ok') === '1',
       recoveryChannel: 'PHONE',
-      recoveryCode: ''
+      recoveryCode: '',
+      cfoCagrPct: 65,
+      cfoCards: [
+        { id: 'tasheel', name: 'بطاقة تسهيل (Tasheel)', balance: 14000, arrears: 1700, monthlyAlloc: 4200 },
+        { id: 'enbd', name: 'الإمارات دبي الوطني (ENBD)', balance: 17000, arrears: 1800, monthlyAlloc: 1800 }
+      ],
+      cfoCumulativeInvestedSar: 2125.00,
+      cfoInvestCycles: 1,
+      cfoQiwaProofs: ['عقد عمل محدد المدة — مباشرة 2024-10-10 (مهلة إشعار 60 يوماً)']
     };
     safeStore.set('htb_ga_secret', state.gaSecret);
 
@@ -1323,8 +1582,8 @@
 
     // معايرة رتيبة خارج العينة (Isotonic PAVA) — تمنع التضخيم الزائف للثقة
     function calibrateProbPAVA(rawP) {
-      const knotsX = [0.50, 0.70, 0.80, 0.86, 0.90, 0.92, 0.94, 0.96, 0.99];
-      const knotsY = [0.48, 0.66, 0.77, 0.83, 0.901, 0.918, 0.938, 0.952, 0.975];
+      const knotsX = [0.50, 0.70, 0.75, 0.80, 0.86, 0.90, 0.92, 0.94, 0.96, 0.99];
+      const knotsY = [0.48, 0.675, 0.752, 0.795, 0.845, 0.901, 0.918, 0.938, 0.952, 0.975];
       if (rawP <= knotsX[0]) return knotsY[0];
       if (rawP >= knotsX[knotsX.length - 1]) return knotsY[knotsY.length - 1];
       for (let i = 0; i < knotsX.length - 1; i++) {
@@ -1354,7 +1613,7 @@
       if (state.killSwitch) vetoReason = '🛑 قاطع الطوارئ (Kill Switch) مفعّل';
       else if (ddPct >= 0.03) vetoReason = `⚡ فيتو AI-4: تراجع اليوم ${(ddPct * 100).toFixed(2)}% بلغ الحد الأقصى 3%`;
       else if (spotShortBlocked) vetoReason = '🚫 فيتو Spot Long-Only: لا بيع على المكشوف في Spot دون رصيد مملوك';
-      else if (calProb < 0.90) vetoReason = `★ بوابة AI-5: الثقة المُعايَرة ${confPct}% أقل من عتبة 90%`;
+      else if (calProb < 0.75) vetoReason = `★ بوابة AI-5: الثقة المُعايَرة ${confPct}% أقل من عتبة 75% المفروضة للتحجيم`;
 
       // تحجيم Fractional Kelly المربوط بـ ATR والعمولات (AI-4)
       const stopDist = d.atr * 1.8;
@@ -1387,8 +1646,10 @@
       { id: 'el-nvda', sym: 'NVDA', assetClass: 'equity', name: 'NVIDIA • إنفيديا', bucket: '7d', round: '7D', recSide: 'BUY', price: 142.80, atr: 2.35, rr: 2.6, tpPct: 0.065, slPct: 0.018, predProbs: [0.946, 0.938, 0.942] },
       { id: 'el-eth', sym: 'ETHUSDT', assetClass: 'crypto', name: 'Ethereum • إيثيريوم', bucket: '24h', round: '4H', recSide: 'BUY', price: 3420.50, atr: 44.0, rr: 2.2, tpPct: 0.035, slPct: 0.012, predProbs: [0.936, 0.932, 0.928] },
       { id: 'el-bnb', sym: 'BNBUSDT', assetClass: 'crypto', name: 'BNB • بينانس', bucket: '24h', round: '12H', recSide: 'BUY', price: 654.20, atr: 8.20, rr: 2.1, tpPct: 0.031, slPct: 0.010, predProbs: [0.922, 0.918, 0.915] },
-      // مرشح سادس يُختبر أمام بوابة AI-5 والـ Spot Long-Only فيُحجب تلقائياً بشفافية كاملة!
-      { id: 'el-xrp-s', sym: 'XRPUSDT', assetClass: 'crypto', name: 'XRP • ريبل', bucket: '1h', round: '45m', recSide: 'SELL', price: 2.46, atr: 0.048, rr: 1.8, tpPct: 0.028, slPct: 0.010, predProbs: [0.85, 0.83, 0.81] }
+      // مع تعديل عتبة التحجيم إلى >=75% تتأهل صفقة XRP الفورية (~81.8% PAVA) وتُحجّم بمعيار Kelly تلقائياً!
+      { id: 'el-xrp', sym: 'XRPUSDT', assetClass: 'crypto', name: 'XRP • ريبل', bucket: '1h', round: '45m', recSide: 'BUY', price: 2.46, atr: 0.048, rr: 2.1, tpPct: 0.032, slPct: 0.011, predProbs: [0.85, 0.83, 0.81] },
+      // مرشح سابع دون عتبة 75% (~67.5% PAVA) يُحجب آلياً ويظهر عند اختيار فلتر «المحجوبة (<75%)»
+      { id: 'el-doge-v', sym: 'DOGEUSDT', assetClass: 'crypto', name: 'DOGE • دوجكوين', bucket: '1h', round: '30m', recSide: 'BUY', price: 0.395, atr: 0.012, rr: 1.6, tpPct: 0.025, slPct: 0.012, predProbs: [0.71, 0.69, 0.68] }
     ];
 
     function fmtQty(q, price) {
@@ -1432,9 +1693,9 @@
       ETH: { name: 'إيثيريوم', sym: 'ETHUSDT', price: 3420.5, conf: 92.1, stance: 'شراء Spot Long مُعايَر' },
       SOL: { name: 'سولانا', sym: 'SOLUSDT', price: 214.8, conf: 94.6, stance: 'شراء Spot رقم 1 (Kelly)' },
       BNB: { name: 'بينانس كوين', sym: 'BNBUSDT', price: 654.2, conf: 90.8, stance: 'شراء Spot Long مُعايَر' },
-      XRP: { name: 'ريبل', sym: 'XRPUSDT', price: 2.46, conf: 81.4, stance: 'محجوبة ببوابة AI-5 (<90% + منع بيع مكشوف Spot)' },
-      ADA: { name: 'كاردانو', sym: 'ADAUSDT', price: 1.08, conf: 80.2, stance: 'محجوبة ببوابة المعايرة (<90%)' },
-      DOGE: { name: 'دوجكوين', sym: 'DOGEUSDT', price: 0.395, conf: 71.5, stance: 'مرفوضة بفلتر النظام المتذبذب' }
+      XRP: { name: 'ريبل', sym: 'XRPUSDT', price: 2.46, conf: 81.8, stance: 'شراء Spot Long مُعايَر (>=75% Kelly)' },
+      ADA: { name: 'كاردانو', sym: 'ADAUSDT', price: 1.08, conf: 80.2, stance: 'شراء Spot Long مُعايَر (>=75% Kelly)' },
+      DOGE: { name: 'دوجكوين', sym: 'DOGEUSDT', price: 0.395, conf: 67.5, stance: 'محجوبة ببوابة AI-5 (<75%)' }
     };
 
     const ORBIT_COINS = [
@@ -1467,6 +1728,7 @@
 
     function getEliteDealsOver90() {
       syncAutoPortfolioSizing();
+      if (state.roundFilter === 'vetoed') return [];
       return ALL_CANDIDATE_DEALS
         .filter((d) => d.quant && d.quant.approved && (state.roundFilter === 'all' || d.bucket === state.roundFilter))
         .sort((a, b) => b.conf - a.conf);
@@ -1474,7 +1736,7 @@
 
     function getVetoedDeals() {
       syncAutoPortfolioSizing();
-      return ALL_CANDIDATE_DEALS.filter((d) => d.quant && !d.quant.approved && (state.roundFilter === 'all' || d.bucket === state.roundFilter));
+      return ALL_CANDIDATE_DEALS.filter((d) => d.quant && !d.quant.approved);
     }
 
     function computeDealMetrics(d) {
@@ -1675,6 +1937,16 @@
       const best = elite[0] || ALL_CANDIDATE_DEALS[0];
       const mBest = computeDealMetrics(best);
 
+      if (ql.includes('مدير') || ql.includes('راتب') || ql.includes('قوى') || ql.includes('تسهيل') || ql.includes('تريليون')) {
+        ui.tab('cfo');
+        speakSmartResponse(
+          'فتحت لك صفحة المدير المالي الشخصي ومسار التريليون دولار شاملة توزيع راتب العشرين ألف ريال، مخطط سداد تسهيل والإمارات دبي الوطني، حاسبة نظام العمل السعودي ومهلة الستين يوماً، ودفتر استثمار ألفين ومئة وخمسة وعشرين ريال.',
+          'Opened Personal CFO and One Trillion roadmap with salary allocation, debt planner, Saudi labor calculator, and SAR 2,125 ledger.',
+          '💼 صفحة المدير المالي الشخصي ومسار 1T$ مفتوحة بالكامل أمامك'
+        );
+        return;
+      }
+
       // أوامر الشراء/التنفيذ الصوتية تقترح فقط وتنتظر تأكيد الضغطة الواحدة (#voice-proposal-bar)!
       if (ql.includes('نفذ') || ql.includes('اشتر') || ql.includes('شراء')) {
         const matched = elite.find((d) => ql.includes(d.sym.replace('USDT', '').toLowerCase()) || d.name.toLowerCase().split('•').some((part) => ql.includes(part.trim()))) || best;
@@ -1725,7 +1997,7 @@
 
       tab(id) {
         state.activeTab = id;
-        ['elite90', 'charts3d', 'boardroom', 'stocks', 'daily'].forEach((k) => {
+        ['elite90', 'charts3d', 'boardroom', 'stocks', 'daily', 'cfo'].forEach((k) => {
           document.getElementById('sec-' + k)?.classList.toggle('hidden', k !== id);
         });
         document.querySelectorAll('.nav-main-btn').forEach((b) => b.classList.toggle('btn-3d-gold', b.dataset.tab === id));
@@ -1734,6 +2006,8 @@
           if (id === 'elite90') this.renderAllCardCandles();
           if (id === 'charts3d') { this.drawOrbit3D(); this.drawMainCandlestickChart(); }
           if (id === 'daily') this.renderDailyPage();
+        this.renderCfoPage();
+          if (id === 'cfo') this.renderCfoPage();
         }, 35);
       },
 
@@ -1775,7 +2049,7 @@
       renderFiveAiOrbs() {
         const box = document.getElementById('five-ai-orbs');
         if (!box) return;
-        const badges = ['P1', 'P2', 'P3', state.killSwitch ? 'STOP' : 'KL', '90%'];
+        const badges = ['P1', 'P2', 'P3', state.killSwitch ? 'STOP' : 'KL', '75%'];
         box.innerHTML = AI_AGENTS.map((ag, i) => `
           <div class="ai-orb" style="--orb-c:${ag.col};--orb-g:${ag.glow};" onclick="ui.pulseAiOrb(${i})" title="${ag.id}: ${ag.roleAr}">
             <span style="font-size:12.5px;color:${ag.col};line-height:1;">${ag.icon}</span>
@@ -2068,7 +2342,7 @@
 
         const tel = document.getElementById('quant-header-telemetry');
         if (tel) {
-          tel.textContent = `${elite.length} مؤهلة >=90% • ${vetoed.length} محجوبة ببوابة AI-5 • DSR ${state.deflatedSharpe} • HWM $${Math.round(state.highWaterMark).toLocaleString()}`;
+          tel.textContent = `${ALL_CANDIDATE_DEALS.filter(x=>x.quant&&x.quant.approved).length} مؤهلة (75%+) • ${vetoed.length} محجوبة • DSR ${state.deflatedSharpe} • HWM $${Math.round(state.highWaterMark).toLocaleString()}`;
         }
 
         const approvedCardsHtml = elite.map((d, idx) => {
@@ -2108,7 +2382,7 @@
             </div>
 
             <div class="row-between" style="gap:5px;">
-              <div style="display:flex;gap:3px;align-items:center;" title="AI1-3 متنبئون | AI4 فيتو المخاطر | AI5 معايرة >=90%">
+              <div style="display:flex;gap:3px;align-items:center;" title="AI1-3 متنبئون | AI4 تحجيم Kelly وفيتو | AI5 عتبة >=75%">
                 ${AI_AGENTS.map((ag, i) => `<span class="ai-orb-sm num" style="--orb-c:${ag.col};--orb-g:${ag.glow};">${d.aiScores[i]}</span>`).join('')}
               </div>
               <div style="display:flex;gap:5px;flex:1;justify-content:flex-end;">
@@ -2129,7 +2403,7 @@
             </div>
             <div class="holo-chamber" style="border-color:rgba(255,56,104,0.35);font-size:11.2px;line-height:1.55;color:#ffccd5;">
               <div><strong>السبب الكمي:</strong> ${d.quant.vetoReason}</div>
-              <div class="muted" style="margin-top:4px;">المبدأ الحاكم: بوابة AI-5 تحجب أي إشارة تقل معايرتها عن 90% وتمنع البيع المكشوف في Spot حمايةً لرأس المال.</div>
+              <div class="muted" style="margin-top:4px;">المبدأ الحاكم: بوابة AI-5 تحجب أي إشارة تقل معايرتها عن 75% وتمنع البيع المكشوف في Spot حمايةً لرأس المال.</div>
             </div>
             <div class="row-between" style="font-size:10.5px;">
               <span class="muted">متنبئو AI1-3: <strong class="num">${d.predProbs.map(p=>Math.round(p*100)+'%').join(' / ')}</strong></span>
@@ -2138,7 +2412,7 @@
           </article>
         `).join('');
 
-        box.innerHTML = approvedCardsHtml + vetoedCardsHtml;
+        box.innerHTML = (state.roundFilter === 'vetoed' || state.killSwitch) ? (approvedCardsHtml + vetoedCardsHtml) : approvedCardsHtml;
         if (typeof hydrateSigs === 'function') hydrateSigs();
         this.renderAllCardCandles();
       },
@@ -2624,6 +2898,259 @@
         }
       },
 
+
+      setCfoCagr(pct) {
+        state.cfoCagrPct = Number(pct) || 65;
+        document.querySelectorAll('.cfo-cagr-btn').forEach((b) => b.classList.toggle('btn-3d-gold', Number(b.dataset.cagr) === state.cfoCagrPct));
+        this.renderCfoPage();
+      },
+
+      recalcCfoSalary() {
+        const g = (id) => Math.max(0, Number(document.getElementById(id)?.value || 0));
+        const personal = g('cfo-b-personal');
+        const cards = g('cfo-b-cards');
+        const invest = g('cfo-b-invest');
+        const save = g('cfo-b-save');
+        const ai = g('cfo-b-ai');
+        const ops = g('cfo-b-ops');
+        const emg = g('cfo-emg-reserve');
+        const salary = 20000;
+        const used = personal + cards + invest + save + ai + ops;
+        const diff = salary - used;
+        const badge = document.getElementById('cfo-salary-badge');
+        if (badge) {
+          badge.textContent = diff === 0 ? `SAR 20,000 / 20,000 ✓` : (diff > 0 ? `فائض غير مخصص: +${diff.toLocaleString()} ر.س` : `تجاوز الراتب: ${diff.toLocaleString()} ر.س!`);
+          badge.style.color = diff >= 0 ? 'var(--ok)' : 'var(--hot)';
+          badge.style.borderColor = diff >= 0 ? 'var(--ok)' : 'var(--hot)';
+        }
+        const months = personal > 0 ? (emg / personal).toFixed(2) : '6.00';
+        const emgEl = document.getElementById('cfo-emg-months');
+        if (emgEl) emgEl.textContent = `تغطية الطوارئ: ${months} أشهر (${Number(months) >= 6 ? 'مكتمل ✓' : 'قيد البناء نحو 6 أشهر'})`;
+        const sumEl = document.getElementById('cfo-salary-summary');
+        if (sumEl) {
+          sumEl.innerHTML = `إجمالي المخصص: <strong class="num text-pri">${used.toLocaleString()} ر.س</strong> • استثمار Spot الشهري: <strong class="num text-ok">${invest.toLocaleString()} ر.س ($${(invest / 3.75).toFixed(2)})</strong> • موعد الصرف القادم: <span class="num">يوم 28 ميلادي</span>`;
+        }
+      },
+
+      resetCfoSalaryDefaults() {
+        const defaults = { 'cfo-b-personal': 8000, 'cfo-b-cards': 6000, 'cfo-b-invest': 2125, 'cfo-b-save': 2000, 'cfo-b-ai': 1375, 'cfo-b-ops': 500, 'cfo-emg-reserve': 42000 };
+        Object.entries(defaults).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
+        this.recalcCfoSalary();
+        this.toast('✅ تمت استعادة التوزيع الشهري المعتمد (20,000 ر.س)');
+      },
+
+      checkStatementDeduplication() {
+        const txt = (document.getElementById('cfo-stmt-inp')?.value || '').trim();
+        const box = document.getElementById('cfo-stmt-result');
+        if (!txt) { this.toast('⚠️ اكتب وصف بند كشف الحساب لفحص الازدواج', 'var(--pri)'); return; }
+        const tl = txt.toLowerCase();
+        if (tl.includes('سداد') || tl.includes('تسهيل') || tl.includes('بطاقة') || tl.includes('تحويل') || tl.includes('enbd') || tl.includes('دبي')) {
+          if (box) box.innerHTML = `<span class="text-pri">🛡️ تم عزل التحويل الداخلي:</span> البند «${txt}» يمثل تسوية بطاقة/تحويل داخلي مدرج مسبقاً ضمن مخصص الـ 6,000 ر.س — <strong>تم منع احتسابه مرتين بنجاح!</strong>`;
+        } else {
+          if (box) box.innerHTML = `<span class="text-ok">✅ عملية استهلاكية صافية:</span> البند «${txt}» لا يتعارض مع تسويات البطاقات ويُدرج مرة واحدة ضمن المصروفات الفعلية.`;
+        }
+        sfx.buySuccess();
+      },
+
+      payCreditCardInstallment(cardId) {
+        const c = state.cfoCards.find((x) => x.id === cardId);
+        if (!c) return;
+        c.balance = Math.max(0, c.balance - c.monthlyAlloc);
+        c.arrears = 0;
+        sfx.buySuccess();
+        this.renderCfoCards();
+        this.toast(`✅ تم تسجيل دفعة ${c.monthlyAlloc.toLocaleString()} ر.س لـ ${c.name} وتصفير المتأخرات!`);
+      },
+
+      renderCfoCards() {
+        const box = document.getElementById('cfo-cards-box');
+        if (!box) return;
+        box.innerHTML = state.cfoCards.map((c) => `
+          <div style="padding:6px 8px;border-radius:8px;background:rgba(0,0,0,0.38);border:1px solid rgba(255,255,255,0.1);font-size:11px;">
+            <div class="row-between">
+              <strong>${c.name}</strong>
+              <span class="num text-pri" style="font-weight:800;">مخصص شهري: ${c.monthlyAlloc.toLocaleString()} ر.س</span>
+            </div>
+            <div class="row-between" style="margin-top:4px;">
+              <span class="muted">الرصيد المتبقي: <strong class="num" style="color:#fff;">${c.balance.toLocaleString()} ر.س</strong> • المتأخرات: <strong class="num" style="color:${c.arrears > 0 ? 'var(--hot)' : 'var(--ok)'};">${c.arrears.toLocaleString()} ر.س</strong></span>
+              <button type="button" class="btn-3d btn-3d-sm btn-3d-buy" onclick="ui.payCreditCardInstallment('${c.id}')">✓ تسجيل دفعة</button>
+            </div>
+          </div>
+        `).join('');
+      },
+
+      recalcSaudiLabor() {
+        const sc = document.getElementById('cfo-labor-scenario')?.value || 'EXPIRY';
+        const expStr = document.getElementById('cfo-contract-expiry')?.value || '2027-10-10';
+        const unusedDays = Math.max(0, Number(document.getElementById('cfo-unused-leave')?.value || 63));
+        const wage = 20000;
+        const start = new Date('2024-10-10T00:00:00Z');
+        const end = new Date(expStr + 'T00:00:00Z');
+        const fullYrs = end.getUTCFullYear() - start.getUTCFullYear();
+        const anniv = new Date(Date.UTC(end.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()));
+        const years = Math.max(0.5, fullYrs + (end - anniv) / (365 * 86400 * 1000));
+        const fullEosb = Math.round((Math.min(years, 5) * 0.5 + Math.max(0, years - 5) * 1.0) * wage);
+        let factor = 1.0;
+        let legalNote = 'المادة 84 (انتهاء العقد المحدد وعدم التجديد): استحقاق 100% من مكافأة نهاية الخدمة.';
+        if (sc === 'EMPLOYER') { factor = 1.0; legalNote = 'المادة 74 / 84 (إنهاء من صاحب العمل): استحقاق 100% من المكافأة.'; }
+        else if (sc === 'ART87') { factor = 1.0; legalNote = 'المادة 87 (قوة قاهرة / حالات استثنائية): استحقاق 100% من المكافأة.'; }
+        else if (sc === 'RESIGN') {
+          factor = years < 2 ? 0 : (years < 5 ? (1 / 3) : (years < 10 ? (2 / 3) : 1.0));
+          legalNote = `المادة 85 (استقالة أثناء السريان لخدمة ${years.toFixed(1)} سنة): نسبة الاستحقاق ${Math.round(factor * 100)}%.`;
+        }
+        const eosb = Math.round(fullEosb * factor);
+        const leaveComp = Math.round((wage / 30) * unusedDays);
+        const totalSar = eosb + leaveComp;
+
+        const cutoff = new Date(end.getTime() - 60 * 86400 * 1000);
+        const r90 = new Date(end.getTime() - 90 * 86400 * 1000).toISOString().slice(0, 10);
+        const r75 = new Date(end.getTime() - 75 * 86400 * 1000).toISOString().slice(0, 10);
+        const cutoffIso = cutoff.toISOString().slice(0, 10);
+
+        const box = document.getElementById('cfo-saudi-calc-box');
+        if (box) {
+          box.innerHTML = `
+            <div class="row-between"><span>مدة الخدمة المحسوبة: <strong class="num">${years.toFixed(2)} سنة</strong></span><span class="num text-pri">آخر موعد لإشعار الـ 60 يوماً: <strong>${cutoffIso}</strong></span></div>
+            <div class="row-between" style="margin-top:3px;">
+              <span>مكافأة نهاية الخدمة: <strong class="num">${eosb.toLocaleString()} ر.س</strong></span>
+              <span>تعويض الإجازات (${unusedDays}د): <strong class="num">${leaveComp.toLocaleString()} ر.س</strong></span>
+              <span>الإجمالي التقديري: <strong class="num-3d-ok">${totalSar.toLocaleString()} ر.س</strong></span>
+            </div>
+            <div class="muted" style="font-size:10.2px;margin-top:3px;">${legalNote} • تنبيهات مبكرة: <span class="num">${r90} (-90d) | ${r75} (-75d)</span></div>
+          `;
+        }
+      },
+
+      saveQiwaProof() {
+        const inp = document.getElementById('cfo-qiwa-proof-inp');
+        const val = (inp?.value || '').trim();
+        if (!val) { this.toast('⚠️ أدخل مرجع عقد قوى أو عنوان المسودة لحفظه', 'var(--pri)'); return; }
+        state.cfoQiwaProofs.unshift(`${val} (${new Date().toLocaleDateString('ar-SA')})`);
+        if (inp) inp.value = '';
+        const box = document.getElementById('cfo-qiwa-proof-list');
+        if (box) box.innerHTML = `✅ الإثباتات المحفوظة (${state.cfoQiwaProofs.length}): <strong>${state.cfoQiwaProofs[0]}</strong> — (صفر إرسال خارجي تلقائي)`;
+        sfx.buySuccess();
+        this.toast('📎 تم حفظ مرجع الإثبات في الخزنة التعاقدية بأمان');
+      },
+
+      async logMonthly2125Allocation() {
+        state.cfoCumulativeInvestedSar = +(state.cfoCumulativeInvestedSar + 2125).toFixed(2);
+        state.cfoInvestCycles += 1;
+        try {
+          if (location.origin && location.origin !== 'null') {
+            fetch('/api/wealth/investments/allocate', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ amountSar: 2125, diversifiedWeightPct: 45, saudiEquitiesWeightPct: 35, cryptoSpotPaperWeightPct: 20, notes: 'CFO UI Monthly Cycle' })
+            }).catch(() => {});
+          }
+        } catch (_) {}
+        sfx.buySuccess();
+        this.renderCfoPage();
+        this.toast(`✅ تم تسجيل دفعة 2,125 ر.س في دفتر الاستثمار (الإجمالي: ${state.cfoCumulativeInvestedSar.toLocaleString()} ر.س — PAPER)`);
+      },
+
+      simulateBinanceReadOnlySync() {
+        sfx.buySuccess();
+        const el = document.getElementById('cfo-bn-bridge-status');
+        const t = new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        if (el) {
+          el.innerHTML = `✅ تزامن القراءة فقط (${t}): المساهم التراكمي <strong>SAR ${state.cfoCumulativeInvestedSar.toLocaleString()}</strong> ($${(state.cfoCumulativeInvestedSar / 3.75).toFixed(2)}) • صافي ربح السوق بعد الرسوم: <strong class="text-ok">+SAR 186.40</strong> • السحب والرافعة محظوران معمارياً ✓`;
+        }
+        this.toast('🔄 تمت محاكاة مزامنة القراءة فقط لجسر Binance الشخصي بنجاح');
+      },
+
+      renderCfoPage() {
+        // 1. حساب التقدم اللوغاريتمي ومسار الـ 1T$
+        const eq = Math.max(100000, state.equity);
+        const logPct = Math.max(1, Math.min(100, ((Math.log10(eq) - 5) / (12 - 5)) * 100));
+        const cagr = Math.max(0.05, (state.cfoCagrPct || 65) / 100);
+        const yrs = eq >= 1e12 ? 0 : Math.log(1e12 / eq) / Math.log(1 + cagr);
+        const incPct = ((state.equity - 1000000) / 1000000) * 100;
+
+        const elLog = document.getElementById('cfo-log-pct');
+        if (elLog) elLog.textContent = `${logPct.toFixed(2)}%`;
+        const elBar = document.getElementById('cfo-log-bar');
+        if (elBar) elBar.style.width = `${logPct.toFixed(2)}%`;
+        const elYrs = document.getElementById('cfo-yrs-1t');
+        if (elYrs) elYrs.textContent = `${yrs.toFixed(1)} سنة`;
+        const elInc = document.getElementById('cfo-since-inc');
+        if (elInc) {
+          elInc.textContent = `${incPct >= 0 ? '+' : ''}${incPct.toFixed(2)}%`;
+          elInc.className = 'num ' + (incPct >= 0 ? 'text-ok' : 'text-err');
+        }
+
+        const milestones = [
+          { lbl: '$1M', val: 1e6 }, { lbl: '$10M', val: 1e7 }, { lbl: '$100M', val: 1e8 },
+          { lbl: '$1B', val: 1e9 }, { lbl: '$100B', val: 1e11 }, { lbl: '$1T', val: 1e12 }
+        ];
+        const mBox = document.getElementById('cfo-milestones-box');
+        if (mBox) {
+          mBox.innerHTML = milestones.map((m) => {
+            const ok = state.equity >= m.val;
+            const mult = Math.max(1, Math.round(m.val / state.equity)).toLocaleString();
+            return `<div class="cfo-mile-chip ${ok ? 'reached' : ''}">
+              <div class="num" style="font-weight:900;font-size:12px;color:${ok ? 'var(--ok)' : '#fff'};">${m.lbl}</div>
+              <div class="num muted" style="font-size:9.5px;">${ok ? '✓ مُحقق' : mult + 'x'}</div>
+            </div>`;
+          }).join('');
+        }
+
+        // 2. حساب المراكز المفتوحة والسيولة النقدية المتاحة
+        const priceMap = {};
+        ALL_CANDIDATE_DEALS.forEach((d) => { priceMap[d.sym] = { price: d.price, name: d.name }; });
+        let investedMarketVal = 0;
+        const openRows = [];
+        Object.entries(state.spotHoldings || {}).forEach(([sym, q]) => {
+          const qty = Number(q || 0);
+          if (qty <= 0) return;
+          const pInfo = priceMap[sym] || { price: 100, name: sym };
+          const mv = qty * pInfo.price;
+          investedMarketVal += mv;
+          openRows.push({ sym, name: pInfo.name, qty, price: pInfo.price, mv, weight: (mv / state.equity) * 100 });
+        });
+        const cashAvail = Math.max(0, state.equity - investedMarketVal);
+        const cashPct = (cashAvail / state.equity) * 100;
+        const ddPct = Math.max(0, ((state.dayStartEquity - state.equity) / state.dayStartEquity) * 100);
+        const var95 = Math.round(investedMarketVal * 0.0185);
+
+        const elEq = document.getElementById('cfo-kpi-eq');
+        if (elEq) elEq.textContent = `$${state.equity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        const elCash = document.getElementById('cfo-kpi-cash');
+        if (elCash) elCash.textContent = `$${Math.round(cashAvail).toLocaleString('en-US')}`;
+        const elCashPct = document.getElementById('cfo-kpi-cash-pct');
+        if (elCashPct) elCashPct.textContent = `احتياطي سيولة ${cashPct.toFixed(1)}%`;
+        const elVar = document.getElementById('cfo-kpi-var');
+        if (elVar) elVar.textContent = `$${var95.toLocaleString('en-US')}`;
+        const elDd = document.getElementById('cfo-kpi-dd');
+        if (elDd) elDd.textContent = `${ddPct.toFixed(2)}% / 3.0% يومي`;
+
+        // 3. تحديث الراتب والبطاقات وحاسبة العمل ودفتر 2,125 والمراكز المفتوحة
+        this.recalcCfoSalary();
+        this.renderCfoCards();
+        this.recalcSaudiLabor();
+
+        const ledEl = document.getElementById('cfo-ledger-summary');
+        if (ledEl) {
+          ledEl.textContent = `الإجمالي التراكمي المخصص: ${state.cfoCumulativeInvestedSar.toLocaleString()} ر.س ($${(state.cfoCumulativeInvestedSar / 3.75).toFixed(2)}) عبر ${state.cfoInvestCycles} دورات شهرية`;
+        }
+
+        const posBadge = document.getElementById('cfo-open-pos-badge');
+        if (posBadge) posBadge.textContent = `${openRows.length} مراكز نشطة`;
+        const posTb = document.getElementById('cfo-open-positions-tbody');
+        if (posTb) {
+          posTb.innerHTML = openRows.length === 0
+            ? `<tr><td colspan="6" class="muted" style="text-align:center;">لا توجد مراكز مفتوحة حالياً — السيولة النقدية 100%.</td></tr>`
+            : openRows.map((r) => `<tr>
+                <td><strong>${r.sym}</strong> <span class="muted" style="font-size:10px;">${r.name}</span></td>
+                <td class="num">${r.qty}</td>
+                <td class="num">$${r.price.toLocaleString()}</td>
+                <td class="num-3d">$${Math.round(r.mv).toLocaleString()}</td>
+                <td class="num text-sec">${r.weight.toFixed(1)}%</td>
+                <td><button type="button" class="btn-3d btn-3d-sm" onclick="ui.focusDealOnMainChart('${r.sym}')">🕯️ الشارت</button></td>
+              </tr>`).join('');
+        }
+      },
+
       generateVaultKeypair() {
         sfx.buySuccess();
         const hex = Array.from(safeRandomBytes(18)).map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -2669,6 +3196,7 @@
       ui.renderBotsLeaderboard();
       ui.renderStocks();
       ui.renderDailyPage();
+    ui.renderCfoPage();
       ui.renderGoogleAuthQR();
       ui.syncLoginGateUI();
 

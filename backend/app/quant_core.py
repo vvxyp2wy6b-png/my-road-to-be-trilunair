@@ -304,13 +304,13 @@ def size_position(
     risk_state: RiskState,
     symbol: str,
     asset_class: str = "crypto",
-    min_calibrated_gate: float = 0.90,
+    min_calibrated_gate: float = 0.75,
     kelly_fraction_cap: float = 0.25,
     atr_stop_mult: float = 1.8,
     fee_bps_roundtrip: float = 15.0,
 ) -> Dict[str, Any]:
     """
-    AI-4 Risk Sizer & Veto + AI-5 >=0.90 Calibrated Confidence Gate.
+    AI-4 Risk Sizer & Veto + AI-5 >=0.75 (75%) Calibrated Confidence Gate.
     Combines conservative Bayesian win-rate + calibrated probability via Fractional Kelly,
     bounded by ATR volatility stop distance, daily drawdown (<3%), and portfolio heat caps.
     """
