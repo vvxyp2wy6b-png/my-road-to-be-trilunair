@@ -710,6 +710,75 @@ def get_live_agents_analysis_for_symbol(symbol: str, horizon: str = "1h") -> dic
     }
 
 
+class EconomistQueryInput(BaseModel):
+    question: str = Field(..., min_length=1, max_length=600)
+    symbolHint: str | None = Field(default=None, max_length=24)
+    horizon: str = Field(default="1h", max_length=12)
+
+
+@executive_router.post("/economist-query")
+def query_chief_economist_and_agents(payload: EconomistQueryInput) -> dict[str, Any]:
+    """
+    ربط برمجي حي للمساعد الاقتصادي الهولوغرامي مع مجلس الوكلاء الخمسة (convene_meeting)
+    ومحرك السوق والمخاطر للإجابة على أي سؤال مالي أو اقتصادي متغير بدقة كمية 100%.
+    """
+    q = payload.question.strip()
+    ql = q.lower()
+    sym_map = [
+        (["سولانا", "sol", "solusdt"], "SOL-USD", "SOLUSDT"),
+        (["بيتكوين", "بتكوين", "btc", "btcusdt"], "BTC-USD", "BTCUSDT"),
+        (["إيثيريوم", "ايثيريوم", "ايثريوم", "eth", "ethusdt"], "ETH-USD", "ETHUSDT"),
+        (["إنفيديا", "انفيديا", "nvda", "nvidia"], "NVDA", "NVDA"),
+        (["ذهب", "الذهب", "gold", "xau", "paxg"], "XAU-USD", "PAXGUSDT"),
+        (["أرامكو", "ارامكو", "aramco", "2222"], "ARAMCO.SR", "2222.SR"),
+    ]
+    target_engine = "SOL-USD"
+    target_disp = "SOLUSDT"
+    if payload.symbolHint:
+        resolved_hint = market_engine.resolve_symbol(payload.symbolHint)
+        if resolved_hint:
+            target_engine = resolved_hint
+            target_disp = payload.symbolHint
+    for keywords, eng_s, disp_s in sym_map:
+        if any(k in ql for k in keywords):
+            target_engine, target_disp = eng_s, disp_s
+            break
+
+    meeting = convene_meeting(symbol=target_engine, horizon=payload.horizon, language="ar")
+    asset = market_engine.get_asset(meeting.symbol)
+    portfolio = get_portfolio_snapshot()
+    agents_opinions = [
+        {
+            "agentId": ag.agentId,
+            "nameAr": ag.nameAr,
+            "roleAr": ag.roleAr,
+            "stance": ag.stance,
+            "confidence": ag.confidence,
+            "summaryAr": ag.summaryAr,
+            "keyMetricLabelAr": ag.keyMetricLabelAr,
+            "keyMetricValue": ag.keyMetricValue,
+        }
+        for ag in meeting.agentResponses
+    ]
+    return {
+        "status": "OK",
+        "connectedToAgentsCouncil": True,
+        "agentsCount": len(agents_opinions),
+        "question": q,
+        "analyzedSymbol": target_disp,
+        "engineSymbol": meeting.symbol,
+        "livePrice": float(asset.price) if asset else 0.0,
+        "change24hPct": float(asset.change24hPct) if asset else 0.0,
+        "spreadBps": float(asset.spreadBps) if asset else 0.0,
+        "portfolioEquityUsd": float(portfolio.totalEquity),
+        "consensusScorePct": meeting.consensus.agreementScorePct,
+        "finalVerdict": meeting.finalRecommendation.model_dump(),
+        "agentsOpinions": agents_opinions,
+        "riskAssessment": meeting.riskAssessment.model_dump(),
+    }
+
+
+
 @executive_router.post("/confirm-decision")
 def confirm_executive_decision(payload: ExecutiveDecisionInput) -> dict[str, Any]:
     """اعتماد أو تخطي توصية الوكلاء بضغطة زر واحدة عبر محرك المخاطر والتنفيذ الورقي."""
