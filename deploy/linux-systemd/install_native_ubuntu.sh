@@ -22,7 +22,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 apt-get install -y --no-install-recommends \
   ca-certificates curl gnupg ufw fail2ban unattended-upgrades \
-  postgresql postgresql-contrib python3 python3-venv git openssl jq
+  postgresql postgresql-contrib python3 python3-venv git openssl jq rsync
 
 echo "[3/7] Installing uv (fast deterministic Python manager)..."
 if ! command -v uv >/dev/null 2>&1; then
