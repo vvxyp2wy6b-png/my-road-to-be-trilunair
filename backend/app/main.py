@@ -1075,12 +1075,15 @@ except Exception:
 from app.admin_identity import admin_identity_router
 from app.binance_personal_account import binance_personal_router
 from app.binance_spot_execution_adapter import spot_execution_router
+from app.executive_advisor import executive_router
 from app.wealth_architect import wealth_router
 
 app.include_router(admin_identity_router)
 app.include_router(wealth_router)
 app.include_router(binance_personal_router)
 app.include_router(spot_execution_router)
+app.include_router(executive_router)
+
 
 _configure_optional_spa_serving(app)
 

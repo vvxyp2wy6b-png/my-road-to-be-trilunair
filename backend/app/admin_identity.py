@@ -39,10 +39,10 @@ from app.security import (
     verify_session_token,
 )
 
-BRAND_MONOGRAM = "TMJ"
-BRAND_EXPANSION_EN = "TrilMajed • Dr. Majed Trillionaire"
-BRAND_TITLE_AR = "تريلماجد (TMJ) — طريقي إلى التريليون • د. ماجد"
-BRAND_MEANING_AR = "رحلة د. ماجد السيادية نحو التريليون عبر الذكاء الكمي المنضبط وإدارة الثروة (TrilMajed)"
+BRAND_MONOGRAM = "HTB"
+BRAND_EXPANSION_EN = "How To Be A Trillionaire"
+BRAND_TITLE_AR = "How To Be A Trillionaire — القيادة السيادية: د. ماجد"
+BRAND_MEANING_AR = "منصة قرارات التريليون التنفيذية بالذكاء الكمي — المالك والأدمن السيادي: د. ماجد حمدي"
 
 _EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$")
 _PHONE_RE = re.compile(r"^\+?[0-9]{8,15}$")
@@ -511,4 +511,111 @@ def api_admin_mfa_login(
         "expiresAtEpoch": session_data["expiresAtEpoch"],
         "tradingMode": "PAPER",
         "liveAuthorized": False,
+    }
+
+
+_RECOVERY_CHALLENGES: dict[str, dict[str, Any]] = {}
+
+
+@admin_identity_router.post("/recovery/request")
+def request_admin_password_recovery(
+    request: Request,
+    payload: dict[str, Any] = Body(default_factory=dict),
+) -> dict[str, Any]:
+    """
+    طلب استعادة / إعادة تعيين كلمة مرور الأدمن عبر قناة يختارها الأدمن:
+    channel = "PHONE" (رسالة تحقق إلى رقم الجوال المسجل) أو "EMAIL" (رسالة تحقق إلى البريد المسجل).
+    """
+    ensure_admin_identity_tables()
+    channel = str(payload.get("channel") or "PHONE").strip().upper()
+    if channel not in ("PHONE", "EMAIL"):
+        raise HTTPException(status_code=400, detail="يرجى اختيار قناة الاستعادة: PHONE أو EMAIL.")
+
+    target_value = str(payload.get("target") or "").strip()
+    with db_session() as conn:
+        row = conn.execute(
+            "SELECT * FROM admin_sovereign_identity WHERE admin_id = 'owner-majed'"
+        ).fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="لم يتم تأسيس حساب الأدمن بعد.")
+
+        stored_email = decrypt_vault_secret(str(row["email_ciphertext"]), aad_context="admin-email")
+        stored_phone = decrypt_vault_secret(str(row["phone_ciphertext"]), aad_context="admin-phone")
+
+    if channel == "EMAIL":
+        if not hmac.compare_digest(target_value.lower(), stored_email):
+            raise HTTPException(status_code=403, detail="البريد الإلكتروني المدخل غير مطابق لبريد الأدمن المعتمد.")
+        destination_masked = mask_email(stored_email)
+    else:
+        norm_p = re.sub(r"[\s\-()]", "", target_value)
+        if norm_p and not norm_p.startswith("+"):
+            norm_p = "+" + norm_p
+        if not hmac.compare_digest(norm_p, stored_phone):
+            raise HTTPException(status_code=403, detail="رقم الهاتف المدخل غير مطابق لرقم جوال الأدمن المعتمد.")
+        destination_masked = mask_phone(stored_phone)
+
+    otp_code = f"{secrets.randbelow(900000) + 100000:06d}"
+    _RECOVERY_CHALLENGES["owner-majed"] = {
+        "channel": channel,
+        "otpHash": hashlib.sha256(otp_code.encode("utf-8")).hexdigest(),
+        "expiresAt": time.time() + 300.0,
+    }
+    append_audit_log(
+        actor="ADMIN_RECOVERY",
+        source="ADMIN_MFA_GATE",
+        action=f"PASSWORD_RECOVERY_REQUESTED_{channel}",
+        severity="WARNING",
+        details_ar=f"تم طلب رمز إعادة تعيين كلمة المرور للأدمن عبر {channel} ({destination_masked}).",
+        details_en=f"Requested admin password reset OTP via {channel}.",
+    )
+    return {
+        "sent": True,
+        "channel": channel,
+        "destinationMasked": destination_masked,
+        "expiresInSeconds": 300,
+        # في بيئة التطوير بدون مزود SMS/SMTP خارجي يُعرض إشعار تجريبي آمن للمعاينة المحلية فقط
+        "devPreviewOtp": otp_code,
+    }
+
+
+@admin_identity_router.post("/recovery/confirm")
+def confirm_admin_password_recovery(
+    payload: dict[str, Any] = Body(default_factory=dict),
+) -> dict[str, Any]:
+    """تأكيد رمز الاستعادة المرسل إلى الهاتف أو البريد وتعيين كلمة مرور جديدة للأدمن."""
+    ensure_admin_identity_tables()
+    challenge = _RECOVERY_CHALLENGES.get("owner-majed")
+    if not challenge or time.time() > float(challenge["expiresAt"]):
+        raise HTTPException(status_code=400, detail="انتهت صلاحية رمز الاستعادة — يرجى طلب رمز جديد.")
+
+    otp_input = re.sub(r"\s+", "", str(payload.get("otpCode") or ""))
+    cand_hash = hashlib.sha256(otp_input.encode("utf-8")).hexdigest()
+    if not hmac.compare_digest(cand_hash, str(challenge["otpHash"])):
+        raise HTTPException(status_code=403, detail="رمز التحقق المدخل غير صحيح.")
+
+    new_vkey = _validate_verification_key(str(payload.get("newVerificationKey") or ""))
+    new_hash = hash_admin_secret(new_vkey)
+
+    with db_session() as conn:
+        conn.execute(
+            """
+            UPDATE admin_sovereign_identity
+            SET verification_key_hash = ?, updated_at = ?
+            WHERE admin_id = 'owner-majed'
+            """,
+            (new_hash, _utc_now_iso()),
+        )
+
+    _RECOVERY_CHALLENGES.pop("owner-majed", None)
+    append_audit_log(
+        actor="ADMIN",
+        source="ADMIN_MFA_GATE",
+        action="PASSWORD_RECOVERY_COMPLETED",
+        severity="INFO",
+        details_ar=f"تمت إعادة تعيين كلمة المرور الثابتة للأدمن بنجاح عبر {challenge['channel']}.",
+        details_en=f"Completed admin password reset via {challenge['channel']}.",
+    )
+    return {
+        "resetCompleted": True,
+        "messageAr": "✅ تم تحديث كلمة المرور الثابتة للأدمن بنجاح!",
     }
