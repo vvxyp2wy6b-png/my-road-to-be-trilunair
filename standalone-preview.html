@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-layout="auto">
+<html lang="ar" dir="rtl" data-layout="auto" data-pnl-glow="on">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -617,6 +617,195 @@
     @media (max-width: 900px) { .mob-subnav-strip.show-in-trading { display: flex !important; } }
     html[data-layout="mobile"] .mob-subnav-strip.show-in-trading { display: flex !important; }
 
+
+    /* === تصميم الداشبورد الهولوغرامي الفاخر (مطابق للصورة المرفقة + 3 أعمدة: الجانبين الصفقات المقترحة والمنتصف أعلى صفقة ربحية قصيرة المدى) === */
+    body {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 62%, rgba(0, 212, 170, 0.11), transparent 70%),
+        radial-gradient(ellipse 65% 40% at 50% 0%, rgba(212, 165, 55, 0.10), transparent 60%),
+        linear-gradient(180deg, #050a12 0%, #07121e 52%, #040911 100%) !important;
+      position: relative;
+    }
+    /* شبكة الأفق الهولوغرامية ثلاثية الأبعاد في الخلفية كما في التصميم المرفق */
+    body::before {
+      content: "";
+      position: fixed; left: 0; right: 0; bottom: 0; height: 48vh; pointer-events: none; z-index: 0;
+      background-image:
+        linear-gradient(rgba(212, 165, 55, 0.11) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 245, 212, 0.09) 1px, transparent 1px);
+      background-size: 56px 34px;
+      transform: perspective(520px) rotateX(62deg);
+      transform-origin: bottom center;
+      opacity: 0.85;
+    }
+    html[data-pnl-glow="on"] body::after {
+      content: "";
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      box-shadow: inset 0 0 95px rgba(0, 232, 150, 0.14), inset 0 0 32px rgba(34, 211, 238, 0.10);
+    }
+    .holo-stage { position: relative; z-index: 1; max-width: 1540px; padding: 8px 16px 14px !important; gap: 6px !important; }
+
+    /* الهيدر العلوي الفاخر وشريط الكبسولة الذهبية للتنقل في سطر واحد متناسق على سطح المكتب */
+    .sovereign-bridge {
+      background: linear-gradient(180deg, rgba(9, 18, 31, 0.95), rgba(6, 13, 24, 0.93)) !important;
+      border: 1px solid rgba(56, 189, 248, 0.24) !important;
+      border-radius: 16px !important;
+      padding: 7px 13px !important;
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+    }
+    .lux-top-bar {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: nowrap;
+    }
+    .lux-brand-cluster {
+      display: flex; align-items: center; gap: 10px; min-width: 0; flex-shrink: 1;
+    }
+    .lux-hex-emblem {
+      min-width: 52px; height: 40px; padding: 0 9px; border-radius: 11px;
+      background: linear-gradient(145deg, #11223b 0%, #091322 100%) !important;
+      border: 1.5px solid rgba(247, 201, 72, 0.78) !important;
+      box-shadow: 0 0 18px rgba(247, 201, 72, 0.25), inset 0 1px 0 rgba(255, 228, 132, 0.22) !important;
+      display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;
+      font-weight: 900; font-size: 12.5px; color: #ffe484 !important; letter-spacing: 0.05em; cursor: pointer;
+    }
+    .lux-top-bar .btn-3d-sm {
+      padding: 4px 9px !important; font-size: 11px !important; white-space: nowrap;
+    }
+    .lux-top-bar .music-vol-range { width: 54px !important; }
+    .lux-pill-nav-track {
+      margin-top: 6px; padding: 3px 6px; border-radius: 999px;
+      background: rgba(6, 13, 24, 0.94);
+      border: 1px solid rgba(148, 197, 255, 0.19);
+      display: flex; align-items: center; justify-content: space-between; gap: 3px; flex-wrap: nowrap;
+    }
+    .lux-pill-nav-track .nav-logical-group {
+      padding: 2px 4px !important; gap: 3px !important; flex-wrap: nowrap !important;
+    }
+    .lux-pill-nav-track .nav-group-lbl {
+      font-size: 9px !important; padding: 1px 4px !important; white-space: nowrap;
+    }
+    .lux-pill-nav-track .nav-main-btn {
+      padding: 3px 7px !important; font-size: 10.2px !important; white-space: nowrap;
+    }
+
+    /* عنوان القسم مع العمود المضيء الجانبي ( | لوحة المؤشرات ، | قاعة التداول ) */
+    .lux-sec-heading {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      margin: 2px 2px 4px;
+    }
+    .lux-sec-title {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 13.8px; font-weight: 900; color: #f8fafc;
+    }
+    .lux-sec-title::before {
+      content: ""; width: 3.5px; height: 15px; border-radius: 4px;
+      background: linear-gradient(180deg, #22d3ee, #f7c948);
+      box-shadow: 0 0 10px rgba(34, 211, 238, 0.7);
+    }
+
+    /* صف كروت المؤشرات الخمسة الزجاجية (لوحة المؤشرات) */
+    .lux-kpi-five-grid {
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 9px;
+    }
+    .lux-kpi-card {
+      padding: 8px 12px; border-radius: 14px;
+      background: linear-gradient(165deg, rgba(14, 28, 44, 0.89), rgba(7, 15, 26, 0.96));
+      border: 1px solid rgba(56, 189, 248, 0.27);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.06);
+      display: flex; flex-direction: column; justify-content: space-between; gap: 4px;
+    }
+    .lux-kpi-top {
+      display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    }
+    .lux-gold-ico {
+      width: 26px; height: 26px; border-radius: 8px;
+      background: rgba(247, 201, 72, 0.13);
+      border: 1px solid rgba(247, 201, 72, 0.44);
+      color: #ffe484; font-size: 13px;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .lux-kpi-val {
+      font-size: clamp(16px, 1.35vw, 20.5px); font-weight: 900; letter-spacing: 0.01em; color: #ffffff;
+    }
+    .lux-kpi-foot {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 10px; color: #9fb4d4;
+    }
+
+    /* شريط مسار التريليون الذهبي-السيان العريض ($1 -> $1K -> $1M -> $1B -> $1T) من اليسار لليمين كما في الصورة المرفقة */
+    .lux-1t-ribbon {
+      margin-top: 6px; padding: 7px 14px; border-radius: 14px;
+      background: linear-gradient(165deg, rgba(12, 25, 40, 0.91), rgba(6, 14, 25, 0.97));
+      border: 1px solid rgba(34, 211, 238, 0.34);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.48), 0 0 22px rgba(34, 211, 238, 0.07);
+    }
+    .lux-1t-track {
+      direction: ltr;
+      height: 10px; border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      overflow: hidden; margin: 5px 0 4px;
+    }
+    .lux-1t-fill {
+      height: 100%; border-radius: 999px;
+      background: linear-gradient(90deg, #c99a2e 0%, #eab308 38%, #34d399 76%, #22d3ee 100%);
+      box-shadow: 0 0 16px rgba(34, 211, 238, 0.72);
+      transition: width 0.35s ease;
+    }
+
+    /* قاعة التداول ثلاثية الأعمدة: [الجانب الأيمن: صفقات مقترحة] | [المنتصف الكبير: أعلى صفقة ربحية قصيرة المدى] | [الجانب الأيسر: صفقات مقترحة] */
+    .lux-trading-tri-arena {
+      display: grid;
+      grid-template-columns: minmax(250px, 0.92fr) minmax(490px, 2.08fr) minmax(250px, 0.92fr);
+      gap: 10px;
+      align-items: stretch;
+    }
+    .lux-side-column {
+      padding: 8px 10px; border-radius: 16px;
+      background: linear-gradient(170deg, rgba(12, 24, 39, 0.91), rgba(6, 13, 24, 0.97));
+      border: 1px solid rgba(56, 189, 248, 0.26);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.54);
+      display: flex; flex-direction: column; justify-content: space-between; gap: 6px;
+    }
+    .lux-side-deal-card {
+      padding: 7px 9px; border-radius: 12px;
+      background: linear-gradient(165deg, rgba(16, 31, 50, 0.89), rgba(8, 17, 30, 0.96));
+      border: 1px solid rgba(148, 197, 255, 0.17);
+      transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.12s ease;
+      cursor: pointer;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .lux-side-deal-card:hover, .lux-side-deal-card.active-hero {
+      border-color: rgba(34, 211, 238, 0.75);
+      box-shadow: 0 0 18px rgba(34, 211, 238, 0.20);
+    }
+    .lux-hero-center-panel {
+      padding: 10px 13px; border-radius: 16px;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(0, 232, 150, 0.09), transparent 68%),
+        linear-gradient(170deg, rgba(13, 27, 44, 0.93), rgba(6, 13, 24, 0.98));
+      border: 1.5px solid rgba(34, 211, 238, 0.45);
+      box-shadow: 0 16px 44px rgba(0,0,0,0.68), 0 0 34px rgba(0, 245, 212, 0.12);
+      display: flex; flex-direction: column; justify-content: space-between; gap: 7px;
+    }
+    .lux-hero-canvas-wrap {
+      position: relative; width: 100%; border-radius: 13px; overflow: hidden;
+      background: radial-gradient(ellipse at 50% 88%, rgba(0, 212, 170, 0.17), rgba(4, 11, 22, 0.97) 72%);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+    .lux-tf-pill-group {
+      display: inline-flex; gap: 4px; padding: 2px 4px; border-radius: 9px;
+      background: rgba(6, 14, 26, 0.92); border: 1px solid rgba(148, 197, 255, 0.2);
+    }
+    @media (max-width: 1320px) {
+      .lux-top-bar, .lux-pill-nav-track { flex-wrap: wrap; }
+    }
+    @media (max-width: 1120px) {
+      .lux-kpi-five-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .lux-trading-tri-arena { grid-template-columns: 1fr; }
+    }
+    html[data-layout="mobile"] .lux-kpi-five-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    html[data-layout="mobile"] .lux-trading-tri-arena { grid-template-columns: 1fr; }
+
   </style>
 </head>
 <body>
@@ -722,65 +911,68 @@
   </section>
 
   <div id="app-cockpit-shell" class="holo-stage hidden">
-    <!-- 1A. الهيدر المكتبي الموحّد مع زر موسيقى التركيز والـ 5 مجموعات المنطقية -->
+    <!-- 1A. الهيدر المكتبي الهولوغرامي الفاخر (مطابق للتصميم المرفق + كل المجموعات المنطقية وموسيقى التركيز وإضاءة P&L) -->
     <header class="sovereign-bridge desktop-only">
-      <div class="header-tri-grid">
-        <div style="display:flex;align-items:center;gap:6px;justify-self:start;flex-wrap:wrap;">
-          <div id="hdr-crest-svg" onclick="ui.cycleMonogram()" style="cursor:pointer;"></div>
-          <span class="hex-shield num" style="color:var(--ok);border-color:var(--ok);">TESTNET•14D•PAPER</span>
-          <button type="button" id="hdr-mono-tag" class="btn-3d btn-3d-sm btn-3d-gold num" onclick="ui.cycleMonogram()">HTB ★</button>
-          <!-- زر الموسيقى الهادئة للتركيز (تشغيل/إيقاف + مستوى الصوت) -->
-          <div class="music-ctrl-pill" title="الموسيقى الهادئة المساعدة على التركيز">
-            <button type="button" id="btn-ambient-music" class="btn-3d btn-3d-sm" onclick="ui.toggleAmbientMusic()">🎵 موسيقى التركيز: إيقاف</button>
+      <div class="lux-top-bar">
+        <!-- اليمين: الشعار السداسي الذهبي + اسم المنصة + توقيع المالك -->
+        <div class="lux-brand-cluster">
+          <div id="hdr-crest-svg" style="display:none;"></div>
+          <button type="button" id="hdr-mono-tag" class="lux-hex-emblem num" onclick="ui.cycleMonogram()" title="تبديل الشعار الثلاثي">HTB</button>
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <h1 class="hdr-eng-title eng-crown" style="margin:0;font-size:18.5px;letter-spacing:0.05em;white-space:nowrap;">TRILMAJED · تريلماجد</h1>
+              <img class="sig-img" data-sig="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="توقيع د. ماجد حمدي" />
+            </div>
+            <div class="muted" style="font-size:10.5px;color:#b8cbe4;white-space:nowrap;">
+              <strong style="color:#ffe484;">HOW TO BE A TRILLIONAIRE</strong> · Quantum AI Command Center — د. ماجد حمدي
+            </div>
+          </div>
+        </div>
+
+        <!-- اليسار: كبسولات التحكم الفاخرة (PAPER LOCKED + إضاءة P&L + موسيقى التركيز ومستوى الصوت + المفاتيح + الطوارئ + خروج) -->
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;">
+          <span class="hex-shield num" style="padding:4px 9px;border-radius:999px;color:#ffe484;border-color:rgba(247,201,72,0.55);background:rgba(247,201,72,0.10);white-space:nowrap;">● PAPER LOCKED</span>
+          <button type="button" id="btn-pnl-glow" class="btn-3d btn-3d-sm" style="border-radius:999px;" onclick="ui.togglePnlGlow()">💡 إضاءة P&amp;L</button>
+          <div class="music-ctrl-pill" style="border-radius:999px;padding:1px 6px;" title="الموسيقى الهادئة المساعدة على التركيز">
+            <button type="button" id="btn-ambient-music" class="btn-3d btn-3d-sm" style="border-radius:999px;" onclick="ui.toggleAmbientMusic()">🎵 موسيقى التركيز</button>
             <input id="ambient-vol-slider" type="range" min="0" max="100" value="35" class="music-vol-range" aria-label="مستوى صوت موسيقى التركيز" oninput="ui.setAmbientVolume(this.value)" />
-            <span id="ambient-vol-lbl" class="num" style="font-size:10.5px;color:#eaf4ff;min-width:28px;">35%</span>
+            <span id="ambient-vol-lbl" class="num" style="font-size:10px;color:#eaf4ff;min-width:25px;">35%</span>
           </div>
-        </div>
-
-        <div class="hdr-center-crown">
-          <h1 class="hdr-eng-title eng-crown" style="font-size:clamp(15px,1.55vw,21px);">HOW TO BE A TRILLIONAIRE</h1>
-        </div>
-
-        <div style="display:flex;align-items:center;gap:6px;justify-self:end;flex-wrap:wrap;">
-          <div class="owner-seal-card">
-            <strong style="font-size:11.5px;color:#fff;">د. ماجد حمدي</strong>
-            <img class="sig-img" data-sig="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="توقيع د. ماجد حمدي" />
-          </div>
-          <button type="button" class="btn-3d btn-3d-sm" onclick="ui.openBinanceModal()">🔑 مفاتيح Testnet</button>
-          <button type="button" class="btn-3d btn-3d-sm" onclick="ui.toggleDeviceMode()"><span id="device-mode-lbl">📱 الجوال</span></button>
-          <button type="button" id="btn-kill-switch" class="btn-3d btn-3d-sm kill-btn-3d" onclick="ui.triggerKillSwitch()">🛑 أوقف كل شيء</button>
-          <button type="button" id="btn-lock-app" class="btn-3d btn-3d-sm btn-3d-sell" onclick="ui.lockCockpit()">🔒 خروج</button>
+          <button type="button" class="btn-3d btn-3d-sm" style="border-radius:999px;" onclick="ui.openBinanceModal()">🔑 Testnet</button>
+          <button type="button" class="btn-3d btn-3d-sm" style="border-radius:999px;" onclick="ui.toggleDeviceMode()"><span id="device-mode-lbl">📱 الجوال</span></button>
+          <button type="button" id="btn-kill-switch" class="btn-3d btn-3d-sm kill-btn-3d" style="border-radius:999px;" onclick="ui.triggerKillSwitch()">🛑 أوقف كل شيء</button>
+          <button type="button" id="btn-lock-app" class="btn-3d btn-3d-sm btn-3d-sell" style="border-radius:999px;" onclick="ui.lockCockpit()">🔒 خروج</button>
         </div>
       </div>
 
-      <!-- الترتيب الاحترافي في 5 مجموعات منطقية: التداول | الوكلاء | المحفظة | المدير المالي | الإعدادات والصوت -->
-      <nav class="grouped-prism-nav" aria-label="المجموعات المنطقية للمنصة">
-        <div class="nav-logical-group" data-group="trading">
-          <span class="nav-group-lbl">التداول</span>
-          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold nav-main-btn" data-tab="elite90" onclick="ui.tab('elite90')">🏆 الصفقات (<span dir="ltr">&ge;75%</span>)</button>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="charts3d" onclick="ui.tab('charts3d')">🕯️ الشموع و3D</button>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="stocks" onclick="ui.tab('stocks')">📈 الأسهم</button>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="testnet14" onclick="ui.tab('testnet14')">🧪 Testnet 14d والمعايرة</button>
+      <!-- شريط الكبسولة الأفقي المقسّم منطقياً (التداول / الوكلاء / المحفظة / المدير المالي / الإعدادات والصوت) -->
+      <nav class="lux-pill-nav-track" aria-label="المجموعات المنطقية للمنصة">
+        <div class="nav-logical-group" data-group="trading" style="border-radius:999px;background:transparent;border-color:rgba(56,189,248,0.22);">
+          <span class="nav-group-lbl" style="border-radius:999px;">التداول</span>
+          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold nav-main-btn" style="border-radius:999px;" data-tab="elite90" onclick="ui.tab('elite90')">🏛️ قاعة التداول (<span dir="ltr">&ge;75%</span>)</button>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="charts3d" onclick="ui.tab('charts3d')">🕯️ مدار 3D</button>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="stocks" onclick="ui.tab('stocks')">📈 الأسهم</button>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="testnet14" onclick="ui.tab('testnet14')">🧪 المعايرة 14d</button>
         </div>
 
-        <div class="nav-logical-group" data-group="agents">
-          <span class="nav-group-lbl">الوكلاء</span>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="boardroom" onclick="ui.tab('boardroom')">🪑 الـ 5 آيجنت والـ 20%</button>
+        <div class="nav-logical-group" data-group="agents" style="border-radius:999px;background:transparent;border-color:rgba(56,189,248,0.22);">
+          <span class="nav-group-lbl" style="border-radius:999px;">الوكلاء</span>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="boardroom" onclick="ui.tab('boardroom')">🤖 مركز الوكلاء (20%)</button>
         </div>
 
-        <div class="nav-logical-group" data-group="portfolio">
-          <span class="nav-group-lbl">المحفظة</span>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="daily" onclick="ui.tab('daily')">📊 صفقات اليوم والـ HWM</button>
+        <div class="nav-logical-group" data-group="portfolio" style="border-radius:999px;background:transparent;border-color:rgba(56,189,248,0.22);">
+          <span class="nav-group-lbl" style="border-radius:999px;">المحفظة</span>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="daily" onclick="ui.tab('daily')">📊 صفقات اليوم HWM</button>
         </div>
 
-        <div class="nav-logical-group" data-group="cfo">
-          <span class="nav-group-lbl">المدير المالي</span>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="cfo" onclick="ui.tab('cfo')">💼 المدير المالي و1T$</button>
+        <div class="nav-logical-group" data-group="cfo" style="border-radius:999px;background:transparent;border-color:rgba(56,189,248,0.22);">
+          <span class="nav-group-lbl" style="border-radius:999px;">المدير المالي</span>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="cfo" onclick="ui.tab('cfo')">💼 المدير المالي (20K ر.س)</button>
         </div>
 
-        <div class="nav-logical-group" data-group="settings">
-          <span class="nav-group-lbl">الإعدادات والصوت</span>
-          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="settings" onclick="ui.tab('settings')">⚙️ الإعدادات والصوت والسمات</button>
+        <div class="nav-logical-group" data-group="settings" style="border-radius:999px;background:transparent;border-color:rgba(56,189,248,0.22);">
+          <span class="nav-group-lbl" style="border-radius:999px;">الإعدادات والصوت</span>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" style="border-radius:999px;" data-tab="settings" onclick="ui.tab('settings')">🎨 الإعدادات والثيمات</button>
         </div>
       </nav>
     </header>
@@ -807,92 +999,197 @@
     <!-- ================================================================
          2. الشريط القيادي المدمج: الأرقام 3D + الهولوغرام الصوتي + زر المايك فقط + 5 أيقونات آيجنت ملونة!
          ================================================================ -->
-    <section class="command-top-deck">
-      <!-- أرقام المحفظة المجسمة 3D -->
-      <div class="kpi-quad">
-        <div class="holo-chamber">
-          <div class="muted">💼 المحفظة</div>
-          <div id="kpi-equity" class="num-3d" style="font-size:16.5px;">$1,004,850.00</div>
-        </div>
-        <div class="holo-chamber">
-          <div class="muted">💰 صافي الربح</div>
-          <div id="kpi-net-profit" class="num-3d-ok" style="font-size:16.5px;">+$4,850.00</div>
-        </div>
-        <div class="holo-chamber">
-          <div class="muted">🤖 محفظة الـ 20%</div>
-          <div id="kpi-bots-pool" class="num-3d-cyan" style="font-size:14.5px;">$8,093 (+0.47%/h)</div>
-        </div>
-        <div class="holo-chamber">
-          <div class="muted">✅ المنفذة</div>
-          <div id="kpi-elite-count" class="num-3d" style="font-size:15px;">6 ELITE • 0 FILLED</div>
+    <!-- شريط التداول الفرعي للجوال -->
+    <div id="mob-trading-subnav" class="mob-subnav-strip show-in-trading">
+      <button type="button" class="btn-3d btn-3d-sm btn-3d-gold mob-sub-btn" data-subtab="elite90" style="flex:1;" onclick="ui.tab('elite90')">🏛️ <span dir="ltr">&ge;75%</span></button>
+      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="charts3d" style="flex:1;" onclick="ui.tab('charts3d')">🕯️ 3D</button>
+      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="stocks" style="flex:1;" onclick="ui.tab('stocks')">📈 الأسهم</button>
+      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="testnet14" style="flex:1;" onclick="ui.tab('testnet14')">🧪 المعايرة 14d</button>
+    </div>
+
+    <!-- 2A. لوحة المؤشرات الخمسة الفاخرة + شريط مسار التريليون الذهبي-السيان + المساعد الصوتي المدمج -->
+    <section class="lux-metrics-shell">
+      <div class="lux-sec-heading">
+        <span class="lux-sec-title">لوحة المؤشرات</span>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span id="quant-header-telemetry" class="hex-shield num" style="color:var(--sec);border-color:rgba(34,211,238,0.4);">7 مؤهلة (75%+) • DSR 0.92 • Spot Long-Only</span>
         </div>
       </div>
 
-      <!-- الهولوغرام الصوتي + زر المايك (اضغط تكلم -> اضغط أغلق يرد الآيجنت) + 5 أيقونات ملونة فقط! -->
-      <div id="holo-vocal-sanctum" class="holo-mic-bar" data-voice-state="idle">
-        <canvas id="vocal-entity-cv" width="272" height="152"></canvas>
+      <div class="lux-kpi-five-grid">
+        <!-- 1. إجمالي حقوق الملكية -->
+        <div class="lux-kpi-card">
+          <div class="lux-kpi-top">
+            <span class="muted" style="font-size:11.8px;color:#cbd5e1;">إجمالي حقوق الملكية</span>
+            <span class="lux-gold-ico">🏛️</span>
+          </div>
+          <div id="kpi-equity" class="lux-kpi-val num" dir="ltr" style="text-align:right;">$1,004,850.00</div>
+          <div class="lux-kpi-foot"><span>Total Equity</span><span class="num">USD</span></div>
+        </div>
 
-        <!-- زر المايك الوحيد البسيط -->
-        <button type="button" id="btn-mic-orb" class="mic-orb-btn" onclick="ui.toggleMicTalk()" title="اضغط لفتح المايك والتحدث، واضغط مرة ثانية لإغلاقه وسماع رد الآيجنت">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3"/><path d="M8 22h8"/></svg>
-          <span id="mic-orb-lbl">اضغط وتحدث</span>
-        </button>
+        <!-- 2. ربح / خسارة اليوم -->
+        <div class="lux-kpi-card">
+          <div class="lux-kpi-top">
+            <span class="muted" style="font-size:11.8px;color:#cbd5e1;">ربح / خسارة اليوم</span>
+            <span class="lux-gold-ico">📈</span>
+          </div>
+          <div id="kpi-net-profit" class="lux-kpi-val num" dir="ltr" style="text-align:right;color:#10f5a0;text-shadow:0 0 16px rgba(16,245,160,0.35);">+$4,850.00</div>
+          <div class="lux-kpi-foot"><span id="kpi-bots-pool" class="num text-sec">20% Pool: $8,128</span><span id="kpi-pnl-pct" class="num text-ok">+0.49%</span></div>
+        </div>
 
-        <!-- 5 أيقونات ملونة فقط للآيجنت الخمسة بجانب الهولوغرام (بدون أسماء بشرية!) -->
-        <div id="five-ai-orbs" class="five-agent-orbs"></div>
+        <!-- 3. سيولة USDT المتاحة -->
+        <div class="lux-kpi-card">
+          <div class="lux-kpi-top">
+            <span class="muted" style="font-size:11.8px;color:#cbd5e1;">سيولة USDT المتاحة</span>
+            <span class="lux-gold-ico">🪙</span>
+          </div>
+          <div id="kpi-avail-usdt" class="lux-kpi-val num" dir="ltr" style="text-align:right;">871,205 USDT</div>
+          <div class="lux-kpi-foot"><span>Available</span><span id="kpi-elite-count" class="num text-pri">7 ELITE • 5 FILLED</span></div>
+        </div>
 
-        <!-- سطر حالة صوتي مختصر جداً + اختيار نبرة الصوت -->
-        <div style="display:flex;flex-direction:column;gap:5px;min-width:0;">
-          <div class="row-between">
-            <span id="vocal-state-pill" class="hex-shield">🎙️ اضغط المايك للتحدث مع الآيجنت</span>
-            <select id="voice-persona-sel" class="holo-sel" style="font-size:10.8px;padding:3px 6px;" onchange="ui.onVoicePersonaChange()">
-              <option value="chief_fast">🔊 صوت 1 (سريع حازم)</option>
-              <option value="sarah_risk">🔊 صوت 2 (ناعم رصين)</option>
-              <option value="wallst_en">🔊 Voice 3 (Neural EN)</option>
-              <option value="scifi_pulse">🔊 نغمة هولوغرامية فقط</option>
+        <!-- 4. قاطع المخاطر / التراجع -->
+        <div class="lux-kpi-card">
+          <div class="lux-kpi-top">
+            <span class="muted" style="font-size:11.8px;color:#cbd5e1;">قاطع المخاطر / التراجع</span>
+            <span class="lux-gold-ico">🛡️</span>
+          </div>
+          <div id="kpi-dd-val" class="lux-kpi-val num" dir="ltr" style="text-align:right;">0.0%</div>
+          <div style="height:4px;border-radius:99px;background:rgba(255,255,255,0.08);overflow:hidden;">
+            <div id="kpi-dd-bar" style="width:8%;height:100%;background:linear-gradient(90deg,#10b981,#22d3ee);"></div>
+          </div>
+          <div class="lux-kpi-foot"><span>1.5% نصف | 2.5% وقف</span><span class="num">حد القطع 3%</span></div>
+        </div>
+
+        <!-- 5. هدف التريليون (لوغاريتمي) -->
+        <div class="lux-kpi-card">
+          <div class="lux-kpi-top">
+            <span class="muted" style="font-size:11.8px;color:#cbd5e1;">هدف التريليون (لوغاريتمي)</span>
+            <span class="lux-gold-ico">☆</span>
+          </div>
+          <div id="kpi-1t-log-pct" class="lux-kpi-val num" dir="ltr" style="text-align:right;">50.0%</div>
+          <div class="lux-kpi-foot"><span>$1T Goal · log</span><span class="num" dir="ltr">10¹² / 10⁶</span></div>
+        </div>
+      </div>
+
+      <!-- شريط مسار الهدف اللوغاريتمي ($1 -> $1K -> $1M -> $1B -> $1T) + دمج المساعد الصوتي والـ 5 آيجنت بأناقة -->
+      <div class="lux-1t-ribbon">
+        <div class="row-between" style="flex-wrap:wrap;gap:8px;">
+          <div style="font-size:12.5px;font-weight:800;color:#e2e8f0;">
+            مسار الهدف: <strong id="ribbon-cur-eq" class="num" style="color:#ffe484;">$1,004,850.00</strong>
+            <span style="color:#64748b;margin:0 4px;">←</span>
+            <strong class="num" style="color:#f8fafc;">$1,000,000,000,000</strong>
+          </div>
+
+          <!-- شريط الأوامر الصوتية المدمج (المايك + الـ 5 آيجنت + رد المستشار) -->
+          <div id="holo-vocal-sanctum" data-voice-state="idle" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <canvas id="vocal-entity-cv" width="110" height="32" style="width:92px;height:28px;border-radius:8px;background:rgba(4,12,24,0.8);border:1px solid rgba(0,245,212,0.25);"></canvas>
+            <button type="button" id="btn-mic-orb" class="btn-3d btn-3d-buy btn-3d-sm" style="border-radius:999px;padding:4px 11px;" onclick="ui.toggleMicTalk()">
+              🎙️ <span id="mic-orb-lbl">اضغط وتحدث</span>
+            </button>
+            <div id="five-ai-orbs" class="five-agent-orbs" style="display:inline-flex;gap:4px;"></div>
+            <select id="voice-persona-sel" class="holo-inp" style="font-size:10.5px;padding:2px 6px;border-radius:8px;" onchange="ui.onVoicePersonaChange()">
+              <option value="chief_fast">🔊 صوت 1 (حازم)</option>
+              <option value="sarah_risk">🔊 صوت 2 (رصين)</option>
+              <option value="wallst_en">🔊 Neural EN</option>
             </select>
+            <span id="vocal-state-pill" class="hidden"></span>
           </div>
-          <div id="assistant-live-answer" style="font-size:12px;color:var(--txt-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-            جاهز صوتياً — الصوت يقترح فقط بتأكيد ضغطة واحدة (واستثناء «أوقف كل شيء» فوري).
-          </div>
-          <div id="voice-proposal-bar" class="voice-proposal-bar hidden">
-            <span id="voice-proposal-txt">🎯 اقتراح صوتي جاهز:</span>
-            <div style="display:flex;gap:5px;">
-              <button type="button" id="btn-confirm-voice-prop" class="btn-3d btn-3d-buy btn-3d-sm" onclick="ui.confirmVoiceProposal()">✅ تأكيد التنفيذ</button>
-              <button type="button" class="btn-3d btn-3d-sm" onclick="ui.cancelVoiceProposal()">✕ إلغاء</button>
-            </div>
+
+          <strong id="ribbon-1t-pct" class="num" style="font-size:16px;color:#ffe484;">50.0%</strong>
+        </div>
+
+        <div class="lux-1t-track">
+          <div id="ribbon-1t-fill" class="lux-1t-fill" style="width:50.02%;"></div>
+        </div>
+
+        <div class="row-between num" dir="ltr" style="font-size:10.5px;color:#94a3b8;">
+          <span>$1</span><span>$1K</span><span style="color:#22d3ee;font-weight:900;">$1M ●</span><span>$1B</span><span>$1T</span>
+        </div>
+
+        <div id="assistant-live-answer" style="font-size:11px;color:#9fb4d4;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          🎙️ المساعد الصوتي جاهز — الصوت يقترح فقط بتأكيد ضغطة واحدة (واستثناء «أوقف كل شيء» فوري).
+        </div>
+        <div id="voice-proposal-bar" class="voice-proposal-bar hidden">
+          <span id="voice-proposal-txt">🎯 اقتراح صوتي جاهز:</span>
+          <div style="display:flex;gap:5px;">
+            <button type="button" id="btn-confirm-voice-prop" class="btn-3d btn-3d-buy btn-3d-sm" onclick="ui.confirmVoiceProposal()">✅ تأكيد التنفيذ</button>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.cancelVoiceProposal()">✕ إلغاء</button>
           </div>
         </div>
       </div>
     </section>
 
     <!-- ================================================================
-         التبويب 1 (الرئيسي — يظهر كاملاً في شاشة واحدة!): قائمة أفضل 6 صفقات (> 90%)
-         بمبالغ شراء محسوبة تلقائياً من حجم المحفظة وتحليل الـ 5 آيجنت + شموع + 5 أيقونات ملونة!
+         التبويب 1 (الداشبورد الرئيسي — قاعة التداول الهولوغرامية ثلاثية الأعمدة):
+         الجانب الأيمن: الصفقات المقترحة (#1-#3) | المنتصف الكبير: أعلى صفقة ربحية على المدى القصير | الجانب الأيسر: الصفقات المقترحة (#4-#6)
          ================================================================ -->
-        <!-- شريط التداول الفرعي للجوال (يظهر في مجموعة التداول لتبديل الصفحات الأربع بوضوح تام) -->
-    <div id="mob-trading-subnav" class="mob-subnav-strip show-in-trading">
-      <button type="button" class="btn-3d btn-3d-sm btn-3d-gold mob-sub-btn" data-subtab="elite90" style="flex:1;" onclick="ui.tab('elite90')">🏆 <span dir="ltr">&ge;75%</span></button>
-      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="charts3d" style="flex:1;" onclick="ui.tab('charts3d')">🕯️ الشموع</button>
-      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="stocks" style="flex:1;" onclick="ui.tab('stocks')">📈 الأسهم</button>
-      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="testnet14" style="flex:1;" onclick="ui.tab('testnet14')">🧪 المعايرة 14d</button>
-    </div>
-    <main id="sec-elite90" class="holo-prism">
-      <div class="row-between" style="margin-bottom:7px;">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <strong style="font-size:14.8px;color:var(--pri);">🏆 الصفقات المُعايَرة والتحجيم (<span dir="ltr">&ge;75% PAVA • Spot Long-Only</span>)</strong>
-          <span id="quant-header-telemetry" class="hex-shield num" dir="ltr" style="color:var(--ok);border-color:var(--ok);">6 Qualified &ge;75% • DSR 0.92</span>
-        </div>
+    <main id="sec-elite90" style="margin-top:6px;">
+      <div class="lux-sec-heading">
+        <span class="lux-sec-title">قاعة التداول — أعلى صفقة ربحية قصيرة المدى والصفقات المقترحة (<span dir="ltr">&ge;75% PAVA</span>)</span>
         <div style="display:flex;gap:5px;flex-wrap:wrap;">
-          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold round-filter-btn" data-rf="all" onclick="ui.filterDealsRound('all')">المؤهلة <span dir="ltr">&ge;75%</span> (6)</button>
-          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" data-rf="1h" onclick="ui.filterDealsRound('1h')">⚡ الساعة القادمة</button>
-          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" data-rf="24h" onclick="ui.filterDealsRound('24h')">☀️ 24 ساعة</button>
-          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" data-rf="7d" onclick="ui.filterDealsRound('7d')">📅 الأسبوع</button>
-          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" data-rf="vetoed" onclick="ui.filterDealsRound('vetoed')">🛡️ المحجوبة (<span dir="ltr">&lt;75%</span>)</button>
+          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold round-filter-btn" style="border-radius:999px;" data-rf="all" onclick="ui.filterDealsRound('all')">الكل <span dir="ltr">&ge;75%</span></button>
+          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" style="border-radius:999px;" data-rf="1h" onclick="ui.filterDealsRound('1h')">⚡ الساعة القادمة</button>
+          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" style="border-radius:999px;" data-rf="24h" onclick="ui.filterDealsRound('24h')">☀️ 24 ساعة</button>
+          <button type="button" class="btn-3d btn-3d-sm round-filter-btn" style="border-radius:999px;" data-rf="vetoed" onclick="ui.filterDealsRound('vetoed')">🛡️ المحجوبة (<span dir="ltr">&lt;75%</span>)</button>
         </div>
       </div>
 
-      <div id="elite-90-cards" class="deals-cards-grid"></div>
+      <!-- حاوية الصفقات المحجوبة (<75%) عند اختيار فلتر المحجوبة -->
+      <div id="vetoed-deals-drawer" class="deals-cards-grid hidden" style="margin-bottom:10px;"></div>
+
+      <!-- الساحة الثلاثية الرئيسية: يمين صفقات مقترحة | منتصف كبير أعلى صفقة ربحية قصيرة المدى | يسار صفقات مقترحة -->
+      <div id="elite-90-cards" class="lux-trading-tri-arena">
+        <!-- الجانب الأيمن: الصفقات المقترحة (المجموعة 1) -->
+        <aside class="lux-side-column" aria-label="الصفقات المقترحة — الجانب الأيمن">
+          <div class="row-between">
+            <span class="lux-sec-title" style="font-size:13px;">الصفقات المقترحة (زخم سريع)</span>
+            <span class="hex-shield num" style="font-size:9.5px;color:#22d3ee;border-color:rgba(34,211,238,0.4);">SPOT · Kelly</span>
+          </div>
+          <div id="lux-right-deals" style="display:flex;flex-direction:column;gap:8px;flex:1;justify-content:space-between;"></div>
+        </aside>
+
+        <!-- اللوحة الكبيرة في المنتصف: أعلى صفقة ربحية على المدى القصير -->
+        <section id="lux-center-hero" class="lux-hero-center-panel" aria-label="أعلى صفقة ربحية على المدى القصير">
+          <div class="row-between" style="flex-wrap:wrap;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span id="hero-rank-badge" class="hex-shield" style="background:rgba(247,201,72,0.16);color:#ffe484;border-color:rgba(247,201,72,0.65);font-size:11px;padding:4px 9px;border-radius:999px;">
+                🔥 أعلى صفقة ربحية على المدى القصير
+              </span>
+              <strong id="hero-sym-title" class="num" style="font-size:19px;color:#ffffff;">SOLUSDT</strong>
+              <span id="hero-ar-name" class="muted" style="font-size:12.5px;color:#cbd5e1;">Solana • سولانا</span>
+              <span id="hero-pava-pill" class="hex-shield num" style="color:#10f5a0;border-color:rgba(16,245,160,0.45);">94.9% PAVA</span>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <button type="button" id="btn-reset-top-short" class="btn-3d btn-3d-sm btn-3d-gold hidden" style="border-radius:999px;" onclick="ui.selectHeroDeal('el-sol')">⚡ الأعلى ربحية قصيرة المدى (SOL)</button>
+              <div class="lux-tf-pill-group" dir="ltr">
+                <button type="button" class="btn-3d btn-3d-sm hero-tf-btn" data-htf="1D" onclick="ui.setHeroTimeframe('1D')">1D</button>
+                <button type="button" class="btn-3d btn-3d-sm hero-tf-btn" data-htf="4H" onclick="ui.setHeroTimeframe('4H')">4H</button>
+                <button type="button" class="btn-3d btn-3d-sm btn-3d-gold hero-tf-btn" data-htf="1H" onclick="ui.setHeroTimeframe('1H')">1H</button>
+                <button type="button" class="btn-3d btn-3d-sm hero-tf-btn" data-htf="15m" onclick="ui.setHeroTimeframe('15m')">15m</button>
+                <button type="button" class="btn-3d btn-3d-sm hero-tf-btn" data-htf="1m" onclick="ui.setHeroTimeframe('1m')">1m</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- الشارت الهولوغرامي الكبير للشموع اليابانية والمتوسط الذهبي ومستويات الربح -->
+          <div class="lux-hero-canvas-wrap">
+            <canvas id="hero-short-term-cv" width="760" height="315" style="width:100%;height:305px;display:block;"></canvas>
+          </div>
+
+          <!-- شريط تفاصيل الصفقة القصيرة المدى والتنفيذ الفوري بضغطة واحدة -->
+          <div id="hero-exec-footer" class="holo-chamber" style="padding:9px 12px;border-radius:14px;background:rgba(8,18,33,0.92);border-color:rgba(34,211,238,0.3);"></div>
+        </section>
+
+        <!-- الجانب الأيسر: الصفقات المقترحة (المجموعة 2) -->
+        <aside class="lux-side-column" aria-label="الصفقات المقترحة — الجانب الأيسر">
+          <div class="row-between">
+            <span class="lux-sec-title" style="font-size:13px;">الصفقات المقترحة (سيولة فورية)</span>
+            <span class="hex-shield num" style="font-size:9.5px;color:#ffe484;border-color:rgba(247,201,72,0.4);">PAVA &ge;75%</span>
+          </div>
+          <div id="lux-left-deals" style="display:flex;flex-direction:column;gap:8px;flex:1;justify-content:space-between;"></div>
+        </aside>
+      </div>
     </main>
 
     <!-- ================================================================
@@ -1850,6 +2147,9 @@
       musicPlaying: false,
       musicVolume: Number(safeStore.get('htb_music_vol') || 35),
       musicFreq: 432,
+      pnlGlow: true,
+      heroDealId: 'el-sol',
+      heroTf: '1H',
       clockOffsetMs: -3,
       recvWindowMs: 5000,
       openWorkingOrders: [
@@ -1978,13 +2278,14 @@
     }
 
     const ALL_CANDIDATE_DEALS = [
-      { id: 'el-sol', sym: 'SOLUSDT', assetClass: 'crypto', name: 'Solana • سولانا', bucket: '1h', round: '1H', recSide: 'BUY', price: 214.80, atr: 2.85, rr: 2.4, tpPct: 0.032, slPct: 0.011, predProbs: [0.962, 0.954, 0.948] },
+      { id: 'el-sol', sym: 'SOLUSDT', assetClass: 'crypto', name: 'Solana • سولانا', bucket: '1h', round: '1H', recSide: 'BUY', price: 214.80, atr: 3.65, rr: 2.55, tpPct: 0.0435, slPct: 0.011, predProbs: [0.962, 0.954, 0.948] },
       { id: 'el-btc', sym: 'BTCUSDT', assetClass: 'crypto', name: 'Bitcoin • بيتكوين', bucket: '24h', round: '24H', recSide: 'BUY', price: 96540.0, atr: 1120.0, rr: 2.3, tpPct: 0.038, slPct: 0.012, predProbs: [0.952, 0.948, 0.941] },
       { id: 'el-nvda', sym: 'NVDA', assetClass: 'equity', name: 'NVIDIA • إنفيديا', bucket: '7d', round: '7D', recSide: 'BUY', price: 142.80, atr: 2.35, rr: 2.6, tpPct: 0.065, slPct: 0.018, predProbs: [0.946, 0.938, 0.942] },
       { id: 'el-eth', sym: 'ETHUSDT', assetClass: 'crypto', name: 'Ethereum • إيثيريوم', bucket: '24h', round: '4H', recSide: 'BUY', price: 3420.50, atr: 44.0, rr: 2.2, tpPct: 0.035, slPct: 0.012, predProbs: [0.936, 0.932, 0.928] },
       { id: 'el-bnb', sym: 'BNBUSDT', assetClass: 'crypto', name: 'BNB • بينانس', bucket: '24h', round: '12H', recSide: 'BUY', price: 654.20, atr: 8.20, rr: 2.1, tpPct: 0.031, slPct: 0.010, predProbs: [0.922, 0.918, 0.915] },
       // مع تعديل عتبة التحجيم إلى >=75% تتأهل صفقة XRP الفورية (~81.8% PAVA) وتُحجّم بمعيار Kelly تلقائياً!
       { id: 'el-xrp', sym: 'XRPUSDT', assetClass: 'crypto', name: 'XRP • ريبل', bucket: '1h', round: '45m', recSide: 'BUY', price: 2.46, atr: 0.048, rr: 2.1, tpPct: 0.032, slPct: 0.011, predProbs: [0.85, 0.83, 0.81] },
+      { id: 'el-paxg', sym: 'PAXGUSDT', assetClass: 'crypto', name: 'PAXG • الذهب الفوري', bucket: '24h', round: '4H', recSide: 'BUY', price: 2671.00, atr: 24.5, rr: 2.2, tpPct: 0.026, slPct: 0.009, predProbs: [0.905, 0.895, 0.888] },
       // مرشح سابع دون عتبة 75% (~67.5% PAVA) يُحجب آلياً ويظهر عند اختيار فلتر «المحجوبة (<75%)»
       { id: 'el-doge-v', sym: 'DOGEUSDT', assetClass: 'crypto', name: 'DOGE • دوجكوين', bucket: '1h', round: '30m', recSide: 'BUY', price: 0.395, atr: 0.012, rr: 1.6, tpPct: 0.025, slPct: 0.012, predProbs: [0.71, 0.69, 0.68] }
     ];
@@ -2419,13 +2720,57 @@
         );
       },
 
+      togglePnlGlow() {
+        state.pnlGlow = !state.pnlGlow;
+        document.documentElement.setAttribute('data-pnl-glow', state.pnlGlow ? 'on' : 'off');
+        const b = document.getElementById('btn-pnl-glow');
+        if (b) b.classList.toggle('btn-3d-gold', state.pnlGlow);
+        this.toast(state.pnlGlow ? '💡 تم تفعيل إضاءة P&L المحيطية' : '💡 تم إيقاف إضاءة P&L المحيطية');
+      },
+
       refreshKpis() {
-        document.getElementById('kpi-equity').textContent = '$' + state.equity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('kpi-net-profit').textContent = '+$' + state.netProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const eqFmt = '$' + state.equity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const elEq = document.getElementById('kpi-equity');
+        if (elEq) elEq.textContent = eqFmt;
+        const elRibEq = document.getElementById('ribbon-cur-eq');
+        if (elRibEq) elRibEq.textContent = eqFmt;
+
+        const elProf = document.getElementById('kpi-net-profit');
+        if (elProf) elProf.textContent = (state.netProfit >= 0 ? '+$' : '-$') + Math.abs(state.netProfit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const pnlPct = ((state.equity - state.dayStartEquity) / state.dayStartEquity) * 100;
+        const elPnlPct = document.getElementById('kpi-pnl-pct');
+        if (elPnlPct) elPnlPct.textContent = (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%';
+
         const totalBots = Math.round(AI_AGENTS.reduce((s, b) => s + b.bal, 0));
-        const avgHr = (AI_AGENTS.reduce((s, b) => s + b.hrGrowth, 0) / AI_AGENTS.length).toFixed(2);
-        document.getElementById('kpi-bots-pool').textContent = `$${totalBots.toLocaleString()} (+${avgHr}%/h)`;
-        document.getElementById('kpi-elite-count').textContent = `6 ELITE • ${state.executedDeals.length} FILLED`;
+        const elBots = document.getElementById('kpi-bots-pool');
+        if (elBots) elBots.textContent = `20% Pool: $${totalBots.toLocaleString()}`;
+
+        const priceMap = {};
+        ALL_CANDIDATE_DEALS.forEach((d) => { priceMap[d.sym] = d.price; });
+        let heldVal = 0;
+        Object.entries(state.spotHoldings || {}).forEach(([sym, q]) => { heldVal += Number(q || 0) * (priceMap[sym] || 0); });
+        const availUsdt = Math.max(0, Math.round(state.equity - heldVal));
+        const elAvail = document.getElementById('kpi-avail-usdt');
+        if (elAvail) elAvail.textContent = `${availUsdt.toLocaleString('en-US')} USDT`;
+
+        const ddPct = Math.max(0, ((state.dayStartEquity - state.equity) / state.dayStartEquity) * 100);
+        const elDd = document.getElementById('kpi-dd-val');
+        if (elDd) elDd.textContent = `${ddPct.toFixed(1)}%`;
+        const elDdBar = document.getElementById('kpi-dd-bar');
+        if (elDdBar) elDdBar.style.width = `${Math.max(6, Math.min(100, (ddPct / 3.0) * 100))}%`;
+
+        // المقياس اللوغاريتمي من $1 (10^0) إلى $1T (10^12): عند $1,000,000 = 50.0% تماماً كما في التصميم المرفق!
+        const log12Pct = Math.max(1, Math.min(100, (Math.log10(Math.max(10, state.equity)) / 12) * 100));
+        const elLog = document.getElementById('kpi-1t-log-pct');
+        if (elLog) elLog.textContent = `${log12Pct.toFixed(1)}%`;
+        const elRibPct = document.getElementById('ribbon-1t-pct');
+        if (elRibPct) elRibPct.textContent = `${log12Pct.toFixed(1)}%`;
+        const elRibFill = document.getElementById('ribbon-1t-fill');
+        if (elRibFill) elRibFill.style.width = `${log12Pct.toFixed(2)}%`;
+
+        const approvedCnt = ALL_CANDIDATE_DEALS.filter((d) => d.quant && d.quant.approved).length;
+        const elCnt = document.getElementById('kpi-elite-count');
+        if (elCnt) elCnt.textContent = `${approvedCnt} ELITE • ${state.executedDeals.length} FILLED`;
       },
 
       onVoicePersonaChange() {
@@ -2692,96 +3037,341 @@
         this.toast(`✅ #${orderId}: ${sideAr} ${execQty} ${d.sym} • صافي بعد الرسوم +$${netGainAfterFees} • 20% HWM: $${bots20}`);
       },
 
+      selectHeroDeal(dealId) {
+        state.heroDealId = dealId;
+        this.renderElite90Page();
+      },
+
+      setHeroTimeframe(tf) {
+        state.heroTf = tf;
+        document.querySelectorAll('.hero-tf-btn').forEach((b) => b.classList.toggle('btn-3d-gold', b.dataset.htf === tf));
+        this.drawHeroShortTermChart();
+      },
+
+      getTopShortTermDeal(approvedList) {
+        const list = approvedList && approvedList.length ? approvedList : ALL_CANDIDATE_DEALS.filter((d) => d.quant && d.quant.approved);
+        if (!list.length) return ALL_CANDIDATE_DEALS[0];
+        // أعلى صفقة ربحية على المدى القصير: الأولوية لأفق الساعة (1h) ثم الـ 24 ساعة بأعلى ربحية وثقة معايرة >=75%
+        const shortPool = list.filter((d) => d.bucket === '1h');
+        const medPool = list.filter((d) => d.bucket === '24h');
+        const pool = shortPool.length ? shortPool : (medPool.length ? medPool : list);
+        return pool.slice().sort((a, b) => (b.tpPct * b.conf) - (a.tpPct * a.conf))[0];
+      },
+
       renderElite90Page() {
-        const elite = getEliteDealsOver90();
+        syncAutoPortfolioSizing();
+        const allApproved = ALL_CANDIDATE_DEALS.filter((d) => d.quant && d.quant.approved);
+        const filteredApproved = state.roundFilter === 'vetoed'
+          ? []
+          : allApproved.filter((d) => state.roundFilter === 'all' || d.bucket === state.roundFilter);
         const vetoed = getVetoedDeals();
-        const box = document.getElementById('elite-90-cards');
-        if (!box) return;
 
         const tel = document.getElementById('quant-header-telemetry');
         if (tel) {
-          tel.textContent = `${ALL_CANDIDATE_DEALS.filter(x=>x.quant&&x.quant.approved).length} مؤهلة (75%+) • ${vetoed.length} محجوبة • DSR ${state.deflatedSharpe} • HWM $${Math.round(state.highWaterMark).toLocaleString()}`;
+          tel.textContent = `${allApproved.length} مؤهلة (75%+) • ${vetoed.length} محجوبة • DSR ${state.deflatedSharpe} • HWM $${Math.round(state.highWaterMark).toLocaleString()}`;
         }
 
-        const approvedCardsHtml = elite.map((d, idx) => {
+        // عرض درج المحجوبة (<75%) عند طلب الفلتر أو تفعيل Kill Switch
+        const vDrawer = document.getElementById('vetoed-deals-drawer');
+        if (vDrawer) {
+          const showVeto = (state.roundFilter === 'vetoed' || state.killSwitch) && vetoed.length > 0;
+          vDrawer.classList.toggle('hidden', !showVeto);
+          if (showVeto) {
+            vDrawer.innerHTML = vetoed.map((d) => `
+              <article class="vetoed-deal-card">
+                <div class="row-between">
+                  <span class="hex-shield" style="color:var(--hot);border-color:var(--hot);">🛡️ محجوبة آلياً (&lt;75%)</span>
+                  <strong style="font-size:13px;color:#ffd6e0;">${d.name} (${d.sym})</strong>
+                </div>
+                <div class="holo-chamber" style="border-color:rgba(255,56,104,0.35);font-size:11.2px;color:#ffccd5;">
+                  <div><strong>السبب الكمي:</strong> ${d.quant.vetoReason}</div>
+                </div>
+              </article>
+            `).join('');
+          }
+        }
+
+        const topShortDeal = this.getTopShortTermDeal(allApproved);
+        const heroDeal = allApproved.find((d) => d.id === state.heroDealId) || topShortDeal || ALL_CANDIDATE_DEALS[0];
+        state.heroDealId = heroDeal.id;
+
+        const isTopShort = heroDeal.id === topShortDeal.id;
+        const rankBadge = document.getElementById('hero-rank-badge');
+        if (rankBadge) {
+          rankBadge.textContent = isTopShort
+            ? `🔥 #1 أعلى صفقة ربحية على المدى القصير (+${(heroDeal.tpPct * 100).toFixed(2)}% في ${heroDeal.round})`
+            : `🔎 معاينة صفقة مقترحة (+${(heroDeal.tpPct * 100).toFixed(2)}% في ${heroDeal.round})`;
+        }
+        document.getElementById('btn-reset-top-short')?.classList.toggle('hidden', isTopShort);
+        const symEl = document.getElementById('hero-sym-title');
+        if (symEl) symEl.textContent = heroDeal.sym;
+        const arEl = document.getElementById('hero-ar-name');
+        if (arEl) arEl.textContent = heroDeal.name;
+        const pvEl = document.getElementById('hero-pava-pill');
+        if (pvEl) pvEl.textContent = `${heroDeal.conf}% PAVA`;
+
+        // شريط التنفيذ السفلي للبطاقة الكبيرة في المنتصف
+        const hm = computeDealMetrics(heroDeal);
+        const hOwned = +(state.spotHoldings[heroDeal.sym] || 0);
+        const hUnit = heroDeal.sym.replace('USDT', '');
+        const hStamp = state.lastStampByDeal[heroDeal.id];
+        const heroFooter = document.getElementById('hero-exec-footer');
+        if (heroFooter) {
+          heroFooter.innerHTML = `
+            <div class="row-between" style="flex-wrap:wrap;gap:8px;">
+              <div>
+                <div class="muted" style="font-size:10px;">حجم Kelly المخصص (${hm.portPct}% محفظة) • المملوك: <strong class="num text-pri">${hOwned} ${hUnit}</strong></div>
+                <div style="display:flex;align-items:baseline;gap:8px;margin-top:1px;">
+                  <strong class="num-3d" style="font-size:17px;">$${hm.invest.toLocaleString()}</strong>
+                  <span class="num text-sec" style="font-size:11.5px;">(${heroDeal.qty} ${hUnit} @ $${heroDeal.price.toLocaleString()})</span>
+                  <span class="num text-ok" style="font-size:11px;font-weight:900;">ربح مستهدف: +$${hm.maxProf.toLocaleString()} (+${hm.expPct}%)</span>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                <button type="button" class="btn-3d btn-stepper" onclick="ui.adjustDealQty('${heroDeal.id}', -1)" aria-label="إنقاص الكمية">−</button>
+                <button type="button" class="btn-3d btn-3d-gold btn-stepper" onclick="ui.adjustDealQty('${heroDeal.id}', 1)" aria-label="زيادة الكمية">+</button>
+                <div style="display:flex;gap:3px;margin:0 3px;" title="AI1-3 متنبئون | AI4 تحجيم Kelly | AI5 عتبة >=75%">
+                  ${AI_AGENTS.map((ag, i) => `<span class="ai-orb-sm num" style="--orb-c:${ag.col};--orb-g:${ag.glow};">${heroDeal.aiScores[i]}</span>`).join('')}
+                </div>
+                <button type="button" class="btn-3d btn-3d-buy" style="padding:7px 14px;font-size:12px;border-radius:10px;" onclick="ui.executeEliteDeal('${heroDeal.id}', 'BUY')">▲ شراء Maker فوري</button>
+                <button type="button" class="btn-3d ${hOwned > 0 ? 'btn-3d-sell' : 'btn-spot-neutral'}" style="padding:7px 11px;font-size:11px;border-radius:10px;" onclick="ui.executeEliteDeal('${heroDeal.id}', 'SELL')">${hOwned > 0 ? '▼ إغلاق مملوك' : '🔒 حياد Spot'}</button>
+              </div>
+            </div>
+            <div class="row-between" style="margin-top:5px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.07);font-size:10.5px;flex-wrap:wrap;gap:8px;">
+              <span>الأهداف المتدرجة: <strong class="num text-ok">TP1 $${hm.tp1} (40%) • TP2 $${hm.tp} (35%)</strong></span>
+              <span>وقف الخسارة الحتمي: <strong class="num text-err">ATR SL $${hm.sl}</strong></span>
+              ${hStamp ? `<span class="num text-pri">✓ آخر تنفيذ: #${hStamp.orderId} (${hStamp.qty} ${hUnit})</span>` : `<span class="muted">صانع سوق LIMIT_MAKER بدون انزلاق سعري</span>`}
+            </div>
+          `;
+        }
+
+        // توزيع الصفقات المقترحة على الجانبين الأيمن والأيسر (3 يمين + 3 يسار)!
+        const sideCandidates = (filteredApproved.length ? filteredApproved : allApproved).filter((d) => d.id !== heroDeal.id);
+        // في حال فلتر زمني ضيق نضمن ظهور كروت مقترحة متوازنة على الجانبين
+        const paddedSides = sideCandidates.length >= 2 ? sideCandidates : allApproved.filter((d) => d.id !== heroDeal.id);
+        const mid = Math.ceil(paddedSides.length / 2);
+        const rightDeals = paddedSides.slice(0, mid);
+        const leftDeals = paddedSides.slice(mid);
+
+        const renderSideCard = (d) => {
           const m = computeDealMetrics(d);
-          const stamp = state.lastStampByDeal[d.id];
-          const unit = d.sym.replace('USDT', '');
           const owned = +(state.spotHoldings[d.sym] || 0);
-          return `<article id="card-${d.id}" class="elite-deal-card">
-            <div class="row-between">
-              <div style="display:flex;align-items:center;gap:5px;">
-                <span class="hex-shield num" style="color:var(--ok);border-color:var(--ok);">#${idx + 1} • ${d.conf}% PAVA</span>
-                <strong style="font-size:13.2px;color:#fff;">${d.name}</strong>
-              </div>
-              <span class="num-3d" style="font-size:13.8px;">$${d.price.toLocaleString()}</span>
+          const tag = d.assetClass === 'crypto' ? 'SPOT' : 'EQUITY';
+          const shortGainPct = +(d.tpPct * 100).toFixed(2);
+          return `<article id="card-${d.id}" class="lux-side-deal-card elite-deal-card ${d.id === state.heroDealId ? 'active-hero' : ''}" onclick="ui.selectHeroDeal('${d.id}')">
+            <div class="row-between" dir="ltr">
+              <strong class="num" style="font-size:12.8px;color:#ffffff;">${d.sym}</strong>
+              <span class="hex-shield num" style="font-size:9px;padding:1px 6px;color:#94a3b8;border-color:rgba(148,163,184,0.3);">${tag} • ${d.conf}%</span>
             </div>
-
-            <div class="card-candle-wrap" onclick="ui.focusDealOnMainChart('${d.sym}')">
-              <canvas id="card-cdl-${d.id}" width="320" height="78"></canvas>
-            </div>
-
-            <div class="holo-chamber" style="padding:5px 8px;">
-              <div class="row-between">
-                <div>
-                  <div class="muted" style="font-size:9.6px;">حجم Kelly (${m.portPct}% محفظة) • المملوك: <span class="num text-pri">${owned} ${unit}</span></div>
-                  <strong class="num-3d" style="font-size:14px;">$${m.invest.toLocaleString()}</strong>
-                  <span class="num text-sec" style="font-size:10.8px;">(${d.qty} ${unit})</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:4px;">
-                  <button type="button" class="btn-3d btn-stepper" onclick="ui.adjustDealQty('${d.id}', -1)">−</button>
-                  <button type="button" class="btn-3d btn-3d-gold btn-stepper" onclick="ui.adjustDealQty('${d.id}', 1)">+</button>
-                </div>
-              </div>
-              <div class="row-between" style="margin-top:3px;font-size:10.3px;">
-                <span>TP1/TP2: <strong class="num-3d-ok">$${m.tp1} / $${m.tp}</strong></span>
-                <span class="num text-err">ATR SL $${m.sl}</span>
+            <div class="row-between" style="align-items:baseline;">
+              <span class="muted" style="font-size:10.5px;">${d.name.split('•')[1] || d.name}</span>
+              <div dir="ltr" style="text-align:right;">
+                <div class="num" style="font-size:14.5px;font-weight:900;color:#ffffff;">$${d.price.toLocaleString()}</div>
+                <div class="num" style="font-size:10.2px;font-weight:800;color:#10f5a0;">▲ +${shortGainPct}% (${d.round})</div>
               </div>
             </div>
-
-            <div class="row-between" style="gap:5px;">
-              <div style="display:flex;gap:3px;align-items:center;" title="AI1-3 متنبئون | AI4 تحجيم Kelly وفيتو | AI5 عتبة >=75%">
-                ${AI_AGENTS.map((ag, i) => `<span class="ai-orb-sm num" style="--orb-c:${ag.col};--orb-g:${ag.glow};">${d.aiScores[i]}</span>`).join('')}
-              </div>
-              <div style="display:flex;gap:5px;flex:1;justify-content:flex-end;">
-                <button type="button" class="btn-3d btn-3d-buy" style="flex:1.15;padding:6px 6px;font-size:11.2px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء Maker</button>
-                <button type="button" class="btn-3d ${owned > 0 ? 'btn-3d-sell' : 'btn-spot-neutral'}" style="flex:0.85;padding:6px 6px;font-size:10.8px;" onclick="ui.executeEliteDeal('${d.id}', 'SELL')">${owned > 0 ? '▼ إغلاق مملوك' : '🔒 حياد Spot'}</button>
+            <canvas id="spark-${d.id}" width="230" height="34" style="width:100%;height:32px;display:block;"></canvas>
+            <div class="row-between" style="gap:5px;padding-top:2px;border-top:1px solid rgba(255,255,255,0.06);" onclick="event.stopPropagation()">
+              <span class="num muted" style="font-size:9.8px;">Kelly: <strong style="color:#ffe484;">$${m.invest.toLocaleString()}</strong></span>
+              <div style="display:flex;gap:4px;">
+                <button type="button" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:2px 8px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء</button>
+                <button type="button" class="btn-3d btn-3d-sm ${owned > 0 ? 'btn-3d-sell' : 'btn-spot-neutral'}" style="padding:2px 6px;font-size:9.8px;" onclick="ui.executeEliteDeal('${d.id}', 'SELL')">${owned > 0 ? '▼ إغلاق' : '🔒 حياد'}</button>
               </div>
             </div>
-
-            ${stamp ? `<div class="card-exec-stamp"><span>✓ #${stamp.orderId} (${stamp.qty} ${unit})</span><img class="sig-img-sm" data-sig="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="توقيع" /></div>` : ''}
           </article>`;
-        }).join('');
+        };
 
-        const vetoedCardsHtml = vetoed.map((d) => `
-          <article class="vetoed-deal-card">
-            <div class="row-between">
-              <span class="hex-shield" style="color:var(--hot);border-color:var(--hot);">🛡️ محجوبة آلياً</span>
-              <strong style="font-size:13px;color:#ffd6e0;">${d.name} (${d.sym})</strong>
-            </div>
-            <div class="holo-chamber" style="border-color:rgba(255,56,104,0.35);font-size:11.2px;line-height:1.55;color:#ffccd5;">
-              <div><strong>السبب الكمي:</strong> ${d.quant.vetoReason}</div>
-              <div class="muted" style="margin-top:4px;">المبدأ الحاكم: بوابة AI-5 تحجب أي إشارة تقل معايرتها عن 75% وتمنع البيع المكشوف في Spot حمايةً لرأس المال.</div>
-            </div>
-            <div class="row-between" style="font-size:10.5px;">
-              <span class="muted">متنبئو AI1-3: <strong class="num">${d.predProbs.map(p=>Math.round(p*100)+'%').join(' / ')}</strong></span>
-              <span class="hex-shield num" style="color:var(--pri);border-color:var(--pri);">البقاء على الحياد ✓</span>
-            </div>
-          </article>
-        `).join('');
+        const rBox = document.getElementById('lux-right-deals');
+        if (rBox) rBox.innerHTML = rightDeals.map(renderSideCard).join('');
+        const lBox = document.getElementById('lux-left-deals');
+        if (lBox) lBox.innerHTML = leftDeals.map(renderSideCard).join('');
 
-        box.innerHTML = (state.roundFilter === 'vetoed' || state.killSwitch) ? (approvedCardsHtml + vetoedCardsHtml) : approvedCardsHtml;
         if (typeof hydrateSigs === 'function') hydrateSigs();
         this.renderAllCardCandles();
       },
 
-      renderAllCardCandles() {
-        getEliteDealsOver90().forEach((d) => {
-          const cv = document.getElementById('card-cdl-' + d.id);
-          if (cv) drawCandlestickCanvas(cv, d, 18, '1h', false);
+      drawHeroShortTermChart() {
+        const cv = document.getElementById('hero-short-term-cv');
+        if (!cv) return;
+        const ctx = cv.getContext('2d');
+        const W = cv.width, H = cv.height;
+        ctx.clearRect(0, 0, W, H);
+
+        const allApproved = ALL_CANDIDATE_DEALS.filter((d) => d.quant && d.quant.approved);
+        const d = allApproved.find((x) => x.id === state.heroDealId) || this.getTopShortTermDeal(allApproved) || ALL_CANDIDATE_DEALS[0];
+        const m = computeDealMetrics(d);
+
+        // خلفية شبكية أفقية ورأسية ناعمة مطابقة للصورة المرفقة
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+        ctx.lineWidth = 1;
+        for (let gy = 28; gy < H - 20; gy += 48) {
+          ctx.beginPath(); ctx.moveTo(14, gy); ctx.lineTo(W - 72, gy); ctx.stroke();
+        }
+        for (let gx = 40; gx < W - 72; gx += 68) {
+          ctx.beginPath(); ctx.moveTo(gx, 16); ctx.lineTo(gx, H - 20); ctx.stroke();
+        }
+
+        // توليد 44 شمعة يابانية متصاعدة реалистية مع تذبذب حي نحو الهدف القصير المدى
+        const N = 44;
+        let seed = 0;
+        const keyStr = d.sym + (state.heroTf || '1H');
+        for (let i = 0; i < keyStr.length; i++) seed = (seed * 31 + keyStr.charCodeAt(i)) % 9973;
+        const rnd = () => { seed = (seed * 16807 + 11) % 2147483647; return (seed % 1000) / 1000; };
+
+        const startP = d.price * 0.945;
+        const candles = [];
+        let cur = startP;
+        for (let i = 0; i < N; i++) {
+          const progress = i / (N - 1);
+          const wave = Math.sin(i * 0.34 + state.candleTick * 0.25) * d.price * 0.0045;
+          const target = startP + (d.price - startP) * Math.pow(progress, 0.86) + wave;
+          const open = cur;
+          const close = i === N - 1 ? d.price : target + (rnd() - 0.46) * d.price * 0.008;
+          const span = Math.abs(close - open) + d.price * (0.0025 + rnd() * 0.004);
+          const high = Math.max(open, close) + span * (0.35 + rnd() * 0.45);
+          const low = Math.min(open, close) - span * (0.35 + rnd() * 0.45);
+          candles.push({ open, close, high, low });
+          cur = close;
+        }
+
+        const minP = Math.min(...candles.map((c) => c.low), m.sl * 0.998);
+        const maxP = Math.max(...candles.map((c) => c.high), m.tp1 * 1.003);
+        const padTop = 22, padBot = 24, chartH = H - padTop - padBot;
+        const padLeft = 18, padRight = 82, chartW = W - padLeft - padRight;
+        const yOf = (p) => padTop + (1 - (p - minP) / Math.max(1e-6, maxP - minP)) * chartH;
+        const stepX = chartW / N;
+
+        // هالة مضيئة خضراء-سيان أسفل منحنى المتوسط المتحرك كما في الصورة المرفقة!
+        const emaPts = [];
+        let ema = candles[0].close;
+        candles.forEach((c, i) => {
+          ema = ema * 0.72 + c.close * 0.28;
+          emaPts.push({ x: padLeft + i * stepX + stepX * 0.5, y: yOf(ema) });
+        });
+
+        const areaGrad = ctx.createLinearGradient(0, padTop, 0, H - padBot);
+        areaGrad.addColorStop(0, 'rgba(16, 245, 160, 0.22)');
+        areaGrad.addColorStop(0.65, 'rgba(34, 211, 238, 0.07)');
+        areaGrad.addColorStop(1, 'rgba(4, 12, 24, 0.0)');
+        ctx.beginPath();
+        ctx.moveTo(emaPts[0].x, H - padBot);
+        emaPts.forEach((pt) => ctx.lineTo(pt.x, pt.y));
+        ctx.lineTo(emaPts[emaPts.length - 1].x, H - padBot);
+        ctx.closePath();
+        ctx.fillStyle = areaGrad;
+        ctx.fill();
+
+        // رسم الشموع اليابانية المضيئة (زمردي للصعود وقرمزي للهبوط)
+        const bodyW = Math.max(5, stepX * 0.56);
+        candles.forEach((c, i) => {
+          const cx = padLeft + i * stepX + stepX * 0.5;
+          const up = c.close >= c.open;
+          const col = up ? '#10f5a0' : '#f43f5e';
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(cx, yOf(c.high));
+          ctx.lineTo(cx, yOf(c.low));
+          ctx.stroke();
+
+          const yTop = yOf(Math.max(c.open, c.close));
+          const yBot = yOf(Math.min(c.open, c.close));
+          const bh = Math.max(2.5, yBot - yTop);
+          ctx.fillStyle = col;
+          ctx.shadowColor = up ? 'rgba(16,245,160,0.45)' : 'rgba(244,63,94,0.35)';
+          ctx.shadowBlur = 7;
+          ctx.fillRect(cx - bodyW / 2, yTop, bodyW, bh);
+          ctx.shadowBlur = 0;
+        });
+
+        // منحنى المتوسط المتحرك الذهبي اللامع (Golden EMA Line)
+        ctx.beginPath();
+        emaPts.forEach((pt, idx) => { if (idx === 0) ctx.moveTo(pt.x, pt.y); else ctx.lineTo(pt.x, pt.y); });
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 2.2;
+        ctx.shadowColor = 'rgba(250, 204, 21, 0.65)';
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // خطوط TP1 والسعر الحالي و SL مع بطاقات الأسعار على المحور الأيمن
+        const dec = d.price < 10 ? 4 : (d.price < 500 ? 2 : 0);
+        const drawLevelLine = (priceVal, color, bgTag, labelPrefix) => {
+          const y = quantClip(yOf(priceVal), 14, H - 14);
+          ctx.save();
+          ctx.setLineDash([4, 4]);
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.moveTo(padLeft, y);
+          ctx.lineTo(W - padRight + 4, y);
+          ctx.stroke();
+          ctx.restore();
+
+          ctx.fillStyle = bgTag;
+          ctx.fillRect(W - padRight + 6, y - 9, padRight - 10, 18);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 10px system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${labelPrefix}${priceVal.toFixed(dec)}`, W - padRight / 2 + 1, y + 3.5);
+        };
+
+        drawLevelLine(m.tp1, 'rgba(16,245,160,0.75)', '#059669', 'TP ');
+        drawLevelLine(d.price, 'rgba(244,63,94,0.85)', '#e11d48', '');
+        drawLevelLine(m.sl, 'rgba(245,158,11,0.65)', '#9a3412', 'SL ');
+
+        // مستويات المحور الأيمن الإضافية
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px system-ui, sans-serif';
+        ctx.textAlign = 'right';
+        [0.15, 0.5, 0.85].forEach((r) => {
+          const pv = maxP - r * (maxP - minP);
+          ctx.fillText(pv.toFixed(dec), W - 10, padTop + r * chartH + 3);
         });
       },
 
+      drawSideSparklines() {
+        ALL_CANDIDATE_DEALS.forEach((d, idx) => {
+          const cv = document.getElementById('spark-' + d.id);
+          if (!cv) return;
+          const ctx = cv.getContext('2d');
+          const W = cv.width, H = cv.height;
+          ctx.clearRect(0, 0, W, H);
+          const pts = [];
+          const N = 22;
+          for (let i = 0; i < N; i++) {
+            const prog = i / (N - 1);
+            const wv = Math.sin(i * 0.65 + idx * 1.7 + state.candleTick * 0.3) * 0.22;
+            const yNorm = 0.22 + prog * 0.56 + wv * 0.35;
+            pts.push({ x: 4 + (i / (N - 1)) * (W - 8), y: H - 6 - quantClip(yNorm, 0.08, 0.92) * (H - 12) });
+          }
+          const grad = ctx.createLinearGradient(0, 0, 0, H);
+          grad.addColorStop(0, 'rgba(16, 245, 160, 0.30)');
+          grad.addColorStop(1, 'rgba(16, 245, 160, 0.0)');
+          ctx.beginPath();
+          ctx.moveTo(pts[0].x, H);
+          pts.forEach((p) => ctx.lineTo(p.x, p.y));
+          ctx.lineTo(pts[pts.length - 1].x, H);
+          ctx.closePath();
+          ctx.fillStyle = grad;
+          ctx.fill();
+
+          ctx.beginPath();
+          pts.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+          ctx.strokeStyle = '#10f5a0';
+          ctx.lineWidth = 2;
+          ctx.shadowColor = 'rgba(16, 245, 160, 0.6)';
+          ctx.shadowBlur = 6;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        });
+      },
+
+      renderAllCardCandles() {
+        this.drawHeroShortTermChart();
+        this.drawSideSparklines();
+      },
       focusDealOnMainChart(sym) {
         state.mainCandleSym = sym;
         const sel = document.getElementById('main-candle-sym');
