@@ -1051,18 +1051,10 @@ def redeem_owner_recovery_code(candidate_code: str) -> dict[str, Any]:
         rows = conn.execute(
             "SELECT code_id, code_hash FROM owner_recovery_codes WHERE used = 0"
         ).fetchall()
+        from app.security import verify_admin_secret_path_safe
+
         for r in rows:
-            parts = str(r["code_hash"]).split("$")
-            if len(parts) != 4:
-                continue
-            _, iter_s, salt_hex, digest_hex = parts
-            derived = hashlib.pbkdf2_hmac(
-                "sha256",
-                cleaned.encode("utf-8"),
-                bytes.fromhex(salt_hex),
-                int(iter_s),
-            )
-            if hmac.compare_digest(derived, bytes.fromhex(digest_hex)):
+            if verify_admin_secret_path_safe(cleaned, str(r["code_hash"])):
                 matched_id = str(r["code_id"])
                 break
 

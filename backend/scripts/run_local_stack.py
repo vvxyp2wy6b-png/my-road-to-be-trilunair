@@ -65,6 +65,7 @@ def _load_or_create_local_env() -> Path:
             os.chmod(env_file, 0o600)
         except OSError:
             pass
+    os.environ.setdefault("TRILUNAIR_REQUIRE_CFO_LOGIN", "1")
     return env_file
 
 

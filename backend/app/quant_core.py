@@ -16,8 +16,10 @@ Implements all 8 modules of the Quantitative Engineering Upgrade Plan (v1.0):
 
 from __future__ import annotations
 
+import hashlib
 import math
 import random
+import re
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -279,9 +281,11 @@ class RiskState:
     open_risk_usd: float = 0.0
     high_water_mark: float = 0.0
     kill_switch: bool = False
-    max_daily_dd: float = 0.03       # Hard 3.0% daily drawdown circuit breaker
-    max_open_heat: float = 0.045     # Max 4.5% simultaneous open risk across all positions
-    max_single_notional_pct: float = 0.08  # Hard cap per position (8% of equity)
+    dd_half_size_threshold: float = 0.015    # 1.5% daily drawdown -> cut position size in half (0.5x)
+    dd_stop_new_threshold: float = 0.025     # 2.5% daily drawdown -> stop all new trade entries
+    max_daily_dd: float = 0.03               # 3.0% daily drawdown -> close everything & halt
+    max_open_heat: float = 0.045             # Max 4.5% simultaneous open risk across all positions
+    max_single_notional_pct: float = 0.08    # Hard cap per position (8% of equity)
 
     def __post_init__(self) -> None:
         if self.high_water_mark <= 0:
@@ -292,6 +296,61 @@ class RiskState:
         if self.day_start_equity <= 0:
             return 0.0
         return max(0.0, (self.day_start_equity - self.equity) / self.day_start_equity)
+
+
+def evaluate_daily_drawdown_breaker(risk_state: RiskState) -> Dict[str, Any]:
+    """
+    3-Tier Daily Drawdown Circuit Breaker (Phase 1 Mandatory Rule #6):
+    - dd < 1.5%        : NORMAL (1.0x position size, new trades allowed, close_all=False)
+    - 1.5% <= dd < 2.5%: DD_1_5_HALF_SIZE (0.5x position size, new trades allowed, close_all=False)
+    - 2.5% <= dd < 3.0%: DD_2_5_STOP_NEW (0.0x size, new trades blocked, close_all=False)
+    - dd >= 3.0%       : DD_3_0_CLOSE_ALL (0.0x size, new trades blocked, close_all=True — liquidate all!)
+    """
+    if risk_state.kill_switch:
+        return {
+            "tier": "KILL_SWITCH_ACTIVE",
+            "drawdown_pct": round(risk_state.daily_drawdown_pct * 100.0, 3),
+            "size_multiplier": 0.0,
+            "allow_new_trades": False,
+            "close_all_positions": True,
+            "reason": "Emergency Kill Switch is active — all open orders canceled & bots halted",
+        }
+    dd = risk_state.daily_drawdown_pct
+    if dd >= risk_state.max_daily_dd - 1e-9:
+        return {
+            "tier": "DD_3_0_CLOSE_ALL",
+            "drawdown_pct": round(dd * 100.0, 3),
+            "size_multiplier": 0.0,
+            "allow_new_trades": False,
+            "close_all_positions": True,
+            "reason": f"Daily drawdown {dd*100:.2f}% >= {risk_state.max_daily_dd*100:.1f}%: CLOSE ALL POSITIONS & HALT",
+        }
+    if dd >= risk_state.dd_stop_new_threshold - 1e-9:
+        return {
+            "tier": "DD_2_5_STOP_NEW",
+            "drawdown_pct": round(dd * 100.0, 3),
+            "size_multiplier": 0.0,
+            "allow_new_trades": False,
+            "close_all_positions": False,
+            "reason": f"Daily drawdown {dd*100:.2f}% >= {risk_state.dd_stop_new_threshold*100:.1f}%: STOP NEW TRADES",
+        }
+    if dd >= risk_state.dd_half_size_threshold - 1e-9:
+        return {
+            "tier": "DD_1_5_HALF_SIZE",
+            "drawdown_pct": round(dd * 100.0, 3),
+            "size_multiplier": 0.5,
+            "allow_new_trades": True,
+            "close_all_positions": False,
+            "reason": f"Daily drawdown {dd*100:.2f}% >= {risk_state.dd_half_size_threshold*100:.1f}%: HALF POSITION SIZE (0.5x)",
+        }
+    return {
+        "tier": "NORMAL",
+        "drawdown_pct": round(dd * 100.0, 3),
+        "size_multiplier": 1.0,
+        "allow_new_trades": True,
+        "close_all_positions": False,
+        "reason": "Nominal daily drawdown (<1.5%)",
+    }
 
 
 def size_position(
@@ -310,17 +369,32 @@ def size_position(
     fee_bps_roundtrip: float = 15.0,
 ) -> Dict[str, Any]:
     """
-    AI-4 Risk Sizer & Veto + AI-5 >=0.75 (75%) Calibrated Confidence Gate.
-    Combines conservative Bayesian win-rate + calibrated probability via Fractional Kelly,
-    bounded by ATR volatility stop distance, daily drawdown (<3%), and portfolio heat caps.
+    AI-4 Risk Sizer & Veto + AI-5 >=0.75 (75%) Calibrated Confidence Gate + 3-Tier Daily Drawdown Breaker.
+    - 1.5% DD -> 0.5x size
+    - 2.5% DD -> stop new trades
+    - 3.0% DD -> close all positions & halt
     """
+    dd_breaker = evaluate_daily_drawdown_breaker(risk_state)
     if risk_state.kill_switch:
-        return {"approved": False, "veto_by": "KILL_SWITCH", "reason": "Emergency Kill Switch is active", "qty": 0.0, "notional_usd": 0.0}
-    if risk_state.daily_drawdown_pct >= risk_state.max_daily_dd:
         return {
             "approved": False,
-            "veto_by": "AI4_DAILY_DD_VETO",
-            "reason": f"Daily drawdown {risk_state.daily_drawdown_pct*100:.2f}% >= {risk_state.max_daily_dd*100:.1f}% limit",
+            "veto_by": "KILL_SWITCH",
+            "dd_tier": dd_breaker["tier"],
+            "close_all_positions": True,
+            "size_multiplier": 0.0,
+            "reason": dd_breaker["reason"],
+            "qty": 0.0,
+            "notional_usd": 0.0,
+        }
+    if not dd_breaker["allow_new_trades"]:
+        veto_code = "AI4_DAILY_DD_VETO" if dd_breaker["close_all_positions"] else "AI4_DAILY_DD_2_5_STOP_NEW"
+        return {
+            "approved": False,
+            "veto_by": veto_code,
+            "dd_tier": dd_breaker["tier"],
+            "close_all_positions": dd_breaker["close_all_positions"],
+            "size_multiplier": 0.0,
+            "reason": dd_breaker["reason"],
             "qty": 0.0,
             "notional_usd": 0.0,
         }
@@ -328,12 +402,15 @@ def size_position(
         return {
             "approved": False,
             "veto_by": "AI5_CONFIDENCE_GATE",
+            "dd_tier": dd_breaker["tier"],
+            "close_all_positions": False,
+            "size_multiplier": dd_breaker["size_multiplier"],
             "reason": f"Calibrated confidence {cal_prob*100:.1f}% < {min_calibrated_gate*100:.0f}% gate",
             "qty": 0.0,
             "notional_usd": 0.0,
         }
     if price <= 0 or atr <= 0 or reward_risk <= 0:
-        return {"approved": False, "veto_by": "AI4_INVALID_INPUT", "reason": "Non-positive price/ATR/RR", "qty": 0.0, "notional_usd": 0.0}
+        return {"approved": False, "veto_by": "AI4_INVALID_INPUT", "dd_tier": dd_breaker["tier"], "close_all_positions": False, "size_multiplier": 0.0, "reason": "Non-positive price/ATR/RR", "qty": 0.0, "notional_usd": 0.0}
 
     # Blend calibrated signal probability with conservative empirical Beta posterior
     p_eff = clip(0.65 * cal_prob + 0.35 * win_rate.conservative_p, 0.01, 0.99)
@@ -345,37 +422,42 @@ def size_position(
 
     full_kelly = p_eff - (1.0 - p_eff) / b_net
     if full_kelly <= 0:
-        return {"approved": False, "veto_by": "AI4_NEGATIVE_EDGE", "reason": "Net-of-fee Kelly edge <= 0", "qty": 0.0, "notional_usd": 0.0}
+        return {"approved": False, "veto_by": "AI4_NEGATIVE_EDGE", "dd_tier": dd_breaker["tier"], "close_all_positions": False, "size_multiplier": 0.0, "reason": "Net-of-fee Kelly edge <= 0", "qty": 0.0, "notional_usd": 0.0}
 
     # Fractional Kelly risk budget (capped at 1.25% equity risk per trade & remaining portfolio heat)
     rem_heat = max(0.0, risk_state.max_open_heat * risk_state.equity - risk_state.open_risk_usd)
     if rem_heat <= 10.0:
-        return {"approved": False, "veto_by": "AI4_HEAT_CAP", "reason": "Max open portfolio risk heat reached", "qty": 0.0, "notional_usd": 0.0}
+        return {"approved": False, "veto_by": "AI4_HEAT_CAP", "dd_tier": dd_breaker["tier"], "close_all_positions": False, "size_multiplier": 0.0, "reason": "Max open portfolio risk heat reached", "qty": 0.0, "notional_usd": 0.0}
 
     frac_kelly_risk_pct = clip(full_kelly * kelly_fraction_cap * 0.04, 0.002, 0.0125)
     risk_budget_usd = min(risk_state.equity * frac_kelly_risk_pct, rem_heat)
 
     raw_notional = risk_budget_usd / max(stop_pct + fee_pct, 1e-4)
     asset_cap = risk_state.max_single_notional_pct if asset_class == "crypto" else risk_state.max_single_notional_pct * 0.85
-    capped_notional = min(raw_notional, risk_state.equity * asset_cap)
-    qty = round_step(capped_notional / price, step)
+    base_capped_notional = min(raw_notional, risk_state.equity * asset_cap)
+    # Apply 3-Tier Daily Drawdown multiplier (1.0x normal, 0.5x when 1.5% <= DD < 2.5%)
+    sized_notional = base_capped_notional * dd_breaker["size_multiplier"]
+    qty = round_step(sized_notional / price, step)
     notional_usd = round(qty * price, 2)
 
     if qty <= 0 or notional_usd < 10.0:
-        return {"approved": False, "veto_by": "AI4_MIN_NOTIONAL", "reason": "Position below exchange minNotional", "qty": 0.0, "notional_usd": 0.0}
+        return {"approved": False, "veto_by": "AI4_MIN_NOTIONAL", "dd_tier": dd_breaker["tier"], "close_all_positions": False, "size_multiplier": dd_breaker["size_multiplier"], "reason": "Position below exchange minNotional", "qty": 0.0, "notional_usd": 0.0}
 
     actual_risk_usd = round(notional_usd * (stop_pct + fee_pct), 2)
     dec = 4 if price < 10 else 2
     return {
         "approved": True,
         "veto_by": None,
+        "dd_tier": dd_breaker["tier"],
+        "close_all_positions": False,
+        "size_multiplier": dd_breaker["size_multiplier"],
         "symbol": symbol,
         "asset_class": asset_class,
         "qty": qty,
         "notional_usd": notional_usd,
         "portfolio_pct": round((notional_usd / risk_state.equity) * 100.0, 2),
         "risk_usd": actual_risk_usd,
-        "kelly_fraction": round(full_kelly * kelly_fraction_cap, 4),
+        "kelly_fraction": round(full_kelly * kelly_fraction_cap * dd_breaker["size_multiplier"], 4),
         "stop_price": round(price - stop_dist, dec),
         "tp1_price": round(price + stop_dist * 1.2, dec),
         "tp2_price": round(price + stop_dist * reward_risk, dec),
@@ -612,6 +694,125 @@ def iceberg_visible_qty(total_qty: float, parts_limit: int, step: float, min_par
     """Binance ICEBERG_PARTS filter: ceil(qty/icebergQty) <= parts_limit (read from exchangeInfo)."""
     parts = clip(min_parts, 1, parts_limit)
     return max(step, round_step(total_qty / parts, step))
+
+
+# ----------------------------------------------------------------------------- 9. Idempotent clientOrderId, Clock Sync (recvWindow) & 14-Day Calibration Table
+def make_idempotent_client_order_id(symbol: str, side: str, signal_key: str, prefix: str = "htb") -> str:
+    """
+    Phase 1 Rule #9: Deterministic idempotent newClientOrderId (<= 36 chars, ^[A-Za-z0-9-_]+$).
+    Submitting the same (symbol, side, signal_key) twice always generates the exact same ID,
+    preventing duplicate fills on network retries.
+    """
+    sym_clean = re.sub(r"[^A-Z0-9]", "", symbol.upper())[:8] or "ASSET"
+    s_clean = "B" if side.upper() == "BUY" else "S"
+    digest = hashlib.sha256(f"{sym_clean}:{side.upper()}:{signal_key.strip()}".encode("utf-8")).hexdigest()[:18]
+    cid = f"{prefix}-{sym_clean}-{s_clean}-{digest}"
+    return cid[:36]
+
+
+@dataclass
+class ClockSyncGuard:
+    """
+    Phase 1 Rule #9: Synchronizes local monotonic/wall clock against Binance `/api/v3/time`
+    and enforces strict `recvWindow` (default 5000ms, max 10000ms) and drift bounds.
+    """
+    recv_window_ms: int = 5000
+    max_allowed_drift_ms: int = 1000
+    offset_ms: int = 0
+    last_sync_epoch_ms: int = 0
+    last_rtt_ms: float = 1.5
+
+    def sync_with_server_time(self, server_time_ms: int, local_send_ms: Optional[int] = None, local_recv_ms: Optional[int] = None) -> Dict[str, Any]:
+        now_ms = int(time.time() * 1000)
+        send_ms = local_send_ms if local_send_ms is not None else now_ms
+        recv_ms = local_recv_ms if local_recv_ms is not None else now_ms
+        rtt = max(0, recv_ms - send_ms)
+        midpoint = send_ms + (rtt // 2)
+        self.offset_ms = int(server_time_ms - midpoint)
+        self.last_sync_epoch_ms = recv_ms
+        self.last_rtt_ms = float(rtt)
+        return {
+            "offsetMs": self.offset_ms,
+            "rttMs": self.last_rtt_ms,
+            "recvWindowMs": self._sanitized_recv_window(),
+            "withinDriftLimit": abs(self.offset_ms) <= self.max_allowed_drift_ms,
+        }
+
+    def _sanitized_recv_window(self) -> int:
+        return int(clip(self.recv_window_ms, 1000, 10000))
+
+    def build_signed_timing_params(self, local_now_ms: Optional[int] = None) -> Dict[str, Any]:
+        now_ms = int(time.time() * 1000) if local_now_ms is None else int(local_now_ms)
+        drift_ok = abs(self.offset_ms) <= self.max_allowed_drift_ms
+        if not drift_ok:
+            raise ValueError(f"Clock drift {self.offset_ms}ms exceeds safety limit ±{self.max_allowed_drift_ms}ms")
+        return {
+            "timestamp": now_ms + self.offset_ms,
+            "recvWindow": self._sanitized_recv_window(),
+            "clockOffsetMs": self.offset_ms,
+        }
+
+
+CALIBRATION_BINS_SPEC: Tuple[Tuple[str, float, float], ...] = (
+    ("75-80%", 0.75, 0.80),
+    ("80-85%", 0.80, 0.85),
+    ("85-90%", 0.85, 0.90),
+    ("90%+", 0.90, 1.0001),
+)
+
+
+def compute_calibration_table(records: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Phase 3 Rule #11: Evaluates 14-day Binance Spot Testnet Paper/Shadow outcomes across
+    the 4 required confidence bins: (75-80%, 80-85%, 85-90%, 90%+), comparing expected
+    calibrated confidence against empirical win rate and computing Expected Calibration Error (ECE).
+    """
+    rows: List[Dict[str, Any]] = []
+    total_n = 0
+    weighted_gap = 0.0
+
+    for label, lo, hi in CALIBRATION_BINS_SPEC:
+        bucket = [
+            r for r in records
+            if lo <= float(r.get("calibrated_prob", 0.0)) < hi
+        ]
+        n = len(bucket)
+        if n > 0:
+            exp_pct = round((sum(float(r["calibrated_prob"]) for r in bucket) / n) * 100.0, 2)
+            wins = sum(1 for r in bucket if bool(r.get("won")))
+            act_pct = round((wins / n) * 100.0, 2)
+            gap_pct = round(act_pct - exp_pct, 2)
+            net_pnl = round(sum(float(r.get("net_pnl_usd", 0.0)) for r in bucket), 2)
+            aligned = abs(gap_pct) <= 8.0
+            total_n += n
+            weighted_gap += n * abs(gap_pct)
+        else:
+            exp_pct = round(((lo + min(hi, 1.0)) / 2.0) * 100.0, 2)
+            wins = 0
+            act_pct = 0.0
+            gap_pct = 0.0
+            net_pnl = 0.0
+            aligned = True
+
+        rows.append({
+            "bin": label,
+            "rangeMinPct": round(lo * 100.0, 1),
+            "rangeMaxPct": round(min(hi, 1.0) * 100.0, 1),
+            "tradesCount": n,
+            "winsCount": wins,
+            "expectedConfidencePct": exp_pct,
+            "actualWinRatePct": act_pct,
+            "calibrationGapPct": gap_pct,
+            "netPnlUsd": net_pnl,
+            "status": "ALIGNED" if aligned else "RECALIBRATE_REQUIRED",
+        })
+
+    ece_pct = round(weighted_gap / total_n, 2) if total_n > 0 else 0.0
+    return {
+        "totalEvaluatedTrades": total_n,
+        "expectedCalibrationErrorPct": ece_pct,
+        "bins": rows,
+    }
 
 
 # ----------------------------------------------------------------------------- self-test

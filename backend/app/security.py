@@ -183,23 +183,67 @@ security_telemetry = StructuredSecurityTelemetry()
 # ==============================================================================
 
 
+from cryptography.hazmat.primitives.kdf.argon2 import Argon2id as _Argon2idKDF
+
+ARGON2_MEMORY_KIB = 65536  # 64 MB
+ARGON2_TIME_COST = 3
+ARGON2_LANES = 2
+
+
 def hash_admin_secret(
     secret: str,
     salt_hex: str | None = None,
     iterations: int = PBKDF2_DEFAULT_ITERATIONS,
 ) -> str:
-    """إنشاء تجزئة PBKDF2-HMAC-SHA256 قياسية آمنة لتخزينها في TRILUNAIR_ADMIN_SECRET_HASH."""
+    """إنشاء تجزئة Argon2id قياسية آمنة (m=64MB, t=3, p=2, 16B salt) لتخزينها في قاعدة البيانات أو البيئة."""
     cleaned = (secret or "").strip()
     if not cleaned:
         raise ValueError("لا يمكن تجزئة سر مسؤول فارغ.")
     salt_bytes = bytes.fromhex(salt_hex) if salt_hex else secrets.token_bytes(16)
-    digest = hashlib.pbkdf2_hmac(
-        "sha256",
-        cleaned.encode("utf-8"),
-        salt_bytes,
-        iterations,
+    if len(salt_bytes) < 8:
+        salt_bytes = hashlib.sha256(salt_bytes).digest()[:16]
+    kdf = _Argon2idKDF(
+        salt=salt_bytes,
+        length=32,
+        iterations=ARGON2_TIME_COST,
+        lanes=ARGON2_LANES,
+        memory_cost=ARGON2_MEMORY_KIB,
     )
-    return f"pbkdf2_sha256${iterations}${salt_bytes.hex()}${digest.hex()}"
+    digest = kdf.derive(cleaned.encode("utf-8"))
+    s_b64 = base64.urlsafe_b64encode(salt_bytes).decode("ascii").rstrip("=")
+    d_b64 = base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
+    return f"$argon2id$v=19$m={ARGON2_MEMORY_KIB},t={ARGON2_TIME_COST},p={ARGON2_LANES}${s_b64}${d_b64}"
+
+
+def _verify_argon2id_phc(candidate: str, phc: str) -> bool:
+    try:
+        parts = phc.strip().split("$")
+        if len(parts) != 6 or parts[1] != "argon2id":
+            return False
+        params: dict[str, int] = {}
+        for kv in parts[3].split(","):
+            if "=" in kv:
+                k, v = kv.split("=", 1)
+                params[k.strip()] = int(v.strip())
+        m_cost = params.get("m", ARGON2_MEMORY_KIB)
+        t_cost = params.get("t", ARGON2_TIME_COST)
+        lanes = params.get("p", ARGON2_LANES)
+        s_b64, d_b64 = parts[4], parts[5]
+        salt_b = base64.urlsafe_b64decode(s_b64 + "=" * (-len(s_b64) % 4))
+        expected_b = base64.urlsafe_b64decode(d_b64 + "=" * (-len(d_b64) % 4))
+        if len(salt_b) < 8 or len(expected_b) < 16:
+            return False
+        kdf = _Argon2idKDF(
+            salt=salt_b,
+            length=len(expected_b),
+            iterations=t_cost,
+            lanes=lanes,
+            memory_cost=m_cost,
+        )
+        actual_b = kdf.derive(candidate.encode("utf-8"))
+        return hmac.compare_digest(actual_b, expected_b)
+    except Exception:
+        return False
 
 
 def is_weak_or_placeholder_secret(value: str) -> bool:
@@ -218,7 +262,7 @@ def is_weak_or_placeholder_secret(value: str) -> bool:
 
 
 def get_admin_auth_config_state() -> dict[str, Any]:
-    """فحص حالة تهيئة مصادقة المسؤول دون كشف أي سر."""
+    """فحص حالة تهيئة مصادقة المسؤول (Argon2id الأساسي + توافق PBKDF2 القديم) دون كشف أي سر."""
     secret_hash = os.getenv("TRILUNAIR_ADMIN_SECRET_HASH", "").strip()
     raw_secret = (
         os.getenv("TRILUNAIR_ADMIN_SECRET", "").strip()
@@ -227,6 +271,30 @@ def get_admin_auth_config_state() -> dict[str, Any]:
     )
 
     if secret_hash:
+        if secret_hash.startswith("$argon2id$"):
+            parts = secret_hash.split("$")
+            if len(parts) != 6 or not parts[4] or not parts[5]:
+                return {
+                    "configured": False,
+                    "mode": "INVALID_HASH_FORMAT",
+                    "reasonEn": "TRILUNAIR_ADMIN_SECRET_HASH Argon2id string is malformed.",
+                    "reasonAr": "صيغة تجزئة Argon2id في TRILUNAIR_ADMIN_SECRET_HASH غير صالحة.",
+                }
+            for banned in ("7777", "1234", "0000", "password", "admin"):
+                if _verify_argon2id_phc(banned, secret_hash):
+                    return {
+                        "configured": False,
+                        "mode": "WEAK_BANNED_HASH",
+                        "reasonEn": "Configured Argon2id hash corresponds to a banned weak/test PIN.",
+                        "reasonAr": "تجزئة Argon2id المهيأة تطابق رمز اختبار ضعيفاً ومحظوراً.",
+                    }
+            return {
+                "configured": True,
+                "mode": "ARGON2ID_HASH",
+                "reasonEn": "Strong Argon2id (m=64MB, t=3) admin credential hash configured.",
+                "reasonAr": "تمت تهيئة تجزئة Argon2id القوية لبيانات اعتماد المسؤول.",
+            }
+
         parts = secret_hash.split("$")
         valid_format = (
             len(parts) == 4
@@ -243,7 +311,6 @@ def get_admin_auth_config_state() -> dict[str, Any]:
                 "reasonEn": "TRILUNAIR_ADMIN_SECRET_HASH is malformed.",
                 "reasonAr": "صيغة التجزئة في TRILUNAIR_ADMIN_SECRET_HASH غير صالحة.",
             }
-        # التأكد من أن التجزئة لا تخص القيمة المحظورة 7777
         try:
             iters = int(parts[1])
             salt_b = bytes.fromhex(parts[2])
@@ -267,8 +334,8 @@ def get_admin_auth_config_state() -> dict[str, Any]:
         return {
             "configured": True,
             "mode": "PBKDF2_SHA256_HASH",
-            "reasonEn": "Strong PBKDF2-HMAC-SHA256 admin credential hash configured.",
-            "reasonAr": "تمت تهيئة تجزئة PBKDF2-HMAC-SHA256 القوية لبيانات اعتماد المسؤول.",
+            "reasonEn": "Legacy PBKDF2-HMAC-SHA256 admin credential hash configured.",
+            "reasonAr": "تمت تهيئة تجزئة PBKDF2-HMAC-SHA256 لبيانات اعتماد المسؤول.",
         }
 
     if raw_secret:
@@ -285,9 +352,9 @@ def get_admin_auth_config_state() -> dict[str, Any]:
             }
         return {
             "configured": True,
-            "mode": "ENV_SECRET_DERIVED_PBKDF2",
-            "reasonEn": "Strong environment admin secret configured (verified via PBKDF2-HMAC-SHA256).",
-            "reasonAr": "تمت تهيئة سر المسؤول القوي عبر متغيرات البيئة (يُتحقق منه عبر PBKDF2-HMAC-SHA256).",
+            "mode": "ENV_SECRET_DERIVED_ARGON2ID",
+            "reasonEn": "Strong environment admin secret configured.",
+            "reasonAr": "تمت تهيئة سر المسؤول القوي عبر متغيرات البيئة.",
         }
 
     return {
@@ -298,8 +365,24 @@ def get_admin_auth_config_state() -> dict[str, Any]:
     }
 
 
+def verify_admin_secret_path_safe(candidate: str, stored_hash: str) -> bool:
+    """التحقق الموحد من تجزئة Argon2id أو تجزئة PBKDF2 القديمة."""
+    cand = (candidate or "").strip()
+    if not cand or not stored_hash:
+        return False
+    if stored_hash.startswith("$argon2id$"):
+        return _verify_argon2id_phc(cand, stored_hash)
+    if stored_hash.startswith("pbkdf2_sha256$"):
+        parts = stored_hash.split("$")
+        if len(parts) != 4:
+            return False
+        derived = hashlib.pbkdf2_hmac("sha256", cand.encode("utf-8"), bytes.fromhex(parts[2]), int(parts[1]))
+        return hmac.compare_digest(derived, bytes.fromhex(parts[3]))
+    return False
+
+
 def verify_admin_secret_bool(candidate: str) -> bool:
-    """التحقق الآمن ثابت الزمن من سر المسؤول دون قيم افتراضية احتياطية."""
+    """التحقق الآمن ثابت الزمن من سر المسؤول عبر Argon2id (مع دعم توافقي لـ PBKDF2)."""
     cand = (candidate or "").strip()
     if not cand or cand.lower() in FORBIDDEN_WEAK_SECRETS:
         return False
@@ -310,14 +393,7 @@ def verify_admin_secret_bool(candidate: str) -> bool:
 
     secret_hash = os.getenv("TRILUNAIR_ADMIN_SECRET_HASH", "").strip()
     if secret_hash:
-        _, iter_str, salt_hex, digest_hex = secret_hash.split("$")
-        derived = hashlib.pbkdf2_hmac(
-            "sha256",
-            cand.encode("utf-8"),
-            bytes.fromhex(salt_hex),
-            int(iter_str),
-        )
-        return hmac.compare_digest(derived, bytes.fromhex(digest_hex))
+        return verify_admin_secret_path_safe(cand, secret_hash)
 
     raw_secret = (
         os.getenv("TRILUNAIR_ADMIN_SECRET", "").strip()
@@ -327,10 +403,10 @@ def verify_admin_secret_bool(candidate: str) -> bool:
     if not raw_secret or is_weak_or_placeholder_secret(raw_secret):
         return False
 
-    ephemeral_salt = b"trilunair-v1.1-constant-time-verify"
-    cand_digest = hashlib.pbkdf2_hmac("sha256", cand.encode("utf-8"), ephemeral_salt, 100_000)
-    exp_digest = hashlib.pbkdf2_hmac("sha256", raw_secret.encode("utf-8"), ephemeral_salt, 100_000)
-    return hmac.compare_digest(cand_digest, exp_digest)
+    ephemeral_salt = b"trilunair-v1.3-argon2id-verify!!"
+    kdf1 = _Argon2idKDF(salt=ephemeral_salt, length=32, iterations=ARGON2_TIME_COST, lanes=ARGON2_LANES, memory_cost=ARGON2_MEMORY_KIB)
+    kdf2 = _Argon2idKDF(salt=ephemeral_salt, length=32, iterations=ARGON2_TIME_COST, lanes=ARGON2_LANES, memory_cost=ARGON2_MEMORY_KIB)
+    return hmac.compare_digest(kdf1.derive(cand.encode("utf-8")), kdf2.derive(raw_secret.encode("utf-8")))
 
 
 # ==============================================================================

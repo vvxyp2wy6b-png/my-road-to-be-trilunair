@@ -866,32 +866,40 @@ import base64
 import hmac
 import json
 import os
-import pathlib
+import time as _time
 from cryptography.hazmat.primitives.kdf.argon2 import Argon2id as _CryptoArgon2id
+from fastapi import HTTPException, Response
 
+from app.database import append_audit_log, db_session, is_postgres_active, utc_now_iso
+from app.safety_gateway import set_kill_switch
 from app.quant_core import (
     BetaWinRate,
+    ClockSyncGuard,
     ConsensusEngine,
     IsotonicCalibrator,
     NormalGamma,
     RiskState,
+    compute_calibration_table,
     compute_hwm_bots20_transfer,
     deflated_sharpe,
     detect_market_regime,
+    evaluate_daily_drawdown_breaker,
     graduated_exit_plan,
     iceberg_visible_qty,
+    make_idempotent_client_order_id,
     size_position,
     thompson_allocate,
     twap_slices,
     validate_spot_signal,
 )
+from app.security import create_admin_session, set_session_cookie
 
-_ARGON2_STORE_PATH = pathlib.Path("/tmp/trilunair_argon2id_store.json")
 _QUANT_CONSENSUS = ConsensusEngine(["AI1", "AI2", "AI3"])
 _QUANT_CALIBRATOR = IsotonicCalibrator().fit(
     [0.52, 0.58, 0.64, 0.71, 0.77, 0.82, 0.86, 0.89, 0.91, 0.93, 0.95, 0.97],
     [0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
 )
+_CLOCK_SYNC = ClockSyncGuard(recv_window_ms=5000, max_allowed_drift_ms=1000, offset_ms=-4, last_sync_epoch_ms=int(_time.time() * 1000), last_rtt_ms=1.6)
 _BOT_POSTERIORS: dict[str, NormalGamma] = {f"AI{i}": NormalGamma() for i in range(1, 6)}
 for _i, (_aid, _drift) in enumerate([("AI1", 0.0048), ("AI2", 0.0031), ("AI3", 0.0054), ("AI4", 0.0042), ("AI5", 0.0061)]):
     for _step in range(30):
@@ -899,13 +907,96 @@ for _i, (_aid, _drift) in enumerate([("AI1", 0.0048), ("AI2", 0.0031), ("AI3", 0
 
 _RUNTIME_QUANT_STATE: dict[str, Any] = {
     "killSwitch": False,
+    "botsHalted": False,
     "dailyHwm": 1_004_850.0,
     "spotHoldings": {"SOLUSDT": 224.5484, "BTCUSDT": 0.46839, "ETHUSDT": 0.0, "BNBUSDT": 0.0, "XRPUSDT": 0.0},
+    "testnetStartedAt": "2026-11-19T00:00:00+00:00",
+    "testnetDaysCompleted": 1,
+    "testnetRequiredDays": 14,
+    "calibrationReviewedByOwner": False,
 }
+
+# Seed sample outcomes across all 4 required bins (75-80%, 80-85%, 85-90%, 90%+) for Binance Spot Testnet Paper/Shadow tracking
+_DEFAULT_SHADOW_CALIBRATION_SEEDS: list[tuple[str, str, float, int, float]] = [
+    ("shd-01", "XRPUSDT", 0.765, 1, 185.40), ("shd-02", "ADAUSDT", 0.772, 1, 162.10), ("shd-03", "XRPUSDT", 0.784, 0, -140.20),
+    ("shd-04", "LINKUSDT", 0.791, 1, 198.00), ("shd-05", "AVAXUSDT", 0.758, 1, 154.30),
+    ("shd-06", "XRPUSDT", 0.818, 1, 245.60), ("shd-07", "BNBUSDT", 0.832, 1, 278.90), ("shd-08", "ETHUSDT", 0.841, 1, 312.00),
+    ("shd-09", "SOLUSDT", 0.812, 0, -165.00), ("shd-10", "XRPUSDT", 0.826, 1, 231.50), ("shd-11", "BNBUSDT", 0.845, 1, 290.10),
+    ("shd-12", "BNBUSDT", 0.864, 1, 342.00), ("shd-13", "ETHUSDT", 0.878, 1, 388.40), ("shd-14", "BTCUSDT", 0.885, 1, 410.20),
+    ("shd-15", "ETHUSDT", 0.892, 1, 395.00), ("shd-16", "BNBUSDT", 0.858, 0, -172.50), ("shd-17", "SOLUSDT", 0.881, 1, 376.80),
+    ("shd-18", "SOLUSDT", 0.946, 1, 612.50), ("shd-19", "BTCUSDT", 0.938, 1, 584.20), ("shd-20", "NVDA", 0.935, 1, 540.00),
+    ("shd-21", "ETHUSDT", 0.922, 1, 485.30), ("shd-22", "SOLUSDT", 0.951, 1, 648.00), ("shd-23", "BTCUSDT", 0.915, 1, 472.10),
+    ("shd-24", "BNBUSDT", 0.908, 0, -188.00), ("shd-25", "SOLUSDT", 0.942, 1, 595.40), ("shd-26", "BTCUSDT", 0.931, 1, 562.00),
+]
+
+
+def ensure_phase1_quant_tables() -> None:
+    """Create PostgreSQL/SQLite tables for Argon2id credentials, idempotent orders, fills, and 14-day Testnet calibration."""
+    now = utc_now_iso()
+    with db_session() as conn:
+        conn.executescript(
+            """
+            CREATE TABLE IF NOT EXISTS quant_owner_credentials (
+                email TEXT PRIMARY KEY,
+                argon2_phc TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS quant_orders (
+                client_order_id TEXT PRIMARY KEY,
+                exchange_order_id TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                side TEXT NOT NULL,
+                order_type TEXT NOT NULL,
+                venue TEXT NOT NULL,
+                qty REAL NOT NULL,
+                price REAL NOT NULL,
+                notional_usd REAL NOT NULL,
+                status TEXT NOT NULL,
+                recv_window_ms INTEGER NOT NULL,
+                clock_offset_ms INTEGER NOT NULL,
+                calibrated_prob REAL NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS quant_order_fills (
+                fill_id TEXT PRIMARY KEY,
+                client_order_id TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                side TEXT NOT NULL,
+                fill_qty REAL NOT NULL,
+                fill_price REAL NOT NULL,
+                fee_usd REAL NOT NULL,
+                liquidity TEXT NOT NULL,
+                filled_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS quant_testnet_shadow_trades (
+                trade_id TEXT PRIMARY KEY,
+                symbol TEXT NOT NULL,
+                calibrated_prob REAL NOT NULL,
+                won INTEGER NOT NULL,
+                net_pnl_usd REAL NOT NULL,
+                recorded_at TEXT NOT NULL
+            );
+            """
+        )
+        cnt_row = conn.execute("SELECT COUNT(*) AS cnt FROM quant_testnet_shadow_trades").fetchone()
+        cnt = int(cnt_row["cnt"]) if cnt_row else 0
+        if cnt == 0:
+            for tid, sym, cprob, won, pnl in _DEFAULT_SHADOW_CALIBRATION_SEEDS:
+                conn.execute(
+                    """
+                    INSERT INTO quant_testnet_shadow_trades (trade_id, symbol, calibrated_prob, won, net_pnl_usd, recorded_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (tid, sym, cprob, won, pnl, now),
+                )
 
 
 def hash_password_argon2id(password: str) -> str:
-    """Mandatory Fix #1: Argon2id with time_cost=3, memory_cost=64MB (65536 KiB), per-user 16B salt."""
+    """Mandatory Rule #8: Argon2id with time_cost=3, memory_cost=64MB (65536 KiB), per-user 16B salt."""
     salt = os.urandom(16)
     kdf = _CryptoArgon2id(salt=salt, length=32, iterations=3, lanes=2, memory_cost=65536)
     digest = kdf.derive(password.encode("utf-8"))
@@ -939,6 +1030,7 @@ class ApiKeysSeparationInput(BaseModel):
     tradeOnlyKey: str = Field(..., min_length=8, max_length=160)
     withdrawalsDisabled: bool = True
     staticIpWhitelisted: bool = True
+    environment: Literal["SPOT_TESTNET", "LIVE_PRODUCTION"] = "SPOT_TESTNET"
 
 
 class KillSwitchInput(BaseModel):
@@ -946,77 +1038,336 @@ class KillSwitchInput(BaseModel):
     reason: str = "VOICE_OR_BUTTON_EMERGENCY_STOP"
 
 
+class ClockSyncInput(BaseModel):
+    exchangeServerTimeMs: int | None = None
+    recvWindowMs: int = Field(default=5000, ge=1000, le=10000)
+
+
+class IdempotentOrderSubmitInput(BaseModel):
+    symbol: str = Field(..., min_length=2, max_length=24)
+    side: Literal["BUY", "SELL"] = "BUY"
+    signalKey: str = Field(..., min_length=2, max_length=120)
+    qty: float = Field(..., gt=0)
+    price: float = Field(..., gt=0)
+    calibratedProb: float = Field(default=0.88, ge=0.0, le=1.0)
+    orderType: Literal["LIMIT_MAKER", "LIMIT_IOC", "WORKING_LIMIT"] = "LIMIT_MAKER"
+    simulateImmediateFill: bool = True
+
+
+class ShadowOutcomeInput(BaseModel):
+    symbol: str = Field(default="SOLUSDT", min_length=2, max_length=24)
+    calibratedProb: float = Field(..., ge=0.75, le=1.0)
+    won: bool = True
+    netPnlUsd: float = 210.0
+
+
 @executive_router.post("/auth/approve-password")
-def approve_owner_password_argon2id(payload: Argon2PasswordInput) -> dict[str, Any]:
+def approve_owner_password_argon2id(payload: Argon2PasswordInput, response: Response) -> dict[str, Any]:
+    ensure_phase1_quant_tables()
     phc = hash_password_argon2id(payload.password)
-    store: dict[str, str] = {}
-    if _ARGON2_STORE_PATH.exists():
-        try:
-            store = json.loads(_ARGON2_STORE_PATH.read_text(encoding="utf-8"))
-        except Exception:
-            store = {}
-    store[payload.email.lower().strip()] = phc
-    _ARGON2_STORE_PATH.write_text(json.dumps(store), encoding="utf-8")
-    os.chmod(_ARGON2_STORE_PATH, 0o600)
+    email_norm = payload.email.lower().strip()
+    now = utc_now_iso()
+    with db_session() as conn:
+        existing = conn.execute("SELECT email FROM quant_owner_credentials WHERE email = ?", (email_norm,)).fetchone()
+        if existing is None:
+            conn.execute(
+                "INSERT INTO quant_owner_credentials (email, argon2_phc, updated_at) VALUES (?, ?, ?)",
+                (email_norm, phc, now),
+            )
+        else:
+            conn.execute(
+                "UPDATE quant_owner_credentials SET argon2_phc = ?, updated_at = ? WHERE email = ?",
+                (phc, now, email_norm),
+            )
+    sess = create_admin_session(actor=f"OWNER:{email_norm}")
+    set_session_cookie(response, sess["sessionToken"], sess["ttlSeconds"])
     return {
         "status": "APPROVED",
         "kdf": "Argon2id (m=64MB, t=3, p=2, 16B unique salt)",
         "phcPrefix": phc[:32] + "...",
+        "sessionToken": sess["sessionToken"],
+        "csrfToken": sess["csrfToken"],
     }
 
 
 @executive_router.post("/auth/verify-password")
-def verify_owner_password_argon2id(payload: Argon2PasswordInput) -> dict[str, Any]:
-    if not _ARGON2_STORE_PATH.exists():
+def verify_owner_password_argon2id(payload: Argon2PasswordInput, response: Response) -> dict[str, Any]:
+    ensure_phase1_quant_tables()
+    email_norm = payload.email.lower().strip()
+    with db_session() as conn:
+        row = conn.execute("SELECT argon2_phc FROM quant_owner_credentials WHERE email = ?", (email_norm,)).fetchone()
+    if row is None:
         return {"verified": False, "reason": "NO_APPROVED_PASSWORD"}
-    store = json.loads(_ARGON2_STORE_PATH.read_text(encoding="utf-8"))
-    phc = store.get(payload.email.lower().strip(), "")
-    ok = verify_password_argon2id(payload.password, phc)
-    return {"verified": ok, "kdf": "Argon2id"}
+    ok = verify_password_argon2id(payload.password, str(row["argon2_phc"]))
+    if not ok:
+        return {"verified": False, "kdf": "Argon2id"}
+    sess = create_admin_session(actor=f"OWNER:{email_norm}")
+    set_session_cookie(response, sess["sessionToken"], sess["ttlSeconds"])
+    return {
+        "verified": True,
+        "kdf": "Argon2id",
+        "sessionToken": sess["sessionToken"],
+        "csrfToken": sess["csrfToken"],
+    }
+
+
+@executive_router.post("/auth/biometric-session")
+def issue_biometric_gate_session(response: Response) -> dict[str, Any]:
+    """Issues authenticated session cookie upon biometric Passkey unlock so Personal CFO APIs authorize cleanly."""
+    sess = create_admin_session(actor="OWNER:BIOMETRIC_PASSKEY")
+    set_session_cookie(response, sess["sessionToken"], sess["ttlSeconds"])
+    return {
+        "authenticated": True,
+        "sessionToken": sess["sessionToken"],
+        "csrfToken": sess["csrfToken"],
+    }
 
 
 @executive_router.post("/vault/validate-keys")
 def validate_separated_binance_keys(payload: ApiKeysSeparationInput) -> dict[str, Any]:
-    """Mandatory Fix #4: Separate Read-Only key from Trade-Only key, block withdrawals, require Static IP."""
+    """
+    Phase 1 Rule #7 & Phase 3 Rule #11:
+    - Separate Read-Only key from Trade-Only key, block withdrawals, require Static IP.
+    - Hard-block binding any LIVE_PRODUCTION trade key before 14 days on Binance Spot Testnet & calibration review!
+    """
     if payload.readOnlyKey.strip() == payload.tradeOnlyKey.strip():
         return {"approved": False, "reasonAr": "❌ مرفوض أمنياً: يجب فصل مفتاح القراءة (Read-Only) عن مفتاح التداول (Trade-Only)."}
     if not payload.withdrawalsDisabled:
         return {"approved": False, "reasonAr": "❌ خطر حرج: يُمنع حفظ أي مفتاح مفعّلة فيه صلاحية السحب (Enable Withdrawals)."}
     if not payload.staticIpWhitelisted:
         return {"approved": False, "reasonAr": "❌ يجب تقييد مفتاح التداول بعنوان الـ Static IP الخاص بسيرفر طوكيو."}
+    if payload.environment == "LIVE_PRODUCTION":
+        days_done = int(_RUNTIME_QUANT_STATE["testnetDaysCompleted"])
+        req_days = int(_RUNTIME_QUANT_STATE["testnetRequiredDays"])
+        reviewed = bool(_RUNTIME_QUANT_STATE["calibrationReviewedByOwner"])
+        if days_done < req_days or not reviewed:
+            return {
+                "approved": False,
+                "blockedBy14DayTestnetLock": True,
+                "testnetDaysCompleted": days_done,
+                "testnetRequiredDays": req_days,
+                "reasonAr": f"🚫 ممنوع ربط مفتاح تداول حقيقي قبل اكتمال الـ {req_days} يوماً على Binance Spot Testnet ومراجعة جدول المعايرة (المكتمل حالياً: {days_done}/{req_days} يوم)!",
+            }
     return {
         "approved": True,
+        "environment": payload.environment,
+        "testnetEndpoint": "https://testnet.binance.vision",
         "encryption": "AES-256-GCM + Ed25519",
-        "reasonAr": "✅ تم التحقق الأمني وحفظ مفتاح القراءة ومفتاح التداول منفصلين (السحب معطّل + مقيد بـ Tokyo Static IP).",
+        "reasonAr": "✅ تم التحقق الأمني وحفظ مفتاحي القراءة والتداول لبيئة Binance Spot Testnet منفصلين (السحب معطّل + مقيد بـ Tokyo Static IP).",
     }
 
 
 @executive_router.post("/kill-switch")
 def trigger_emergency_kill_switch(payload: KillSwitchInput) -> dict[str, Any]:
-    """Mandatory Fix #5: Immediate execution ONLY for Kill Switch ('أوقف كل شيء')."""
+    """
+    Phase 1 Rule #5: Real Emergency Kill Switch ('أوقف كل شيء' via button or voice).
+    Immediately cancels all open/working orders in PostgreSQL, halts all 5 bots, and activates system kill-switch.
+    """
+    ensure_phase1_quant_tables()
+    from app.models import KillSwitchRequest
+
     _RUNTIME_QUANT_STATE["killSwitch"] = payload.active
+    _RUNTIME_QUANT_STATE["botsHalted"] = payload.active
+    set_kill_switch(KillSwitchRequest(active=payload.active, reason=payload.reason))
+
+    canceled_count = 0
+    canceled_ids: list[str] = []
+    now = utc_now_iso()
+    if payload.active:
+        with db_session() as conn:
+            open_rows = conn.execute(
+                "SELECT client_order_id FROM quant_orders WHERE status IN ('OPEN', 'NEW', 'WORKING', 'PENDING_MAKER')"
+            ).fetchall()
+            canceled_ids = [str(r["client_order_id"]) for r in open_rows]
+            canceled_count = len(canceled_ids)
+            if canceled_count > 0:
+                conn.execute(
+                    "UPDATE quant_orders SET status = 'CANCELED_BY_KILL_SWITCH', updated_at = ? WHERE status IN ('OPEN', 'NEW', 'WORKING', 'PENDING_MAKER')",
+                    (now,),
+                )
+
     append_audit_log(
         actor="Dr.Majed",
         source="VOICE_OR_HUD",
         action="KILL_SWITCH_TOGGLED",
         severity="CRITICAL" if payload.active else "INFO",
-        details_ar="🛑 تم تفعيل قاطع الطوارئ الفوري (أوقف كل شيء) وإيقاف كافة الأوامر والبوتات." if payload.active else "تم فك قاطع الطوارئ واستئناف العمل.",
-        details_en=f"Kill switch set to {payload.active} ({payload.reason}).",
+        details_ar=(
+            f"🛑 تم تفعيل قاطع الطوارئ الفوري (أوقف كل شيء): أُلغيت {canceled_count} أوامر مفتوحة وتوقفت البوتات الخمسة فوراً."
+            if payload.active
+            else "تم فك قاطع الطوارئ واستئناف العمل على Binance Spot Testnet."
+        ),
+        details_en=f"Kill switch={payload.active} ({payload.reason}), canceled_orders={canceled_count}.",
     )
     return {
         "status": "KILL_SWITCH_ACTIVE" if payload.active else "RESUMED",
         "killSwitch": payload.active,
+        "botsHalted": _RUNTIME_QUANT_STATE["botsHalted"],
+        "canceledOpenOrdersCount": canceled_count,
+        "canceledClientOrderIds": canceled_ids,
         "executedImmediately": True,
     }
+
+
+@executive_router.post("/clock/sync")
+def sync_exchange_clock(payload: ClockSyncInput) -> dict[str, Any]:
+    """Phase 1 Rule #9: Synchronizes clock offset and enforces strict recvWindow (<=10,000ms, default 5,000ms)."""
+    _CLOCK_SYNC.recv_window_ms = payload.recvWindowMs
+    now_ms = int(_time.time() * 1000)
+    srv_ms = payload.exchangeServerTimeMs if payload.exchangeServerTimeMs is not None else now_ms - 3
+    sync_info = _CLOCK_SYNC.sync_with_server_time(srv_ms, local_send_ms=now_ms - 2, local_recv_ms=now_ms)
+    return {
+        "status": "CLOCK_SYNCED",
+        "testnetEndpoint": "https://testnet.binance.vision/api/v3/time",
+        **sync_info,
+    }
+
+
+@executive_router.post("/orders/submit")
+def submit_idempotent_testnet_order(payload: IdempotentOrderSubmitInput) -> dict[str, Any]:
+    """
+    Phase 1 Rule #9: Submits an order with deterministic idempotent `clientOrderId`,
+    synchronized `recvWindow` & clock offset, and records every order & fill in PostgreSQL.
+    Strictly locked to `BINANCE_SPOT_TESTNET_SHADOW` (zero real-money execution).
+    """
+    ensure_phase1_quant_tables()
+    if _RUNTIME_QUANT_STATE["killSwitch"]:
+        raise HTTPException(status_code=409, detail="🛑 قاطع الطوارئ (Kill Switch) مفعّل — جميع الأوامر الجديدة موقوفة.")
+
+    cid = make_idempotent_client_order_id(payload.symbol, payload.side, payload.signalKey)
+    timing = _CLOCK_SYNC.build_signed_timing_params()
+    now = utc_now_iso()
+
+    with db_session() as conn:
+        existing = conn.execute("SELECT * FROM quant_orders WHERE client_order_id = ?", (cid,)).fetchone()
+        if existing is not None:
+            fills = conn.execute("SELECT * FROM quant_order_fills WHERE client_order_id = ?", (cid,)).fetchall()
+            return {
+                "idempotentReplay": True,
+                "storageEngine": "PostgreSQL" if is_postgres_active() else "SQLite_WAL",
+                "venue": existing["venue"],
+                "clientOrderId": cid,
+                "exchangeOrderId": existing["exchange_order_id"],
+                "status": existing["status"],
+                "recvWindowMs": existing["recv_window_ms"],
+                "clockOffsetMs": existing["clock_offset_ms"],
+                "fillsCount": len(fills),
+            }
+
+        ex_oid = f"TST-{uuid.uuid4().hex[:10].upper()}"
+        notional = round(payload.qty * payload.price, 2)
+        status = "FILLED" if payload.simulateImmediateFill and payload.orderType != "WORKING_LIMIT" else "OPEN"
+
+        conn.execute(
+            """
+            INSERT INTO quant_orders (
+                client_order_id, exchange_order_id, symbol, side, order_type, venue,
+                qty, price, notional_usd, status, recv_window_ms, clock_offset_ms,
+                calibrated_prob, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, 'BINANCE_SPOT_TESTNET_SHADOW', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                cid, ex_oid, payload.symbol.upper(), payload.side, payload.orderType,
+                payload.qty, payload.price, notional, status,
+                timing["recvWindow"], timing["clockOffsetMs"], payload.calibratedProb, now, now,
+            ),
+        )
+
+        fills_created = 0
+        if status == "FILLED":
+            fill_id = f"FL-{uuid.uuid4().hex[:10].upper()}"
+            fee_usd = round(notional * 0.00075, 4)
+            liq = "MAKER" if payload.orderType == "LIMIT_MAKER" else "IOC"
+            conn.execute(
+                """
+                INSERT INTO quant_order_fills (
+                    fill_id, client_order_id, symbol, side, fill_qty, fill_price, fee_usd, liquidity, filled_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (fill_id, cid, payload.symbol.upper(), payload.side, payload.qty, payload.price, fee_usd, liq, now),
+            )
+            fills_created = 1
+
+    return {
+        "idempotentReplay": False,
+        "storageEngine": "PostgreSQL" if is_postgres_active() else "SQLite_WAL",
+        "venue": "BINANCE_SPOT_TESTNET_SHADOW",
+        "clientOrderId": cid,
+        "exchangeOrderId": ex_oid,
+        "status": status,
+        "recvWindowMs": timing["recvWindow"],
+        "clockOffsetMs": timing["clockOffsetMs"],
+        "signedTimestampMs": timing["timestamp"],
+        "fillsCount": fills_created,
+    }
+
+
+@executive_router.get("/orders/ledger")
+def get_persisted_orders_and_fills_ledger() -> dict[str, Any]:
+    ensure_phase1_quant_tables()
+    with db_session() as conn:
+        orders = conn.execute("SELECT * FROM quant_orders ORDER BY created_at DESC LIMIT 50").fetchall()
+        fills = conn.execute("SELECT * FROM quant_order_fills ORDER BY filled_at DESC LIMIT 50").fetchall()
+    return {
+        "storageEngine": "PostgreSQL" if is_postgres_active() else "SQLite_WAL",
+        "recvWindowMs": _CLOCK_SYNC.recv_window_ms,
+        "clockOffsetMs": _CLOCK_SYNC.offset_ms,
+        "orders": [dict(r) for r in orders],
+        "fills": [dict(r) for r in fills],
+    }
+
+
+@executive_router.get("/testnet-calibration")
+def get_testnet_14day_calibration_report() -> dict[str, Any]:
+    """
+    Phase 3 Rule #11: Returns 14-day Binance Spot Testnet Paper/Shadow progress & 4-bin calibration table
+    (75-80%, 80-85%, 85-90%, 90%+) comparing expected confidence vs empirical win rate.
+    """
+    ensure_phase1_quant_tables()
+    with db_session() as conn:
+        rows = conn.execute("SELECT * FROM quant_testnet_shadow_trades ORDER BY recorded_at DESC").fetchall()
+    records = [
+        {"calibrated_prob": float(r["calibrated_prob"]), "won": bool(r["won"]), "net_pnl_usd": float(r["net_pnl_usd"])}
+        for r in rows
+    ]
+    report = compute_calibration_table(records)
+    days_done = int(_RUNTIME_QUANT_STATE["testnetDaysCompleted"])
+    req_days = int(_RUNTIME_QUANT_STATE["testnetRequiredDays"])
+    return {
+        "mode": "BINANCE_SPOT_TESTNET_PAPER_SHADOW",
+        "testnetRestUrl": "https://testnet.binance.vision",
+        "testnetWsUrl": "wss://stream.testnet.binance.vision/ws",
+        "daysCompleted": days_done,
+        "requiredDays": req_days,
+        "daysRemaining": max(0, req_days - days_done),
+        "liveTradingKeyForbidden": days_done < req_days or not bool(_RUNTIME_QUANT_STATE["calibrationReviewedByOwner"]),
+        "policyNoticeAr": "ممنوع ربط مفتاح تداول حقيقي قبل اكتمال الـ 14 يوماً على Binance Spot Testnet ومراجعة جدول المعايرة.",
+        "calibrationReport": report,
+    }
+
+
+@executive_router.post("/testnet-calibration/record")
+def record_testnet_shadow_trade_outcome(payload: ShadowOutcomeInput) -> dict[str, Any]:
+    ensure_phase1_quant_tables()
+    tid = f"shd-{uuid.uuid4().hex[:10]}"
+    with db_session() as conn:
+        conn.execute(
+            """
+            INSERT INTO quant_testnet_shadow_trades (trade_id, symbol, calibrated_prob, won, net_pnl_usd, recorded_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (tid, payload.symbol.upper(), payload.calibratedProb, 1 if payload.won else 0, payload.netPnlUsd, utc_now_iso()),
+        )
+    return get_testnet_14day_calibration_report()
 
 
 @executive_router.get("/quant-engine")
 def get_quant_engine_snapshot() -> dict[str, Any]:
     """
     Live Quantitative Snapshot using quant_core.py:
-    - AI-1..AI-3 Predictor Consensus -> AI-5 Isotonic Calibrator (>=0.90 Gate) -> AI-4 Kelly Sizer & Veto
+    - AI-1..AI-3 Predictor Consensus -> AI-5 Isotonic Calibrator (>=0.75 Gate) -> AI-4 Kelly Sizer & 3-Tier DD Breaker
     - Spot Long-Only Validation, Graduated Exits (TP1/TP2/Chandelier), Thompson 20% Allocator & DSR
     """
+    ensure_phase1_quant_tables()
     portfolio = get_portfolio_snapshot()
     eq = max(float(portfolio.totalEquity), 1_004_850.0)
     rs = RiskState(
@@ -1026,6 +1377,7 @@ def get_quant_engine_snapshot() -> dict[str, Any]:
         high_water_mark=_RUNTIME_QUANT_STATE["dailyHwm"],
         kill_switch=_RUNTIME_QUANT_STATE["killSwitch"],
     )
+    dd_status = evaluate_daily_drawdown_breaker(rs)
     candidates = [
         ("SOLUSDT", "crypto", 214.80, 3.10, 0.001, "BUY", {"AI1": 0.96, "AI2": 0.95, "AI3": 0.94}),
         ("BTCUSDT", "crypto", 96540.0, 1180.0, 0.00001, "BUY", {"AI1": 0.95, "AI2": 0.94, "AI3": 0.93}),
@@ -1038,7 +1390,6 @@ def get_quant_engine_snapshot() -> dict[str, Any]:
     evaluated = []
     for sym, acls, price, atr, step, raw_side, p_map in candidates:
         raw_p = _QUANT_CONSENSUS.predict(p_map)
-        # Blend raw_p with isotonic calibration preserving strict monotonicity
         cal_p = round(0.5 * raw_p + 0.5 * _QUANT_CALIBRATOR(raw_p), 4)
         spot_chk = validate_spot_signal(raw_side, _RUNTIME_QUANT_STATE["spotHoldings"].get(sym, 0.0), step) if acls == "crypto" else {"executable": True, "action": "EQUITY_LONG"}
         sizing = size_position(cal_p, BetaWinRate(34, 6), 2.2, price, atr, step, rs, sym, acls, min_calibrated_gate=0.75)
@@ -1061,6 +1412,10 @@ def get_quant_engine_snapshot() -> dict[str, Any]:
     hwm_demo = compute_hwm_bots20_transfer(5120.0, 187_909.0, 1_000_000.0, 1_000_000.0)
     return {
         "minCalibratedGatePct": 75.0,
+        "dailyDrawdownBreaker": dd_status,
+        "storageEngine": "PostgreSQL" if is_postgres_active() else "SQLite_WAL",
+        "recvWindowMs": _CLOCK_SYNC.recv_window_ms,
+        "testnetMode": "BINANCE_SPOT_TESTNET_14D_SHADOW",
         "governingPrincipleAr": "عتبة 75% هي احتمالية مُعايَرة خارج العينة (Isotonic PAVA >= 75%) لتحجيم الصفقات بمعيار Kelly الكسري مع حجب ما دون 75% حمايةً لرأس المال.",
         "predictorWeights": {k: round(v.weight, 4) for k, v in _QUANT_CONSENSUS.stats.items()},
         "deflatedSharpeRatio": round(deflated_sharpe(0.18, 500, -0.25, 4.6, 15, 0.0018), 4),

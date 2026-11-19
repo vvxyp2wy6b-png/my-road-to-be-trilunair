@@ -77,7 +77,7 @@ def test_trm_brand_and_four_factor_admin_mfa_flow(isolated_admin_client: TestCli
         assert "majed.owner@example.sa" not in str(row["email_ciphertext"])
         assert "+966501234567" not in str(row["phone_ciphertext"])
         assert secret_b32 not in str(row["totp_secret_ciphertext"])
-        assert str(row["verification_key_hash"]).startswith("pbkdf2_sha256$")
+        assert str(row["verification_key_hash"]).startswith("$argon2id$v=19$")
 
     # 4. تأكيد إقران تطبيق المصادقة برمز RFC 6238 مكون من 6 أرقام في النافذة السابقة (-30s)
     now_ts = int(time.time())

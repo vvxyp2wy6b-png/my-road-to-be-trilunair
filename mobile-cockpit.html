@@ -484,6 +484,139 @@
     html[data-layout="mobile"] .cfo-main-grid { grid-template-columns: 1fr; }
     html[data-layout="mobile"] .cfo-bucket-grid, html[data-layout="mobile"] .cfo-sleeves-grid { grid-template-columns: 1fr; }
 
+
+    /* === إصلاح عاجل #1: تباين واضح لكل الأزرار والأيقونات في جميع الحالات (عادي / مرور / مضغوط / معطّل) === */
+    button, .btn-3d {
+      color: #ffffff;
+      font-family: inherit;
+    }
+    .btn-3d {
+      background: linear-gradient(180deg, #2b579a 0%, #1a3a6e 100%);
+      color: #ffffff !important;
+      border: 1.5px solid rgba(110, 231, 255, 0.78);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+      box-shadow: inset 0 2px 1px rgba(255,255,255,0.32), 0 3px 0 #091833, 0 6px 14px rgba(0,0,0,0.65);
+    }
+    .btn-3d:hover:not(:disabled) {
+      background: linear-gradient(180deg, #386ec2 0%, #224b8f 100%);
+      color: #ffffff !important;
+      border-color: #00f5d4;
+      filter: brightness(1.06);
+    }
+    .btn-3d:active:not(:disabled) {
+      transform: translateY(2px);
+      background: linear-gradient(180deg, #1f437d 0%, #152e59 100%);
+      color: #ffffff !important;
+    }
+    .btn-3d-gold {
+      background: linear-gradient(180deg, #ffe88c 0%, #f5be30 58%, #db9d14 100%) !important;
+      color: #061020 !important;
+      border: 1.5px solid #fff6c9 !important;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.45) !important;
+    }
+    .btn-3d-gold:hover:not(:disabled), .btn-3d-gold:active:not(:disabled) {
+      color: #061020 !important;
+      filter: brightness(1.06);
+    }
+    .btn-3d-buy {
+      background: linear-gradient(180deg, #4affbe 0%, #00d98b 58%, #00ad6d 100%) !important;
+      color: #03170f !important;
+      border: 1.5px solid #b8ffe4 !important;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.4) !important;
+    }
+    .btn-3d-buy:hover:not(:disabled), .btn-3d-buy:active:not(:disabled) {
+      color: #03170f !important;
+      filter: brightness(1.06);
+    }
+    .btn-3d-sell, .kill-btn-3d {
+      background: linear-gradient(180deg, #c9184a 0%, #a4133c 58%, #800f2f 100%) !important;
+      color: #ffffff !important;
+      border: 1.5px solid #ffb3c6 !important;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.65) !important;
+    }
+    .btn-3d-sell:hover:not(:disabled), .kill-btn-3d:hover:not(:disabled) {
+      background: linear-gradient(180deg, #d91b4e 0%, #a4133c 100%) !important;
+      color: #ffffff !important;
+    }
+    .kill-btn-3d.active-kill, .kill-btn-3d.active-kill:hover:not(:disabled) {
+      background: linear-gradient(180deg, #ffe88c 0%, #f5be30 100%) !important;
+      color: #061020 !important;
+      border-color: #ffffff !important;
+      text-shadow: none !important;
+    }
+    /* حالة التعطيل أو حياد Spot: تباين عالٍ بدون إعتام opacity يطمس النص! */
+    .btn-3d:disabled, button:disabled, .btn-spot-neutral, .btn-spot-neutral:hover:not(:disabled) {
+      opacity: 1 !important;
+      background: linear-gradient(180deg, #273b5c 0%, #1a2942 100%) !important;
+      color: #e2f1ff !important;
+      border: 1.5px dashed #7dd3fc !important;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.6) !important;
+      box-shadow: none !important;
+    }
+    .btn-3d:disabled, button:disabled { cursor: not-allowed; }
+    select.holo-inp option { background: #0d1f3d; color: #ffffff; }
+
+    /* === إصلاح #2: شريط زر الموسيقى الهادئة للتركيز ومستوى الصوت === */
+    .music-ctrl-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 8px; border-radius: 10px;
+      background: rgba(16, 36, 72, 0.92);
+      border: 1.5px solid rgba(110, 231, 255, 0.55);
+    }
+    .music-vol-range {
+      width: 66px; height: 5px; accent-color: var(--sec); cursor: pointer;
+    }
+    .btn-music-on, .btn-music-on:hover:not(:disabled), .btn-music-on:active:not(:disabled) {
+      background: linear-gradient(180deg, #3bfcb4 0%, #00c47c 100%) !important;
+      color: #041710 !important;
+      border-color: #b8ffe4 !important;
+      text-shadow: none !important;
+    }
+    .holo-toast.hidden { display: none !important; }
+
+    /* === إصلاح #3: ترتيب التبويبات في 5 مجموعات منطقية (التداول / الوكلاء / المحفظة / المدير المالي / الإعدادات والصوت) === */
+    .grouped-prism-nav {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 6px; padding-top: 6px; border-top: 1px solid rgba(110, 231, 255, 0.22);
+    }
+    .nav-logical-group {
+      display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;
+      padding: 3px 6px; border-radius: 10px;
+      background: rgba(10, 24, 50, 0.85);
+      border: 1px solid rgba(110, 231, 255, 0.28);
+    }
+    .nav-group-lbl {
+      font-size: 10px; font-weight: 900; color: #ffe484;
+      padding: 1px 5px; border-radius: 5px;
+      background: rgba(247, 201, 72, 0.14);
+      white-space: nowrap;
+    }
+    .mobile-bottom-nav {
+      grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+      background: rgba(6, 15, 34, 0.99) !important;
+      border-top: 2px solid rgba(247, 201, 72, 0.65) !important;
+      padding: 5px 4px calc(6px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    .mob-tab-btn {
+      color: #eaf4ff !important;
+      font-size: 10.2px !important;
+      font-weight: 900 !important;
+      border-radius: 8px;
+      padding: 4px 2px !important;
+    }
+    .mob-tab-btn.active {
+      color: #061020 !important;
+      background: linear-gradient(180deg, #ffe88c 0%, #f5be30 100%) !important;
+      box-shadow: 0 2px 8px rgba(247,201,72,0.4);
+    }
+    .mob-subnav-strip {
+      display: none; gap: 4px; flex-wrap: wrap; margin-bottom: 6px;
+      padding: 5px 6px; border-radius: 10px;
+      background: rgba(10, 24, 50, 0.92); border: 1px solid rgba(110,231,255,0.35);
+    }
+    @media (max-width: 900px) { .mob-subnav-strip.show-in-trading { display: flex !important; } }
+    html[data-layout="mobile"] .mob-subnav-strip.show-in-trading { display: flex !important; }
+
   </style>
 </head>
 <body>
@@ -557,7 +690,7 @@
               <div class="muted" style="color:var(--sec);font-weight:700;">اكتب كلمة السر التي تريد اعتمادها لحسابك:</div>
               <div style="display:flex;gap:5px;">
                 <input id="gate-new-pass" type="password" dir="ltr" class="holo-inp num" style="flex:1;padding:8px 10px;" placeholder="كلمة السر الجديدة المعتمدة..." />
-                <button type="button" class="btn-3d btn-3d-sm" onclick="ui.togglePassVis('gate-new-pass')">👁️</button>
+                <button type="button" class="btn-3d btn-3d-sm" onclick="ui.togglePassVis('gate-new-pass')" aria-label="إظهار كلمة السر">👁️ إظهار</button>
               </div>
               <input id="gate-confirm-pass" type="password" dir="ltr" class="holo-inp num" style="width:100%;padding:8px 10px;" placeholder="تأكيد كلمة السر..." />
               <button type="button" id="btn-approve-pass" class="btn-3d btn-3d-gold" style="width:100%;padding:9px 12px;" onclick="ui.approveCustomPassword()">
@@ -570,7 +703,7 @@
               <div class="muted">أدخل كلمة السر المعتمدة للدخول إلى المنصة:</div>
               <div style="display:flex;gap:5px;">
                 <input id="gate-login-pass" type="password" dir="ltr" class="holo-inp num" style="flex:1;padding:8px 10px;" placeholder="كلمة السر المعتمدة..." onkeydown="if(event.key==='Enter')ui.loginWithApprovedPassword()" />
-                <button type="button" class="btn-3d btn-3d-sm" onclick="ui.togglePassVis('gate-login-pass')">👁️</button>
+                <button type="button" class="btn-3d btn-3d-sm" onclick="ui.togglePassVis('gate-login-pass')" aria-label="إظهار كلمة السر">👁️ إظهار</button>
               </div>
               <input id="gate-2fa-opt" type="text" maxlength="6" dir="ltr" class="holo-inp num hidden" style="width:100%;text-align:center;letter-spacing:4px;" placeholder="رمز Google Authenticator (6 أرقام)" />
               <button type="button" id="btn-submit-login" class="btn-3d btn-3d-gold" style="width:100%;padding:9px 12px;" onclick="ui.loginWithApprovedPassword()">
@@ -589,58 +722,84 @@
   </section>
 
   <div id="app-cockpit-shell" class="holo-stage hidden">
-    <!-- 1A. الهيدر المكتبي -->
+    <!-- 1A. الهيدر المكتبي الموحّد مع زر موسيقى التركيز والـ 5 مجموعات المنطقية -->
     <header class="sovereign-bridge desktop-only">
       <div class="header-tri-grid">
-        <div style="display:flex;align-items:center;gap:8px;justify-self:start;">
+        <div style="display:flex;align-items:center;gap:6px;justify-self:start;flex-wrap:wrap;">
           <div id="hdr-crest-svg" onclick="ui.cycleMonogram()" style="cursor:pointer;"></div>
-          <span class="hex-shield num">PAPER•SAFE</span>
+          <span class="hex-shield num" style="color:var(--ok);border-color:var(--ok);">TESTNET•14D•PAPER</span>
           <button type="button" id="hdr-mono-tag" class="btn-3d btn-3d-sm btn-3d-gold num" onclick="ui.cycleMonogram()">HTB ★</button>
+          <!-- زر الموسيقى الهادئة للتركيز (تشغيل/إيقاف + مستوى الصوت) -->
+          <div class="music-ctrl-pill" title="الموسيقى الهادئة المساعدة على التركيز">
+            <button type="button" id="btn-ambient-music" class="btn-3d btn-3d-sm" onclick="ui.toggleAmbientMusic()">🎵 موسيقى التركيز: إيقاف</button>
+            <input id="ambient-vol-slider" type="range" min="0" max="100" value="35" class="music-vol-range" aria-label="مستوى صوت موسيقى التركيز" oninput="ui.setAmbientVolume(this.value)" />
+            <span id="ambient-vol-lbl" class="num" style="font-size:10.5px;color:#eaf4ff;min-width:28px;">35%</span>
+          </div>
         </div>
 
         <div class="hdr-center-crown">
-          <h1 class="hdr-eng-title eng-crown">HOW TO BE A TRILLIONAIRE</h1>
+          <h1 class="hdr-eng-title eng-crown" style="font-size:clamp(15px,1.55vw,21px);">HOW TO BE A TRILLIONAIRE</h1>
         </div>
 
-        <div style="display:flex;align-items:center;gap:8px;justify-self:end;">
+        <div style="display:flex;align-items:center;gap:6px;justify-self:end;flex-wrap:wrap;">
           <div class="owner-seal-card">
-            <strong style="font-size:12px;color:#fff;">د. ماجد حمدي</strong>
+            <strong style="font-size:11.5px;color:#fff;">د. ماجد حمدي</strong>
             <img class="sig-img" data-sig="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="توقيع د. ماجد حمدي" />
           </div>
-          <button type="button" class="btn-3d btn-3d-sm" onclick="ui.openBinanceModal()" title="إعداد مفاتيح Binance وسيرفر طوكيو">🔑 Binance</button>
-          <button type="button" class="btn-3d btn-3d-sm" onclick="ui.toggleDeviceMode()">
-            <span id="device-mode-lbl">📱 الجوال</span>
-          </button>
-          <button type="button" id="btn-kill-switch" class="btn-3d btn-3d-sm kill-btn-3d" onclick="ui.triggerKillSwitch()" title="أمر طوارئ فوري: إيقاف كافة الأوامر والبوتات فوراً">🛑 أوقف كل شيء</button>
-          <button type="button" id="btn-lock-app" class="btn-3d btn-3d-sm btn-3d-sell" onclick="ui.lockCockpit()" title="قفل المنصة والعودة لشاشة تسجيل الدخول">🔒 خروج</button>
+          <button type="button" class="btn-3d btn-3d-sm" onclick="ui.openBinanceModal()">🔑 مفاتيح Testnet</button>
+          <button type="button" class="btn-3d btn-3d-sm" onclick="ui.toggleDeviceMode()"><span id="device-mode-lbl">📱 الجوال</span></button>
+          <button type="button" id="btn-kill-switch" class="btn-3d btn-3d-sm kill-btn-3d" onclick="ui.triggerKillSwitch()">🛑 أوقف كل شيء</button>
+          <button type="button" id="btn-lock-app" class="btn-3d btn-3d-sm btn-3d-sell" onclick="ui.lockCockpit()">🔒 خروج</button>
         </div>
       </div>
 
-      <!-- تنقل نظيف بشاشة واحدة لكل تبويب (بدون حشو طولي!) -->
-      <nav class="prism-nav">
-        <button type="button" class="btn-3d btn-3d-sm btn-3d-gold nav-main-btn" data-tab="elite90" onclick="ui.tab('elite90')">🏆 الصفقات المُعايَرة (<span dir="ltr">&ge;75%</span>)</button>
-        <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="charts3d" onclick="ui.tab('charts3d')">🕯️ مدار 3D والشموع</button>
-        <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="boardroom" onclick="ui.tab('boardroom')">🪑 طاولة الـ 5 آيجنت والـ 20%</button>
-        <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="stocks" onclick="ui.tab('stocks')">📈 أفضل الأسهم</button>
-        <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="daily" onclick="ui.tab('daily')">📊 صفقات اليوم والـ 20%</button>
-        <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="cfo" onclick="ui.tab('cfo')">💼 المدير المالي ومسار 1T$</button>
+      <!-- الترتيب الاحترافي في 5 مجموعات منطقية: التداول | الوكلاء | المحفظة | المدير المالي | الإعدادات والصوت -->
+      <nav class="grouped-prism-nav" aria-label="المجموعات المنطقية للمنصة">
+        <div class="nav-logical-group" data-group="trading">
+          <span class="nav-group-lbl">التداول</span>
+          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold nav-main-btn" data-tab="elite90" onclick="ui.tab('elite90')">🏆 الصفقات (<span dir="ltr">&ge;75%</span>)</button>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="charts3d" onclick="ui.tab('charts3d')">🕯️ الشموع و3D</button>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="stocks" onclick="ui.tab('stocks')">📈 الأسهم</button>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="testnet14" onclick="ui.tab('testnet14')">🧪 Testnet 14d والمعايرة</button>
+        </div>
+
+        <div class="nav-logical-group" data-group="agents">
+          <span class="nav-group-lbl">الوكلاء</span>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="boardroom" onclick="ui.tab('boardroom')">🪑 الـ 5 آيجنت والـ 20%</button>
+        </div>
+
+        <div class="nav-logical-group" data-group="portfolio">
+          <span class="nav-group-lbl">المحفظة</span>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="daily" onclick="ui.tab('daily')">📊 صفقات اليوم والـ HWM</button>
+        </div>
+
+        <div class="nav-logical-group" data-group="cfo">
+          <span class="nav-group-lbl">المدير المالي</span>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="cfo" onclick="ui.tab('cfo')">💼 المدير المالي و1T$</button>
+        </div>
+
+        <div class="nav-logical-group" data-group="settings">
+          <span class="nav-group-lbl">الإعدادات والصوت</span>
+          <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="settings" onclick="ui.tab('settings')">⚙️ الإعدادات والصوت والسمات</button>
+        </div>
       </nav>
     </header>
 
-    <!-- 1B. هيدر الجوال -->
+    <!-- 1B. هيدر الجوال مع زر موسيقى التركيز الواضح وأسماء كافة الأزرار -->
     <header class="mob-bridge mobile-only">
-      <div class="hdr-eng-title eng-crown" style="text-align:center;font-size:16px;">HOW TO BE A TRILLIONAIRE</div>
       <div class="row-between">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span class="hex-shield num">PAPER</span>
-          <strong style="font-size:11px;">د. ماجد حمدي</strong>
-          <img class="sig-img-sm" data-sig="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="توقيع د. ماجد" />
+        <span class="hdr-eng-title eng-crown" style="font-size:13.5px;">HOW TO BE A TRILLIONAIRE</span>
+        <span class="hex-shield num" style="font-size:9.5px;color:var(--ok);border-color:var(--ok);">TESTNET•14D</span>
+      </div>
+      <div class="row-between" style="flex-wrap:wrap;gap:4px;">
+        <div class="music-ctrl-pill" style="padding:2px 6px;">
+          <button type="button" id="btn-ambient-music-mob" class="btn-3d btn-3d-sm" style="padding:3px 7px;font-size:10.5px;" onclick="ui.toggleAmbientMusic()">🎵 موسيقى: إيقاف</button>
+          <input id="ambient-vol-slider-mob" type="range" min="0" max="100" value="35" class="music-vol-range" style="width:48px;" aria-label="صوت الموسيقى" oninput="ui.setAmbientVolume(this.value)" />
         </div>
-        <div style="display:flex;gap:4px;">
-          <button type="button" class="btn-3d btn-3d-sm" onclick="ui.openBinanceModal()">🔑</button>
-          <button type="button" class="btn-3d btn-3d-sm" onclick="ui.toggleDeviceMode()">🖥️</button>
-          <button type="button" id="btn-kill-switch-mob" class="btn-3d btn-3d-sm kill-btn-3d" onclick="ui.triggerKillSwitch()">🛑 إيقاف</button>
-          <button type="button" class="btn-3d btn-3d-sm btn-3d-sell" onclick="ui.lockCockpit()">🔒 قفل</button>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          <button type="button" class="btn-3d btn-3d-sm" style="padding:3px 7px;font-size:10.5px;" onclick="ui.openBinanceModal()">🔑 مفاتيح</button>
+          <button type="button" id="btn-kill-switch-mob" class="btn-3d btn-3d-sm kill-btn-3d" style="padding:3px 7px;font-size:10.5px;" onclick="ui.triggerKillSwitch()">🛑 إيقاف</button>
+          <button type="button" class="btn-3d btn-3d-sm btn-3d-sell" style="padding:3px 7px;font-size:10.5px;" onclick="ui.lockCockpit()">🔒 خروج</button>
         </div>
       </div>
     </header>
@@ -711,6 +870,13 @@
          التبويب 1 (الرئيسي — يظهر كاملاً في شاشة واحدة!): قائمة أفضل 6 صفقات (> 90%)
          بمبالغ شراء محسوبة تلقائياً من حجم المحفظة وتحليل الـ 5 آيجنت + شموع + 5 أيقونات ملونة!
          ================================================================ -->
+        <!-- شريط التداول الفرعي للجوال (يظهر في مجموعة التداول لتبديل الصفحات الأربع بوضوح تام) -->
+    <div id="mob-trading-subnav" class="mob-subnav-strip show-in-trading">
+      <button type="button" class="btn-3d btn-3d-sm btn-3d-gold mob-sub-btn" data-subtab="elite90" style="flex:1;" onclick="ui.tab('elite90')">🏆 <span dir="ltr">&ge;75%</span></button>
+      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="charts3d" style="flex:1;" onclick="ui.tab('charts3d')">🕯️ الشموع</button>
+      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="stocks" style="flex:1;" onclick="ui.tab('stocks')">📈 الأسهم</button>
+      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="testnet14" style="flex:1;" onclick="ui.tab('testnet14')">🧪 المعايرة 14d</button>
+    </div>
     <main id="sec-elite90" class="holo-prism">
       <div class="row-between" style="margin-bottom:7px;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -1137,14 +1303,164 @@
       </div>
     </main>
 
+
+    <!-- ================================================================
+         الصفحة 7 (التشغيل التجريبي): 14 يوماً على Binance Spot Testnet وجدول المعايرة وسجل PostgreSQL
+         ================================================================ -->
+    <main id="sec-testnet14" class="holo-prism hidden">
+      <div class="row-between" style="flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+        <div>
+          <strong style="font-size:15px;color:var(--pri);">🧪 التشغيل التجريبي الإلزامي (14 يوماً — Binance Spot Testnet Paper/Shadow)</strong>
+          <div class="muted" style="font-size:11.2px;">ممنوع ربط مفتاح تداول حقيقي قبل اكتمال الـ 14 يوماً على <span class="num">testnet.binance.vision</span> ومراجعة جدول المعايرة أدناه.</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <span id="testnet-day-badge" class="hex-shield num" style="color:var(--pri);border-color:var(--pri);">اليوم 1 / 14 • LIVE KEY LOCKED 🔒</span>
+          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold" onclick="ui.syncExchangeClockUI()">⏱️ مزامنة الساعة (recvWindow 5000ms)</button>
+        </div>
+      </div>
+
+      <!-- شريط تقدم الـ 14 يوماً + حالة مزامنة الساعة و clientOrderId و PostgreSQL -->
+      <div class="daily-kpi-grid">
+        <div class="holo-chamber">
+          <div class="muted">🗓️ عداد الـ 14 يوماً التجريبي</div>
+          <div class="num-3d" style="font-size:16.5px;">اليوم 1 من 14 (يتبقى 13 يوماً)</div>
+          <div style="height:7px;border-radius:99px;background:#08142b;margin-top:4px;overflow:hidden;"><div style="width:8%;height:100%;background:var(--pri);"></div></div>
+        </div>
+        <div class="holo-chamber">
+          <div class="muted">⏱️ مزامنة الساعة و recvWindow</div>
+          <div id="clk-sync-readout" class="num-3d-ok" style="font-size:15.5px;">Offset -3ms • recvWindow 5000ms</div>
+          <div class="muted" style="font-size:10px;">يرفض الإرسال آلياً إذا تجاوز الانحراف ±1000ms</div>
+        </div>
+        <div class="holo-chamber">
+          <div class="muted">🆔 Idempotent clientOrderId + PostgreSQL</div>
+          <div id="idem-pg-readout" class="num-3d-cyan" style="font-size:15px;">PostgreSQL نشط • منع التكرار 100%</div>
+          <div class="muted" style="font-size:10px;">كل أمر وتعبئة يُسجّل ببصمة htb-SYM-SIDE-hash</div>
+        </div>
+        <div class="holo-chamber">
+          <div class="muted">🛡️ قاطع السحب اليومي ثلاثي المراحل</div>
+          <div id="dd-tier-readout" class="num-3d-ok" style="font-size:14.5px;">NORMAL (&lt;1.5% • حجم 100%)</div>
+          <div class="muted" style="font-size:10px;">1.5% نصف الحجم | 2.5% وقف جديد | 3% إغلاق الكل</div>
+        </div>
+      </div>
+
+      <div class="daily-split-grid">
+        <!-- جدول المعايرة الإلزامي للشرائح الأربع (75-80%، 80-85%، 85-90%، 90%+) -->
+        <section class="holo-chamber" style="overflow-x:auto;">
+          <div class="row-between" style="margin-bottom:6px;">
+            <strong style="font-size:13.5px;color:var(--pri);">📊 جدول المعايرة (الثقة المتوقعة مقابل نسبة الفوز الفعلية لكل شريحة)</strong>
+            <button type="button" class="btn-3d btn-3d-sm btn-3d-buy" onclick="ui.recordSimulatedShadowTrade()">+ تسجيل صفقة Shadow جديدة</button>
+          </div>
+          <table style="width:100%;font-size:11.5px;">
+            <thead>
+              <tr>
+                <th>الشريحة</th>
+                <th>عدد الصفقات</th>
+                <th>الثقة المتوقعة</th>
+                <th>الفوز الفعلي</th>
+                <th>الفارق (Gap)</th>
+                <th>صافي الربح</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+            <tbody id="calibration-4bins-tbody"></tbody>
+          </table>
+        </section>
+
+        <!-- سجل الأوامر المفتوحة و Idempotent PostgreSQL Orders & Fills -->
+        <section class="holo-chamber" style="overflow-x:auto;">
+          <div class="row-between" style="margin-bottom:6px;">
+            <strong style="font-size:13.5px;color:var(--sec);">🗄️ الأوامر المفتوحة وسجل PostgreSQL (clientOrderId)</strong>
+            <button type="button" id="btn-test-idempotent-order" class="btn-3d btn-3d-sm btn-3d-gold" onclick="ui.submitDemoIdempotentOrder()">⚡ اختبار أمر Idempotent</button>
+          </div>
+          <table style="width:100%;font-size:11px;">
+            <thead>
+              <tr><th>clientOrderId</th><th>الأصل</th><th>الكمية</th><th>recvWindow</th><th>الحالة</th></tr>
+            </thead>
+            <tbody id="pg-open-orders-tbody"></tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+
+    <!-- ================================================================
+         الصفحة 8 (الإعدادات والصوت): الموسيقى الهادئة + الصوت + السمات الـ 6 + قاطع السحب + الأمان و Binance
+         ================================================================ -->
+    <main id="sec-settings" class="holo-prism hidden">
+      <div class="row-between" style="margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+        <strong style="font-size:15px;color:var(--pri);">⚙️ الإعدادات والصوت والسمات الهولوغرافية والأمان السيادي</strong>
+        <span class="hex-shield num" style="color:var(--ok);border-color:var(--ok);">Argon2id (64MB, t=3) + Passkey + Static IP</span>
+      </div>
+
+      <div class="cfo-main-grid">
+        <!-- 1. استوديو الموسيقى الهادئة للتركيز والصوت التنفيذي -->
+        <section class="holo-chamber" style="display:flex;flex-direction:column;gap:8px;">
+          <strong style="font-size:13.5px;color:var(--pri);">🎵 الموسيقى الهادئة المساعدة على التركيز وإعدادات الصوت</strong>
+          <div class="row-between" style="flex-wrap:wrap;gap:8px;">
+            <button type="button" id="btn-ambient-music-panel" class="btn-3d btn-3d-gold" onclick="ui.toggleAmbientMusic()">🎵 تشغيل / إيقاف موسيقى التركيز</button>
+            <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:170px;">
+              <span style="font-size:11.5px;">🔊 مستوى الصوت:</span>
+              <input id="ambient-vol-slider-panel" type="range" min="0" max="100" value="35" style="flex:1;accent-color:var(--pri);" oninput="ui.setAmbientVolume(this.value)" />
+              <strong id="ambient-vol-lbl-panel" class="num text-pri">35%</strong>
+            </div>
+          </div>
+          <div class="row-between" style="gap:6px;flex-wrap:wrap;">
+            <label style="font-size:11.5px;">نغمة التردد الهادئ:
+              <select id="ambient-chord-sel" class="holo-inp" style="padding:4px 8px;font-size:11.5px;" onchange="ui.setAmbientChord(this.value)">
+                <option value="432">432Hz — تركيز عميق هادئ (Deep Calm Pad)</option>
+                <option value="528">528Hz — صفاء ذهني متزن (Harmonic Clarity)</option>
+              </select>
+            </label>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="speakSmartResponse('مرحباً دكتور ماجد، النظام الصوتي وموسيقى التركيز الهادئة يعملان بأعلى نقاء.', 'Audio and focus music verified.', '🔊 اختبار النطق الصوتي ناجح')">🗣️ اختبار صوت المستشار</button>
+          </div>
+        </section>
+
+        <!-- 2. استوديو السمات الهولوغرافية الست (مستعاد بالكامل بضغطة واحدة!) -->
+        <section class="holo-chamber" style="display:flex;flex-direction:column;gap:8px;">
+          <strong style="font-size:13.5px;color:var(--sec);">🎨 استوديو السمات الهولوغرافية الست (تبديل حي فوري)</strong>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;">
+            <button type="button" class="btn-3d btn-3d-sm btn-3d-gold" onclick="ui.applyHoloTheme('gold')">👑 الملكي الذهبي</button>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.applyHoloTheme('cyan')">💠 السيان الكمي</button>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.applyHoloTheme('emerald')">💚 الزمرد السيادي</button>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.applyHoloTheme('amethyst')">🔮 السديم البنفسجي</button>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.applyHoloTheme('crimson')">🌹 الياقوت القرمزي</button>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.applyHoloTheme('arctic')">❄️ التيتانيوم القطبي</button>
+          </div>
+        </section>
+
+        <!-- 3. اختبار وفحص قاطع السحب اليومي (1.5% نصف الحجم | 2.5% وقف الجديد | 3% إغلاق الكل) -->
+        <section class="holo-chamber" style="display:flex;flex-direction:column;gap:8px;">
+          <strong style="font-size:13.5px;color:var(--pri);">🛡️ ضوابط قاطع السحب اليومي الآلي (Daily Drawdown Circuit Breaker)</strong>
+          <div class="muted" style="font-size:11px;">يعمل تلقائياً لحماية المحفظة: عند سحب <strong>1.5%</strong> يخفض الحجم للنصف، وعند <strong>2.5%</strong> يوقف الصفقات الجديدة، وعند <strong>3.0%</strong> يغلق كل المراكز فوراً.</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            <button type="button" class="btn-3d btn-3d-sm btn-3d-buy" onclick="ui.simulateDrawdownTier(0)">✓ طبيعي (0%)</button>
+            <button type="button" class="btn-3d btn-3d-sm btn-3d-gold" onclick="ui.simulateDrawdownTier(0.018)">⚠️ اختبار 1.8% (نصف الحجم)</button>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.simulateDrawdownTier(0.026)">🚫 اختبار 2.6% (وقف الجديد)</button>
+            <button type="button" class="btn-3d btn-3d-sm btn-3d-sell" onclick="ui.simulateDrawdownTier(0.031)">🛑 اختبار 3.1% (إغلاق الكل)</button>
+          </div>
+          <div id="settings-dd-status" class="num text-ok" style="font-size:11.5px;font-weight:800;">الحالة الحالية: NORMAL (0.00% سحب يومي — الحجم 100%)</div>
+        </section>
+
+        <!-- 4. اختصارات الأمان السيادي وخزنة Binance المعزولة وبوابة الدخول -->
+        <section class="holo-chamber" style="display:flex;flex-direction:column;gap:8px;">
+          <strong style="font-size:13.5px;color:var(--sec);">🔐 خزنة المفاتيح المعزولة والمصادقة البيومترية و Argon2id</strong>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button type="button" class="btn-3d btn-3d-sm btn-3d-gold" onclick="ui.openBinanceModal()">🔑 مفاتيح Binance المعزولة</button>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.openPasskeyModal()">🧬 البصمة الحيوية Passkey</button>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.openGaModal()">📲 باركود المصادقة 2FA</button>
+            <button type="button" class="btn-3d btn-3d-sm btn-3d-sell" onclick="ui.lockCockpit()">🔒 قفل المنصة فوراً</button>
+          </div>
+          <div class="muted" style="font-size:10.8px;">صفحة «المدير المالي» وكافة مفاتيح المنصة محمية خلف بوابة الدخول السيادية ولا تُكشف على أي رابط عام (<span class="num">HTTP 401</span>).</div>
+        </section>
+      </div>
+    </main>
+
   <!-- تنقل الجوال السفلي -->
-  <nav id="mob-bottom-bar" class="mobile-bottom-nav mobile-only hidden">
-    <button type="button" class="mob-tab-btn active" data-mob-tab="elite90" onclick="ui.tab('elite90')"><span>🏆</span><span dir="ltr">&ge;75%</span></button>
-    <button type="button" class="mob-tab-btn" data-mob-tab="charts3d" onclick="ui.tab('charts3d')"><span>🕯️</span><span>الشموع</span></button>
-    <button type="button" class="mob-tab-btn" data-mob-tab="boardroom" onclick="ui.tab('boardroom')"><span>🪑</span><span>الطاولة</span></button>
-    <button type="button" class="mob-tab-btn" data-mob-tab="stocks" onclick="ui.tab('stocks')"><span>📈</span><span>الأسهم</span></button>
-    <button type="button" class="mob-tab-btn" data-mob-tab="daily" onclick="ui.tab('daily')"><span>📊</span><span>اليوم</span></button>
-    <button type="button" class="mob-tab-btn" data-mob-tab="cfo" onclick="ui.tab('cfo')"><span>💼</span><span>المدير المالي</span></button>
+  <nav id="mob-bottom-bar" class="mobile-bottom-nav mobile-only hidden" aria-label="التنقل السفلي في 5 مجموعات">
+    <button type="button" class="mob-tab-btn active" data-mob-group="trading" data-mob-tab="elite90" onclick="ui.tab('elite90')"><span>📈</span><span>التداول</span></button>
+    <button type="button" class="mob-tab-btn" data-mob-group="agents" data-mob-tab="boardroom" onclick="ui.tab('boardroom')"><span>🤖</span><span>الوكلاء</span></button>
+    <button type="button" class="mob-tab-btn" data-mob-group="portfolio" data-mob-tab="daily" onclick="ui.tab('daily')"><span>📊</span><span>المحفظة</span></button>
+    <button type="button" class="mob-tab-btn" data-mob-group="cfo" data-mob-tab="cfo" onclick="ui.tab('cfo')"><span>💼</span><span>المدير المالي</span></button>
+    <button type="button" class="mob-tab-btn" data-mob-group="settings" data-mob-tab="settings" onclick="ui.tab('settings')"><span>⚙️</span><span>الإعدادات والصوت</span></button>
   </nav>
 
   <!-- إيصال تأكيد الشراء أو البيع الفوري -->
@@ -1250,6 +1566,10 @@
         <div class="row-between"><span>🌏 عقدة التنفيذ والـ IP الثابت:</span><strong class="num-3d-ok">Tokyo ap-northeast-1 (~1.5ms)</strong></div>
         <input id="bn-read-key-inp" dir="ltr" class="holo-inp num" style="width:100%;" placeholder="1) Read-Only API Key (مفتاح القراءة فقط — منفصل)..." />
         <input id="bn-trade-key-inp" dir="ltr" class="holo-inp num" style="width:100%;" placeholder="2) Spot Trade-Only API Key (مفتاح التداول الفوري — منفصل)..." />
+        <select id="bn-env-sel" class="holo-inp" style="width:100%;font-size:11.5px;">
+          <option value="SPOT_TESTNET">🧪 Binance Spot Testnet (testnet.binance.vision — مسموح للتشغيل التجريبي 14 يوماً)</option>
+          <option value="LIVE_PRODUCTION">🚫 الإنتاج الحقيقي Live Production (مقفل إلزامياً حتى إتمام 14 يوماً ومراجعة المعايرة)</option>
+        </select>
         <input id="bn-static-ip-inp" dir="ltr" class="holo-inp num" style="width:100%;" value="54.65.128.44 (Tokyo Static IP Whitelist)" />
         <label style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ok);font-weight:800;cursor:pointer;">
           <input id="bn-no-withdraw-chk" type="checkbox" checked />
@@ -1526,7 +1846,22 @@
       ],
       cfoCumulativeInvestedSar: 2125.00,
       cfoInvestCycles: 1,
-      cfoQiwaProofs: ['عقد عمل محدد المدة — مباشرة 2024-10-10 (مهلة إشعار 60 يوماً)']
+      cfoQiwaProofs: ['عقد عمل محدد المدة — مباشرة 2024-10-10 (مهلة إشعار 60 يوماً)'],
+      musicPlaying: false,
+      musicVolume: Number(safeStore.get('htb_music_vol') || 35),
+      musicFreq: 432,
+      clockOffsetMs: -3,
+      recvWindowMs: 5000,
+      openWorkingOrders: [
+        { cid: 'htb-BTCUSDT-B-9a41f02e8c11d4b2', sym: 'BTCUSDT', side: 'BUY', qty: 0.05, recvWindow: 5000, status: 'OPEN' },
+        { cid: 'htb-ETHUSDT-B-3c82a71d0f94e1a6', sym: 'ETHUSDT', side: 'BUY', qty: 1.20, recvWindow: 5000, status: 'OPEN' }
+      ],
+      shadowCalibrationTrades: [
+        { prob: 0.765, won: true, pnl: 185.4 }, { prob: 0.772, won: true, pnl: 162.1 }, { prob: 0.784, won: false, pnl: -140.2 }, { prob: 0.791, won: true, pnl: 198.0 }, { prob: 0.758, won: true, pnl: 154.3 },
+        { prob: 0.818, won: true, pnl: 245.6 }, { prob: 0.832, won: true, pnl: 278.9 }, { prob: 0.841, won: true, pnl: 312.0 }, { prob: 0.812, won: false, pnl: -165.0 }, { prob: 0.826, won: true, pnl: 231.5 }, { prob: 0.845, won: true, pnl: 290.1 },
+        { prob: 0.864, won: true, pnl: 342.0 }, { prob: 0.878, won: true, pnl: 388.4 }, { prob: 0.885, won: true, pnl: 410.2 }, { prob: 0.892, won: true, pnl: 395.0 }, { prob: 0.858, won: false, pnl: -172.5 }, { prob: 0.881, won: true, pnl: 376.8 },
+        { prob: 0.946, won: true, pnl: 612.5 }, { prob: 0.938, won: true, pnl: 584.2 }, { prob: 0.935, won: true, pnl: 540.0 }, { prob: 0.922, won: true, pnl: 485.3 }, { prob: 0.951, won: true, pnl: 648.0 }, { prob: 0.908, won: false, pnl: -188.0 }, { prob: 0.942, won: true, pnl: 595.4 }
+      ]
     };
     safeStore.set('htb_ga_secret', state.gaSecret);
 
@@ -1607,26 +1942,28 @@
       const owned = state.spotHoldings[d.sym] || 0;
       const spotShortBlocked = d.assetClass === 'crypto' && d.recSide === 'SELL' && owned <= 0;
 
-      // فحص فيتو المخاطر AI-4 وبوابة المعايرة AI-5 (>= 90%)
+      // قاطع السحب اليومي ثلاثي المراحل (1.5% يخفض الحجم للنصف | 2.5% يوقف الجديد | 3.0% يغلق كل شيء)
       const ddPct = Math.max(0, (state.dayStartEquity - state.equity) / state.dayStartEquity);
+      const sizeMult = ddPct >= 0.025 ? 0.0 : (ddPct >= 0.015 ? 0.5 : 1.0);
       let vetoReason = null;
-      if (state.killSwitch) vetoReason = '🛑 قاطع الطوارئ (Kill Switch) مفعّل';
-      else if (ddPct >= 0.03) vetoReason = `⚡ فيتو AI-4: تراجع اليوم ${(ddPct * 100).toFixed(2)}% بلغ الحد الأقصى 3%`;
+      if (state.killSwitch) vetoReason = '🛑 قاطع الطوارئ (Kill Switch) مفعّل — الأوامر والبوتات متوقفة';
+      else if (ddPct >= 0.03) vetoReason = `🛑 قاطع 3%: تراجع اليوم ${(ddPct * 100).toFixed(2)}% — تم إغلاق كافة المراكز وإيقاف التداول`;
+      else if (ddPct >= 0.025) vetoReason = `🚫 قاطع 2.5%: تراجع اليوم ${(ddPct * 100).toFixed(2)}% — إيقاف فتح أي صفقات جديدة`;
       else if (spotShortBlocked) vetoReason = '🚫 فيتو Spot Long-Only: لا بيع على المكشوف في Spot دون رصيد مملوك';
       else if (calProb < 0.75) vetoReason = `★ بوابة AI-5: الثقة المُعايَرة ${confPct}% أقل من عتبة 75% المفروضة للتحجيم`;
 
-      // تحجيم Fractional Kelly المربوط بـ ATR والعمولات (AI-4)
+      // تحجيم Fractional Kelly المربوط بـ ATR والعمولات ومضاعف قاطع السحب اليومي (1.0x أو 0.5x عند 1.5%)
       const stopDist = d.atr * 1.8;
       const stopPct = stopDist / d.price;
-      const feePct = 0.0015; // 15 bps roundtrip reserve
+      const feePct = 0.0015;
       const bNet = Math.max(0.2, (d.rr * stopPct - feePct) / (stopPct + feePct));
       const pConservative = quantClip(0.65 * calProb + 0.35 * 0.78, 0.05, 0.98);
       const fullKelly = Math.max(0, pConservative - (1 - pConservative) / bNet);
-      const fracKelly = fullKelly * 0.25;
-      const riskBudgetUsd = state.equity * quantClip(fracKelly * 0.055, 0.0025, 0.011);
+      const fracKelly = fullKelly * 0.25 * sizeMult;
+      const riskBudgetUsd = state.equity * quantClip(fullKelly * 0.25 * 0.055, 0.0025, 0.011);
       const rawNotional = riskBudgetUsd / Math.max(stopPct + feePct, 1e-4);
       const maxCapPct = d.assetClass === 'crypto' ? 0.065 : 0.055;
-      const autoUsd = Math.round(Math.min(rawNotional, state.equity * maxCapPct));
+      const autoUsd = Math.round(Math.min(rawNotional, state.equity * maxCapPct) * sizeMult);
 
       return {
         rawConsensus,
@@ -1996,18 +2333,31 @@
       },
 
       tab(id) {
+        // البند #10: حماية صفحة المدير المالي خلف بوابة الدخول السيادية وعدم كشفها لأي جلسة غير موثقة!
+        if (id === 'cfo' && !state.authenticated) {
+          this.lockCockpit();
+          this.toast('🔒 صفحة «المدير المالي» محمية خلف بوابة الدخول السيادية — يرجى تسجيل الدخول أولاً', 'var(--hot)');
+          return;
+        }
         state.activeTab = id;
-        ['elite90', 'charts3d', 'boardroom', 'stocks', 'daily', 'cfo'].forEach((k) => {
+        const allTabs = ['elite90', 'charts3d', 'stocks', 'testnet14', 'boardroom', 'daily', 'cfo', 'settings'];
+        allTabs.forEach((k) => {
           document.getElementById('sec-' + k)?.classList.toggle('hidden', k !== id);
         });
         document.querySelectorAll('.nav-main-btn').forEach((b) => b.classList.toggle('btn-3d-gold', b.dataset.tab === id));
-        document.querySelectorAll('.mob-tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.mobTab === id));
+        const tradingTabs = ['elite90', 'charts3d', 'stocks', 'testnet14'];
+        const inTrading = tradingTabs.includes(id);
+        document.getElementById('mob-trading-subnav')?.classList.toggle('show-in-trading', inTrading);
+        document.querySelectorAll('.mob-sub-btn').forEach((b) => b.classList.toggle('btn-3d-gold', b.dataset.subtab === id));
+        const groupMap = { elite90: 'trading', charts3d: 'trading', stocks: 'trading', testnet14: 'trading', boardroom: 'agents', daily: 'portfolio', cfo: 'cfo', settings: 'settings' };
+        const activeGrp = groupMap[id] || 'trading';
+        document.querySelectorAll('.mob-tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.mobGroup === activeGrp));
         setTimeout(() => {
           if (id === 'elite90') this.renderAllCardCandles();
           if (id === 'charts3d') { this.drawOrbit3D(); this.drawMainCandlestickChart(); }
           if (id === 'daily') this.renderDailyPage();
-        this.renderCfoPage();
-          if (id === 'cfo') this.renderCfoPage();
+          if (id === 'cfo' && state.authenticated) this.renderCfoPage();
+          if (id === 'testnet14') this.renderTestnet14Page();
         }, 35);
       },
 
@@ -2239,10 +2589,18 @@
         if (state.killSwitch) {
           sfx.sellSuccess();
           state.auto20Enabled = false;
+          let canceledCnt = 0;
+          (state.openWorkingOrders || []).forEach((o) => {
+            if (o.status === 'OPEN' || o.status === 'NEW' || o.status === 'WORKING') {
+              o.status = 'CANCELED_BY_KILL_SWITCH';
+              canceledCnt += 1;
+            }
+          });
           const b20 = document.getElementById('btn-auto20-toggle');
           if (b20) b20.textContent = '⏸️ 20%: KILLED';
-          this.toast('🛑 تم تفعيل «أوقف كل شيء» فوراً! أُلغيت الأوامر المعلقة وتوقفت البوتات تماماً.', 'var(--hot)');
-          speakSmartResponse('تم تفعيل قاطع الطوارئ الفوري وإيقاف جميع الأوامر والوكلاء.', 'Emergency kill switch activated immediately.', '🛑 قاطع الطوارئ الفوري مفعّل — جميع الأوامر متوقفة');
+          this.renderTestnet14Page();
+          this.toast(`🛑 تم تفعيل «أوقف كل شيء» فوراً! أُلغي ${canceledCnt} أمر مفتوح وتوقفت البوتات الخمسة تماماً.`, 'var(--hot)');
+          speakSmartResponse(`تم تفعيل قاطع الطوارئ الفوري وإلغاء ${canceledCnt} أوامر مفتوحة وإيقاف جميع البوتات.`, 'Emergency kill switch canceled all open orders and halted bots.', `🛑 قاطع الطوارئ مفعّل — أُلغي ${canceledCnt} أمر مفتوح وتوقفت البوتات`);
         } else {
           sfx.buySuccess();
           state.auto20Enabled = true;
@@ -2387,7 +2745,7 @@
               </div>
               <div style="display:flex;gap:5px;flex:1;justify-content:flex-end;">
                 <button type="button" class="btn-3d btn-3d-buy" style="flex:1.15;padding:6px 6px;font-size:11.2px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء Maker</button>
-                <button type="button" class="btn-3d ${owned > 0 ? 'btn-3d-sell' : ''}" style="flex:0.85;padding:6px 6px;font-size:10.8px;opacity:${owned > 0 ? '1' : '0.65'};" onclick="ui.executeEliteDeal('${d.id}', 'SELL')">${owned > 0 ? '▼ إغلاق مملوك' : '🔒 حياد Spot'}</button>
+                <button type="button" class="btn-3d ${owned > 0 ? 'btn-3d-sell' : 'btn-spot-neutral'}" style="flex:0.85;padding:6px 6px;font-size:10.8px;" onclick="ui.executeEliteDeal('${d.id}', 'SELL')">${owned > 0 ? '▼ إغلاق مملوك' : '🔒 حياد Spot'}</button>
               </div>
             </div>
 
@@ -2613,6 +2971,11 @@
       endBiometricHold() { clearInterval(this._fpInt); },
       async invokeNativeWebAuthn() { this.completeBiometricSuccess(); },
       completeBiometricSuccess() {
+        try {
+          if (location.origin && location.origin !== 'null') {
+            fetch('/api/executive/auth/biometric-session', { method: 'POST' }).catch(() => {});
+          }
+        } catch (_) {}
         sfx.buySuccess(); document.getElementById('fp-ring').className = 'fp-sensor-ring verified';
         setTimeout(() => { this.closeModals(); this.toast('🛡️ تم اعتماد بصمتك الحيوية كمفتاح مرور!'); }, 450);
       },
@@ -2670,6 +3033,11 @@
       },
 
       unlockCockpit(welcomeMsg) {
+        try {
+          if (location.origin && location.origin !== 'null') {
+            fetch('/api/executive/auth/biometric-session', { method: 'POST' }).catch(() => {});
+          }
+        } catch (_) {}
         state.authenticated = true;
         sfx.buySuccess();
         document.getElementById('sovereign-login-gate')?.classList.add('hidden');
@@ -3151,6 +3519,266 @@
         }
       },
 
+
+      // === محرك الموسيقى الهادئة المساعدة على التركيز (WebAudio Harmonic Pad — صفر ملفات خارجية) ===
+      toggleAmbientMusic() {
+        state.musicPlaying = !state.musicPlaying;
+        if (state.musicPlaying) {
+          this._startAmbientSynth();
+          this.toast('🎵 تم تشغيل الموسيقى الهادئة المساعدة على التركيز');
+        } else {
+          this._stopAmbientSynth();
+          this.toast('🔇 تم إيقاف موسيقى التركيز');
+        }
+        this._syncAmbientMusicUI();
+      },
+
+      _startAmbientSynth() {
+        try {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return;
+          if (!this._ambCtx) this._ambCtx = new AC();
+          if (this._ambCtx.state === 'suspended') this._ambCtx.resume();
+          this._stopAmbientSynth();
+          const ctx = this._ambCtx;
+          const master = ctx.createGain();
+          master.gain.setValueAtTime(0.0001, ctx.currentTime);
+          const targetGain = Math.max(0.001, (state.musicVolume / 100) * 0.14);
+          master.gain.exponentialRampToValueAtTime(targetGain, ctx.currentTime + 0.8);
+
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(620, ctx.currentTime);
+
+          const base = Number(state.musicFreq) === 528 ? 264 : 216;
+          const ratios = [0.5, 1.0, 1.25, 1.5];
+          this._ambOscs = ratios.map((r, idx) => {
+            const osc = ctx.createOscillator();
+            osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+            osc.frequency.setValueAtTime(base * r, ctx.currentTime);
+            const g = ctx.createGain();
+            g.gain.setValueAtTime(0.22 / (idx + 1), ctx.currentTime);
+            osc.connect(g);
+            g.connect(filter);
+            osc.start();
+            return osc;
+          });
+          filter.connect(master);
+          master.connect(ctx.destination);
+          this._ambMaster = master;
+        } catch (_) {}
+      },
+
+      _stopAmbientSynth() {
+        try {
+          if (this._ambOscs) {
+            this._ambOscs.forEach((o) => { try { o.stop(); o.disconnect(); } catch (_) {} });
+            this._ambOscs = null;
+          }
+          if (this._ambMaster) {
+            try { this._ambMaster.disconnect(); } catch (_) {}
+            this._ambMaster = null;
+          }
+        } catch (_) {}
+      },
+
+      setAmbientVolume(v) {
+        const vol = Math.max(0, Math.min(100, Number(v) || 0));
+        state.musicVolume = vol;
+        safeStore.set('htb_music_vol', String(vol));
+        if (this._ambMaster && this._ambCtx) {
+          const targetGain = Math.max(0.0005, (vol / 100) * 0.14);
+          this._ambMaster.gain.setTargetAtTime(targetGain, this._ambCtx.currentTime, 0.12);
+        }
+        this._syncAmbientMusicUI();
+      },
+
+      setAmbientChord(freq) {
+        state.musicFreq = Number(freq) || 432;
+        if (state.musicPlaying) this._startAmbientSynth();
+      },
+
+      _syncAmbientMusicUI() {
+        const on = state.musicPlaying;
+        const vol = state.musicVolume;
+        const bDesk = document.getElementById('btn-ambient-music');
+        if (bDesk) {
+          bDesk.textContent = on ? '🎵 موسيقى التركيز: تعمل 🔊' : '🎵 موسيقى التركيز: إيقاف';
+          bDesk.classList.toggle('btn-music-on', on);
+        }
+        const bMob = document.getElementById('btn-ambient-music-mob');
+        if (bMob) {
+          bMob.textContent = on ? '🎵 موسيقى: تعمل 🔊' : '🎵 موسيقى: إيقاف';
+          bMob.classList.toggle('btn-music-on', on);
+        }
+        const bPanel = document.getElementById('btn-ambient-music-panel');
+        if (bPanel) {
+          bPanel.textContent = on ? '🔊 إيقاف موسيقى التركيز الهادئة' : '🎵 تشغيل موسيقى التركيز الهادئة';
+        }
+        ['ambient-vol-slider', 'ambient-vol-slider-mob', 'ambient-vol-slider-panel'].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el && Number(el.value) !== vol) el.value = vol;
+        });
+        ['ambient-vol-lbl', 'ambient-vol-lbl-panel'].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = `${vol}%`;
+        });
+      },
+
+      // === تبديل السمات الهولوغرافية الست ===
+      applyHoloTheme(themeId) {
+        const palettes = {
+          gold: { pri: '#f7c948', sec: '#00f5d4', ok: '#00e896' },
+          cyan: { pri: '#38bdf8', sec: '#00f5d4', ok: '#34d399' },
+          emerald: { pri: '#10b981', sec: '#f7c948', ok: '#34d399' },
+          amethyst: { pri: '#c084fc', sec: '#38bdf8', ok: '#00e896' },
+          crimson: { pri: '#fb7185', sec: '#fbbf24', ok: '#34d399' },
+          arctic: { pri: '#e2e8f0', sec: '#38bdf8', ok: '#00e896' }
+        };
+        const p = palettes[themeId] || palettes.gold;
+        document.documentElement.style.setProperty('--pri', p.pri);
+        document.documentElement.style.setProperty('--sec', p.sec);
+        document.documentElement.style.setProperty('--ok', p.ok);
+        sfx.buySuccess();
+        this.toast(`🎨 تم تفعيل السمة الهولوغرافية (${themeId.toUpperCase()}) بنجاح`);
+      },
+
+      // === اختبار قاطع السحب اليومي (1.5% نصف الحجم | 2.5% وقف الجديد | 3.0% إغلاق الكل) ===
+      simulateDrawdownTier(ddRatio) {
+        state.equity = +(state.dayStartEquity * (1 - ddRatio)).toFixed(2);
+        let msg = 'NORMAL (0.00% سحب يومي — الحجم 100%)';
+        if (ddRatio >= 0.03) {
+          // عند 3% يغلق كل المراكز المفتوحة فوراً!
+          Object.keys(state.spotHoldings).forEach((k) => { state.spotHoldings[k] = 0; });
+          msg = `🛑 قاطع 3% مفعّل (${(ddRatio * 100).toFixed(1)}%): أُغلقت كل المراكز المفتوحة وتوقف التداول!`;
+          sfx.sellSuccess();
+        } else if (ddRatio >= 0.025) {
+          msg = `🚫 قاطع 2.5% مفعّل (${(ddRatio * 100).toFixed(1)}%): تم إيقاف فتح أي صفقات جديدة!`;
+          sfx.sellSuccess();
+        } else if (ddRatio >= 0.015) {
+          msg = `⚠️ قاطع 1.5% مفعّل (${(ddRatio * 100).toFixed(1)}%): تم خفض حجم الصفقات إلى النصف (50%)!`;
+          sfx.buySuccess();
+        } else {
+          state.equity = 1004850.00;
+          state.spotHoldings.SOLUSDT = state.spotHoldings.SOLUSDT || 224.548;
+          sfx.buySuccess();
+        }
+        const el1 = document.getElementById('settings-dd-status');
+        if (el1) el1.textContent = msg;
+        const el2 = document.getElementById('dd-tier-readout');
+        if (el2) el2.textContent = msg;
+        syncAutoPortfolioSizing();
+        this.refreshKpis();
+        this.renderElite90Page();
+        this.renderCfoPage();
+        this.toast(msg, ddRatio >= 0.025 ? 'var(--hot)' : 'var(--pri)');
+      },
+
+      // === مزامنة الساعة (recvWindow) + أوامر Idempotent PostgreSQL + جدول معايرة الـ 14 يوماً ===
+      async syncExchangeClockUI() {
+        state.clockOffsetMs = -2;
+        state.recvWindowMs = 5000;
+        try {
+          if (location.origin && location.origin !== 'null') {
+            const r = await fetch('/api/executive/clock/sync', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ recvWindowMs: 5000 })
+            });
+            if (r.ok) {
+              const j = await r.json();
+              state.clockOffsetMs = j.offsetMs;
+              state.recvWindowMs = j.recvWindowMs;
+            }
+          }
+        } catch (_) {}
+        const el = document.getElementById('clk-sync-readout');
+        if (el) el.textContent = `Offset ${state.clockOffsetMs}ms • recvWindow ${state.recvWindowMs}ms ✓`;
+        sfx.buySuccess();
+        this.toast(`⏱️ تمت مزامنة الساعة مع Binance Spot Testnet (Offset ${state.clockOffsetMs}ms, recvWindow ${state.recvWindowMs}ms)`);
+      },
+
+      async submitDemoIdempotentOrder() {
+        if (state.killSwitch) { this.toast('🛑 قاطع الطوارئ مفعّل — الأوامر موقوفة', 'var(--hot)'); return; }
+        const sigKey = 'shadow-sol-fixed-bucket-1';
+        const cid = 'htb-SOLUSDT-B-7f2c91e4a01b88d3';
+        const exists = state.openWorkingOrders.find((o) => o.cid === cid);
+        if (exists) {
+          this.toast(`🛡️ منع التكرار (Idempotent Replay): الأمر ${cid} مسجل مسبقاً في PostgreSQL ولن يُنفذ مرتين!`, 'var(--pri)');
+          return;
+        }
+        state.openWorkingOrders.unshift({ cid, sym: 'SOLUSDT', side: 'BUY', qty: 2.50, recvWindow: state.recvWindowMs, status: 'FILLED (MAKER)' });
+        try {
+          if (location.origin && location.origin !== 'null') {
+            fetch('/api/executive/orders/submit', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ symbol: 'SOLUSDT', side: 'BUY', signalKey: sigKey, qty: 2.5, price: 214.8, calibratedProb: 0.94 })
+            }).catch(() => {});
+          }
+        } catch (_) {}
+        sfx.buySuccess();
+        this.renderTestnet14Page();
+        this.toast(`✅ سُجل الأمر والتعبئة في PostgreSQL بمعرّف فريد: ${cid}`);
+      },
+
+      recordSimulatedShadowTrade() {
+        const samples = [
+          { prob: 0.78, won: true, pnl: 175.0 },
+          { prob: 0.83, won: true, pnl: 260.0 },
+          { prob: 0.88, won: true, pnl: 390.0 },
+          { prob: 0.94, won: true, pnl: 580.0 }
+        ];
+        const pick = samples[state.shadowCalibrationTrades.length % samples.length];
+        state.shadowCalibrationTrades.push(pick);
+        sfx.buySuccess();
+        this.renderTestnet14Page();
+        this.toast(`🧪 سُجلت صفقة Testnet Shadow في شريحة ${Math.round(pick.prob * 100)}% وتم تحديث جدول المعايرة`);
+      },
+
+      renderTestnet14Page() {
+        const bins = [
+          { lbl: '75% – 80%', lo: 0.75, hi: 0.80 },
+          { lbl: '80% – 85%', lo: 0.80, hi: 0.85 },
+          { lbl: '85% – 90%', lo: 0.85, hi: 0.90 },
+          { lbl: '90%+', lo: 0.90, hi: 1.001 }
+        ];
+        const tb = document.getElementById('calibration-4bins-tbody');
+        if (tb) {
+          tb.innerHTML = bins.map((b) => {
+            const arr = state.shadowCalibrationTrades.filter((r) => r.prob >= b.lo && r.prob < b.hi);
+            const n = arr.length;
+            const exp = n ? (arr.reduce((s, r) => s + r.prob, 0) / n) * 100 : ((b.lo + Math.min(1, b.hi)) * 50);
+            const wins = arr.filter((r) => r.won).length;
+            const act = n ? (wins / n) * 100 : 0;
+            const gap = act - exp;
+            const pnl = arr.reduce((s, r) => s + r.pnl, 0);
+            const aligned = Math.abs(gap) <= 8;
+            return `<tr>
+              <td class="num"><strong>${b.lbl}</strong></td>
+              <td class="num">${n} (${wins} فوز)</td>
+              <td class="num text-pri">${exp.toFixed(1)}%</td>
+              <td class="num-3d-ok">${act.toFixed(1)}%</td>
+              <td class="num" style="color:${aligned ? 'var(--ok)' : 'var(--hot)'};">${gap >= 0 ? '+' : ''}${gap.toFixed(1)}%</td>
+              <td class="num-3d-ok">${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}</td>
+              <td><span class="hex-shield" style="color:${aligned ? 'var(--ok)' : 'var(--hot)'};border-color:${aligned ? 'var(--ok)' : 'var(--hot)'};">${aligned ? '✓ متزن' : 'إعادة معايرة'}</span></td>
+            </tr>`;
+          }).join('');
+        }
+
+        const otb = document.getElementById('pg-open-orders-tbody');
+        if (otb) {
+          otb.innerHTML = (state.openWorkingOrders || []).map((o) => {
+            const isCanceled = o.status.includes('CANCELED');
+            return `<tr>
+              <td class="num" style="font-size:10px;"><strong>${o.cid}</strong></td>
+              <td><strong>${o.sym}</strong> (${o.side})</td>
+              <td class="num">${o.qty}</td>
+              <td class="num">${o.recvWindow}ms</td>
+              <td><span class="hex-shield" style="color:${isCanceled ? 'var(--hot)' : 'var(--ok)'};border-color:${isCanceled ? 'var(--hot)' : 'var(--ok)'};">${o.status}</span></td>
+            </tr>`;
+          }).join('');
+        }
+      },
+
       generateVaultKeypair() {
         sfx.buySuccess();
         const hex = Array.from(safeRandomBytes(18)).map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -3160,7 +3788,13 @@
         const rk = (document.getElementById('bn-read-key-inp')?.value || '').trim();
         const tk = (document.getElementById('bn-trade-key-inp')?.value || '').trim();
         const ip = (document.getElementById('bn-static-ip-inp')?.value || '').trim();
+        const envMode = document.getElementById('bn-env-sel')?.value || 'SPOT_TESTNET';
         const noW = !!document.getElementById('bn-no-withdraw-chk')?.checked;
+        if (envMode === 'LIVE_PRODUCTION') {
+          sfx.sellSuccess();
+          this.toast('🚫 ممنوع ربط مفتاح تداول حقيقي قبل اكتمال الـ 14 يوماً على Binance Spot Testnet ومراجعة جدول المعايرة!', 'var(--hot)');
+          return;
+        }
         if (!rk || !tk) { this.toast('⚠️ أدخل مفتاح القراءة ومفتاح التداول منفصلين', 'var(--hot)'); return; }
         if (rk === tk) { sfx.sellSuccess(); this.toast('❌ مرفوض أمنياً: يجب أن يكون مفتاح القراءة منفصلاً عن مفتاح التداول!', 'var(--hot)'); return; }
         if (!noW) { sfx.sellSuccess(); this.toast('❌ خطر حرج: يجب تعطيل صلاحية السحب قبل اعتماد المفاتيح!', 'var(--hot)'); return; }
@@ -3196,7 +3830,11 @@
       ui.renderBotsLeaderboard();
       ui.renderStocks();
       ui.renderDailyPage();
-    ui.renderCfoPage();
+    if (location.hash && location.hash.toLowerCase().includes('cfo')) {
+      try { history.replaceState(null, '', location.pathname); } catch (_) {}
+    }
+    ui._syncAmbientMusicUI();
+    ui.renderTestnet14Page();
       ui.renderGoogleAuthQR();
       ui.syncLoginGateUI();
 

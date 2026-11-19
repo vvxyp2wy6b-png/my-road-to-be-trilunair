@@ -95,17 +95,9 @@ def mask_phone(phone: str) -> str:
 
 
 def _verify_pbkdf2_secret(candidate: str, stored_hash: str) -> bool:
-    try:
-        parts = stored_hash.split("$")
-        if len(parts) != 4 or parts[0] != "pbkdf2_sha256":
-            return False
-        iters = int(parts[1])
-        salt = bytes.fromhex(parts[2])
-        expected = bytes.fromhex(parts[3])
-        derived = hashlib.pbkdf2_hmac("sha256", candidate.encode("utf-8"), salt, iters)
-        return hmac.compare_digest(derived, expected)
-    except Exception:
-        return False
+    from app.security import verify_admin_secret_path_safe
+
+    return verify_admin_secret_path_safe(candidate, stored_hash)
 
 
 # ==============================================================================

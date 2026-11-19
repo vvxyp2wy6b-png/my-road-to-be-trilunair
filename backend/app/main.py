@@ -267,6 +267,26 @@ async def cloud_security_and_telemetry_middleware(request: Request, call_next) -
                 headers={"Retry-After": str(retry_after)},
             )
 
+    # Phase 1 Rule #10: Protect Personal CFO behind the Sovereign Login Gate — never expose on any public URL!
+    path_lower = path.lower().rstrip("/") or "/"
+    is_public_cfo_url = path_lower in {"/cfo", "/wealth", "/personal-cfo"} or path_lower.startswith(("/cfo/", "/wealth/", "/personal-cfo/"))
+    enforce_cfo_api_gate = (
+        os.getenv("TRILUNAIR_ENV", "development").lower() == "production"
+        or os.getenv("TRILUNAIR_REQUIRE_CFO_LOGIN", "0").strip() in {"1", "true", "yes"}
+    )
+    if is_public_cfo_url or (enforce_cfo_api_gate and path_lower.startswith("/api/wealth")):
+        auth_hdr = request.headers.get("authorization", "").strip()
+        bearer_tok = auth_hdr[7:].strip() if auth_hdr.lower().startswith("bearer ") else None
+        cookie_tok = request.cookies.get(HOST_ONLY_PRODUCTION_SESSION_COOKIE) or request.cookies.get(ADMIN_SESSION_COOKIE)
+        if verify_session_token(bearer_tok or cookie_tok) is None:
+            security_telemetry.record_http_response(401)
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "detail": "🔒 صفحة وبيانات «المدير المالي» محمية خلف بوابة الدخول السيادية ولا تُكشف على أي رابط عام."
+                },
+            )
+
     response: Response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
