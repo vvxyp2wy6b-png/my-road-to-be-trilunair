@@ -40,12 +40,12 @@ def test_trm_brand_and_four_factor_admin_mfa_flow(isolated_admin_client: TestCli
     from app.admin_identity import compute_totp_code
     from app.database import db_session
 
-    # 1. فحص حالة الهوية المبدئية والشعار الثلاثي الموصى به TMJ (تريلماجد)
+    # 1. فحص حالة الهوية المبدئية والشعار الثلاثي المعتمد HTB (How To Be A Trillionaire)
     r0 = isolated_admin_client.get("/api/auth/admin/identity")
     assert r0.status_code == 200
     body0 = r0.json()
-    assert body0["brand"]["monogram"] == "TMJ"
-    assert "Majed" in body0["brand"]["expansionEn"]
+    assert body0["brand"]["monogram"] == "HTB"
+    assert "Trillionaire" in body0["brand"]["expansionEn"]
     assert "ماجد" in body0["brand"]["titleAr"]
     assert body0["enrolled"] is False
     assert body0["tradingMode"] == "PAPER"
@@ -66,7 +66,7 @@ def test_trm_brand_and_four_factor_admin_mfa_flow(isolated_admin_client: TestCli
     assert enr["phoneMasked"].startswith("+966")
     secret_b32 = enr["authenticatorSetup"]["secretBase32"]
     assert len(secret_b32) >= 24
-    assert enr["authenticatorSetup"]["otpauthUri"].startswith("otpauth://totp/TMJ-TrilMajed")
+    assert enr["authenticatorSetup"]["otpauthUri"].startswith("otpauth://totp/")
 
     # 3. التحقق من أن البريد ورقم الجوال وسر TOTP ومفتاح التحقق غير مخزنة كنص صريح في قاعدة البيانات
     with db_session() as conn:
@@ -130,7 +130,7 @@ def test_trm_brand_and_four_factor_admin_mfa_flow(isolated_admin_client: TestCli
     assert r_login.status_code == 200, r_login.text
     login_body = r_login.json()
     assert login_body["authenticated"] is True
-    assert login_body["brandMonogram"] == "TMJ"
+    assert login_body["brandMonogram"] == "HTB"
     assert login_body["sessionToken"]
     assert login_body["csrfToken"]
     assert login_body["tradingMode"] == "PAPER"

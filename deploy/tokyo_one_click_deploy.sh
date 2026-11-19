@@ -46,11 +46,15 @@ if [ ! -f "${VAULT_ENV}" ]; then
   VAULT_KEY=$(python3 -c "import secrets, base64; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())")
   SESSION_SECRET=$(python3 -c "import secrets; print(secrets.token_urlsafe(48))")
   cat <<EOF | sudo tee "${VAULT_ENV}" >/dev/null
-# خزنة HOW TO BE A TRILLIONAIRE المشفرة (AES-256-GCM) — لا تشارك هذا الملف أبداً
+# خزنة HOW TO BE A TRILLIONAIRE المشفرة (AES-256-GCM + Argon2id) — لا تشارك هذا الملف أبداً
 TRILUNAIR_ENV=production
 TRILUNAIR_REGION=ap-northeast-1
 TRILUNAIR_TRADING_MODE=PAPER
 TRILUNAIR_LIVE_AUTHORIZED=false
+TRILUNAIR_WITHDRAWALS_ALLOWED=false
+TRILUNAIR_STATIC_IP=${PUBLIC_IP}
+TRILUNAIR_BINANCE_READ_KEY=
+TRILUNAIR_BINANCE_TRADE_KEY=
 DATABASE_URL=postgresql+psycopg://trilunair:${DB_PASS}@127.0.0.1:5432/trilunair
 TRILUNAIR_VAULT_MASTER_KEY=${VAULT_KEY}
 TRILUNAIR_SESSION_SECRET=${SESSION_SECRET}
@@ -59,7 +63,7 @@ fi
 sudo chown root:trilunair "${VAULT_ENV}"
 sudo chmod 0640 "${VAULT_ENV}"
 
-echo "[5/7] نسخ ملفات المنصة وبناء بيئة المحرك السريع (FastAPI + Uvicorn)..."
+echo "[5/7] نسخ ملفات المنصة وبناء بيئة المحرك الكمي (FastAPI + Argon2id + quant_core.py)..."
 sudo mkdir -p "${APP_DIR}/frontend/dist"
 sudo rsync -a --delete --exclude '.git' --exclude '.venv' "${REPO_SRC}/" "${APP_DIR}/"
 if [ -f "${APP_DIR}/standalone-preview.html" ]; then
@@ -67,7 +71,7 @@ if [ -f "${APP_DIR}/standalone-preview.html" ]; then
 fi
 sudo chown -R trilunair:trilunair "${APP_DIR}" /var/lib/trilunair /var/log/trilunair
 
-sudo -u trilunair bash -c "cd '${APP_DIR}/backend' && /usr/local/bin/uv venv .venv && /usr/local/bin/uv pip install --python .venv/bin/python -r requirements.txt 2>/dev/null || /usr/local/bin/uv sync"
+sudo -u trilunair bash -c "cd '${APP_DIR}/backend' && /usr/local/bin/uv venv .venv && (/usr/local/bin/uv pip install --python .venv/bin/python -r requirements.txt argon2-cffi 2>/dev/null || /usr/local/bin/uv sync) && .venv/bin/python app/quant_core.py"
 
 echo "[6/7] تفعيل خدمة المحرك الدائمة (systemd 24/7) على 127.0.0.1:8000..."
 sudo cp "${APP_DIR}/deploy/linux-systemd/trilunair-engine.service" /etc/systemd/system/trilunair-engine.service

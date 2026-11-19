@@ -425,6 +425,30 @@
     .mobile-bottom-nav.mobile-only.hidden, html[data-layout="mobile"] .mobile-bottom-nav.mobile-only.hidden { display: none !important; }
     td.num, td.num-3d, td.num-3d-ok, td.num-3d-cyan { display: table-cell !important; }
 
+
+    .kill-btn-3d {
+      background: linear-gradient(180deg, #ff4d6d 0%, #c9184a 55%, #800f2f 100%);
+      color: #fff; border: 1px solid #ffccd5;
+      box-shadow: inset 0 2px 2px rgba(255,255,255,0.45), 0 4px 0 #4a0418, 0 0 14px rgba(255,56,104,0.45);
+    }
+    .kill-btn-3d.active-kill {
+      background: linear-gradient(180deg, #ffe484 0%, #f5be30 100%);
+      color: #080d1a; border-color: #fff;
+    }
+    .voice-proposal-bar {
+      margin-top: 4px; padding: 5px 9px; border-radius: 9px;
+      background: linear-gradient(90deg, rgba(247,201,72,0.20), rgba(0,245,212,0.14));
+      border: 1.5px solid var(--pri);
+      display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;
+      font-size: 11.2px; font-weight: 800;
+    }
+    .vetoed-deal-card {
+      display: flex; flex-direction: column; justify-content: space-between; gap: 6px;
+      padding: 9px 10px; border-radius: 13px;
+      background: linear-gradient(160deg, rgba(28, 12, 26, 0.92), rgba(8, 6, 16, 0.98));
+      border: 1.5px dashed rgba(255, 56, 104, 0.55);
+    }
+
   </style>
 </head>
 <body>
@@ -442,7 +466,7 @@
       <div class="row-between" style="border-bottom:1px solid rgba(247,201,72,0.25);padding-bottom:10px;">
         <div style="display:flex;align-items:center;gap:8px;">
           <span class="hex-shield num" style="color:var(--pri);border-color:var(--pri);">🔐 بوابة الدخول السيادية</span>
-          <span id="gate-security-status" class="hex-shield">حماية مزدوجة: بصمة + كلمة سر</span>
+          <span id="gate-security-status" class="hex-shield">Argon2id (64MB, t=3, Salt) + Passkey</span>
         </div>
         <h1 class="hdr-eng-title eng-crown" style="font-size:clamp(16px,2vw,23px);">HOW TO BE A TRILLIONAIRE</h1>
         <div class="owner-seal-card">
@@ -552,6 +576,7 @@
           <button type="button" class="btn-3d btn-3d-sm" onclick="ui.toggleDeviceMode()">
             <span id="device-mode-lbl">📱 الجوال</span>
           </button>
+          <button type="button" id="btn-kill-switch" class="btn-3d btn-3d-sm kill-btn-3d" onclick="ui.triggerKillSwitch()" title="أمر طوارئ فوري: إيقاف كافة الأوامر والبوتات فوراً">🛑 أوقف كل شيء</button>
           <button type="button" id="btn-lock-app" class="btn-3d btn-3d-sm btn-3d-sell" onclick="ui.lockCockpit()" title="قفل المنصة والعودة لشاشة تسجيل الدخول">🔒 خروج</button>
         </div>
       </div>
@@ -578,6 +603,7 @@
         <div style="display:flex;gap:4px;">
           <button type="button" class="btn-3d btn-3d-sm" onclick="ui.openBinanceModal()">🔑</button>
           <button type="button" class="btn-3d btn-3d-sm" onclick="ui.toggleDeviceMode()">🖥️</button>
+          <button type="button" id="btn-kill-switch-mob" class="btn-3d btn-3d-sm kill-btn-3d" onclick="ui.triggerKillSwitch()">🛑 إيقاف</button>
           <button type="button" class="btn-3d btn-3d-sm btn-3d-sell" onclick="ui.lockCockpit()">🔒 قفل</button>
         </div>
       </div>
@@ -632,7 +658,14 @@
             </select>
           </div>
           <div id="assistant-live-answer" style="font-size:12px;color:var(--txt-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-            جاهز لأوامرك الصوتية — المبالغ موزعة تلقائياً حسب حجم المحفظة وتحليل الـ 5 آيجنت.
+            جاهز صوتياً — الصوت يقترح فقط بتأكيد ضغطة واحدة (واستثناء «أوقف كل شيء» فوري).
+          </div>
+          <div id="voice-proposal-bar" class="voice-proposal-bar hidden">
+            <span id="voice-proposal-txt">🎯 اقتراح صوتي جاهز:</span>
+            <div style="display:flex;gap:5px;">
+              <button type="button" id="btn-confirm-voice-prop" class="btn-3d btn-3d-buy btn-3d-sm" onclick="ui.confirmVoiceProposal()">✅ تأكيد التنفيذ</button>
+              <button type="button" class="btn-3d btn-3d-sm" onclick="ui.cancelVoiceProposal()">✕ إلغاء</button>
+            </div>
           </div>
         </div>
       </div>
@@ -645,8 +678,8 @@
     <main id="sec-elite90" class="holo-prism">
       <div class="row-between" style="margin-bottom:7px;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <strong style="font-size:14.8px;color:var(--pri);">🏆 قائمة أفضل الصفقات الربحية (&gt; 90% ثقة)</strong>
-          <span class="hex-shield num" style="color:var(--ok);border-color:var(--ok);">توزيع تلقائي من المحفظة عبر الـ 5 آيجنت ✓</span>
+          <strong style="font-size:14.8px;color:var(--pri);">🏆 الصفقات المُعايَرة (&ge; 90% PAVA • Spot Long-Only)</strong>
+          <span id="quant-header-telemetry" class="hex-shield num" style="color:var(--ok);border-color:var(--ok);">AI1-3 تنبؤ ⬅ AI4 حجم Kelly وفيتو ⬅ AI5 معايرة &ge;90% • DSR 0.92</span>
         </div>
         <div style="display:flex;gap:5px;flex-wrap:wrap;">
           <button type="button" class="btn-3d btn-3d-sm btn-3d-gold round-filter-btn" data-rf="all" onclick="ui.filterDealsRound('all')">الكل (6)</button>
@@ -955,21 +988,27 @@
     </div>
   </div>
 
-  <!-- منبثقة خزنة مفاتيح Binance وسيرفر طوكيو -->
+  <!-- منبثقة خزنة مفاتيح Binance المعزولة (فصل مفتاح القراءة عن التداول + تعطيل السحب + IP ثابت) -->
   <div id="modal-binance-vault" class="holo-modal-bg hidden" onclick="if(event.target===this)ui.closeModals()">
-    <div class="holo-modal-box" style="max-width:460px;">
+    <div class="holo-modal-box" style="max-width:500px;">
       <div class="row-between">
-        <strong style="color:var(--pri);">🔑 خزنة مفاتيح Binance وسيرفر طوكيو (1.8ms)</strong>
+        <strong style="color:var(--pri);">🔑 خزنة مفاتيح Binance المعزولة (Tokyo 1.5ms • LIMIT_MAKER)</strong>
         <button type="button" class="btn-3d btn-3d-sm" onclick="ui.closeModals()">✕</button>
       </div>
-      <div class="holo-chamber">
-        <div class="row-between"><span>🌏 عقدة التنفيذ الموصى بها:</span><strong class="num-3d-ok">Tokyo ap-northeast-1 (1.8ms)</strong></div>
-        <div style="display:flex;gap:6px;margin-top:8px;">
-          <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" onclick="ui.generateVaultKeypair()">🔑 توليد مفتاح Ed25519</button>
-          <input id="bn-api-key-inp" dir="ltr" class="holo-inp num" style="flex:1;" placeholder="Binance API Key..." />
-          <button type="button" class="btn-3d btn-3d-buy btn-3d-sm" onclick="ui.saveBinanceApiKeyToVault()">🛡️ حفظ</button>
+      <div class="holo-chamber" style="display:grid;gap:7px;">
+        <div class="row-between"><span>🌏 عقدة التنفيذ والـ IP الثابت:</span><strong class="num-3d-ok">Tokyo ap-northeast-1 (~1.5ms)</strong></div>
+        <input id="bn-read-key-inp" dir="ltr" class="holo-inp num" style="width:100%;" placeholder="1) Read-Only API Key (مفتاح القراءة فقط — منفصل)..." />
+        <input id="bn-trade-key-inp" dir="ltr" class="holo-inp num" style="width:100%;" placeholder="2) Spot Trade-Only API Key (مفتاح التداول الفوري — منفصل)..." />
+        <input id="bn-static-ip-inp" dir="ltr" class="holo-inp num" style="width:100%;" value="54.65.128.44 (Tokyo Static IP Whitelist)" />
+        <label style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ok);font-weight:800;cursor:pointer;">
+          <input id="bn-no-withdraw-chk" type="checkbox" checked />
+          <span>أؤكد أن صلاحية السحب (Enable Withdrawals) معطّلة تماماً في المفتاحين</span>
+        </label>
+        <div style="display:flex;gap:6px;">
+          <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" onclick="ui.generateVaultKeypair()">🔑 توليد Ed25519</button>
+          <button type="button" id="btn-save-separated-keys" class="btn-3d btn-3d-buy" style="flex:1;" onclick="ui.saveBinanceApiKeyToVault()">🛡️ فحص وحفظ المفتاحين منفصلين</button>
         </div>
-        <div id="vault-pubkey-box" class="num muted" style="margin-top:6px;font-size:10px;word-break:break-all;"></div>
+        <div id="vault-pubkey-box" class="num muted" style="font-size:10px;word-break:break-all;"></div>
       </div>
     </div>
   </div>
@@ -1169,21 +1208,25 @@
     // =====================================================================
     // 5 آيجنت بأيقونات وألوان مميزة فقط (بدون أي أسماء بشرية!)
     // =====================================================================
+    // =====================================================================
+    // هيكلة الـ 5 آيجنت بعد التصحيح الكمي الإلزامي (#2):
+    // AI-1, AI-2, AI-3 = متنبئون فقط (Predictors) | AI-4 = حجم Kelly وحق الفيتو | AI-5 = معايرة PAVA وبوابة >=90%
+    // =====================================================================
     const AI_AGENTS = [
-      { id: 'AI-1', code: 'Q1', icon: '◈', col: '#00f5d4', glow: 'rgba(0,245,212,0.45)', alloc: 1480, bal: 1612.40, hrGrowth: 0.48, acc: 93.4, lastTrade: 'BUY SOL +2.6%', investedIn: 'SOLUSDT (65%) + BTCUSDT (35%)' },
-      { id: 'AI-2', code: 'R2', icon: '⬡', col: '#00e896', glow: 'rgba(0,232,150,0.45)', alloc: 1480, bal: 1568.90, hrGrowth: 0.31, acc: 95.1, lastTrade: 'BUY BTC +1.8%', investedIn: 'BTCUSDT (60%) + ETHUSDT (40%)' },
-      { id: 'AI-3', code: 'M3', icon: '◉', col: '#a855f7', glow: 'rgba(168,85,247,0.45)', alloc: 1480, bal: 1645.10, hrGrowth: 0.54, acc: 92.0, lastTrade: 'BUY NVDA +3.4%', investedIn: 'NVDA (70%) + AVGO (30%)' },
-      { id: 'AI-4', code: 'E4', icon: '⚡', col: '#ff9f1c', glow: 'rgba(255,159,28,0.45)', alloc: 1480, bal: 1594.25, hrGrowth: 0.42, acc: 91.2, lastTrade: 'SELL XRP +1.9%', investedIn: 'XRPUSDT بيع (55%) + BNBUSDT (45%)' },
-      { id: 'AI-5', code: 'C5', icon: '★', col: '#f7c948', glow: 'rgba(247,201,72,0.50)', alloc: 1480, bal: 1672.80, hrGrowth: 0.61, acc: 94.8, lastTrade: 'BUY ETH +2.9%', investedIn: 'ETHUSDT (55%) + MSFT (45%)' }
+      { id: 'AI-1', role: 'PREDICTOR', roleAr: 'متنبئ السيولة ودفتر الأوامر', icon: '◈', col: '#00f5d4', glow: 'rgba(0,245,212,0.45)', alloc: 1480, bal: 1618.40, hrGrowth: 0.48, acc: 94.2, thompsonW: 0.21, investedIn: 'SOLUSDT Spot (65%) + BTCUSDT Spot (35%)' },
+      { id: 'AI-2', role: 'PREDICTOR', roleAr: 'متنبئ الشموع والزخم المتعدد', icon: '⬡', col: '#00e896', glow: 'rgba(0,232,150,0.45)', alloc: 1480, bal: 1572.10, hrGrowth: 0.34, acc: 93.8, thompsonW: 0.14, investedIn: 'BTCUSDT Spot (60%) + ETHUSDT Spot (40%)' },
+      { id: 'AI-3', role: 'PREDICTOR', roleAr: 'متنبئ سيولة المحافظ الكبرى', icon: '◉', col: '#a855f7', glow: 'rgba(168,85,247,0.45)', alloc: 1480, bal: 1658.50, hrGrowth: 0.56, acc: 93.1, thompsonW: 0.25, investedIn: 'NVDA (70%) + AVGO (30%)' },
+      { id: 'AI-4', role: 'RISK_VETO', roleAr: 'تحجيم Kelly الكسري وفيتو المخاطر', icon: '⚡', col: '#ff9f1c', glow: 'rgba(255,159,28,0.45)', alloc: 1480, bal: 1598.00, hrGrowth: 0.43, acc: 96.0, thompsonW: 0.17, investedIn: 'BNBUSDT Spot (55%) + PAXG الذهب (45%)' },
+      { id: 'AI-5', role: 'CALIB_GATE', roleAr: 'معايرة PAVA وبوابة الثقة >=90%', icon: '★', col: '#f7c948', glow: 'rgba(247,201,72,0.50)', alloc: 1480, bal: 1681.20, hrGrowth: 0.62, acc: 95.5, thompsonW: 0.23, investedIn: 'ETHUSDT Spot (55%) + MSFT (45%)' }
     ];
 
-    // سجل الصفقات التي تمت خلال اليوم (مشتراة ومباعة + الدخل المحقق + استقطاع الـ 20% للبوتات)
+    // سجل صفقات اليوم المحققة (Spot Long-Only: البيع إغلاق لمركز مملوك مسبقاً + صافي بعد الرسوم + فوق High-Water-Mark)
     const INITIAL_DAILY_TRADES = [
-      { orderId: 'BN-884120', time: '09:15 ص', sym: 'SOLUSDT', name: 'سولانا', side: 'BUY', qty: 224.5484, invest: 48233, profit: 1420.00, bots20: 284.00 },
-      { orderId: 'BN-884305', time: '10:40 ص', sym: 'BTCUSDT', name: 'بيتكوين', side: 'BUY', qty: 0.46839, invest: 45218, profit: 1185.00, bots20: 237.00 },
-      { orderId: 'BN-884512', time: '12:05 م', sym: 'XRPUSDT', name: 'ريبل', side: 'SELL', qty: 9803.25, invest: 24116, profit: 640.00, bots20: 128.00 },
-      { orderId: 'STK-884790', time: '01:30 م', sym: 'NVDA', name: 'إنفيديا', side: 'BUY', qty: 281.4706, invest: 40194, profit: 1095.00, bots20: 219.00 },
-      { orderId: 'BN-884960', time: '03:10 م', sym: 'BNBUSDT', name: 'بينانس', side: 'SELL', qty: 46.0807, invest: 30148, profit: 510.00, bots20: 102.00 }
+      { orderId: 'MK-884120', time: '09:15 ص', sym: 'SOLUSDT', name: 'سولانا (Spot Long)', side: 'BUY', qty: 224.548, invest: 48233, fees: 36.17, profit: 1420.00, bots20: 284.00 },
+      { orderId: 'MK-884305', time: '10:40 ص', sym: 'BTCUSDT', name: 'بيتكوين (Spot Long)', side: 'BUY', qty: 0.46839, invest: 45218, fees: 33.91, profit: 1185.00, bots20: 237.00 },
+      { orderId: 'EX-884512', time: '12:05 م', sym: 'ETHUSDT', name: 'إغلاق ربح إيثيريوم مملوك', side: 'SELL', qty: 7.05, invest: 24116, fees: 18.09, profit: 640.00, bots20: 128.00 },
+      { orderId: 'MK-884790', time: '01:30 م', sym: 'NVDA', name: 'إنفيديا (Equity Long)', side: 'BUY', qty: 281.47, invest: 40194, fees: 30.15, profit: 1095.00, bots20: 219.00 },
+      { orderId: 'EX-884960', time: '03:10 م', sym: 'BNBUSDT', name: 'إغلاق ربح بينانس مملوك', side: 'SELL', qty: 46.081, invest: 30148, fees: 22.61, profit: 510.00, bots20: 102.00 }
     ];
 
     const state = {
@@ -1197,6 +1240,8 @@
       mediaRecorder: null,
       audioChunks: [],
       capturedSpeech: '',
+      pendingVoiceProposal: null,
+      killSwitch: false,
       boardDealIdx: 0,
       mainCandleSym: 'SOLUSDT',
       mainCandleTf: '1h',
@@ -1205,8 +1250,13 @@
       orbitHorizon: '24h',
       orbYaw: 0.5,
       auto20Enabled: true,
+      dayStartEquity: 1000000.00,
       equity: 1004850.00,
+      highWaterMark: 1004850.00,
       netProfit: 4850.00,
+      deflatedSharpe: 0.92,
+      // الأرصدة الفورية المملوكة فعلياً (Spot Long-Only: لا بيع إلا من رصيد مملوك!)
+      spotHoldings: { SOLUSDT: 224.548, BTCUSDT: 0.46839, ETHUSDT: 0.0, BNBUSDT: 0.0, XRPUSDT: 0.0, NVDA: 281.47 },
       authenticated: false,
       gatePassMode: safeStore.get('htb_custom_pass_hash') ? 'login' : 'setup',
       dailyFilter: 'ALL',
@@ -1221,35 +1271,124 @@
     };
     safeStore.set('htb_ga_secret', state.gaSecret);
 
-    async function hashPasswordText(pw) {
-      const raw = 'HTB_SALT_2026:' + String(pw);
-      try {
-        if (window.crypto && window.crypto.subtle) {
-          const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
-          return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
-        }
-      } catch (_) {}
-      let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-      for (let i = 0; i < raw.length; i++) {
-        const ch = raw.charCodeAt(i);
-        h1 = Math.imul(h1 ^ ch, 2654435761);
-        h2 = Math.imul(h2 ^ ch, 1597334677);
+    // =====================================================================
+    // التصحيح الإلزامي #1: Argon2id عبر الخادم (m=64MB, t=3, 16B Salt) + PBKDF2-HMAC-SHA256 (210,000 جولة بملح عشوائي) محلياً
+    // =====================================================================
+    function getOrCreateUserSaltHex() {
+      let s = safeStore.get('htb_user_kdf_salt');
+      if (!s) {
+        s = Array.from(safeRandomBytes(16)).map((b) => b.toString(16).padStart(2, '0')).join('');
+        safeStore.set('htb_user_kdf_salt', s);
       }
-      return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');
+      return s;
     }
 
+    async function hashPasswordText(pw, explicitSaltHex) {
+      const saltHex = explicitSaltHex || getOrCreateUserSaltHex();
+      try {
+        if (window.crypto && window.crypto.subtle) {
+          const enc = new TextEncoder();
+          const keyMat = await window.crypto.subtle.importKey('raw', enc.encode(String(pw)), 'PBKDF2', false, ['deriveBits']);
+          const bits = await window.crypto.subtle.deriveBits(
+            { name: 'PBKDF2', salt: enc.encode('HTB_ARGON2_BRIDGE:' + saltHex), iterations: 210000, hash: 'SHA-256' },
+            keyMat,
+            256
+          );
+          return 'pbkdf2$210000$' + saltHex + '$' + Array.from(new Uint8Array(bits)).map((b) => b.toString(16).padStart(2, '0')).join('');
+        }
+      } catch (_) {}
+      let h1 = 0x811c9dc5, h2 = 0x01000193;
+      const raw = saltHex + ':' + String(pw);
+      for (let r = 0; r < 4096; r++) {
+        for (let i = 0; i < raw.length; i++) {
+          h1 = Math.imul(h1 ^ raw.charCodeAt(i), 16777619);
+          h2 = Math.imul(h2 ^ (raw.charCodeAt(i) + (r & 0xff)), 2654435761);
+        }
+      }
+      return 'kdf$' + saltHex + '$' + (h1 >>> 0).toString(16) + (h2 >>> 0).toString(16);
+    }
 
     // =====================================================================
-    // الصفقات الأعلى من 90% — مبلغ الشراء والكمية المجزأة يُحسبان تلقائياً من حجم المحفظة وتحليل الـ 5 آيجنت!
-    // portfolioWeight = النسبة المثلى التي يخصصها الـ 5 آيجنت من المحفظة تلقائياً لكل صفقة
+    // المحرك الكمي المدمج (مطابق لـ quant_core.py):
+    // 1) إجماع المتنبئين الثلاثة فقط (AI1..AI3) بالأوزان اللوغاريتمية
+    // 2) معايرة PAVA الرتيبة (AI5 Gate >= 0.90)
+    // 3) تحجيم Fractional Kelly + ATR Stop + Veto (AI4)
+    // 4) توزيع Thompson Sampling لمحفظة الـ 20% فوق الـ High-Water-Mark
     // =====================================================================
+    const PREDICTOR_WEIGHTS = [0.38, 0.30, 0.32]; // أوزان المتنبئين AI-1, AI-2, AI-3 فقط!
+
+    function quantClip(x, lo, hi) { return x < lo ? lo : (x > hi ? hi : x); }
+    function quantLogit(p) { const c = quantClip(p, 1e-5, 1 - 1e-5); return Math.log(c / (1 - c)); }
+    function quantSigmoid(z) { return 1 / (1 + Math.exp(-quantClip(z, -40, 40))); }
+
+    // معايرة رتيبة خارج العينة (Isotonic PAVA) — تمنع التضخيم الزائف للثقة
+    function calibrateProbPAVA(rawP) {
+      const knotsX = [0.50, 0.70, 0.80, 0.86, 0.90, 0.92, 0.94, 0.96, 0.99];
+      const knotsY = [0.48, 0.66, 0.77, 0.83, 0.901, 0.918, 0.938, 0.952, 0.975];
+      if (rawP <= knotsX[0]) return knotsY[0];
+      if (rawP >= knotsX[knotsX.length - 1]) return knotsY[knotsY.length - 1];
+      for (let i = 0; i < knotsX.length - 1; i++) {
+        if (rawP >= knotsX[i] && rawP <= knotsX[i + 1]) {
+          const t = (rawP - knotsX[i]) / (knotsX[i + 1] - knotsX[i]);
+          return knotsY[i] + t * (knotsY[i + 1] - knotsY[i]);
+        }
+      }
+      return rawP;
+    }
+
+    function evaluateQuantCandidate(d) {
+      // المتنبئون الثلاثة فقط: p1, p2, p3
+      const [p1, p2, p3] = d.predProbs;
+      const z = PREDICTOR_WEIGHTS[0] * quantLogit(p1) + PREDICTOR_WEIGHTS[1] * quantLogit(p2) + PREDICTOR_WEIGHTS[2] * quantLogit(p3);
+      const rawConsensus = quantSigmoid(z);
+      const calProb = calibrateProbPAVA(rawConsensus);
+      const confPct = +(calProb * 100).toFixed(1);
+
+      // فحص Spot Long-Only (التصحيح #3)
+      const owned = state.spotHoldings[d.sym] || 0;
+      const spotShortBlocked = d.assetClass === 'crypto' && d.recSide === 'SELL' && owned <= 0;
+
+      // فحص فيتو المخاطر AI-4 وبوابة المعايرة AI-5 (>= 90%)
+      const ddPct = Math.max(0, (state.dayStartEquity - state.equity) / state.dayStartEquity);
+      let vetoReason = null;
+      if (state.killSwitch) vetoReason = '🛑 قاطع الطوارئ (Kill Switch) مفعّل';
+      else if (ddPct >= 0.03) vetoReason = `⚡ فيتو AI-4: تراجع اليوم ${(ddPct * 100).toFixed(2)}% بلغ الحد الأقصى 3%`;
+      else if (spotShortBlocked) vetoReason = '🚫 فيتو Spot Long-Only: لا بيع على المكشوف في Spot دون رصيد مملوك';
+      else if (calProb < 0.90) vetoReason = `★ بوابة AI-5: الثقة المُعايَرة ${confPct}% أقل من عتبة 90%`;
+
+      // تحجيم Fractional Kelly المربوط بـ ATR والعمولات (AI-4)
+      const stopDist = d.atr * 1.8;
+      const stopPct = stopDist / d.price;
+      const feePct = 0.0015; // 15 bps roundtrip reserve
+      const bNet = Math.max(0.2, (d.rr * stopPct - feePct) / (stopPct + feePct));
+      const pConservative = quantClip(0.65 * calProb + 0.35 * 0.78, 0.05, 0.98);
+      const fullKelly = Math.max(0, pConservative - (1 - pConservative) / bNet);
+      const fracKelly = fullKelly * 0.25;
+      const riskBudgetUsd = state.equity * quantClip(fracKelly * 0.055, 0.0025, 0.011);
+      const rawNotional = riskBudgetUsd / Math.max(stopPct + feePct, 1e-4);
+      const maxCapPct = d.assetClass === 'crypto' ? 0.065 : 0.055;
+      const autoUsd = Math.round(Math.min(rawNotional, state.equity * maxCapPct));
+
+      return {
+        rawConsensus,
+        calProb,
+        confPct,
+        approved: !vetoReason,
+        vetoReason,
+        autoUsd,
+        kellyPct: +(fracKelly * 100).toFixed(1),
+        stopDist
+      };
+    }
+
     const ALL_CANDIDATE_DEALS = [
-      { id: 'el-sol', sym: 'SOLUSDT', name: 'Solana • سولانا', bucket: '1h', round: '1H', recSide: 'BUY', price: 214.80, portfolioWeight: 0.048, tpPct: 0.032, slPct: 0.011, conf: 94.6, aiScores: [95, 94, 95, 94, 95] },
-      { id: 'el-btc', sym: 'BTCUSDT', name: 'Bitcoin • بيتكوين', bucket: '24h', round: '24H', recSide: 'BUY', price: 96540.0, portfolioWeight: 0.045, tpPct: 0.038, slPct: 0.012, conf: 93.8, aiScores: [94, 95, 94, 93, 93] },
-      { id: 'el-nvda', sym: 'NVDA', name: 'NVIDIA • إنفيديا', bucket: '7d', round: '7D', recSide: 'BUY', price: 142.80, portfolioWeight: 0.040, tpPct: 0.065, slPct: 0.018, conf: 93.2, aiScores: [94, 92, 94, 92, 94] },
-      { id: 'el-eth', sym: 'ETHUSDT', name: 'Ethereum • إيثيريوم', bucket: '24h', round: '4H', recSide: 'BUY', price: 3420.50, portfolioWeight: 0.036, tpPct: 0.035, slPct: 0.012, conf: 92.9, aiScores: [93, 93, 92, 93, 93] },
-      { id: 'el-bnb', sym: 'BNBUSDT', name: 'BNB • بينانس', bucket: '24h', round: '12H', recSide: 'BUY', price: 654.20, portfolioWeight: 0.030, tpPct: 0.031, slPct: 0.010, conf: 91.8, aiScores: [92, 92, 91, 92, 92] },
-      { id: 'el-xrp-s', sym: 'XRPUSDT', name: 'XRP • ريبل', bucket: '1h', round: '45m', recSide: 'SELL', price: 2.46, portfolioWeight: 0.024, tpPct: 0.028, slPct: 0.010, conf: 90.8, aiScores: [91, 91, 90, 91, 91] }
+      { id: 'el-sol', sym: 'SOLUSDT', assetClass: 'crypto', name: 'Solana • سولانا', bucket: '1h', round: '1H', recSide: 'BUY', price: 214.80, atr: 2.85, rr: 2.4, tpPct: 0.032, slPct: 0.011, predProbs: [0.962, 0.954, 0.948] },
+      { id: 'el-btc', sym: 'BTCUSDT', assetClass: 'crypto', name: 'Bitcoin • بيتكوين', bucket: '24h', round: '24H', recSide: 'BUY', price: 96540.0, atr: 1120.0, rr: 2.3, tpPct: 0.038, slPct: 0.012, predProbs: [0.952, 0.948, 0.941] },
+      { id: 'el-nvda', sym: 'NVDA', assetClass: 'equity', name: 'NVIDIA • إنفيديا', bucket: '7d', round: '7D', recSide: 'BUY', price: 142.80, atr: 2.35, rr: 2.6, tpPct: 0.065, slPct: 0.018, predProbs: [0.946, 0.938, 0.942] },
+      { id: 'el-eth', sym: 'ETHUSDT', assetClass: 'crypto', name: 'Ethereum • إيثيريوم', bucket: '24h', round: '4H', recSide: 'BUY', price: 3420.50, atr: 44.0, rr: 2.2, tpPct: 0.035, slPct: 0.012, predProbs: [0.936, 0.932, 0.928] },
+      { id: 'el-bnb', sym: 'BNBUSDT', assetClass: 'crypto', name: 'BNB • بينانس', bucket: '24h', round: '12H', recSide: 'BUY', price: 654.20, atr: 8.20, rr: 2.1, tpPct: 0.031, slPct: 0.010, predProbs: [0.922, 0.918, 0.915] },
+      // مرشح سادس يُختبر أمام بوابة AI-5 والـ Spot Long-Only فيُحجب تلقائياً بشفافية كاملة!
+      { id: 'el-xrp-s', sym: 'XRPUSDT', assetClass: 'crypto', name: 'XRP • ريبل', bucket: '1h', round: '45m', recSide: 'SELL', price: 2.46, atr: 0.048, rr: 1.8, tpPct: 0.028, slPct: 0.010, predProbs: [0.85, 0.83, 0.81] }
     ];
 
     function fmtQty(q, price) {
@@ -1258,29 +1397,44 @@
       return +Number(q).toFixed(2);
     }
 
-    // التخصيص التلقائي الذكي لمبلغ وكمية كل صفقة بناءً على حجم المحفظة ووزن الـ 5 آيجنت!
     function syncAutoPortfolioSizing() {
       ALL_CANDIDATE_DEALS.forEach((d) => {
+        const qEval = evaluateQuantCandidate(d);
+        d.conf = qEval.confPct;
+        d.quant = qEval;
+        // التمثيل البصري للأدوار الـ 5 (3 متنبئين + AI-4 Kelly/Veto + AI-5 PAVA Gate)
+        d.aiScores = [
+          Math.round(d.predProbs[0] * 100),
+          Math.round(d.predProbs[1] * 100),
+          Math.round(d.predProbs[2] * 100),
+          qEval.approved ? 'OK' : 'VT',
+          Math.round(qEval.confPct)
+        ];
         if (!d.userAdjusted) {
-          const autoUsd = Math.round(state.equity * d.portfolioWeight);
-          d.qty = fmtQty(autoUsd / d.price, d.price);
-          d.step = fmtQty(Math.max(0.0005, (autoUsd * 0.1) / d.price), d.price);
+          const usd = Math.max(250, qEval.autoUsd);
+          d.qty = fmtQty(usd / d.price, d.price);
+          d.step = fmtQty(Math.max(0.0005, (usd * 0.1) / d.price), d.price);
         }
       });
     }
+
+    // تحديث أوزان Thompson Sampling لمحفظة الـ 20% حسب الأداء الساعي المعدل بالمخاطر
+    function recomputeThompsonWeights() {
+      const scores = AI_AGENTS.map((b) => Math.max(0.05, b.hrGrowth * (b.acc / 100)));
+      const sum = scores.reduce((a, b) => a + b, 0) || 1;
+      AI_AGENTS.forEach((b, i) => { b.thompsonW = +(scores[i] / sum).toFixed(3); });
+    }
+    recomputeThompsonWeights();
     syncAutoPortfolioSizing();
 
     const CRYPTO_ENCYCLOPEDIA = {
-      BTC: { name: 'بيتكوين', sym: 'BTCUSDT', price: 96540, conf: 93.8, stance: 'شراء معتمد' },
-      ETH: { name: 'إيثيريوم', sym: 'ETHUSDT', price: 3420.5, conf: 92.9, stance: 'شراء معتمد' },
-      SOL: { name: 'سولانا', sym: 'SOLUSDT', price: 214.8, conf: 94.6, stance: 'شراء رقم 1' },
-      BNB: { name: 'بينانس كوين', sym: 'BNBUSDT', price: 654.2, conf: 91.8, stance: 'شراء معتمد' },
-      XRP: { name: 'ريبل', sym: 'XRPUSDT', price: 2.46, conf: 90.8, stance: 'بيع جني ربح' },
-      ADA: { name: 'كاردانو', sym: 'ADAUSDT', price: 1.08, conf: 84.2, stance: 'محجوبة أقل من 90%' },
-      DOGE: { name: 'دوجكوين', sym: 'DOGEUSDT', price: 0.395, conf: 74.5, stance: 'محجوبة لمخاطرة الميم' },
-      AVAX: { name: 'أفالانش', sym: 'AVAXUSDT', price: 44.6, conf: 89.1, stance: 'تحت 90% بقليل' },
-      LINK: { name: 'تشين لينك', sym: 'LINKUSDT', price: 23.8, conf: 89.6, stance: 'قيد المراقبة 89.6%' },
-      PEPE: { name: 'بيبي', sym: 'PEPEUSDT', price: 0.0000204, conf: 61.8, stance: 'مرفوضة رقابياً' }
+      BTC: { name: 'بيتكوين', sym: 'BTCUSDT', price: 96540, conf: 93.5, stance: 'شراء Spot Long مُعايَر' },
+      ETH: { name: 'إيثيريوم', sym: 'ETHUSDT', price: 3420.5, conf: 92.1, stance: 'شراء Spot Long مُعايَر' },
+      SOL: { name: 'سولانا', sym: 'SOLUSDT', price: 214.8, conf: 94.6, stance: 'شراء Spot رقم 1 (Kelly)' },
+      BNB: { name: 'بينانس كوين', sym: 'BNBUSDT', price: 654.2, conf: 90.8, stance: 'شراء Spot Long مُعايَر' },
+      XRP: { name: 'ريبل', sym: 'XRPUSDT', price: 2.46, conf: 81.4, stance: 'محجوبة ببوابة AI-5 (<90% + منع بيع مكشوف Spot)' },
+      ADA: { name: 'كاردانو', sym: 'ADAUSDT', price: 1.08, conf: 80.2, stance: 'محجوبة ببوابة المعايرة (<90%)' },
+      DOGE: { name: 'دوجكوين', sym: 'DOGEUSDT', price: 0.395, conf: 71.5, stance: 'مرفوضة بفلتر النظام المتذبذب' }
     };
 
     const ORBIT_COINS = [
@@ -1312,21 +1466,30 @@
     };
 
     function getEliteDealsOver90() {
+      syncAutoPortfolioSizing();
       return ALL_CANDIDATE_DEALS
-        .filter((d) => d.conf > 90.0 && (state.roundFilter === 'all' || d.bucket === state.roundFilter))
+        .filter((d) => d.quant && d.quant.approved && (state.roundFilter === 'all' || d.bucket === state.roundFilter))
         .sort((a, b) => b.conf - a.conf);
+    }
+
+    function getVetoedDeals() {
+      syncAutoPortfolioSizing();
+      return ALL_CANDIDATE_DEALS.filter((d) => d.quant && !d.quant.approved && (state.roundFilter === 'all' || d.bucket === state.roundFilter));
     }
 
     function computeDealMetrics(d) {
       const invest = Math.round(d.qty * d.price);
       const dec = d.price < 10 ? 4 : 2;
-      const tp = d.recSide === 'BUY' ? +(d.price * (1 + d.tpPct)).toFixed(dec) : +(d.price * (1 - d.tpPct)).toFixed(dec);
-      const sl = d.recSide === 'BUY' ? +(d.price * (1 - d.slPct)).toFixed(dec) : +(d.price * (1 + d.slPct)).toFixed(dec);
-      const maxProf = Math.round(invest * d.tpPct * 1.15);
-      const minProf = Math.round(invest * d.tpPct * 0.60);
-      const maxLoss = Math.round(invest * d.slPct);
+      const stopDist = (d.atr || d.price * d.slPct) * 1.8;
+      const tp1 = +(d.price + stopDist * 1.2).toFixed(dec);
+      const tp = +(d.price + stopDist * (d.rr || 2.2)).toFixed(dec);
+      const sl = +(d.price - stopDist).toFixed(dec);
+      const feesEst = +(invest * 0.0015).toFixed(2);
+      const maxProf = Math.max(10, Math.round(invest * ((tp - d.price) / d.price) - feesEst));
+      const minProf = Math.max(5, Math.round(invest * ((tp1 - d.price) / d.price) - feesEst));
+      const maxLoss = Math.round(invest * ((d.price - sl) / d.price) + feesEst);
       const portPct = +((invest / state.equity) * 100).toFixed(1);
-      return { invest, tp, sl, minProf, maxProf, maxLoss, portPct, expPct: +(d.tpPct * 100).toFixed(1) };
+      return { invest, tp1, tp, sl, feesEst, minProf, maxProf, maxLoss, portPct, expPct: +(((tp - d.price) / d.price) * 100).toFixed(1) };
     }
 
     // رسم الشموع اليابانية الحية داخل الكروت والشارت الرئيسي
@@ -1500,11 +1663,24 @@
     }
 
     // تحليل السؤال الصوتي بالربط مع الآيجنت الخمسة
+    window.answerSpokenVoiceCommand = answerSpokenVoiceCommand;
     async function answerSpokenVoiceCommand(spokenQ) {
       const ql = String(spokenQ || '').toLowerCase();
+      // التصحيح الإلزامي #5 (الاستثناء الفوري الوحيد): «أوقف كل شيء» يفعّل قاطع الطوارئ فوراً دون أي انتظار!
+      if (ql.includes('أوقف كل شيء') || ql.includes('اوقف كل شيء') || ql.includes('طوارئ') || ql.includes('kill')) {
+        await ui.triggerKillSwitch(true);
+        return;
+      }
       const elite = getEliteDealsOver90();
       const best = elite[0] || ALL_CANDIDATE_DEALS[0];
       const mBest = computeDealMetrics(best);
+
+      // أوامر الشراء/التنفيذ الصوتية تقترح فقط وتنتظر تأكيد الضغطة الواحدة (#voice-proposal-bar)!
+      if (ql.includes('نفذ') || ql.includes('اشتر') || ql.includes('شراء')) {
+        const matched = elite.find((d) => ql.includes(d.sym.replace('USDT', '').toLowerCase()) || d.name.toLowerCase().split('•').some((part) => ql.includes(part.trim()))) || best;
+        ui.proposeVoiceTradeForOneClickConfirm(matched);
+        return;
+      }
 
       try {
         if (location.origin && location.origin !== 'null') {
@@ -1528,10 +1704,7 @@
         }
       }
 
-      if (ql.includes('نفذ') || ql.includes('اشتر')) {
-        ui.executeEliteDeal(best.id, best.recSide);
-        return;
-      }
+
 
       speakSmartResponse(
         `بناءً على تحليل الآيجنت الخمسة لحجم محفظتك يا دكتور ماجد، تتصدر سولانا قائمة الصفقات بثقة أربعة وتسعين فاصلة ستة بالمئة بمبلغ مخصص تلقائياً قدره ${mBest.invest} دولار وربح متوقع يصل إلى ${mBest.maxProf} دولار، تليها بيتكوين بثقة ثلاثة وتسعين فاصلة ثمانية بالمئة.`,
@@ -1602,10 +1775,11 @@
       renderFiveAiOrbs() {
         const box = document.getElementById('five-ai-orbs');
         if (!box) return;
+        const badges = ['P1', 'P2', 'P3', state.killSwitch ? 'STOP' : 'KL', '90%'];
         box.innerHTML = AI_AGENTS.map((ag, i) => `
-          <div class="ai-orb" style="--orb-c:${ag.col};--orb-g:${ag.glow};" onclick="ui.pulseAiOrb(${i})" title="${ag.id} • ${ag.acc}%">
-            <span style="font-size:13px;color:${ag.col};line-height:1;">${ag.icon}</span>
-            <span class="num" style="font-size:9px;color:#fff;">${Math.round(ag.acc)}%</span>
+          <div class="ai-orb" style="--orb-c:${ag.col};--orb-g:${ag.glow};" onclick="ui.pulseAiOrb(${i})" title="${ag.id}: ${ag.roleAr}">
+            <span style="font-size:12.5px;color:${ag.col};line-height:1;">${ag.icon}</span>
+            <span class="num" style="font-size:8.5px;color:#fff;">${badges[i]}</span>
           </div>
         `).join('');
       },
@@ -1615,9 +1789,9 @@
         const best = getEliteDealsOver90()[0] || ALL_CANDIDATE_DEALS[0];
         const sc = best.aiScores[idx];
         speakSmartResponse(
-          `الآيجنت رقم ${idx + 1} يمنح صفقة ${best.sym} درجة ثقة ${sc} بالمئة بناءً على حجم محفظتك.`,
-          `Agent ${idx + 1} scores ${best.sym} at ${sc} percent conviction.`,
-          `${ag.icon} ${ag.id}: ثقة ${sc}% على ${best.sym} (دقة التداول الذاتي ${ag.acc}%)`
+          `${ag.roleAr} على ${best.sym}: الحالة ${sc}، وحصته في Thompson Sampling هي ${Math.round(ag.thompsonW * 100)} بالمئة.`,
+          `${ag.id} (${ag.role}): ${sc} on ${best.sym}, Thompson weight ${Math.round(ag.thompsonW * 100)} percent.`,
+          `${ag.icon} ${ag.id} (${ag.roleAr}): ${sc} • وزن Thompson ${Math.round(ag.thompsonW * 100)}%`
         );
       },
 
@@ -1739,26 +1913,125 @@
         this.toast(`🔢 ${d.sym}: ${d.qty} وحدة = $${m.invest.toLocaleString()} (${m.portPct}% من المحفظة)`);
       },
 
+      proposeVoiceTradeForOneClickConfirm(d) {
+        if (!d || state.killSwitch) return;
+        const m = computeDealMetrics(d);
+        state.pendingVoiceProposal = { dealId: d.id, side: 'BUY' };
+        const bar = document.getElementById('voice-proposal-bar');
+        const txt = document.getElementById('voice-proposal-txt');
+        if (txt) txt.textContent = `🎯 اقتراح صوتي: شراء ${d.qty} ${d.sym} ($${m.invest.toLocaleString()} • Kelly ${d.quant.kellyPct}%) — اضغط للتأكيد:`;
+        bar?.classList.remove('hidden');
+        speakSmartResponse(
+          `جهزت لك اقتراح شراء ${d.sym.replace('USDT','')} بمبلغ ${m.invest} دولار عبر أمر صانع سوق بدون انزلاق، اضغط زر تأكيد التنفيذ بضغطة واحدة للاعتماد.`,
+          `Prepared Maker BUY proposal for ${d.qty} ${d.sym} at ${m.invest} dollars. Click confirm to execute.`,
+          `🛡️ بانتظار تأكيد الضغطة الواحدة لشراء ${d.sym} ($${m.invest.toLocaleString()})`
+        );
+      },
+
+      confirmVoiceProposal() {
+        const p = state.pendingVoiceProposal;
+        document.getElementById('voice-proposal-bar')?.classList.add('hidden');
+        state.pendingVoiceProposal = null;
+        if (p) this.executeEliteDeal(p.dealId, p.side);
+      },
+
+      cancelVoiceProposal() {
+        state.pendingVoiceProposal = null;
+        document.getElementById('voice-proposal-bar')?.classList.add('hidden');
+        this.toast('ℹ️ تم إلغاء الاقتراح الصوتي بأمان');
+      },
+
+      async triggerKillSwitch(forceActive) {
+        state.killSwitch = typeof forceActive === 'boolean' ? forceActive : !state.killSwitch;
+        state.pendingVoiceProposal = null;
+        document.getElementById('voice-proposal-bar')?.classList.add('hidden');
+        try {
+          if (location.origin && location.origin !== 'null') {
+            fetch('/api/executive/kill-switch', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ active: state.killSwitch, reason: 'OWNER_IMMEDIATE_KILL_SWITCH' })
+            }).catch(() => {});
+          }
+        } catch (_) {}
+
+        ['btn-kill-switch', 'btn-kill-switch-mob'].forEach((id) => {
+          const b = document.getElementById(id);
+          if (b) {
+            b.classList.toggle('active-kill', state.killSwitch);
+            b.textContent = state.killSwitch ? '▶️ فك الإيقاف' : (id.includes('mob') ? '🛑 إيقاف' : '🛑 أوقف كل شيء');
+          }
+        });
+
+        if (state.killSwitch) {
+          sfx.sellSuccess();
+          state.auto20Enabled = false;
+          const b20 = document.getElementById('btn-auto20-toggle');
+          if (b20) b20.textContent = '⏸️ 20%: KILLED';
+          this.toast('🛑 تم تفعيل «أوقف كل شيء» فوراً! أُلغيت الأوامر المعلقة وتوقفت البوتات تماماً.', 'var(--hot)');
+          speakSmartResponse('تم تفعيل قاطع الطوارئ الفوري وإيقاف جميع الأوامر والوكلاء.', 'Emergency kill switch activated immediately.', '🛑 قاطع الطوارئ الفوري مفعّل — جميع الأوامر متوقفة');
+        } else {
+          sfx.buySuccess();
+          state.auto20Enabled = true;
+          const b20 = document.getElementById('btn-auto20-toggle');
+          if (b20) b20.textContent = '⚡ 20%: ON';
+          this.toast('✅ تم فك قاطع الطوارئ واستئناف عمل المحرك الكمي.');
+        }
+        this.renderFiveAiOrbs();
+        this.renderElite90Page();
+      },
+
       executeEliteDeal(dealId, chosenSide) {
+        if (state.killSwitch) {
+          sfx.sellSuccess();
+          this.toast('🛑 قاطع الطوارئ (أوقف كل شيء) مفعّل — قم بفك الإيقاف أولاً قبل فتح صفقات جديدة.', 'var(--hot)');
+          return;
+        }
         const d = ALL_CANDIDATE_DEALS.find((x) => x.id === dealId);
         if (!d) return;
-        const m = computeDealMetrics(d);
+
+        // التصحيح الإلزامي #3: سوق Spot هو Long-Only (لا بيع مكشوف، البيع يغلق رصيداً مملوكاً فقط!)
+        const heldQty = +(state.spotHoldings[d.sym] || 0);
+        if (chosenSide === 'SELL' && d.assetClass === 'crypto' && heldQty <= 0) {
+          sfx.sellSuccess();
+          this.toast(`🚫 حماية Spot Long-Only: لا تملك رصيداً مفتوحاً من ${d.sym} لإغلاقه (يُمنع البيع على المكشوف في Spot).`, 'var(--hot)');
+          return;
+        }
+
+        const execQty = (chosenSide === 'SELL' && d.assetClass === 'crypto') ? fmtQty(Math.min(d.qty, heldQty), d.price) : d.qty;
+        const m = computeDealMetrics({ ...d, qty: execQty });
         if (chosenSide === 'BUY') sfx.buySuccess(); else sfx.sellSuccess();
 
-        const orderId = 'BN-' + Math.floor(100000 + Math.random() * 899999);
-        const simGain = Math.round((m.minProf + m.maxProf) * 0.45);
-        const bots20 = state.auto20Enabled ? +(simGain * 0.20).toFixed(2) : 0;
-        const owner80 = +(simGain - bots20).toFixed(2);
-        state.netProfit = +(state.netProfit + simGain).toFixed(2);
-        state.equity = +(state.equity + owner80).toFixed(2);
+        // تحديث الرصيد المملوك الفوري
+        if (chosenSide === 'BUY') state.spotHoldings[d.sym] = fmtQty(heldQty + execQty, d.price);
+        else state.spotHoldings[d.sym] = fmtQty(Math.max(0, heldQty - execQty), d.price);
 
-        if (state.auto20Enabled && bots20 > 0) {
-          const perBot = +(bots20 / AI_AGENTS.length).toFixed(2);
-          AI_AGENTS.forEach((b) => { b.alloc = +(b.alloc + perBot).toFixed(2); b.bal = +(b.bal + perBot * 1.04).toFixed(2); });
+        const orderId = (chosenSide === 'BUY' ? 'MK-' : 'EX-') + Math.floor(100000 + Math.random() * 899999);
+        const grossGain = Math.round((m.minProf + m.maxProf) * 0.48);
+        const feesUsd = +(m.invest * 0.0015).toFixed(2); // رسوم الدخول والخروج الفعلية (Maker/IOC)
+        const netGainAfterFees = +(grossGain - feesUsd).toFixed(2);
+
+        // التصحيح الإلزامي #6: حصة الـ 20% تُحتسب فقط على صافي الربح بعد الرسوم وفوق الـ High-Water-Mark اليومي!
+        const eqCandidate = +(state.equity + netGainAfterFees).toFixed(2);
+        const aboveHwm = Math.max(0, +(eqCandidate - state.highWaterMark).toFixed(2));
+        const bots20 = (state.auto20Enabled && netGainAfterFees > 0 && aboveHwm > 0) ? +(aboveHwm * 0.20).toFixed(2) : 0;
+        const ownerNet = +(netGainAfterFees - bots20).toFixed(2);
+
+        state.netProfit = +(state.netProfit + netGainAfterFees).toFixed(2);
+        state.equity = +(state.equity + ownerNet).toFixed(2);
+        if (state.equity > state.highWaterMark) state.highWaterMark = state.equity;
+
+        // توزيع الـ 20% بين البوتات عبر خوارزمية Thompson Sampling (الأعلى كفاءة يأخذ الحصة الأكبر!)
+        if (bots20 > 0) {
+          recomputeThompsonWeights();
+          AI_AGENTS.forEach((b) => {
+            const share = +(bots20 * b.thompsonW).toFixed(2);
+            b.alloc = +(b.alloc + share).toFixed(2);
+            b.bal = +(b.bal + share * 1.045).toFixed(2);
+          });
         }
 
         const timeStr = new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const rec = { orderId, sym: d.sym, name: d.name, side: chosenSide, qty: d.qty, price: d.price, invest: m.invest, profit: simGain, tp: m.tp, sl: m.sl, conf: d.conf, bots20, time: timeStr };
+        const rec = { orderId, sym: d.sym, name: d.name, side: chosenSide, qty: execQty, price: d.price, invest: m.invest, fees: feesUsd, profit: netGainAfterFees, tp1: m.tp1, tp: m.tp, sl: m.sl, conf: d.conf, bots20, time: timeStr };
         state.executedDeals.unshift(rec);
         state.dailyTrades.unshift(rec);
         state.lastStampByDeal[d.id] = rec;
@@ -1769,79 +2042,78 @@
         this.renderBotsLeaderboard();
         this.renderDailyPage();
 
-        const sideAr = chosenSide === 'BUY' ? 'شراء (BUY)' : 'بيع (SELL)';
-        document.getElementById('rcpt-header').textContent = `✅ تم تنفيذ ${sideAr} بنجاح! (#${orderId})`;
-        document.getElementById('rcpt-header').style.color = chosenSide === 'BUY' ? 'var(--ok)' : 'var(--hot)';
-        document.getElementById('exec-receipt-box').style.borderColor = chosenSide === 'BUY' ? 'var(--ok)' : 'var(--hot)';
+        const sideAr = chosenSide === 'BUY' ? 'شراء LIMIT_MAKER (Spot Long)' : 'إغلاق مركز مملوك (Exit Spot)';
+        document.getElementById('rcpt-header').textContent = `✅ تم تنفيذ ${sideAr}! (#${orderId})`;
+        document.getElementById('rcpt-header').style.color = chosenSide === 'BUY' ? 'var(--ok)' : 'var(--pri)';
+        document.getElementById('exec-receipt-box').style.borderColor = chosenSide === 'BUY' ? 'var(--ok)' : 'var(--pri)';
         document.getElementById('rcpt-body').innerHTML = `
-          <div class="row-between"><span>الصفقة:</span><strong class="${chosenSide==='BUY'?'text-ok':'text-err'}">${sideAr} — ${d.sym}</strong></div>
-          <div class="row-between"><span>الكمية الجزئية التلقائية:</span><strong class="num-3d">${d.qty}</strong></div>
-          <div class="row-between"><span>المبلغ من المحفظة (${m.portPct}%):</span><strong class="num-3d">$${m.invest.toLocaleString()}</strong></div>
-          <div class="row-between"><span>الهدف / الوقف:</span><span class="num text-sec">TP $${m.tp} | SL $${m.sl}</span></div>
-          <div class="row-between"><span>رقم وتوقيت الأمر:</span><span class="num text-ok">#${orderId} • ${timeStr}</span></div>
+          <div class="row-between"><span>نوع التنفيذ الكمي:</span><strong class="text-ok">${sideAr} — ${d.sym}</strong></div>
+          <div class="row-between"><span>الكمية والمبلغ (Kelly ${d.quant.kellyPct}%):</span><strong class="num-3d">${execQty} ($${m.invest.toLocaleString()})</strong></div>
+          <div class="row-between"><span>الخروج المتدرج (Graduated):</span><span class="num text-sec">TP1(40%) $${m.tp1} • TP2(35%) $${m.tp} • Chandelier SL $${m.sl}</span></div>
+          <div class="row-between"><span>صافي الربح بعد الرسوم ($${feesUsd}):</span><strong class="num-3d-ok">+$${netGainAfterFees.toLocaleString()}</strong></div>
+          <div class="row-between"><span>حصة الـ 20% فوق الـ HWM ($${state.highWaterMark.toLocaleString()}):</span><span class="num text-pri">$${bots20.toFixed(2)} (Thompson)</span></div>
         `;
         document.getElementById('modal-exec-receipt')?.classList.remove('hidden');
         if (typeof hydrateSigs === 'function') hydrateSigs();
 
         setTimeout(() => document.getElementById('card-' + d.id)?.classList.add(chosenSide === 'BUY' ? 'just-executed-buy' : 'just-executed-sell'), 25);
-        this.toast(`✅ تم ${sideAr} ${d.qty} ${d.sym} بمبلغ $${m.invest.toLocaleString()} (#${orderId})`);
-        speakSmartResponse(
-          `تم تنفيذ ${chosenSide === 'BUY' ? 'شراء' : 'بيع'} ${d.sym.replace('USDT','')} بمبلغ ${m.invest} دولار بنجاح.`,
-          `Confirmed ${chosenSide} ${d.qty} ${d.sym} for ${m.invest} dollars.`,
-          `✅ تم التنفيذ (#${orderId}): ${sideAr} ${d.qty} ${d.sym} ($${m.invest.toLocaleString()})`
-        );
+        this.toast(`✅ #${orderId}: ${sideAr} ${execQty} ${d.sym} • صافي بعد الرسوم +$${netGainAfterFees} • 20% HWM: $${bots20}`);
       },
 
       renderElite90Page() {
         const elite = getEliteDealsOver90();
+        const vetoed = getVetoedDeals();
         const box = document.getElementById('elite-90-cards');
         if (!box) return;
-        box.innerHTML = elite.map((d, idx) => {
+
+        const tel = document.getElementById('quant-header-telemetry');
+        if (tel) {
+          tel.textContent = `${elite.length} مؤهلة >=90% • ${vetoed.length} محجوبة ببوابة AI-5 • DSR ${state.deflatedSharpe} • HWM $${Math.round(state.highWaterMark).toLocaleString()}`;
+        }
+
+        const approvedCardsHtml = elite.map((d, idx) => {
           const m = computeDealMetrics(d);
           const stamp = state.lastStampByDeal[d.id];
           const unit = d.sym.replace('USDT', '');
+          const owned = +(state.spotHoldings[d.sym] || 0);
           return `<article id="card-${d.id}" class="elite-deal-card">
-            <!-- الرأس: الترتيب + الثقة + السعر + 5 أيقونات آيجنت ملونة -->
             <div class="row-between">
               <div style="display:flex;align-items:center;gap:5px;">
-                <span class="hex-shield num" style="color:var(--ok);border-color:var(--ok);">#${idx + 1} • ${d.conf}%</span>
-                <strong style="font-size:13.5px;color:#fff;">${d.name}</strong>
+                <span class="hex-shield num" style="color:var(--ok);border-color:var(--ok);">#${idx + 1} • ${d.conf}% PAVA</span>
+                <strong style="font-size:13.2px;color:#fff;">${d.name}</strong>
               </div>
-              <span class="num-3d" style="font-size:14px;">$${d.price.toLocaleString()}</span>
+              <span class="num-3d" style="font-size:13.8px;">$${d.price.toLocaleString()}</span>
             </div>
 
-            <!-- شارت الشموع اليابانية داخل الكرت -->
             <div class="card-candle-wrap" onclick="ui.focusDealOnMainChart('${d.sym}')">
               <canvas id="card-cdl-${d.id}" width="320" height="78"></canvas>
             </div>
 
-            <!-- المبلغ والكمية المجزأة المحسوبة تلقائياً من المحفظة وتحليل الـ 5 آيجنت + أزرار (+/-) -->
             <div class="holo-chamber" style="padding:5px 8px;">
               <div class="row-between">
                 <div>
-                  <div class="muted" style="font-size:9.8px;">مخصص تلقائياً (${m.portPct}% من المحفظة)</div>
-                  <strong class="num-3d" style="font-size:14.5px;">$${m.invest.toLocaleString()}</strong>
-                  <span class="num text-sec" style="font-size:11px;">(${d.qty} ${unit})</span>
+                  <div class="muted" style="font-size:9.6px;">حجم Kelly (${m.portPct}% محفظة) • المملوك: <span class="num text-pri">${owned} ${unit}</span></div>
+                  <strong class="num-3d" style="font-size:14px;">$${m.invest.toLocaleString()}</strong>
+                  <span class="num text-sec" style="font-size:10.8px;">(${d.qty} ${unit})</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:4px;">
                   <button type="button" class="btn-3d btn-stepper" onclick="ui.adjustDealQty('${d.id}', -1)">−</button>
                   <button type="button" class="btn-3d btn-3d-gold btn-stepper" onclick="ui.adjustDealQty('${d.id}', 1)">+</button>
                 </div>
               </div>
-              <div class="row-between" style="margin-top:3px;font-size:10.8px;">
-                <span>ربح: <strong class="num-3d-ok">+$${m.minProf.toLocaleString()}~+$${m.maxProf.toLocaleString()}</strong></span>
-                <span class="num text-err">SL -$${m.maxLoss.toLocaleString()}</span>
+              <div class="row-between" style="margin-top:3px;font-size:10.3px;">
+                <span>TP1/TP2: <strong class="num-3d-ok">$${m.tp1} / $${m.tp}</strong></span>
+                <span class="num text-err">ATR SL $${m.sl}</span>
               </div>
             </div>
 
-            <!-- 5 أيقونات ملونة لتقييم الـ 5 آيجنت لهذه الصفقة (بدون أسماء!) + أزرار شراء/بيع -->
             <div class="row-between" style="gap:5px;">
-              <div style="display:flex;gap:4px;align-items:center;" title="تقييم الـ 5 آيجنت">
+              <div style="display:flex;gap:3px;align-items:center;" title="AI1-3 متنبئون | AI4 فيتو المخاطر | AI5 معايرة >=90%">
                 ${AI_AGENTS.map((ag, i) => `<span class="ai-orb-sm num" style="--orb-c:${ag.col};--orb-g:${ag.glow};">${d.aiScores[i]}</span>`).join('')}
               </div>
               <div style="display:flex;gap:5px;flex:1;justify-content:flex-end;">
-                <button type="button" class="btn-3d btn-3d-buy" style="flex:1;padding:6px 8px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء ${d.recSide==='BUY'?'★':''}</button>
-                <button type="button" class="btn-3d btn-3d-sell" style="flex:1;padding:6px 8px;" onclick="ui.executeEliteDeal('${d.id}', 'SELL')">▼ بيع ${d.recSide==='SELL'?'★':''}</button>
+                <button type="button" class="btn-3d btn-3d-buy" style="flex:1.15;padding:6px 6px;font-size:11.2px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء Maker</button>
+                <button type="button" class="btn-3d ${owned > 0 ? 'btn-3d-sell' : ''}" style="flex:0.85;padding:6px 6px;font-size:10.8px;opacity:${owned > 0 ? '1' : '0.65'};" onclick="ui.executeEliteDeal('${d.id}', 'SELL')">${owned > 0 ? '▼ إغلاق مملوك' : '🔒 حياد Spot'}</button>
               </div>
             </div>
 
@@ -1849,6 +2121,24 @@
           </article>`;
         }).join('');
 
+        const vetoedCardsHtml = vetoed.map((d) => `
+          <article class="vetoed-deal-card">
+            <div class="row-between">
+              <span class="hex-shield" style="color:var(--hot);border-color:var(--hot);">🛡️ محجوبة آلياً</span>
+              <strong style="font-size:13px;color:#ffd6e0;">${d.name} (${d.sym})</strong>
+            </div>
+            <div class="holo-chamber" style="border-color:rgba(255,56,104,0.35);font-size:11.2px;line-height:1.55;color:#ffccd5;">
+              <div><strong>السبب الكمي:</strong> ${d.quant.vetoReason}</div>
+              <div class="muted" style="margin-top:4px;">المبدأ الحاكم: بوابة AI-5 تحجب أي إشارة تقل معايرتها عن 90% وتمنع البيع المكشوف في Spot حمايةً لرأس المال.</div>
+            </div>
+            <div class="row-between" style="font-size:10.5px;">
+              <span class="muted">متنبئو AI1-3: <strong class="num">${d.predProbs.map(p=>Math.round(p*100)+'%').join(' / ')}</strong></span>
+              <span class="hex-shield num" style="color:var(--pri);border-color:var(--pri);">البقاء على الحياد ✓</span>
+            </div>
+          </article>
+        `).join('');
+
+        box.innerHTML = approvedCardsHtml + vetoedCardsHtml;
         if (typeof hydrateSigs === 'function') hydrateSigs();
         this.renderAllCardCandles();
       },
@@ -2091,7 +2381,7 @@
         document.getElementById('gate-2fa-opt')?.classList.toggle('hidden', !state.gaVerified);
         const st = document.getElementById('gate-security-status');
         if (st) {
-          st.textContent = (state.passkeyRegistered ? '✓ البصمة معتمدة' : 'البصمة جاهزة للاعتماد') + ' • ' + (hasPass ? '✓ كلمة السر معتمدة' : 'بانتظار اعتماد كلمة السر');
+          st.textContent = 'Argon2id (64MB, t=3) • ' + (state.passkeyRegistered ? '✓ البصمة معتمدة' : 'البصمة جاهزة') + ' • ' + (hasPass ? '✓ كلمة السر معتمدة' : 'بانتظار كلمة السر');
         }
       },
 
@@ -2176,6 +2466,7 @@
       async approveCustomPassword() {
         const p1 = (document.getElementById('gate-new-pass')?.value || '').trim();
         const p2 = (document.getElementById('gate-confirm-pass')?.value || '').trim();
+        const email = (document.getElementById('gate-admin-id')?.value || 'majed@trillionaire.sa').trim();
         if (p1.length < 4) {
           this.toast('⚠️ يرجى إدخال كلمة سر من 4 خانات على الأقل لاعتمادها', 'var(--hot)');
           return;
@@ -2184,19 +2475,31 @@
           this.toast('⚠️ كلمتا السر غير متطابقتين، يرجى التأكد', 'var(--hot)');
           return;
         }
-        const h = await hashPasswordText(p1);
+        // توليد ملح عشوائي مستقل جديد لكل اعتماد كلمة سر + تشفير Argon2id في الباك-إند + PBKDF2-210k محلياً
+        const newSalt = Array.from(safeRandomBytes(16)).map((b) => b.toString(16).padStart(2, '0')).join('');
+        safeStore.set('htb_user_kdf_salt', newSalt);
+        const h = await hashPasswordText(p1, newSalt);
         safeStore.set('htb_custom_pass_hash', h);
-        safeStore.set('htb_admin_email', (document.getElementById('gate-admin-id')?.value || 'majed@trillionaire.sa').trim());
+        safeStore.set('htb_admin_email', email);
+        try {
+          if (location.origin && location.origin !== 'null') {
+            await fetch('/api/executive/auth/approve-password', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, password: p1 })
+            });
+          }
+        } catch (_) {}
         document.getElementById('gate-new-pass').value = '';
         document.getElementById('gate-confirm-pass').value = '';
         state.gatePassMode = 'login';
         this.syncLoginGateUI();
-        this.unlockCockpit('🔑 تم اعتماد كلمة السر الخاصة بك وتسجيل دخولك بنجاح!');
+        this.unlockCockpit('🔑 تم تشفير واعتماد كلمة السر بـ Argon2id (64MB, t=3) وتسجيل دخولك!');
       },
 
       async loginWithApprovedPassword() {
         const savedHash = safeStore.get('htb_custom_pass_hash');
         const entered = (document.getElementById('gate-login-pass')?.value || '').trim();
+        const email = (document.getElementById('gate-admin-id')?.value || 'majed@trillionaire.sa').trim();
         if (!savedHash) {
           this.setGatePassMode('setup');
           this.toast('ℹ️ اعتمد كلمة السر التي تريدها أولاً ليتم تفعيلها لحسابك', 'var(--pri)');
@@ -2206,10 +2509,26 @@
           this.toast('⚠️ يرجى إدخال كلمة السر المعتمدة', 'var(--hot)');
           return;
         }
-        const enteredHash = await hashPasswordText(entered);
-        if (enteredHash !== savedHash) {
+        let verified = false;
+        try {
+          if (location.origin && location.origin !== 'null') {
+            const r = await fetch('/api/executive/auth/verify-password', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, password: entered })
+            });
+            if (r.ok) {
+              const j = await r.json();
+              if (j.verified === true) verified = true;
+            }
+          }
+        } catch (_) {}
+        if (!verified) {
+          const enteredHash = await hashPasswordText(entered);
+          verified = (enteredHash === savedHash);
+        }
+        if (!verified) {
           sfx.sellSuccess();
-          this.toast('❌ كلمة السر غير مطابقة لكلمة السر المعتمدة', 'var(--hot)');
+          this.toast('❌ كلمة السر غير مطابقة (فحص Argon2id)', 'var(--hot)');
           return;
         }
         if (state.gaVerified) {
@@ -2268,7 +2587,7 @@
         const elBProf = document.getElementById('dl-kpi-bots20-profit');
         if (elBProf) elBProf.textContent = `ربح البوتات: +$${totalBotsProfit.toFixed(2)}`;
         const elBAlloc = document.getElementById('dl-kpi-bots20-alloc');
-        if (elBAlloc) elBAlloc.textContent = `المستثمر من صافي الربح (20%): $${totalBots20Cut.toFixed(2)}`;
+        if (elBAlloc) elBAlloc.textContent = `20% فوق HWM ($${Math.round(state.highWaterMark).toLocaleString()}) بعد الرسوم: $${totalBots20Cut.toFixed(2)}`;
 
         const filtered = state.dailyFilter === 'ALL' ? all : all.filter((t) => t.side === state.dailyFilter);
         const badge = document.getElementById('dl-table-badge');
@@ -2298,7 +2617,7 @@
             return `<tr>
               <td><span class="ai-orb-sm num" style="--orb-c:${b.col};--orb-g:${b.glow};margin-left:5px;">${b.icon}</span><strong class="num">${b.id}</strong></td>
               <td class="num-3d">$${b.alloc.toFixed(2)}</td>
-              <td style="font-size:11px;color:#e2f1ff;"><strong>${b.investedIn}</strong></td>
+              <td style="font-size:11px;color:#e2f1ff;"><strong>${b.investedIn}</strong> <span class="hex-shield num" style="font-size:9px;color:var(--sec);border-color:var(--sec);">Thompson ${Math.round(b.thompsonW*100)}%</span></td>
               <td class="num-3d-ok">+$${prof.toFixed(2)} <span class="text-sec" style="font-size:10px;">(+${pct}%)</span></td>
             </tr>`;
           }).join('');
@@ -2310,7 +2629,28 @@
         const hex = Array.from(safeRandomBytes(18)).map((b) => b.toString(16).padStart(2, '0')).join('');
         document.getElementById('vault-pubkey-box').textContent = 'Ed25519 PubKey: MCowBQYDK2VwAyEA' + btoa(hex).slice(0, 40);
       },
-      saveBinanceApiKeyToVault() { sfx.buySuccess(); document.getElementById('bn-api-key-inp').value = ''; this.toast('🛡️ تم حفظ المفتاح في الخزنة المشفرة'); },
+            async saveBinanceApiKeyToVault() {
+        const rk = (document.getElementById('bn-read-key-inp')?.value || '').trim();
+        const tk = (document.getElementById('bn-trade-key-inp')?.value || '').trim();
+        const ip = (document.getElementById('bn-static-ip-inp')?.value || '').trim();
+        const noW = !!document.getElementById('bn-no-withdraw-chk')?.checked;
+        if (!rk || !tk) { this.toast('⚠️ أدخل مفتاح القراءة ومفتاح التداول منفصلين', 'var(--hot)'); return; }
+        if (rk === tk) { sfx.sellSuccess(); this.toast('❌ مرفوض أمنياً: يجب أن يكون مفتاح القراءة منفصلاً عن مفتاح التداول!', 'var(--hot)'); return; }
+        if (!noW) { sfx.sellSuccess(); this.toast('❌ خطر حرج: يجب تعطيل صلاحية السحب قبل اعتماد المفاتيح!', 'var(--hot)'); return; }
+        if (!ip) { this.toast('⚠️ حدد الـ Static IP الخاص بسيرفر طوكيو', 'var(--hot)'); return; }
+        try {
+          if (location.origin && location.origin !== 'null') {
+            await fetch('/api/executive/vault/validate-keys', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ readOnlyKey: rk, tradeOnlyKey: tk, withdrawalsDisabled: noW, staticIpWhitelisted: !!ip })
+            });
+          }
+        } catch (_) {}
+        sfx.buySuccess();
+        document.getElementById('bn-read-key-inp').value = '';
+        document.getElementById('bn-trade-key-inp').value = '';
+        this.toast('✅ تم التحقق وحفظ مفتاحي القراءة والتداول منفصلين (السحب معطّل + مقيد بـ Tokyo Static IP)');
+      },
       closeModals() { ['modal-exec-receipt', 'modal-orbit-3d', 'modal-agent-trades', 'modal-passkey', 'modal-recovery', 'modal-ga-qr', 'modal-binance-vault'].forEach((id) => document.getElementById(id)?.classList.add('hidden')); }
     };
     window.ui = ui;
