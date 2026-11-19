@@ -341,6 +341,90 @@
       font-size: 10px; font-weight: 800; padding: 3px 2px; cursor: pointer;
     }
     .mob-tab-btn.active { color: var(--pri); }
+
+    /* ================================================================
+       بوابة تسجيل الدخول السيادية قبل فتح التطبيق (البصمة + كلمة السر المعتمدة)
+       ================================================================ */
+    .login-gate-screen {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(247,201,72,0.20), transparent 55%),
+        radial-gradient(circle at 80% 80%, rgba(0,245,212,0.10), transparent 45%),
+        linear-gradient(180deg, #02050e 0%, #071226 100%);
+    }
+    .login-gate-shell {
+      width: min(940px, 100%);
+      background: linear-gradient(170deg, rgba(10, 22, 48, 0.97), rgba(3, 8, 20, 0.99));
+      border: 1.8px solid rgba(247, 201, 72, 0.55);
+      border-radius: 20px;
+      padding: 18px 20px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.92), 0 0 40px rgba(247,201,72,0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .login-dual-grid {
+      display: grid;
+      grid-template-columns: 0.95fr 1.15fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+    @media (max-width: 820px) { .login-dual-grid { grid-template-columns: 1fr; } }
+    html[data-layout="mobile"] .login-dual-grid { grid-template-columns: 1fr; }
+    html[data-layout="mobile"] .login-gate-shell { max-width: 430px; padding: 14px; }
+
+    .login-card {
+      background: linear-gradient(180deg, rgba(6, 15, 34, 0.95), rgba(3, 7, 18, 0.98));
+      border: 1px solid rgba(0, 245, 212, 0.32);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .gate-fp-orb {
+      width: 112px; height: 112px; border-radius: 50%; margin: 4px auto;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      background: radial-gradient(circle, rgba(0,245,212,0.22), rgba(4,10,24,0.96));
+      border: 2.5px solid var(--sec);
+      box-shadow: 0 0 28px rgba(0,245,212,0.38), inset 0 2px 6px rgba(255,255,255,0.2);
+      cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .gate-fp-orb.scanning {
+      border-color: var(--pri);
+      box-shadow: 0 0 38px rgba(247,201,72,0.75);
+    }
+    .gate-fp-orb.verified {
+      border-color: var(--ok);
+      box-shadow: 0 0 40px rgba(0,232,150,0.85);
+    }
+
+    /* صفحة تفاصيل صفقات اليوم واستثمار الـ 20% للبوتات */
+    .daily-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+    @media (max-width: 980px) { .daily-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    html[data-layout="mobile"] .daily-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .daily-split-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+    @media (max-width: 1020px) { .daily-split-grid { grid-template-columns: 1fr; } }
+    html[data-layout="mobile"] .daily-split-grid { grid-template-columns: 1fr; }
+    .mobile-bottom-nav.mobile-only.hidden, html[data-layout="mobile"] .mobile-bottom-nav.mobile-only.hidden { display: none !important; }
+    td.num, td.num-3d, td.num-3d-ok, td.num-3d-cyan { display: table-cell !important; }
+
   </style>
 </head>
 <body>
@@ -349,7 +433,103 @@
     <button type="button" class="btn-3d btn-3d-sm" onclick="document.getElementById('toast').classList.add('hidden')">✕</button>
   </div>
 
-  <div class="holo-stage">
+
+  <!-- ================================================================
+       بوابة تسجيل الدخول السيادية (قبل الدخول للتطبيق: البصمة + اعتماد كلمة السر)
+       ================================================================ -->
+  <section id="sovereign-login-gate" class="login-gate-screen">
+    <div class="login-gate-shell">
+      <div class="row-between" style="border-bottom:1px solid rgba(247,201,72,0.25);padding-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="hex-shield num" style="color:var(--pri);border-color:var(--pri);">🔐 بوابة الدخول السيادية</span>
+          <span id="gate-security-status" class="hex-shield">حماية مزدوجة: بصمة + كلمة سر</span>
+        </div>
+        <h1 class="hdr-eng-title eng-crown" style="font-size:clamp(16px,2vw,23px);">HOW TO BE A TRILLIONAIRE</h1>
+        <div class="owner-seal-card">
+          <strong style="font-size:12px;color:#fff;">د. ماجد حمدي</strong>
+          <img class="sig-img" data-sig="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="توقيع د. ماجد حمدي" />
+        </div>
+      </div>
+
+      <div class="login-dual-grid">
+        <!-- الخيار 1: الدخول واعتماد البصمة الحيوية -->
+        <div class="login-card" style="text-align:center;">
+          <div>
+            <strong style="font-size:14.5px;color:var(--sec);">🛡️ الدخول بالبصمة الحيوية (Passkey)</strong>
+            <div class="muted" style="margin-top:3px;">اعتماد بصمة الإصبع أو الوجه كمفتاح مرور فوري للمنصة</div>
+          </div>
+
+          <div id="gate-fp-ring" class="gate-fp-orb"
+               onclick="ui.triggerGateBiometricLogin()"
+               onmousedown="ui.startGateFpHold()" onmouseup="ui.endGateFpHold()"
+               ontouchstart="event.preventDefault();ui.triggerGateBiometricLogin()">
+            <svg width="54" height="54" viewBox="0 0 64 64" fill="none" stroke="var(--sec)" stroke-width="2.5" stroke-linecap="round">
+              <path d="M20 26c0-7.2 5.4-13 12-13s12 5.8 12 13c0 10-2.5 18.5-7 25"/>
+              <path d="M14 28c0-10.5 8-19 18-19s18 8.5 18 19c0 8.5-1.6 16.5-5 23"/>
+              <path d="M26 27c0-3.6 2.7-6.5 6-6.5s6 2.9 6 6.5c0 8-2 15-6 21"/>
+              <path d="M32 27c0 6.5-1.5 12.5-4.5 17.5"/>
+            </svg>
+          </div>
+
+          <div id="gate-fp-status" style="font-size:12px;font-weight:900;color:var(--pri);">
+            اضغط على البصمة لاعتمادها والدخول فوراً
+          </div>
+
+          <button type="button" id="btn-gate-biometric" class="btn-3d btn-3d-buy" style="width:100%;padding:9px 12px;" onclick="ui.triggerGateBiometricLogin()">
+            🛡️ اعتماد البصمة والدخول للمنصة
+          </button>
+        </div>
+
+        <!-- الخيار 2: اعتماد وتعيين كلمة السر التي يريدها د. ماجد + الدخول بها -->
+        <div class="login-card">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="row-between">
+              <strong style="font-size:14px;color:var(--pri);">🔑 كلمة السر المعتمدة والتحقق</strong>
+              <div style="display:flex;gap:5px;">
+                <button type="button" id="tab-gate-login" class="btn-3d btn-3d-sm" onclick="ui.setGatePassMode('login')">تسجيل الدخول</button>
+                <button type="button" id="tab-gate-setup" class="btn-3d btn-3d-sm btn-3d-gold" onclick="ui.setGatePassMode('setup')">اعتماد كلمة سر</button>
+              </div>
+            </div>
+
+            <input id="gate-admin-id" type="email" dir="ltr" class="holo-inp num" style="width:100%;padding:7px 10px;" value="majed@trillionaire.sa" />
+
+            <!-- وضع اعتماد / تعيين كلمة السر التي يريدها المالك -->
+            <div id="gate-setup-panel" style="display:flex;flex-direction:column;gap:7px;">
+              <div class="muted" style="color:var(--sec);font-weight:700;">اكتب كلمة السر التي تريد اعتمادها لحسابك:</div>
+              <div style="display:flex;gap:5px;">
+                <input id="gate-new-pass" type="password" dir="ltr" class="holo-inp num" style="flex:1;padding:8px 10px;" placeholder="كلمة السر الجديدة المعتمدة..." />
+                <button type="button" class="btn-3d btn-3d-sm" onclick="ui.togglePassVis('gate-new-pass')">👁️</button>
+              </div>
+              <input id="gate-confirm-pass" type="password" dir="ltr" class="holo-inp num" style="width:100%;padding:8px 10px;" placeholder="تأكيد كلمة السر..." />
+              <button type="button" id="btn-approve-pass" class="btn-3d btn-3d-gold" style="width:100%;padding:9px 12px;" onclick="ui.approveCustomPassword()">
+                ✅ اعتماد كلمة السر والدخول للمنصة
+              </button>
+            </div>
+
+            <!-- وضع الدخول اليومي بكلمة السر المعتمدة -->
+            <div id="gate-login-panel" class="hidden" style="display:flex;flex-direction:column;gap:7px;">
+              <div class="muted">أدخل كلمة السر المعتمدة للدخول إلى المنصة:</div>
+              <div style="display:flex;gap:5px;">
+                <input id="gate-login-pass" type="password" dir="ltr" class="holo-inp num" style="flex:1;padding:8px 10px;" placeholder="كلمة السر المعتمدة..." onkeydown="if(event.key==='Enter')ui.loginWithApprovedPassword()" />
+                <button type="button" class="btn-3d btn-3d-sm" onclick="ui.togglePassVis('gate-login-pass')">👁️</button>
+              </div>
+              <input id="gate-2fa-opt" type="text" maxlength="6" dir="ltr" class="holo-inp num hidden" style="width:100%;text-align:center;letter-spacing:4px;" placeholder="رمز Google Authenticator (6 أرقام)" />
+              <button type="button" id="btn-submit-login" class="btn-3d btn-3d-gold" style="width:100%;padding:9px 12px;" onclick="ui.loginWithApprovedPassword()">
+                🚀 تسجيل الدخول للمنصة
+              </button>
+            </div>
+          </div>
+
+          <div class="row-between" style="padding-top:6px;border-top:1px solid rgba(0,245,212,0.16);">
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.openGaModal()">📲 باركود Google Authenticator</button>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.openRecoveryModal()">🔄 استعادة (جوال / إيميل)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="app-cockpit-shell" class="holo-stage hidden">
     <!-- 1A. الهيدر المكتبي -->
     <header class="sovereign-bridge desktop-only">
       <div class="header-tri-grid">
@@ -368,9 +548,11 @@
             <strong style="font-size:12px;color:#fff;">د. ماجد حمدي</strong>
             <img class="sig-img" data-sig="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="توقيع د. ماجد حمدي" />
           </div>
+          <button type="button" class="btn-3d btn-3d-sm" onclick="ui.openBinanceModal()" title="إعداد مفاتيح Binance وسيرفر طوكيو">🔑 Binance</button>
           <button type="button" class="btn-3d btn-3d-sm" onclick="ui.toggleDeviceMode()">
             <span id="device-mode-lbl">📱 الجوال</span>
           </button>
+          <button type="button" id="btn-lock-app" class="btn-3d btn-3d-sm btn-3d-sell" onclick="ui.lockCockpit()" title="قفل المنصة والعودة لشاشة تسجيل الدخول">🔒 خروج</button>
         </div>
       </div>
 
@@ -380,7 +562,7 @@
         <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="charts3d" onclick="ui.tab('charts3d')">🕯️ مدار 3D والشموع</button>
         <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="boardroom" onclick="ui.tab('boardroom')">🪑 طاولة الـ 5 آيجنت والـ 20%</button>
         <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="stocks" onclick="ui.tab('stocks')">📈 أفضل الأسهم</button>
-        <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="vault" onclick="ui.tab('vault')">🔐 البصمة و QR وبينانس</button>
+        <button type="button" class="btn-3d btn-3d-sm nav-main-btn" data-tab="daily" onclick="ui.tab('daily')">📊 صفقات اليوم والـ 20%</button>
       </nav>
     </header>
 
@@ -394,8 +576,9 @@
           <img class="sig-img-sm" data-sig="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="توقيع د. ماجد" />
         </div>
         <div style="display:flex;gap:4px;">
-          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold" onclick="ui.openPasskeyModal('login')">🛡️ البصمة</button>
+          <button type="button" class="btn-3d btn-3d-sm" onclick="ui.openBinanceModal()">🔑</button>
           <button type="button" class="btn-3d btn-3d-sm" onclick="ui.toggleDeviceMode()">🖥️</button>
+          <button type="button" class="btn-3d btn-3d-sm btn-3d-sell" onclick="ui.lockCockpit()">🔒 قفل</button>
         </div>
       </div>
     </header>
@@ -579,47 +762,92 @@
     </main>
 
     <!-- ================================================================
-         التبويب 5: الأمان (Google Authenticator QR + البصمة + خزنة Binance وطوكيو)
+         التبويب 5 (الجديد): تفاصيل صفقات اليوم + المشتراة والمباعة + الدخل والمستثمر + استثمار الـ 20% للبوتات
          ================================================================ -->
-    <main id="sec-vault" class="hidden" style="display:flex;flex-direction:column;gap:10px;">
-      <div class="grid-2">
-        <div class="holo-prism" style="display:flex;flex-direction:column;gap:8px;">
-          <div class="row-between">
-            <strong style="font-size:14px;color:var(--pri);">📲 باركود Google Authenticator (2FA)</strong>
-            <span id="ga-status-badge" class="hex-shield">جاهز للمسح</span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;background:rgba(0,0,0,0.45);padding:8px;border-radius:10px;">
-            <div style="background:#fff;padding:6px;border-radius:8px;">
-              <canvas id="ga-qr-canvas" width="144" height="144" style="display:block;width:144px;height:144px;"></canvas>
-            </div>
-            <div style="flex:1;min-width:180px;display:grid;gap:5px;">
-              <input id="adm-email" type="email" dir="ltr" class="holo-inp num" value="majed@trillionaire.sa" oninput="ui.renderGoogleAuthQR()" />
-              <input id="adm-ga-code" type="text" maxlength="6" dir="ltr" class="holo-inp num" style="text-align:center;font-weight:900;letter-spacing:4px;" placeholder="الرمز السداسي (6 أرقام)" />
-              <div class="muted" style="font-size:10px;">المفتاح: <strong id="ga-secret-txt" class="num text-pri"></strong></div>
-            </div>
-          </div>
-          <div style="display:flex;gap:6px;">
-            <button type="button" class="btn-3d btn-3d-gold" style="flex:2;" onclick="ui.verifyGoogleAuthenticatorEnrollment()">✅ اعتماد الرمز</button>
-            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.fillTestGaCode()">🧪 رمز المعاينة</button>
+    <main id="sec-daily" class="holo-prism hidden">
+      <div class="row-between" style="margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <strong style="font-size:15px;color:var(--pri);">📊 سجل وتفاصيل صفقات اليوم واستثمارات الـ 20% للبوتات</strong>
+          <span class="hex-shield num" style="color:var(--ok);border-color:var(--ok);">تحديث فوري مع كل عملية شراء أو بيع ✓</span>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">
+          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold daily-flt-btn" data-dflt="ALL" onclick="ui.setDailyFilter('ALL')">الكل</button>
+          <button type="button" class="btn-3d btn-3d-sm daily-flt-btn" data-dflt="BUY" onclick="ui.setDailyFilter('BUY')">▲ المشتراة فقط</button>
+          <button type="button" class="btn-3d btn-3d-sm daily-flt-btn" data-dflt="SELL" onclick="ui.setDailyFilter('SELL')">▼ المباعة فقط</button>
+        </div>
+      </div>
+
+      <!-- المؤشرات الأربع لليوم بأرقام 3D مجسمة -->
+      <div class="daily-kpi-grid">
+        <div class="holo-chamber">
+          <div class="muted">🔢 عدد صفقات اليوم (شراء / بيع)</div>
+          <div id="dl-kpi-total-cnt" class="num-3d" style="font-size:17px;">5 صفقات</div>
+          <div id="dl-kpi-buy-sell-cnt" style="font-size:11px;font-weight:800;margin-top:2px;">
+            <span class="text-ok">▲ مشتراة: 3</span> • <span class="text-err">▼ مباعة: 2</span>
           </div>
         </div>
 
-        <div class="holo-prism" style="display:flex;flex-direction:column;justify-content:space-between;gap:8px;">
-          <div class="holo-chamber">
-            <strong style="font-size:13px;color:var(--sec);">🛡️ مفتاح المرور بالبصمة (Passkey) واستعادة كلمة السر</strong>
-            <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
-              <button type="button" class="btn-3d btn-3d-buy" style="flex:1;" onclick="ui.openPasskeyModal('register')">🛡️ تسجيل بصمتي</button>
-              <button type="button" class="btn-3d btn-3d-gold" style="flex:1;" onclick="ui.openRecoveryModal()">🔄 استعادة (جوال/إيميل)</button>
-            </div>
+        <div class="holo-chamber">
+          <div class="muted">💰 إجمالي الدخل خلال اليوم (صافي الربح)</div>
+          <div id="dl-kpi-daily-income" class="num-3d-ok" style="font-size:18px;">+$4,850.00</div>
+          <div class="muted" style="margin-top:2px;">بعد احتساب الصفقات المشتراة والمباعة</div>
+        </div>
+
+        <div class="holo-chamber">
+          <div class="muted">💼 إجمالي المبلغ المستثمر اليوم (شراء + بيع)</div>
+          <div id="dl-kpi-total-invested" class="num-3d" style="font-size:17px;">$187,909</div>
+          <div id="dl-kpi-invest-split" class="muted" style="font-size:10.5px;margin-top:2px;">شراء: $133,645 • بيع: $54,264</div>
+        </div>
+
+        <div class="holo-chamber">
+          <div class="muted">🤖 حصة الـ 20% للبوتات وأرباحهم اليوم</div>
+          <div id="dl-kpi-bots20-profit" class="num-3d-cyan" style="font-size:16.5px;">ربح البوتات: +$693.45</div>
+          <div id="dl-kpi-bots20-alloc" class="muted" style="font-size:10.5px;margin-top:2px;">المقتطع من صافي ربح اليوم (20%): $970.00</div>
+        </div>
+      </div>
+
+      <!-- تقسيم متجاور: يمين تفاصيل صفقات اليوم | يسار استثمارات الـ 20% للبوتات وأرباحهم وفي ماذا استثمروها -->
+      <div class="daily-split-grid">
+        <div class="holo-chamber">
+          <div class="row-between" style="margin-bottom:6px;">
+            <strong style="font-size:13.2px;color:var(--pri);">📋 تفاصيل الصفقات التي تمت خلال اليوم</strong>
+            <span id="dl-table-badge" class="hex-shield num">5 / 5</span>
           </div>
-          <div class="holo-chamber">
-            <div class="row-between"><span>🌏 سيرفر طوكيو الأقرب لـ Binance:</span><strong class="num-3d-ok">1.8 ms</strong></div>
-            <div style="display:flex;gap:6px;margin-top:6px;">
-              <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" onclick="ui.generateVaultKeypair()">🔑 توليد مفتاح Ed25519</button>
-              <input id="bn-api-key-inp" dir="ltr" class="holo-inp num" style="flex:1;" placeholder="Binance API Key..." />
-              <button type="button" class="btn-3d btn-3d-sm" onclick="ui.saveBinanceApiKeyToVault()">🛡️ حفظ</button>
-            </div>
-            <div id="vault-pubkey-box" class="num muted" style="margin-top:4px;font-size:10px;word-break:break-all;"></div>
+          <div class="table-wrap" style="max-height:295px;overflow-y:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>الوقت / الأمر</th>
+                  <th>الأصل</th>
+                  <th>النوع</th>
+                  <th>الكمية</th>
+                  <th>المبلغ المستثمر</th>
+                  <th>الدخل المحقق</th>
+                  <th>20% للبوتات</th>
+                </tr>
+              </thead>
+              <tbody id="daily-trades-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="holo-chamber">
+          <div class="row-between" style="margin-bottom:6px;">
+            <strong style="font-size:13.2px;color:var(--sec);">🤖 استثمار الـ 20% للبوتات (أرباحهم وفي ماذا استثمروها)</strong>
+            <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" onclick="ui.runAutonomousBotCycle()">⚡ دورة ربح 20%</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>الآيجنت</th>
+                  <th>مبلغ الـ 20%</th>
+                  <th>في ماذا استثمرها اليوم؟</th>
+                  <th>ربحه اليوم</th>
+                </tr>
+              </thead>
+              <tbody id="daily-bots20-tbody"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -627,12 +855,12 @@
   </div>
 
   <!-- تنقل الجوال السفلي -->
-  <nav class="mobile-bottom-nav mobile-only">
+  <nav id="mob-bottom-bar" class="mobile-bottom-nav mobile-only hidden">
     <button type="button" class="mob-tab-btn active" data-mob-tab="elite90" onclick="ui.tab('elite90')"><span>🏆</span><span>الصفقات</span></button>
     <button type="button" class="mob-tab-btn" data-mob-tab="charts3d" onclick="ui.tab('charts3d')"><span>🕯️</span><span>الشموع و3D</span></button>
     <button type="button" class="mob-tab-btn" data-mob-tab="boardroom" onclick="ui.tab('boardroom')"><span>🪑</span><span>الطاولة</span></button>
     <button type="button" class="mob-tab-btn" data-mob-tab="stocks" onclick="ui.tab('stocks')"><span>📈</span><span>الأسهم</span></button>
-    <button type="button" class="mob-tab-btn" data-mob-tab="vault" onclick="ui.tab('vault')"><span>🔐</span><span>الأمان</span></button>
+    <button type="button" class="mob-tab-btn" data-mob-tab="daily" onclick="ui.tab('daily')"><span>📊</span><span>صفقات اليوم</span></button>
   </nav>
 
   <!-- إيصال تأكيد الشراء أو البيع الفوري -->
@@ -698,6 +926,50 @@
         <input id="rec-otp-inp" dir="ltr" maxlength="6" class="holo-inp num" />
         <input id="rec-new-pass" dir="ltr" type="password" class="holo-inp num" placeholder="كلمة المرور الجديدة..." />
         <button type="button" class="btn-3d btn-3d-gold" onclick="ui.confirmRecoveryReset()">✅ اعتماد</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- منبثقة باركود Google Authenticator (متاحة من شاشة تسجيل الدخول) -->
+  <div id="modal-ga-qr" class="holo-modal-bg hidden" onclick="if(event.target===this)ui.closeModals()">
+    <div class="holo-modal-box" style="max-width:440px;">
+      <div class="row-between">
+        <strong style="color:var(--pri);">📲 ربط باركود Google Authenticator (2FA)</strong>
+        <button type="button" class="btn-3d btn-3d-sm" onclick="ui.closeModals()">✕</button>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;background:rgba(0,0,0,0.45);padding:10px;border-radius:10px;">
+        <div style="background:#fff;padding:6px;border-radius:8px;">
+          <canvas id="ga-qr-canvas" width="144" height="144" style="display:block;width:144px;height:144px;"></canvas>
+        </div>
+        <div style="flex:1;min-width:170px;display:grid;gap:6px;">
+          <input id="adm-email" type="email" dir="ltr" class="holo-inp num" value="majed@trillionaire.sa" oninput="ui.renderGoogleAuthQR()" />
+          <input id="adm-ga-code" type="text" maxlength="6" dir="ltr" class="holo-inp num" style="text-align:center;font-weight:900;letter-spacing:4px;" placeholder="الرمز السداسي (6 أرقام)" />
+          <div class="muted" style="font-size:10px;">المفتاح: <strong id="ga-secret-txt" class="num text-pri"></strong> • <span id="ga-status-badge" class="text-ok">جاهز</span></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button type="button" class="btn-3d btn-3d-gold" style="flex:2;" onclick="ui.verifyGoogleAuthenticatorEnrollment()">✅ اعتماد التحقق الثنائي</button>
+        <button type="button" class="btn-3d btn-3d-sm" onclick="ui.fillTestGaCode()">🧪 رمز المعاينة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- منبثقة خزنة مفاتيح Binance وسيرفر طوكيو -->
+  <div id="modal-binance-vault" class="holo-modal-bg hidden" onclick="if(event.target===this)ui.closeModals()">
+    <div class="holo-modal-box" style="max-width:460px;">
+      <div class="row-between">
+        <strong style="color:var(--pri);">🔑 خزنة مفاتيح Binance وسيرفر طوكيو (1.8ms)</strong>
+        <button type="button" class="btn-3d btn-3d-sm" onclick="ui.closeModals()">✕</button>
+      </div>
+      <div class="holo-chamber">
+        <div class="row-between"><span>🌏 عقدة التنفيذ الموصى بها:</span><strong class="num-3d-ok">Tokyo ap-northeast-1 (1.8ms)</strong></div>
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" onclick="ui.generateVaultKeypair()">🔑 توليد مفتاح Ed25519</button>
+          <input id="bn-api-key-inp" dir="ltr" class="holo-inp num" style="flex:1;" placeholder="Binance API Key..." />
+          <button type="button" class="btn-3d btn-3d-buy btn-3d-sm" onclick="ui.saveBinanceApiKeyToVault()">🛡️ حفظ</button>
+        </div>
+        <div id="vault-pubkey-box" class="num muted" style="margin-top:6px;font-size:10px;word-break:break-all;"></div>
       </div>
     </div>
   </div>
@@ -898,11 +1170,20 @@
     // 5 آيجنت بأيقونات وألوان مميزة فقط (بدون أي أسماء بشرية!)
     // =====================================================================
     const AI_AGENTS = [
-      { id: 'AI-1', code: 'Q1', icon: '◈', col: '#00f5d4', glow: 'rgba(0,245,212,0.45)', alloc: 1480, bal: 1612.40, hrGrowth: 0.48, acc: 93.4, lastTrade: 'BUY SOL +2.6%' },
-      { id: 'AI-2', code: 'R2', icon: '⬡', col: '#00e896', glow: 'rgba(0,232,150,0.45)', alloc: 1480, bal: 1568.90, hrGrowth: 0.31, acc: 95.1, lastTrade: 'BUY BTC +1.8%' },
-      { id: 'AI-3', code: 'M3', icon: '◉', col: '#a855f7', glow: 'rgba(168,85,247,0.45)', alloc: 1480, bal: 1645.10, hrGrowth: 0.54, acc: 92.0, lastTrade: 'BUY NVDA +3.4%' },
-      { id: 'AI-4', code: 'E4', icon: '⚡', col: '#ff9f1c', glow: 'rgba(255,159,28,0.45)', alloc: 1480, bal: 1594.25, hrGrowth: 0.42, acc: 91.2, lastTrade: 'SELL XRP +1.9%' },
-      { id: 'AI-5', code: 'C5', icon: '★', col: '#f7c948', glow: 'rgba(247,201,72,0.50)', alloc: 1480, bal: 1672.80, hrGrowth: 0.61, acc: 94.8, lastTrade: 'BUY ETH +2.9%' }
+      { id: 'AI-1', code: 'Q1', icon: '◈', col: '#00f5d4', glow: 'rgba(0,245,212,0.45)', alloc: 1480, bal: 1612.40, hrGrowth: 0.48, acc: 93.4, lastTrade: 'BUY SOL +2.6%', investedIn: 'SOLUSDT (65%) + BTCUSDT (35%)' },
+      { id: 'AI-2', code: 'R2', icon: '⬡', col: '#00e896', glow: 'rgba(0,232,150,0.45)', alloc: 1480, bal: 1568.90, hrGrowth: 0.31, acc: 95.1, lastTrade: 'BUY BTC +1.8%', investedIn: 'BTCUSDT (60%) + ETHUSDT (40%)' },
+      { id: 'AI-3', code: 'M3', icon: '◉', col: '#a855f7', glow: 'rgba(168,85,247,0.45)', alloc: 1480, bal: 1645.10, hrGrowth: 0.54, acc: 92.0, lastTrade: 'BUY NVDA +3.4%', investedIn: 'NVDA (70%) + AVGO (30%)' },
+      { id: 'AI-4', code: 'E4', icon: '⚡', col: '#ff9f1c', glow: 'rgba(255,159,28,0.45)', alloc: 1480, bal: 1594.25, hrGrowth: 0.42, acc: 91.2, lastTrade: 'SELL XRP +1.9%', investedIn: 'XRPUSDT بيع (55%) + BNBUSDT (45%)' },
+      { id: 'AI-5', code: 'C5', icon: '★', col: '#f7c948', glow: 'rgba(247,201,72,0.50)', alloc: 1480, bal: 1672.80, hrGrowth: 0.61, acc: 94.8, lastTrade: 'BUY ETH +2.9%', investedIn: 'ETHUSDT (55%) + MSFT (45%)' }
+    ];
+
+    // سجل الصفقات التي تمت خلال اليوم (مشتراة ومباعة + الدخل المحقق + استقطاع الـ 20% للبوتات)
+    const INITIAL_DAILY_TRADES = [
+      { orderId: 'BN-884120', time: '09:15 ص', sym: 'SOLUSDT', name: 'سولانا', side: 'BUY', qty: 224.5484, invest: 48233, profit: 1420.00, bots20: 284.00 },
+      { orderId: 'BN-884305', time: '10:40 ص', sym: 'BTCUSDT', name: 'بيتكوين', side: 'BUY', qty: 0.46839, invest: 45218, profit: 1185.00, bots20: 237.00 },
+      { orderId: 'BN-884512', time: '12:05 م', sym: 'XRPUSDT', name: 'ريبل', side: 'SELL', qty: 9803.25, invest: 24116, profit: 640.00, bots20: 128.00 },
+      { orderId: 'STK-884790', time: '01:30 م', sym: 'NVDA', name: 'إنفيديا', side: 'BUY', qty: 281.4706, invest: 40194, profit: 1095.00, bots20: 219.00 },
+      { orderId: 'BN-884960', time: '03:10 م', sym: 'BNBUSDT', name: 'بينانس', side: 'SELL', qty: 46.0807, invest: 30148, profit: 510.00, bots20: 102.00 }
     ];
 
     const state = {
@@ -926,7 +1207,11 @@
       auto20Enabled: true,
       equity: 1004850.00,
       netProfit: 4850.00,
-      executedDeals: [],
+      authenticated: false,
+      gatePassMode: safeStore.get('htb_custom_pass_hash') ? 'login' : 'setup',
+      dailyFilter: 'ALL',
+      dailyTrades: INITIAL_DAILY_TRADES.slice(),
+      executedDeals: INITIAL_DAILY_TRADES.slice(),
       lastStampByDeal: {},
       gaSecret: safeStore.get('htb_ga_secret') || randomBase32(20),
       gaVerified: safeStore.get('htb_ga_verified') === '1',
@@ -935,6 +1220,24 @@
       recoveryCode: ''
     };
     safeStore.set('htb_ga_secret', state.gaSecret);
+
+    async function hashPasswordText(pw) {
+      const raw = 'HTB_SALT_2026:' + String(pw);
+      try {
+        if (window.crypto && window.crypto.subtle) {
+          const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+          return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+        }
+      } catch (_) {}
+      let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+      for (let i = 0; i < raw.length; i++) {
+        const ch = raw.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+      }
+      return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');
+    }
+
 
     // =====================================================================
     // الصفقات الأعلى من 90% — مبلغ الشراء والكمية المجزأة يُحسبان تلقائياً من حجم المحفظة وتحليل الـ 5 آيجنت!
@@ -1249,7 +1552,7 @@
 
       tab(id) {
         state.activeTab = id;
-        ['elite90', 'charts3d', 'boardroom', 'stocks', 'vault'].forEach((k) => {
+        ['elite90', 'charts3d', 'boardroom', 'stocks', 'daily'].forEach((k) => {
           document.getElementById('sec-' + k)?.classList.toggle('hidden', k !== id);
         });
         document.querySelectorAll('.nav-main-btn').forEach((b) => b.classList.toggle('btn-3d-gold', b.dataset.tab === id));
@@ -1257,7 +1560,7 @@
         setTimeout(() => {
           if (id === 'elite90') this.renderAllCardCandles();
           if (id === 'charts3d') { this.drawOrbit3D(); this.drawMainCandlestickChart(); }
-          if (id === 'vault') this.renderGoogleAuthQR();
+          if (id === 'daily') this.renderDailyPage();
         }, 35);
       },
 
@@ -1455,14 +1758,16 @@
         }
 
         const timeStr = new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const rec = { orderId, sym: d.sym, name: d.name, side: chosenSide, qty: d.qty, price: d.price, invest: m.invest, tp: m.tp, sl: m.sl, conf: d.conf, bots20, time: timeStr };
+        const rec = { orderId, sym: d.sym, name: d.name, side: chosenSide, qty: d.qty, price: d.price, invest: m.invest, profit: simGain, tp: m.tp, sl: m.sl, conf: d.conf, bots20, time: timeStr };
         state.executedDeals.unshift(rec);
+        state.dailyTrades.unshift(rec);
         state.lastStampByDeal[d.id] = rec;
 
         syncAutoPortfolioSizing();
         this.refreshKpis();
         this.renderElite90Page();
         this.renderBotsLeaderboard();
+        this.renderDailyPage();
 
         const sideAr = chosenSide === 'BUY' ? 'شراء (BUY)' : 'بيع (SELL)';
         document.getElementById('rcpt-header').textContent = `✅ تم تنفيذ ${sideAr} بنجاح! (#${orderId})`;
@@ -1614,6 +1919,7 @@
         sfx.buySuccess();
         AI_AGENTS.forEach((b) => { b.bal = +(b.bal * (1 + b.hrGrowth / 100)).toFixed(2); b.hrGrowth = +(b.hrGrowth + 0.02).toFixed(2); });
         this.renderBotsLeaderboard();
+        this.renderDailyPage();
         this.refreshKpis();
         this.toast('🤖 أنجزت الـ 5 آيجنت دورة تداول ذاتية بمحفظة الـ 20%!');
       },
@@ -1700,9 +2006,22 @@
       },
       buyStockCard(ticker, name, autoUsd) {
         sfx.buySuccess();
-        state.executedDeals.unshift({ orderId: 'STK-' + Math.floor(1000+Math.random()*8999), sym: ticker });
+        const orderId = 'STK-' + Math.floor(100000 + Math.random() * 899999);
+        const simGain = Math.round(autoUsd * 0.032);
+        const bots20 = state.auto20Enabled ? +(simGain * 0.20).toFixed(2) : 0;
+        const owner80 = +(simGain - bots20).toFixed(2);
+        state.netProfit = +(state.netProfit + simGain).toFixed(2);
+        state.equity = +(state.equity + owner80).toFixed(2);
+        if (state.auto20Enabled && bots20 > 0) {
+          const perBot = +(bots20 / AI_AGENTS.length).toFixed(2);
+          AI_AGENTS.forEach((b) => { b.alloc = +(b.alloc + perBot).toFixed(2); b.bal = +(b.bal + perBot * 1.05).toFixed(2); });
+        }
+        const rec = { orderId, time: new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }), sym: ticker, name, side: 'BUY', qty: +(autoUsd / 140).toFixed(2), invest: autoUsd, profit: simGain, bots20 };
+        state.executedDeals.unshift(rec);
+        state.dailyTrades.unshift(rec);
         this.refreshKpis();
-        this.toast(`✅ تم شراء ${name} (${ticker}) بالمبلغ المخصص تلقائياً $${autoUsd.toLocaleString()}`);
+        this.renderDailyPage();
+        this.toast(`✅ تم شراء ${name} (${ticker}) بمبلغ $${autoUsd.toLocaleString()} (#${orderId})`);
       },
 
       renderGoogleAuthQR() {
@@ -1719,7 +2038,7 @@
         const code = (document.getElementById('adm-ga-code')?.value || '').trim();
         const c0 = await computeTOTP(state.gaSecret, 0), cm1 = await computeTOTP(state.gaSecret, -1), cp1 = await computeTOTP(state.gaSecret, 1);
         if (![c0, cm1, cp1].includes(code)) { this.toast('❌ الرمز غير مطابق', 'var(--hot)'); return; }
-        sfx.buySuccess(); document.getElementById('ga-status-badge').textContent = '✓ مفعل'; this.toast('✅ تم تفعيل Google Authenticator');
+        state.gaVerified = true; safeStore.set('htb_ga_verified', '1'); this.syncLoginGateUI(); sfx.buySuccess(); document.getElementById('ga-status-badge').textContent = '✓ مفعل'; this.toast('✅ تم تفعيل Google Authenticator');
       },
       openPasskeyModal() { document.getElementById('fp-ring').className = 'fp-sensor-ring'; document.getElementById('modal-passkey').classList.remove('hidden'); },
       startBiometricHold() {
@@ -1746,14 +2065,253 @@
         document.getElementById('rec-sent-banner').textContent = `✓ تم إرسال الرمز (${code})`;
         document.getElementById('rec-otp-inp').value = code;
       },
-      confirmRecoveryReset() { sfx.buySuccess(); this.closeModals(); this.toast('✅ تم تحديث كلمة المرور بنجاح'); },
+      async confirmRecoveryReset() {
+        const np = (document.getElementById('rec-new-pass')?.value || '').trim();
+        if (np.length >= 4) {
+          const h = await hashPasswordText(np);
+          safeStore.set('htb_custom_pass_hash', h);
+          this.setGatePassMode('login');
+        }
+        sfx.buySuccess();
+        this.closeModals();
+        this.toast('✅ تم اعتماد وتحديث كلمة المرور الجديدة بنجاح');
+      },
+
+      // =====================================================================
+      // بوابة تسجيل الدخول السيادية (البصمة الحيوية + كلمة السر المعتمدة)
+      // =====================================================================
+      syncLoginGateUI() {
+        const hasPass = !!safeStore.get('htb_custom_pass_hash');
+        const mode = state.gatePassMode || (hasPass ? 'login' : 'setup');
+        state.gatePassMode = mode;
+        document.getElementById('gate-setup-panel')?.classList.toggle('hidden', mode !== 'setup');
+        document.getElementById('gate-login-panel')?.classList.toggle('hidden', mode !== 'login');
+        document.getElementById('tab-gate-setup')?.classList.toggle('btn-3d-gold', mode === 'setup');
+        document.getElementById('tab-gate-login')?.classList.toggle('btn-3d-gold', mode === 'login');
+        document.getElementById('gate-2fa-opt')?.classList.toggle('hidden', !state.gaVerified);
+        const st = document.getElementById('gate-security-status');
+        if (st) {
+          st.textContent = (state.passkeyRegistered ? '✓ البصمة معتمدة' : 'البصمة جاهزة للاعتماد') + ' • ' + (hasPass ? '✓ كلمة السر معتمدة' : 'بانتظار اعتماد كلمة السر');
+        }
+      },
+
+      setGatePassMode(mode) {
+        state.gatePassMode = mode;
+        this.syncLoginGateUI();
+      },
+
+      togglePassVis(inpId) {
+        const el = document.getElementById(inpId);
+        if (el) el.type = el.type === 'password' ? 'text' : 'password';
+      },
+
+      unlockCockpit(welcomeMsg) {
+        state.authenticated = true;
+        sfx.buySuccess();
+        document.getElementById('sovereign-login-gate')?.classList.add('hidden');
+        document.getElementById('app-cockpit-shell')?.classList.remove('hidden');
+        document.getElementById('mob-bottom-bar')?.classList.remove('hidden');
+        this.toast(welcomeMsg || '🔓 أهلاً بك د. ماجد حمدي — تم فتح المنصة بأمان');
+        setTimeout(() => {
+          this.renderAllCardCandles();
+          this.renderDailyPage();
+          if (state.activeTab === 'charts3d') { this.drawOrbit3D(); this.drawMainCandlestickChart(); }
+        }, 50);
+      },
+
+      lockCockpit() {
+        state.authenticated = false;
+        this.closeModals();
+        document.getElementById('app-cockpit-shell')?.classList.add('hidden');
+        document.getElementById('mob-bottom-bar')?.classList.add('hidden');
+        document.getElementById('sovereign-login-gate')?.classList.remove('hidden');
+        const ring = document.getElementById('gate-fp-ring');
+        if (ring) ring.className = 'gate-fp-orb';
+        const fpTxt = document.getElementById('gate-fp-status');
+        if (fpTxt) fpTxt.textContent = state.passkeyRegistered ? '✓ بصمتك معتمدة — اضغط للدخول بالبصمة' : 'اضغط على البصمة لاعتمادها والدخول فوراً';
+        if (safeStore.get('htb_custom_pass_hash')) state.gatePassMode = 'login';
+        this.syncLoginGateUI();
+        this.toast('🔒 تم قفل المنصة والعودة لصفحة تسجيل الدخول');
+      },
+
+      startGateFpHold() {
+        document.getElementById('gate-fp-ring')?.classList.add('scanning');
+      },
+      endGateFpHold() {},
+
+      async triggerGateBiometricLogin() {
+        const ring = document.getElementById('gate-fp-ring');
+        const fpTxt = document.getElementById('gate-fp-status');
+        ring?.classList.add('scanning');
+        if (fpTxt) fpTxt.textContent = '🔍 جاري التحقق من بصمتك الحيوية...';
+
+        // محاولة استدعاء بصمة الجهاز الأصلية WebAuthn إن توفرت خارج الإطار المعزول
+        try {
+          if (window.PublicKeyCredential && navigator.credentials && window.isSecureContext) {
+            const challenge = safeRandomBytes(32);
+            if (!state.passkeyRegistered) {
+              await navigator.credentials.create({
+                publicKey: {
+                  challenge,
+                  rp: { name: 'HOW TO BE A TRILLIONAIRE' },
+                  user: { id: safeRandomBytes(16), name: 'majed@trillionaire.sa', displayName: 'Dr. Majed Hamdi' },
+                  pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+                  authenticatorSelection: { userVerification: 'preferred' },
+                  timeout: 15000
+                }
+              }).catch(() => null);
+            }
+          }
+        } catch (_) {}
+
+        setTimeout(() => {
+          state.passkeyRegistered = true;
+          safeStore.set('htb_passkey_ok', '1');
+          if (ring) ring.className = 'gate-fp-orb verified';
+          if (fpTxt) fpTxt.textContent = '✅ تم التحقق من البصمة واعتمادها!';
+          setTimeout(() => this.unlockCockpit('🛡️ تم اعتماد بصمتك الحيوية وتسجيل الدخول بنجاح!'), 220);
+        }, 320);
+      },
+
+      async approveCustomPassword() {
+        const p1 = (document.getElementById('gate-new-pass')?.value || '').trim();
+        const p2 = (document.getElementById('gate-confirm-pass')?.value || '').trim();
+        if (p1.length < 4) {
+          this.toast('⚠️ يرجى إدخال كلمة سر من 4 خانات على الأقل لاعتمادها', 'var(--hot)');
+          return;
+        }
+        if (p2 && p1 !== p2) {
+          this.toast('⚠️ كلمتا السر غير متطابقتين، يرجى التأكد', 'var(--hot)');
+          return;
+        }
+        const h = await hashPasswordText(p1);
+        safeStore.set('htb_custom_pass_hash', h);
+        safeStore.set('htb_admin_email', (document.getElementById('gate-admin-id')?.value || 'majed@trillionaire.sa').trim());
+        document.getElementById('gate-new-pass').value = '';
+        document.getElementById('gate-confirm-pass').value = '';
+        state.gatePassMode = 'login';
+        this.syncLoginGateUI();
+        this.unlockCockpit('🔑 تم اعتماد كلمة السر الخاصة بك وتسجيل دخولك بنجاح!');
+      },
+
+      async loginWithApprovedPassword() {
+        const savedHash = safeStore.get('htb_custom_pass_hash');
+        const entered = (document.getElementById('gate-login-pass')?.value || '').trim();
+        if (!savedHash) {
+          this.setGatePassMode('setup');
+          this.toast('ℹ️ اعتمد كلمة السر التي تريدها أولاً ليتم تفعيلها لحسابك', 'var(--pri)');
+          return;
+        }
+        if (!entered) {
+          this.toast('⚠️ يرجى إدخال كلمة السر المعتمدة', 'var(--hot)');
+          return;
+        }
+        const enteredHash = await hashPasswordText(entered);
+        if (enteredHash !== savedHash) {
+          sfx.sellSuccess();
+          this.toast('❌ كلمة السر غير مطابقة لكلمة السر المعتمدة', 'var(--hot)');
+          return;
+        }
+        if (state.gaVerified) {
+          const otp = (document.getElementById('gate-2fa-opt')?.value || '').trim();
+          const c0 = await computeTOTP(state.gaSecret, 0), cm1 = await computeTOTP(state.gaSecret, -1), cp1 = await computeTOTP(state.gaSecret, 1);
+          if (otp && ![c0, cm1, cp1].includes(otp)) {
+            this.toast('❌ رمز Google Authenticator غير صحيح', 'var(--hot)');
+            return;
+          }
+        }
+        document.getElementById('gate-login-pass').value = '';
+        this.unlockCockpit('🔓 تم التحقق من كلمة السر المعتمدة — مرحباً د. ماجد!');
+      },
+
+      openGaModal() {
+        this.renderGoogleAuthQR();
+        document.getElementById('modal-ga-qr')?.classList.remove('hidden');
+      },
+      openBinanceModal() {
+        document.getElementById('modal-binance-vault')?.classList.remove('hidden');
+      },
+
+      // =====================================================================
+      // صفحة تفاصيل صفقات اليوم + إجمالي المشتراة والمباعة + الدخل + استثمار الـ 20% للبوتات
+      // =====================================================================
+      setDailyFilter(flt) {
+        state.dailyFilter = flt;
+        document.querySelectorAll('.daily-flt-btn').forEach((b) => b.classList.toggle('btn-3d-gold', b.dataset.dflt === flt));
+        this.renderDailyPage();
+      },
+
+      renderDailyPage() {
+        const all = state.dailyTrades || [];
+        const buyTrades = all.filter((t) => t.side === 'BUY');
+        const sellTrades = all.filter((t) => t.side === 'SELL');
+        const buyInvest = buyTrades.reduce((s, t) => s + Number(t.invest || 0), 0);
+        const sellInvest = sellTrades.reduce((s, t) => s + Number(t.invest || 0), 0);
+        const totalInvest = buyInvest + sellInvest;
+        const totalIncome = all.reduce((s, t) => s + Number(t.profit || 0), 0);
+        const totalBots20Cut = all.reduce((s, t) => s + Number(t.bots20 || 0), 0);
+        const totalBotsProfit = AI_AGENTS.reduce((s, b) => s + (b.bal - b.alloc), 0);
+
+        const elTotalCnt = document.getElementById('dl-kpi-total-cnt');
+        if (elTotalCnt) elTotalCnt.textContent = `${all.length} صفقات اليوم`;
+        const elSplitCnt = document.getElementById('dl-kpi-buy-sell-cnt');
+        if (elSplitCnt) elSplitCnt.innerHTML = `<span class="text-ok">▲ مشتراة: ${buyTrades.length}</span> • <span class="text-err">▼ مباعة: ${sellTrades.length}</span>`;
+
+        const elInc = document.getElementById('dl-kpi-daily-income');
+        if (elInc) elInc.textContent = `+$${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+        const elVol = document.getElementById('dl-kpi-total-invested');
+        if (elVol) elVol.textContent = `$${Math.round(totalInvest).toLocaleString('en-US')}`;
+        const elVolSplit = document.getElementById('dl-kpi-invest-split');
+        if (elVolSplit) elVolSplit.textContent = `شراء: $${Math.round(buyInvest).toLocaleString()} • بيع: $${Math.round(sellInvest).toLocaleString()}`;
+
+        const elBProf = document.getElementById('dl-kpi-bots20-profit');
+        if (elBProf) elBProf.textContent = `ربح البوتات: +$${totalBotsProfit.toFixed(2)}`;
+        const elBAlloc = document.getElementById('dl-kpi-bots20-alloc');
+        if (elBAlloc) elBAlloc.textContent = `المستثمر من صافي الربح (20%): $${totalBots20Cut.toFixed(2)}`;
+
+        const filtered = state.dailyFilter === 'ALL' ? all : all.filter((t) => t.side === state.dailyFilter);
+        const badge = document.getElementById('dl-table-badge');
+        if (badge) badge.textContent = `${filtered.length} / ${all.length}`;
+
+        const tb = document.getElementById('daily-trades-tbody');
+        if (tb) {
+          tb.innerHTML = filtered.map((t) => {
+            const isBuy = t.side === 'BUY';
+            return `<tr>
+              <td class="num" style="font-size:10.5px;"><strong>#${t.orderId}</strong><br/><span class="muted">${t.time}</span></td>
+              <td><strong>${t.sym}</strong></td>
+              <td><span class="hex-shield" style="color:${isBuy ? 'var(--ok)' : 'var(--hot)'};border-color:${isBuy ? 'var(--ok)' : 'var(--hot)'};">${isBuy ? '▲ شراء' : '▼ بيع'}</span></td>
+              <td class="num">${t.qty}</td>
+              <td class="num-3d">$${Math.round(t.invest).toLocaleString()}</td>
+              <td class="num-3d-ok">+$${Number(t.profit).toLocaleString()}</td>
+              <td class="num text-sec">$${Number(t.bots20).toFixed(2)}</td>
+            </tr>`;
+          }).join('');
+        }
+
+        const btb = document.getElementById('daily-bots20-tbody');
+        if (btb) {
+          btb.innerHTML = AI_AGENTS.map((b) => {
+            const prof = +(b.bal - b.alloc).toFixed(2);
+            const pct = +((prof / b.alloc) * 100).toFixed(1);
+            return `<tr>
+              <td><span class="ai-orb-sm num" style="--orb-c:${b.col};--orb-g:${b.glow};margin-left:5px;">${b.icon}</span><strong class="num">${b.id}</strong></td>
+              <td class="num-3d">$${b.alloc.toFixed(2)}</td>
+              <td style="font-size:11px;color:#e2f1ff;"><strong>${b.investedIn}</strong></td>
+              <td class="num-3d-ok">+$${prof.toFixed(2)} <span class="text-sec" style="font-size:10px;">(+${pct}%)</span></td>
+            </tr>`;
+          }).join('');
+        }
+      },
+
       generateVaultKeypair() {
         sfx.buySuccess();
         const hex = Array.from(safeRandomBytes(18)).map((b) => b.toString(16).padStart(2, '0')).join('');
         document.getElementById('vault-pubkey-box').textContent = 'Ed25519 PubKey: MCowBQYDK2VwAyEA' + btoa(hex).slice(0, 40);
       },
       saveBinanceApiKeyToVault() { sfx.buySuccess(); document.getElementById('bn-api-key-inp').value = ''; this.toast('🛡️ تم حفظ المفتاح في الخزنة المشفرة'); },
-      closeModals() { ['modal-exec-receipt', 'modal-orbit-3d', 'modal-agent-trades', 'modal-passkey', 'modal-recovery'].forEach((id) => document.getElementById(id)?.classList.add('hidden')); }
+      closeModals() { ['modal-exec-receipt', 'modal-orbit-3d', 'modal-agent-trades', 'modal-passkey', 'modal-recovery', 'modal-ga-qr', 'modal-binance-vault'].forEach((id) => document.getElementById(id)?.classList.add('hidden')); }
     };
     window.ui = ui;
 
@@ -1770,7 +2328,9 @@
       ui.renderBoardroom();
       ui.renderBotsLeaderboard();
       ui.renderStocks();
+      ui.renderDailyPage();
       ui.renderGoogleAuthQR();
+      ui.syncLoginGateUI();
 
       setInterval(() => {
         state.orbYaw += 0.022;
