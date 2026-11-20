@@ -29,17 +29,111 @@
       --hot: #ff3868;
       --txt-1: #f8fbff;
       --txt-2: #b4cae8;
+      --bg-top: #030611;
+      --bg-bot: #071022;
+      --bg-glow: rgba(247, 201, 72, 0.16);
+      --bg-glow-2: rgba(0, 245, 212, 0.08);
+      --panel-bg-1: rgba(11, 24, 50, 0.94);
+      --panel-bg-2: rgba(4, 10, 24, 0.98);
+      --chamber-bg-1: rgba(5, 12, 26, 0.92);
+      --chamber-bg-2: rgba(2, 6, 16, 0.96);
+      --border-pri: rgba(247, 201, 72, 0.48);
+      --border-sec: rgba(0, 245, 212, 0.34);
+    }
+    html[data-theme="gold"] {
+      --pri: #f7c948; --sec: #00f5d4; --ok: #00e896;
+      --bg-top: #050814; --bg-bot: #0c1428;
+      --bg-glow: rgba(247, 201, 72, 0.24); --bg-glow-2: rgba(0, 245, 212, 0.10);
+      --panel-bg-1: rgba(18, 28, 54, 0.95); --panel-bg-2: rgba(7, 12, 26, 0.98);
+      --chamber-bg-1: rgba(10, 16, 34, 0.94); --chamber-bg-2: rgba(4, 8, 18, 0.97);
+      --border-pri: rgba(247, 201, 72, 0.62); --border-sec: rgba(0, 245, 212, 0.36);
+    }
+    html[data-theme="cyan"] {
+      --pri: #38bdf8; --sec: #00f5d4; --ok: #34d399;
+      --bg-top: #011424; --bg-bot: #042942;
+      --bg-glow: rgba(56, 189, 248, 0.32); --bg-glow-2: rgba(0, 245, 212, 0.18);
+      --panel-bg-1: rgba(6, 38, 66, 0.94); --panel-bg-2: rgba(2, 20, 38, 0.98);
+      --chamber-bg-1: rgba(4, 28, 52, 0.94); --chamber-bg-2: rgba(2, 15, 30, 0.97);
+      --border-pri: rgba(56, 189, 248, 0.68); --border-sec: rgba(0, 245, 212, 0.50);
+    }
+    html[data-theme="emerald"] {
+      --pri: #10b981; --sec: #f7c948; --ok: #34d399;
+      --bg-top: #011a11; --bg-bot: #043322;
+      --bg-glow: rgba(16, 185, 129, 0.32); --bg-glow-2: rgba(247, 201, 72, 0.16);
+      --panel-bg-1: rgba(5, 46, 32, 0.94); --panel-bg-2: rgba(2, 24, 17, 0.98);
+      --chamber-bg-1: rgba(4, 34, 24, 0.94); --chamber-bg-2: rgba(2, 18, 12, 0.97);
+      --border-pri: rgba(16, 185, 129, 0.68); --border-sec: rgba(247, 201, 72, 0.45);
+    }
+    html[data-theme="amethyst"] {
+      --pri: #c084fc; --sec: #38bdf8; --ok: #00e896;
+      --bg-top: #130526; --bg-bot: #260b47;
+      --bg-glow: rgba(192, 132, 252, 0.34); --bg-glow-2: rgba(56, 189, 248, 0.18);
+      --panel-bg-1: rgba(38, 14, 72, 0.94); --panel-bg-2: rgba(18, 6, 38, 0.98);
+      --chamber-bg-1: rgba(28, 10, 56, 0.94); --chamber-bg-2: rgba(13, 4, 28, 0.97);
+      --border-pri: rgba(192, 132, 252, 0.72); --border-sec: rgba(56, 189, 248, 0.48);
+    }
+    html[data-theme="crimson"] {
+      --pri: #fb7185; --sec: #fbbf24; --ok: #34d399;
+      --bg-top: #1f040d; --bg-bot: #3d091b;
+      --bg-glow: rgba(251, 113, 133, 0.34); --bg-glow-2: rgba(251, 191, 36, 0.18);
+      --panel-bg-1: rgba(64, 12, 30, 0.94); --panel-bg-2: rgba(30, 5, 14, 0.98);
+      --chamber-bg-1: rgba(48, 8, 22, 0.94); --chamber-bg-2: rgba(22, 3, 10, 0.97);
+      --border-pri: rgba(251, 113, 133, 0.72); --border-sec: rgba(251, 191, 36, 0.48);
+    }
+    html[data-theme="arctic"] {
+      --pri: #e2e8f0; --sec: #38bdf8; --ok: #2dd4bf;
+      --bg-top: #0f1c2e; --bg-bot: #1f3552;
+      --bg-glow: rgba(226, 232, 240, 0.28); --bg-glow-2: rgba(56, 189, 248, 0.22);
+      --panel-bg-1: rgba(30, 52, 82, 0.94); --panel-bg-2: rgba(15, 28, 48, 0.98);
+      --chamber-bg-1: rgba(22, 40, 66, 0.94); --chamber-bg-2: rgba(12, 22, 38, 0.97);
+      --border-pri: rgba(226, 232, 240, 0.65); --border-sec: rgba(56, 189, 248, 0.55);
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
       margin: 0; padding: 0; min-height: 100dvh;
       background:
-        radial-gradient(ellipse at 50% -8%, rgba(247,201,72,0.15), transparent 50%),
-        linear-gradient(180deg, #030611 0%, #071022 100%);
+        radial-gradient(ellipse at 50% -8%, var(--bg-glow), transparent 55%),
+        radial-gradient(ellipse at 12% 88%, var(--bg-glow-2), transparent 50%),
+        linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bot) 100%);
       color: var(--txt-1);
       font-family: Cairo, Tajawal, sans-serif;
       overflow-x: hidden;
+      transition: background 0.35s ease;
     }
+    .sovereign-bridge, .mob-bridge, .holo-prism, .holo-modal-box {
+      background: linear-gradient(165deg, var(--panel-bg-1), var(--panel-bg-2)) !important;
+      border-color: var(--border-pri) !important;
+      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .holo-chamber, .lux-side-deal-card, .centered-stat-box, .basis-pillar-card {
+      background: linear-gradient(180deg, var(--chamber-bg-1), var(--chamber-bg-2)) !important;
+      border-color: var(--border-sec) !important;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+    .val-gold, .num-3d { color: var(--pri) !important; }
+    .theme-btn-active {
+      outline: 2px solid var(--pri) !important;
+      box-shadow: 0 0 18px var(--border-pri) !important;
+      transform: scale(1.03);
+    }
+    .admin-amt-wrap {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(0,0,0,0.42); padding: 3px 5px; border-radius: 9px;
+      border: 1px solid var(--border-pri);
+    }
+    .admin-amt-inp {
+      width: 82px; text-align: center; padding: 3px 4px; border-radius: 6px;
+      background: rgba(4,10,24,0.92); color: var(--pri); border: 1px solid var(--border-sec);
+      font-weight: 900; font-size: 12px; font-family: Cairo, Tajawal, sans-serif;
+      direction: ltr;
+    }
+    .admin-amt-btn {
+      width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--border-pri);
+      background: rgba(255,255,255,0.08); color: #fff; font-weight: 900; font-size: 13px;
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+      line-height: 1; padding: 0;
+    }
+    .admin-amt-btn:hover { background: var(--pri); color: #050a18; }
     .hidden { display: none !important; }
     .text-pri { color: var(--pri); }
     .text-sec { color: var(--sec); }
@@ -1490,7 +1584,7 @@
       <button type="button" class="btn-3d btn-3d-sm btn-3d-gold mob-sub-btn" data-subtab="elite90" style="flex:1;" onclick="ui.tab('elite90')">🏛️ <span dir="ltr">&ge;75%</span></button>
       <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="charts3d" style="flex:1;" onclick="ui.tab('charts3d')">🕯️ 3D</button>
       <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="stocks" style="flex:1;" onclick="ui.tab('stocks')">📈 الأسهم</button>
-      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="testnet14" style="flex:1;" onclick="ui.tab('testnet14')">🧪 المعايرة 14d</button>
+      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="testnet14" style="flex:1;" onclick="ui.tab('testnet14')">🧪 المعايرة 28/11</button>
     </div>
 
     <!-- 2A. لوحة المؤشرات المتمركزة (عناوين وأرقام بألوان متمايزة وخط القاهرة) + منصة الوكيل المتحدث «ترليورين» -->
@@ -2103,26 +2197,26 @@
 
 
     <!-- ================================================================
-         الصفحة 7 (التشغيل التجريبي): 14 يوماً على Binance Spot Testnet وجدول المعايرة وسجل PostgreSQL
+         الصفحة 7 (التشغيل التجريبي): المعايرة حتى تاريخ 28/11/2026 على Binance Spot Testnet وجدول المعايرة وسجل PostgreSQL
          ================================================================ -->
     <main id="sec-testnet14" class="holo-prism hidden">
       <div class="row-between" style="flex-wrap:wrap;gap:6px;margin-bottom:8px;">
         <div>
-          <strong style="font-size:15px;color:var(--pri);">🧪 التشغيل التجريبي الإلزامي (14 يوماً — Binance Spot Testnet Paper/Shadow)</strong>
-          <div class="muted" style="font-size:11.2px;">ممنوع ربط مفتاح تداول حقيقي قبل اكتمال الـ 14 يوماً على <span class="num">testnet.binance.vision</span> ومراجعة جدول المعايرة أدناه.</div>
+          <strong style="font-size:15px;color:var(--pri);">🧪 التشغيل التجريبي والمعايرة الإلزامية (حتى تاريخ 28/11/2026 — Binance Spot Testnet)</strong>
+          <div class="muted" style="font-size:11.2px;">تستمر فترة المعايرة المعتمدة من الأدمن حتى <strong class="num text-pri">28/11/2026</strong> على <span class="num">testnet.binance.vision</span> (بدلاً من 14 يوماً)، ويُفتح الربط الحقيقي بعدها فور مراجعة جدول المعايرة.</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <span id="testnet-day-badge" class="hex-shield num" style="color:var(--pri);border-color:var(--pri);">اليوم 1 / 14 • LIVE KEY LOCKED 🔒</span>
+          <span id="testnet-day-badge" class="hex-shield num" style="color:var(--pri);border-color:var(--pri);">حتى 28/11/2026 • LIVE KEY LOCKED 🔒</span>
           <button type="button" class="btn-3d btn-3d-sm btn-3d-gold" onclick="ui.syncExchangeClockUI()">⏱️ مزامنة الساعة (recvWindow 5000ms)</button>
         </div>
       </div>
 
-      <!-- شريط تقدم الـ 14 يوماً + حالة مزامنة الساعة و clientOrderId و PostgreSQL -->
+      <!-- شريط تقدم المعايرة حتى 28/11/2026 + حالة مزامنة الساعة و clientOrderId و PostgreSQL -->
       <div class="daily-kpi-grid">
         <div class="holo-chamber">
-          <div class="muted">🗓️ عداد الـ 14 يوماً التجريبي</div>
-          <div class="num-3d" style="font-size:16.5px;">اليوم 1 من 14 (يتبقى 13 يوماً)</div>
-          <div style="height:7px;border-radius:99px;background:#08142b;margin-top:4px;overflow:hidden;"><div style="width:8%;height:100%;background:var(--pri);"></div></div>
+          <div class="muted">🗓️ عداد المعايرة حتى 28/11/2026</div>
+          <div id="cal-deadline-readout" class="num-3d" style="font-size:15.5px;">المعايرة حتى 28/11/2026</div>
+          <div style="height:7px;border-radius:99px;background:#08142b;margin-top:4px;overflow:hidden;"><div id="cal-deadline-bar" style="width:15%;height:100%;background:var(--pri);transition:width 0.3s ease;"></div></div>
         </div>
         <div class="holo-chamber">
           <div class="muted">⏱️ مزامنة الساعة و recvWindow</div>
@@ -2197,31 +2291,32 @@
             <button type="button" id="btn-ambient-music-panel" class="btn-3d btn-3d-gold" onclick="ui.toggleAmbientMusic()">🎵 تشغيل / إيقاف موسيقى التركيز</button>
             <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:170px;">
               <span style="font-size:11.5px;">🔊 مستوى الصوت:</span>
-              <input id="ambient-vol-slider-panel" type="range" min="0" max="100" value="35" style="flex:1;accent-color:var(--pri);" oninput="ui.setAmbientVolume(this.value)" />
-              <strong id="ambient-vol-lbl-panel" class="num text-pri">35%</strong>
+              <input id="ambient-vol-slider-panel" type="range" min="0" max="100" value="65" style="flex:1;accent-color:var(--pri);" oninput="ui.setAmbientVolume(this.value)" />
+              <strong id="ambient-vol-lbl-panel" class="num text-pri">65%</strong>
             </div>
           </div>
           <div class="row-between" style="gap:6px;flex-wrap:wrap;">
             <label style="font-size:11.5px;">نغمة التردد الهادئ:
               <select id="ambient-chord-sel" class="holo-inp" style="padding:4px 8px;font-size:11.5px;" onchange="ui.setAmbientChord(this.value)">
-                <option value="432">432Hz — تركيز عميق هادئ (Deep Calm Pad)</option>
+                <option value="432">432Hz — تركيز عميق هادئ (Ambient Piano + Pad)</option>
                 <option value="528">528Hz — صفاء ذهني متزن (Harmonic Clarity)</option>
+                <option value="396">396Hz — هدوء وتأمل استثماري (Deep Calm)</option>
               </select>
             </label>
             <button type="button" class="btn-3d btn-3d-sm" onclick="speakSmartResponse('مرحباً دكتور ماجد، النظام الصوتي وموسيقى التركيز الهادئة يعملان بأعلى نقاء.', 'Audio and focus music verified.', '🔊 اختبار النطق الصوتي ناجح')">🗣️ اختبار صوت المستشار</button>
           </div>
         </section>
 
-        <!-- 2. استوديو السمات الهولوغرافية الست (مستعاد بالكامل بضغطة واحدة!) -->
+        <!-- 2. استوديو السمات الهولوغرافية الست (تبديل كامل وفوري للخلفية والبطاقات والحدود!) -->
         <section class="holo-chamber" style="display:flex;flex-direction:column;gap:8px;">
-          <strong style="font-size:13.5px;color:var(--sec);">🎨 استوديو السمات الهولوغرافية الست (تبديل حي فوري)</strong>
+          <strong style="font-size:13.5px;color:var(--sec);">🎨 استوديو السمات الهولوغرافية الست (تبديل حي فوري كامل)</strong>
           <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;">
-            <button type="button" class="btn-3d btn-3d-sm btn-3d-gold" onclick="ui.applyHoloTheme('gold')">👑 الملكي الذهبي</button>
-            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.applyHoloTheme('cyan')">💠 السيان الكمي</button>
-            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.applyHoloTheme('emerald')">💚 الزمرد السيادي</button>
-            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.applyHoloTheme('amethyst')">🔮 السديم البنفسجي</button>
-            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.applyHoloTheme('crimson')">🌹 الياقوت القرمزي</button>
-            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.applyHoloTheme('arctic')">❄️ التيتانيوم القطبي</button>
+            <button type="button" data-theme-btn="gold" class="btn-3d btn-3d-sm btn-3d-gold" onclick="ui.applyHoloTheme('gold')">👑 الملكي الذهبي</button>
+            <button type="button" data-theme-btn="cyan" class="btn-3d btn-3d-sm" style="border-color:#38bdf8;color:#7dd3fc;" onclick="ui.applyHoloTheme('cyan')">💠 السيان الكمي</button>
+            <button type="button" data-theme-btn="emerald" class="btn-3d btn-3d-sm" style="border-color:#10b981;color:#6ee7b7;" onclick="ui.applyHoloTheme('emerald')">💚 الزمرد السيادي</button>
+            <button type="button" data-theme-btn="amethyst" class="btn-3d btn-3d-sm" style="border-color:#c084fc;color:#e9d5ff;" onclick="ui.applyHoloTheme('amethyst')">🔮 السديم البنفسجي</button>
+            <button type="button" data-theme-btn="crimson" class="btn-3d btn-3d-sm" style="border-color:#fb7185;color:#fecdd3;" onclick="ui.applyHoloTheme('crimson')">🌹 الياقوت القرمزي</button>
+            <button type="button" data-theme-btn="arctic" class="btn-3d btn-3d-sm" style="border-color:#e2e8f0;color:#f8fafc;" onclick="ui.applyHoloTheme('arctic')">❄️ التيتانيوم القطبي</button>
           </div>
         </section>
 
@@ -2295,17 +2390,20 @@
     </div>
   </div>
 
-  <!-- منبثقة البصمة -->
+  <!-- منبثقة البصمة الأصلية للجهاز (WebAuthn Touch ID / Face ID / Windows Hello) -->
   <div id="modal-passkey" class="holo-modal-bg hidden" onclick="if(event.target===this)ui.closeModals()">
-    <div class="holo-modal-box" style="max-width:400px;text-align:center;">
-      <div class="row-between"><strong style="color:var(--sec);">🛡️ البصمة الحيوية (Passkey)</strong><button type="button" class="btn-3d btn-3d-sm" onclick="ui.closeModals()">✕</button></div>
-      <div id="fp-ring" class="fp-sensor-ring" onmousedown="ui.startBiometricHold()" onmouseup="ui.endBiometricHold()" ontouchstart="event.preventDefault();ui.startBiometricHold()" ontouchend="ui.endBiometricHold()">
+    <div class="holo-modal-box" style="max-width:420px;text-align:center;">
+      <div class="row-between"><strong style="color:var(--sec);">🛡️ بصمة الجهاز الأصلية (WebAuthn Passkey)</strong><button type="button" class="btn-3d btn-3d-sm" onclick="ui.closeModals()">✕</button></div>
+      <div id="fp-ring" class="fp-sensor-ring" onclick="ui.invokeNativeWebAuthn(false)" style="cursor:pointer;">
         <svg width="56" height="56" viewBox="0 0 64 64" fill="none" stroke="var(--sec)" stroke-width="2.4" stroke-linecap="round">
           <path d="M20 26c0-7.2 5.4-13 12-13s12 5.8 12 13c0 10-2.5 18.5-7 25"/><path d="M14 28c0-10.5 8-19 18-19s18 8.5 18 19c0 8.5-1.6 16.5-5 23"/><path d="M26 27c0-3.6 2.7-6.5 6-6.5s6 2.9 6 6.5c0 8-2 15-6 21"/><path d="M32 27c0 6.5-1.5 12.5-4.5 17.5"/>
         </svg>
       </div>
-      <div id="fp-progress-txt" style="font-size:12px;font-weight:900;color:var(--pri);">اضغط مطولاً لمسح البصمة</div>
-      <button type="button" class="btn-3d btn-3d-buy" style="width:100%;" onclick="ui.invokeNativeWebAuthn()">🛡️ بصمة الجهاز الأصلية (Touch ID)</button>
+      <div id="fp-progress-txt" style="font-size:12px;font-weight:900;color:var(--pri);">اضغط لتفعيل بصمة الجهاز الأصلية (Touch ID / Face ID / Fingerprint)</div>
+      <div style="display:grid;gap:6px;">
+        <button type="button" class="btn-3d btn-3d-buy" style="width:100%;" onclick="ui.invokeNativeWebAuthn(false)">🛡️ تفعيل / تحقق ببصمة الجهاز الأصلية (Touch ID / Face ID)</button>
+        <button type="button" class="btn-3d btn-3d-sm" style="width:100%;" onclick="ui.invokeNativeWebAuthn(true)">🔄 إعادة تسجيل بصمة جديدة لهذا الجهاز</button>
+      </div>
     </div>
   </div>
 
@@ -2329,21 +2427,32 @@
   </div>
 
 
-  <!-- منبثقة باركود Google Authenticator (متاحة من شاشة تسجيل الدخول) -->
+  <!-- منبثقة باركود Google Authenticator (متوافقة 100% مع RFC 6238 و ISO 18004) -->
   <div id="modal-ga-qr" class="holo-modal-bg hidden" onclick="if(event.target===this)ui.closeModals()">
-    <div class="holo-modal-box" style="max-width:440px;">
+    <div class="holo-modal-box" style="max-width:480px;">
       <div class="row-between">
-        <strong style="color:var(--pri);">📲 ربط باركود Google Authenticator (2FA)</strong>
+        <strong style="color:var(--pri);">📲 ربط Google Authenticator (2FA • RFC 6238)</strong>
         <button type="button" class="btn-3d btn-3d-sm" onclick="ui.closeModals()">✕</button>
       </div>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;background:rgba(0,0,0,0.45);padding:10px;border-radius:10px;">
-        <div style="background:#fff;padding:6px;border-radius:8px;">
-          <canvas id="ga-qr-canvas" width="144" height="144" style="display:block;width:144px;height:144px;"></canvas>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;background:rgba(0,0,0,0.45);padding:12px;border-radius:10px;">
+        <div style="background:#ffffff;padding:10px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.5);">
+          <canvas id="ga-qr-canvas" width="204" height="204" style="display:block;width:196px;height:196px;image-rendering:pixelated;"></canvas>
         </div>
-        <div style="flex:1;min-width:170px;display:grid;gap:6px;">
+        <div style="flex:1;min-width:190px;display:grid;gap:7px;">
+          <label class="muted" style="font-size:10.5px;">الحساب في Google Authenticator:</label>
           <input id="adm-email" type="email" dir="ltr" class="holo-inp num" value="majed@trillionaire.sa" oninput="ui.renderGoogleAuthQR()" />
-          <input id="adm-ga-code" type="text" maxlength="6" dir="ltr" class="holo-inp num" style="text-align:center;font-weight:900;letter-spacing:4px;" placeholder="الرمز السداسي (6 أرقام)" />
-          <div class="muted" style="font-size:10px;">المفتاح: <strong id="ga-secret-txt" class="num text-pri"></strong> • <span id="ga-status-badge" class="text-ok">جاهز</span></div>
+          <div class="holo-chamber" style="padding:6px 8px;display:grid;gap:4px;">
+            <div class="row-between" style="font-size:10px;">
+              <span class="muted">المفتاح اليدوي (Base32 • حسب الوقت):</span>
+              <span id="ga-status-badge" class="text-ok" style="font-weight:800;">جاهز</span>
+            </div>
+            <div id="ga-secret-txt" dir="ltr" style="font-family:monospace;font-size:12px;font-weight:900;color:var(--pri);letter-spacing:1.2px;word-break:break-all;user-select:all;background:rgba(0,0,0,0.45);padding:5px 7px;border-radius:6px;text-align:center;"></div>
+            <div style="display:flex;gap:5px;">
+              <button type="button" class="btn-3d btn-3d-sm btn-3d-gold" style="flex:1;" onclick="ui.copyGaSecret()">📋 نسخ المفتاح</button>
+              <button type="button" class="btn-3d btn-3d-sm" onclick="ui.regenerateGaSecret()">🔄 مفتاح جديد</button>
+            </div>
+          </div>
+          <input id="adm-ga-code" type="text" inputmode="numeric" maxlength="6" dir="ltr" class="holo-inp num" style="text-align:center;font-weight:900;letter-spacing:4px;font-size:15px;" placeholder="أدخل رمز 6 أرقام" />
         </div>
       </div>
       <div style="display:flex;gap:6px;">
@@ -2365,8 +2474,8 @@
         <input id="bn-read-key-inp" dir="ltr" class="holo-inp num" style="width:100%;" placeholder="1) Read-Only API Key (مفتاح القراءة فقط — منفصل)..." />
         <input id="bn-trade-key-inp" dir="ltr" class="holo-inp num" style="width:100%;" placeholder="2) Spot Trade-Only API Key (مفتاح التداول الفوري — منفصل)..." />
         <select id="bn-env-sel" class="holo-inp" style="width:100%;font-size:11.5px;">
-          <option value="SPOT_TESTNET">🧪 Binance Spot Testnet (testnet.binance.vision — مسموح للتشغيل التجريبي 14 يوماً)</option>
-          <option value="LIVE_PRODUCTION">🚫 الإنتاج الحقيقي Live Production (مقفل إلزامياً حتى إتمام 14 يوماً ومراجعة المعايرة)</option>
+          <option value="SPOT_TESTNET">🧪 Binance Spot Testnet (testnet.binance.vision — مسموح للتشغيل والمعايرة حتى 28/11/2026)</option>
+          <option value="LIVE_PRODUCTION">🚫 الإنتاج الحقيقي Live Production (مقفل إلزامياً حتى تاريخ 28/11/2026 ومراجعة المعايرة)</option>
         </select>
         <input id="bn-static-ip-inp" dir="ltr" class="holo-inp num" style="width:100%;" value="54.65.128.44 (Tokyo Static IP Whitelist)" />
         <label style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ok);font-weight:800;cursor:pointer;">
@@ -2452,22 +2561,41 @@
       return String(bin % 1000000).padStart(6, '0');
     }
 
-    // مولد باركود QR الحقيقي (ISO 18004)
+    // مولد باركود QR الحقيقي والموثّق (ISO/IEC 18004 — Versions 1..10, EC=L, Mask=0)
     function makeQrMatrix(text) {
       const bytes = Array.from(new TextEncoder().encode(text));
-      const VTAB = [null, [26,7,1,[]], [44,10,1,[6,18]], [70,15,1,[6,22]], [100,20,1,[6,26]], [134,26,1,[6,30]]];
+      // [totCw, ecPerBlk, blocksG1, dataG1, blocksG2, dataG2, aligns]
+      const VTAB = [
+        null,
+        [26, 7, 1, 19, 0, 0, []],
+        [44, 10, 1, 34, 0, 0, [6, 18]],
+        [70, 15, 1, 55, 0, 0, [6, 22]],
+        [100, 20, 1, 80, 0, 0, [6, 26]],
+        [134, 26, 1, 108, 0, 0, [6, 30]],
+        [172, 18, 2, 68, 0, 0, [6, 34]],
+        [196, 20, 2, 78, 0, 0, [6, 22, 38]],
+        [242, 24, 2, 97, 0, 0, [6, 24, 42]],
+        [292, 30, 2, 116, 0, 0, [6, 26, 46]],
+        [346, 18, 2, 68, 2, 69, [6, 28, 50]]
+      ];
       let ver = 1;
-      while (ver < 5) {
-        const [tot, ec] = VTAB[ver];
-        if (Math.ceil((12 + bytes.length * 8) / 8) <= (tot - ec)) break;
+      while (ver < 10) {
+        const [, , b1, d1, b2, d2] = VTAB[ver];
+        const cap = b1 * d1 + b2 * d2;
+        const ccBits = ver >= 10 ? 16 : 8;
+        if (Math.ceil((4 + ccBits + bytes.length * 8) / 8) <= cap) break;
         ver++;
       }
-      const [totCw, ecCw, , aligns] = VTAB[ver];
-      const dataCap = totCw - ecCw;
+      const [, ecPerBlk, b1, d1, b2, d2, aligns] = VTAB[ver];
+      const dataCap = b1 * d1 + b2 * d2;
+      const ccBits = ver >= 10 ? 16 : 8;
       const bits = [];
       const pushBits = (val, len) => { for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
-      pushBits(0b0100, 4); pushBits(bytes.length, 8);
-      bytes.slice(0, dataCap - 2).forEach((b) => pushBits(b, 8));
+      pushBits(0b0100, 4);
+      const maxLen = dataCap - (ccBits === 16 ? 3 : 2);
+      const payload = bytes.slice(0, maxLen);
+      pushBits(payload.length, ccBits);
+      payload.forEach((b) => pushBits(b, 8));
       for (let i = 0; i < 4 && bits.length < dataCap * 8; i++) bits.push(0);
       while (bits.length % 8 !== 0) bits.push(0);
       const dataBytes = [];
@@ -2477,23 +2605,48 @@
       }
       let padIdx = 0;
       while (dataBytes.length < dataCap) { dataBytes.push(padIdx % 2 === 0 ? 0xEC : 0x11); padIdx++; }
+
+      // GF(256) Reed-Solomon
       const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
       let x = 1;
       for (let i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11d; }
       for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
       const gfMul = (a, b) => (a === 0 || b === 0 ? 0 : EXP[LOG[a] + LOG[b]]);
       let gen = [1];
-      for (let i = 0; i < ecCw; i++) {
+      for (let i = 0; i < ecPerBlk; i++) {
         const next = new Array(gen.length + 1).fill(0);
         for (let j = 0; j < gen.length; j++) { next[j] ^= gen[j]; next[j + 1] ^= gfMul(gen[j], EXP[i]); }
         gen = next;
       }
-      const rem = new Array(ecCw).fill(0);
-      for (const b of dataBytes) {
-        const factor = b ^ rem.shift(); rem.push(0);
-        for (let j = 0; j < ecCw; j++) rem[j] ^= gfMul(gen[j + 1], factor);
+      const rsEncode = (blk) => {
+        const rem = new Array(ecPerBlk).fill(0);
+        for (const b of blk) {
+          const factor = b ^ rem.shift(); rem.push(0);
+          for (let j = 0; j < ecPerBlk; j++) rem[j] ^= gfMul(gen[j + 1], factor);
+        }
+        return rem;
+      };
+
+      // Split into RS blocks & interleave
+      const dataBlocks = [], ecBlocks = [];
+      let offset = 0;
+      for (let i = 0; i < b1; i++) {
+        const blk = dataBytes.slice(offset, offset + d1); offset += d1;
+        dataBlocks.push(blk); ecBlocks.push(rsEncode(blk));
       }
-      const finalCw = dataBytes.concat(rem);
+      for (let i = 0; i < b2; i++) {
+        const blk = dataBytes.slice(offset, offset + d2); offset += d2;
+        dataBlocks.push(blk); ecBlocks.push(rsEncode(blk));
+      }
+      const finalCw = [];
+      const maxDataLen = Math.max(d1, d2);
+      for (let i = 0; i < maxDataLen; i++) {
+        for (const blk of dataBlocks) if (i < blk.length) finalCw.push(blk[i]);
+      }
+      for (let i = 0; i < ecPerBlk; i++) {
+        for (const ec of ecBlocks) finalCw.push(ec[i]);
+      }
+
       const size = ver * 4 + 17;
       const mat = Array.from({ length: size }, () => new Array(size).fill(false));
       const isFunc = Array.from({ length: size }, () => new Array(size).fill(false));
@@ -2513,6 +2666,20 @@
       setMod(size - 8, 8, true);
       for (let i = 0; i <= 8; i++) { if (!isFunc[8][i]) setMod(8, i, false); if (!isFunc[i][8]) setMod(i, 8, false); }
       for (let i = 0; i < 8; i++) { if (!isFunc[8][size - 1 - i]) setMod(8, size - 1 - i, false); if (!isFunc[size - 1 - i][8]) setMod(size - 1 - i, 8, false); }
+
+      // Reserve & write 18-bit Version Information for Version >= 7
+      if (ver >= 7) {
+        let vRem = ver;
+        for (let i = 0; i < 12; i++) vRem = (vRem << 1) ^ (((vRem >>> 11) & 1) * 0x1f25);
+        const vBits = (ver << 12) | vRem;
+        for (let i = 0; i < 18; i++) {
+          const bit = ((vBits >>> i) & 1) === 1;
+          const a = Math.floor(i / 3), b = size - 11 + (i % 3);
+          setMod(a, b, bit);
+          setMod(b, a, bit);
+        }
+      }
+
       const allBits = [];
       finalCw.forEach((cw) => { for (let i = 7; i >= 0; i--) allBits.push((cw >>> i) & 1); });
       let bIdx = 0;
@@ -2530,9 +2697,9 @@
           }
         }
       }
-      let fRem = 8;
-      for (let i = 0; i < 10; i++) fRem = (fRem << 1) ^ ((fRem >>> 9) * 0x537);
-      const fBits = ((8 << 10) | fRem) ^ 0x5412;
+
+      // Format Info for EC=L (01), Mask=0 (000) -> 0b01000 = 8 -> ISO 18004 BCH+XOR = 0x77C4 (111011111000100)
+      const fBits = 0x77C4;
       const fBit = (i) => ((fBits >>> i) & 1) === 1;
       for (let i = 0; i <= 5; i++) mat[i][8] = fBit(i);
       mat[7][8] = fBit(6); mat[8][8] = fBit(7); mat[8][7] = fBit(8);
@@ -2540,6 +2707,20 @@
       for (let i = 0; i < 8; i++) mat[8][size - 1 - i] = fBit(i);
       for (let i = 8; i < 15; i++) mat[size - 15 + i][8] = fBit(i);
       return mat;
+    }
+
+    function b64urlEncode(buf) {
+      const bytes = new Uint8Array(buf);
+      let bin = '';
+      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    }
+    function b64urlDecode(str) {
+      const pad = '='.repeat((4 - (str.length % 4)) % 4);
+      const bin = atob(str.replace(/-/g, '+').replace(/_/g, '/') + pad);
+      const out = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
     }
 
     
@@ -2632,9 +2813,26 @@
       dailyTrades: INITIAL_DAILY_TRADES.slice(),
       executedDeals: INITIAL_DAILY_TRADES.slice(),
       lastStampByDeal: {},
-      gaSecret: safeStore.get('htb_ga_secret') || randomBase32(20),
+      gaSecret: (() => {
+        const s = (safeStore.get('htb_ga_secret') || '').toUpperCase().replace(/[^A-Z2-7]/g, '');
+        return (s.length === 32) ? s : randomBase32(32);
+      })(),
       gaVerified: safeStore.get('htb_ga_verified') === '1',
       passkeyRegistered: safeStore.get('htb_passkey_ok') === '1',
+      holoTheme: safeStore.get('htb_holo_theme') || 'gold',
+      agentRules: (() => {
+        try {
+          const saved = JSON.parse(safeStore.get('htb_agent_rules') || 'null');
+          if (saved && saved.maxHourlyUsd) return saved;
+        } catch (_) {}
+        return {
+          maxPerTradePct: 6.5,
+          maxHourlyUsd: 150000,
+          maxDailyUsd: 350000,
+          maxTradesPerHour: 3,
+          maxTradesPerDay: 8
+        };
+      })(),
       recoveryChannel: 'PHONE',
       recoveryCode: '',
       cfoCagrPct: 65,
@@ -2646,7 +2844,7 @@
       cfoInvestCycles: 1,
       cfoQiwaProofs: ['عقد عمل محدد المدة — مباشرة 2024-10-10 (مهلة إشعار 60 يوماً)'],
       musicPlaying: false,
-      musicVolume: Number(safeStore.get('htb_music_vol') || 35),
+      musicVolume: Number(safeStore.get('htb_music_vol') || 65),
       musicFreq: 432,
       pnlGlow: true,
       heroDealId: 'el-sol',
@@ -2665,6 +2863,50 @@
       ]
     };
     safeStore.set('htb_ga_secret', state.gaSecret);
+
+    // حساب ميزانية وحدود استثمار الوكيل الفعلية (في الساعة واليوم ولكل صفقة)
+    function getAgentBudgetUsage() {
+      const now = Date.now();
+      const oneHourAgo = now - 3600 * 1000;
+      const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
+      const dayStartMs = startOfDay.getTime();
+      const buyDeals = (state.executedDeals || []).filter((r) => r.side === 'BUY');
+      const hourDeals = buyDeals.filter((r) => (r.ts || 0) >= oneHourAgo);
+      const dayDeals = buyDeals.filter((r) => !r.ts || r.ts >= dayStartMs);
+      const spentHourUsd = Math.round(hourDeals.reduce((s, r) => s + (Number(r.invest) || 0), 0));
+      const spentDayUsd = Math.round(dayDeals.reduce((s, r) => s + (Number(r.invest) || 0), 0));
+      const rules = state.agentRules;
+      const maxSingleUsd = Math.round(state.equity * ((Number(rules.maxPerTradePct) || 6.5) / 100));
+      const remHourUsd = Math.max(0, (Number(rules.maxHourlyUsd) || 150000) - spentHourUsd);
+      const remDayUsd = Math.max(0, (Number(rules.maxDailyUsd) || 350000) - spentDayUsd);
+      const remTradesHour = Math.max(0, (Number(rules.maxTradesPerHour) || 3) - hourDeals.length);
+      const remTradesDay = Math.max(0, (Number(rules.maxTradesPerDay) || 8) - dayDeals.length);
+      return {
+        spentHourUsd, spentDayUsd,
+        tradesHour: hourDeals.length, tradesDay: dayDeals.length,
+        maxSingleUsd, remHourUsd, remDayUsd, remTradesHour, remTradesDay,
+        maxHourlyUsd: Number(rules.maxHourlyUsd) || 150000,
+        maxDailyUsd: Number(rules.maxDailyUsd) || 350000,
+        maxTradesPerHour: Number(rules.maxTradesPerHour) || 3,
+        maxTradesPerDay: Number(rules.maxTradesPerDay) || 8,
+        maxPerTradePct: Number(rules.maxPerTradePct) || 6.5
+      };
+    }
+
+    // حساب الفترة المتبقية للمعايرة حتى التاريخ المعتمد من الأدمن: 28/11/2026
+    function getCalibrationDeadlineInfo() {
+      const startMs = new Date('2026-11-20T00:00:00+03:00').getTime();
+      const endMs = new Date('2026-11-28T23:59:59+03:00').getTime();
+      const nowMs = Date.now();
+      const totalMs = Math.max(1, endMs - startMs);
+      const remMs = Math.max(0, endMs - nowMs);
+      const elapsedMs = Math.max(0, Math.min(totalMs, nowMs - startMs));
+      const pct = Math.max(5, Math.min(100, Math.round((elapsedMs / totalMs) * 100)));
+      const remDays = Math.floor(remMs / (86400 * 1000));
+      const remHours = Math.floor((remMs % (86400 * 1000)) / (3600 * 1000));
+      const isComplete = nowMs >= endMs;
+      return { deadlineLabel: '28/11/2026', remDays, remHours, pct, isComplete };
+    }
 
     // =====================================================================
     // التصحيح الإلزامي #1: Argon2id عبر الخادم (m=64MB, t=3, 16B Salt) + PBKDF2-HMAC-SHA256 (210,000 جولة بملح عشوائي) محلياً
@@ -2763,8 +3005,34 @@
       const fracKelly = fullKelly * 0.25 * sizeMult;
       const riskBudgetUsd = state.equity * quantClip(fullKelly * 0.25 * 0.055, 0.0025, 0.011);
       const rawNotional = riskBudgetUsd / Math.max(stopPct + feePct, 1e-4);
-      const maxCapPct = d.assetClass === 'crypto' ? 0.065 : 0.055;
-      const autoUsd = Math.round(Math.min(rawNotional, state.equity * maxCapPct) * sizeMult);
+      const budget = getAgentBudgetUsage();
+      const maxCapPct = Math.min(d.assetClass === 'crypto' ? 0.065 : 0.055, budget.maxPerTradePct / 100);
+      const kellyRawUsd = Math.round(Math.min(rawNotional, state.equity * maxCapPct) * sizeMult);
+
+      // التزام الوكيل الصارم بحدود الاستثمار المسموحة (في الساعة واليوم ولكل صفقة)
+      let ruleCapReason = null;
+      let agentAllowedUsd = kellyRawUsd;
+      if (budget.remTradesHour <= 0) {
+        agentAllowedUsd = 0;
+        ruleCapReason = `بلغ الوكيل الحد الساعي (${budget.tradesHour}/${budget.maxTradesPerHour} صفقات/ساعة)`;
+      } else if (budget.remTradesDay <= 0) {
+        agentAllowedUsd = 0;
+        ruleCapReason = `بلغ الوكيل الحد اليومي (${budget.tradesDay}/${budget.maxTradesPerDay} صفقات/يوم)`;
+      } else {
+        if (agentAllowedUsd > budget.maxSingleUsd) {
+          agentAllowedUsd = budget.maxSingleUsd;
+          ruleCapReason = `مقيد بسقف الصفقة (${budget.maxPerTradePct}%)`;
+        }
+        if (agentAllowedUsd > budget.remHourUsd) {
+          agentAllowedUsd = budget.remHourUsd;
+          ruleCapReason = `مقيد بالمتبقي للساعة ($${budget.remHourUsd.toLocaleString()})`;
+        }
+        if (agentAllowedUsd > budget.remDayUsd) {
+          agentAllowedUsd = budget.remDayUsd;
+          ruleCapReason = `مقيد بالمتبقي لليوم ($${budget.remDayUsd.toLocaleString()})`;
+        }
+      }
+      const autoUsd = Math.max(0, Math.round(agentAllowedUsd));
 
       return {
         rawConsensus,
@@ -2773,6 +3041,8 @@
         approved: !vetoReason,
         vetoReason,
         autoUsd,
+        kellyRawUsd,
+        ruleCapReason,
         kellyPct: +(fracKelly * 100).toFixed(1),
         stopDist
       };
@@ -2802,6 +3072,7 @@
         const qEval = evaluateQuantCandidate(d);
         d.conf = qEval.confPct;
         d.quant = qEval;
+        d.agentRecommendedUsd = qEval.autoUsd;
         // التمثيل البصري للأدوار الـ 5 (3 متنبئين + AI-4 Kelly/Veto + AI-5 PAVA Gate)
         d.aiScores = [
           Math.round(d.predProbs[0] * 100),
@@ -2810,10 +3081,11 @@
           qEval.approved ? 'OK' : 'VT',
           Math.round(qEval.confPct)
         ];
+        const baseUsd = Math.max(250, qEval.autoUsd || qEval.kellyRawUsd || 2500);
+        d.step = fmtQty(Math.max(0.0005, Math.max(1000, baseUsd * 0.1) / d.price), d.price);
         if (!d.userAdjusted) {
-          const usd = Math.max(250, qEval.autoUsd);
-          d.qty = fmtQty(usd / d.price, d.price);
-          d.step = fmtQty(Math.max(0.0005, (usd * 0.1) / d.price), d.price);
+          const usd = qEval.autoUsd > 0 ? Math.max(250, qEval.autoUsd) : 0;
+          d.qty = usd > 0 ? fmtQty(usd / d.price, d.price) : 0;
         }
       });
     }
@@ -3379,15 +3651,65 @@
         }
       },
 
-      // تعديل اختياري بسيط بـ (+) أو (-) فوق المبلغ التلقائي المحسوب من المحفظة
-      adjustDealQty(dealId, deltaDir) {
+      // صلاحية الأدمن في الزيادة أو النقصان أو إدخال مبلغ مباشر فوق مقترح الوكيل التلقائي
+      adjustDealQty(dealId, deltaDir, refreshModal = false) {
         const d = ALL_CANDIDATE_DEALS.find((x) => x.id === dealId);
         if (!d) return;
         d.userAdjusted = true;
-        d.qty = fmtQty(Math.max(5 / d.price, d.qty + deltaDir * d.step), d.price);
+        const stepQty = d.step || fmtQty(Math.max(1000 / d.price, 0.01), d.price);
+        d.qty = fmtQty(Math.max(50 / d.price, d.qty + deltaDir * stepQty), d.price);
         this.renderElite90Page();
+        if (refreshModal || !document.getElementById('trilliurin-nexthour-modal')?.classList.contains('hidden')) {
+          this.openNextHourBriefModal(true);
+        }
         const m = computeDealMetrics(d);
-        this.toast(`🔢 ${d.sym}: ${d.qty} وحدة = $${m.invest.toLocaleString()} (${m.portPct}% من المحفظة)`);
+        const agUsd = d.agentRecommendedUsd || 0;
+        const overCap = m.invest > agUsd && agUsd > 0 ? ' (تجاوز بصلاحية الأدمن)' : '';
+        this.toast(`👑 تعديل الأدمن لـ ${d.sym}: $${m.invest.toLocaleString()} (${d.qty} وحدة) • مقترح الوكيل $${agUsd.toLocaleString()}${overCap}`);
+      },
+
+      setDealUsd(dealId, rawVal, refreshModal = false) {
+        const d = ALL_CANDIDATE_DEALS.find((x) => x.id === dealId);
+        if (!d) return;
+        const usd = Math.max(50, Math.round(Number(String(rawVal).replace(/[^0-9.]/g, '')) || 0));
+        if (!usd) return;
+        d.userAdjusted = true;
+        d.qty = fmtQty(usd / d.price, d.price);
+        this.renderElite90Page();
+        if (refreshModal || !document.getElementById('trilliurin-nexthour-modal')?.classList.contains('hidden')) {
+          this.openNextHourBriefModal(true);
+        }
+        const agUsd = d.agentRecommendedUsd || 0;
+        this.toast(`👑 تم اعتماد مبلغ الأدمن لـ ${d.sym}: $${usd.toLocaleString()} (مقترح الوكيل: $${agUsd.toLocaleString()})`);
+      },
+
+      resetDealToAgent(dealId, refreshModal = false) {
+        const d = ALL_CANDIDATE_DEALS.find((x) => x.id === dealId);
+        if (!d) return;
+        d.userAdjusted = false;
+        syncAutoPortfolioSizing();
+        this.renderElite90Page();
+        if (refreshModal || !document.getElementById('trilliurin-nexthour-modal')?.classList.contains('hidden')) {
+          this.openNextHourBriefModal(true);
+        }
+        this.toast(`🤖 تمت إعادة ${d.sym} إلى مقترح الوكيل التلقائي: $${(d.agentRecommendedUsd || 0).toLocaleString()}`);
+      },
+
+      saveAgentRulesFromModal() {
+        const pct = Math.max(1, Math.min(25, Number(document.getElementById('rule-max-pct')?.value) || 6.5));
+        const hrUsd = Math.max(1000, Number(document.getElementById('rule-max-hr-usd')?.value) || 150000);
+        const dayUsd = Math.max(hrUsd, Number(document.getElementById('rule-max-day-usd')?.value) || 350000);
+        const hrCnt = Math.max(1, Math.min(20, Number(document.getElementById('rule-max-hr-cnt')?.value) || 3));
+        const dayCnt = Math.max(hrCnt, Math.min(50, Number(document.getElementById('rule-max-day-cnt')?.value) || 8));
+        state.agentRules = { maxPerTradePct: pct, maxHourlyUsd: hrUsd, maxDailyUsd: dayUsd, maxTradesPerHour: hrCnt, maxTradesPerDay: dayCnt };
+        safeStore.set('htb_agent_rules', JSON.stringify(state.agentRules));
+        syncAutoPortfolioSizing();
+        this.renderElite90Page();
+        if (!document.getElementById('trilliurin-nexthour-modal')?.classList.contains('hidden')) {
+          this.openNextHourBriefModal(true);
+        }
+        sfx.buySuccess();
+        this.toast(`✅ تم حفظ قواعد استثمار الوكيل: سقف الصفقة ${pct}% • الساعة $${hrUsd.toLocaleString()} • اليوم $${dayUsd.toLocaleString()}`);
       },
 
       proposeVoiceTradeForOneClickConfirm(d) {
@@ -3516,7 +3838,7 @@
         }
 
         const timeStr = new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const rec = { orderId, sym: d.sym, name: d.name, side: chosenSide, qty: execQty, price: d.price, invest: m.invest, fees: feesUsd, profit: netGainAfterFees, tp1: m.tp1, tp: m.tp, sl: m.sl, conf: d.conf, bots20, time: timeStr };
+        const rec = { orderId, ts: Date.now(), sym: d.sym, name: d.name, side: chosenSide, qty: execQty, price: d.price, invest: m.invest, fees: feesUsd, profit: netGainAfterFees, tp1: m.tp1, tp: m.tp, sl: m.sl, conf: d.conf, bots20, time: timeStr };
         state.executedDeals.unshift(rec);
         state.dailyTrades.unshift(rec);
         state.lastStampByDeal[d.id] = rec;
@@ -3524,6 +3846,9 @@
         syncAutoPortfolioSizing();
         this.refreshKpis();
         this.renderElite90Page();
+        if (!document.getElementById('trilliurin-nexthour-modal')?.classList.contains('hidden')) {
+          this.openNextHourBriefModal(true);
+        }
         this.renderBotsLeaderboard();
         this.renderDailyPage();
 
@@ -3534,7 +3859,7 @@
         document.getElementById('rcpt-body').innerHTML = `
           <div class="row-between"><span>نوع التنفيذ الكمي:</span><strong class="text-ok">${sideAr} — ${d.sym}</strong></div>
           <div class="row-between"><span>الكمية والمبلغ (Kelly ${d.quant.kellyPct}%):</span><strong class="num-3d">${execQty} ($${m.invest.toLocaleString()})</strong></div>
-          <div class="row-between"><span>الخروج المتدرج (Graduated):</span><span class="num text-sec">TP1(40%) $${m.tp1} • TP2(35%) $${m.tp} • Chandelier SL $${m.sl}</span></div>
+          <div class="row-between"><span>الخروج المتدرج (Graduated):</span><span class="num text-sec">TP1(40%) $${m.tp1} • TP2 $${m.tp} • Chandelier SL $${m.sl}</span></div>
           <div class="row-between"><span>صافي الربح بعد الرسوم ($${feesUsd}):</span><strong class="num-3d-ok">+$${netGainAfterFees.toLocaleString()}</strong></div>
           <div class="row-between"><span>حصة الـ 20% فوق الـ HWM ($${state.highWaterMark.toLocaleString()}):</span><span class="num text-pri">$${bots20.toFixed(2)} (Thompson)</span></div>
         `;
@@ -3575,7 +3900,8 @@
 
         const tel = document.getElementById('quant-header-telemetry');
         if (tel) {
-          tel.textContent = `${allApproved.length} مؤهلة (≥75%) • DSR ${state.deflatedSharpe}`;
+          const bud = getAgentBudgetUsage();
+          tel.textContent = `${allApproved.length} مؤهلة (≥75%) • متبقي الساعة $${bud.remHourUsd.toLocaleString()} • اليوم $${bud.remDayUsd.toLocaleString()}`;
         }
 
         const vDrawer = document.getElementById('vetoed-deals-drawer');
@@ -3618,22 +3944,31 @@
         const hOwned = +(state.spotHoldings[heroDeal.sym] || 0);
         const hUnit = heroDeal.sym.replace('USDT', '');
         const hStamp = state.lastStampByDeal[heroDeal.id];
+        const hAgUsd = heroDeal.agentRecommendedUsd || 0;
+        const hBudget = getAgentBudgetUsage();
         const heroFooter = document.getElementById('hero-exec-footer');
         if (heroFooter) {
           heroFooter.innerHTML = `
             <div class="row-between" style="flex-wrap:wrap;gap:8px;">
               <div>
-                <div class="muted" style="font-size:10px;">Kelly (${hm.portPct}%) • المملوك: <strong class="num text-pri">${hOwned} ${hUnit}</strong></div>
-                <div style="display:flex;align-items:baseline;gap:8px;margin-top:1px;">
-                  <strong class="num-3d" style="font-size:17px;">$${hm.invest.toLocaleString()}</strong>
+                <div class="muted" style="font-size:10px;">
+                  🤖 مقترح الوكيل: <strong class="num text-sec">$${hAgUsd.toLocaleString()}</strong>
+                  ${heroDeal.userAdjusted ? `<span class="hex-shield" style="font-size:9px;padding:0 5px;color:var(--pri);border-color:var(--pri);margin-inline-start:4px;">👑 تعديل الأدمن</span>` : ''}
+                  • المملوك: <strong class="num text-pri">${hOwned} ${hUnit}</strong>
+                </div>
+                <div style="display:flex;align-items:center;gap:7px;margin-top:3px;flex-wrap:wrap;">
+                  <div class="admin-amt-wrap">
+                    <button type="button" class="admin-amt-btn" onclick="ui.adjustDealQty('${heroDeal.id}', -1)" title="إنقاص المبلغ">−</button>
+                    <input type="number" class="admin-amt-inp" value="${hm.invest}" min="50" step="500" onchange="ui.setDealUsd('${heroDeal.id}', this.value)" aria-label="مبلغ الاستثمار بالدولار" />
+                    <button type="button" class="admin-amt-btn" onclick="ui.adjustDealQty('${heroDeal.id}', 1)" title="زيادة المبلغ">+</button>
+                    ${heroDeal.userAdjusted ? `<button type="button" class="admin-amt-btn" onclick="ui.resetDealToAgent('${heroDeal.id}')" title="إرجاع لمقترح الوكيل">↺</button>` : ''}
+                  </div>
                   <span class="num text-sec" style="font-size:11.5px;">(${heroDeal.qty} ${hUnit})</span>
                   <span class="num text-ok" style="font-size:11px;font-weight:900;">+$${hm.maxProf.toLocaleString()} (+${hm.expPct}%)</span>
                 </div>
               </div>
 
               <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
-                <button type="button" class="btn-3d btn-stepper" onclick="ui.adjustDealQty('${heroDeal.id}', -1)" aria-label="إنقاص الكمية">−</button>
-                <button type="button" class="btn-3d btn-3d-gold btn-stepper" onclick="ui.adjustDealQty('${heroDeal.id}', 1)" aria-label="زيادة الكمية">+</button>
                 <div style="display:flex;gap:3px;margin:0 3px;">
                   ${AI_AGENTS.map((ag, i) => `<span class="ai-orb-sm num" style="--orb-c:${ag.col};--orb-g:${ag.glow};">${heroDeal.aiScores[i]}</span>`).join('')}
                 </div>
@@ -3645,6 +3980,7 @@
             <div class="row-between" style="margin-top:5px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.07);font-size:10.5px;flex-wrap:wrap;gap:8px;">
               <strong class="num text-ok">TP1 $${hm.tp1} • TP2 $${hm.tp}</strong>
               <strong class="num text-err">SL $${hm.sl}</strong>
+              <span class="num muted">🛡️ سقف الساعة: $${hBudget.remHourUsd.toLocaleString()} / $${hBudget.maxHourlyUsd.toLocaleString()} • اليوم: $${hBudget.remDayUsd.toLocaleString()}</span>
               <span class="num muted">${hStamp ? `✓ #${hStamp.orderId}` : `LIMIT_MAKER`}</span>
             </div>
           `;
@@ -3660,19 +3996,25 @@
 
         const renderSideCard = (d) => {
           const m = computeDealMetrics(d);
-          const owned = +(state.spotHoldings[d.sym] || 0);
           const tag = d.assetClass === 'crypto' ? 'SPOT' : 'EQUITY';
           const shortGainPct = +(d.tpPct * 100).toFixed(2);
+          const agUsd = d.agentRecommendedUsd || 0;
           return `<article id="card-${d.id}" class="lux-side-deal-card elite-deal-card ${d.id === state.heroDealId ? 'active-hero' : ''}" onclick="ui.selectHeroDeal('${d.id}')">
             <div class="row-between" dir="ltr">
               <strong class="num" style="font-size:12.5px;color:#93c5fd;">${d.sym} • ${(d.name.split('•')[1] || d.name).trim()}</strong>
-              <span class="hex-shield num" style="font-size:9px;padding:1px 6px;color:#ffd86b;border-color:rgba(245,196,81,0.35);">${tag} • ${d.conf}%</span>
+              <span class="hex-shield num" style="font-size:9px;padding:1px 6px;color:var(--pri);border-color:var(--border-pri);">${tag} • ${d.conf}%</span>
             </div>
             <div style="text-align:center;padding:1px 0;">
               <div class="num val-gold" dir="ltr" style="font-size:16px;font-weight:900;line-height:1.15;">$${d.price.toLocaleString()}</div>
-              <div class="num val-emerald" dir="ltr" style="font-size:10.5px;font-weight:800;">▲ +${shortGainPct}% (${d.round}) • Kelly $${m.invest.toLocaleString()}</div>
+              <div class="num val-emerald" dir="ltr" style="font-size:10px;font-weight:800;">▲ +${shortGainPct}% (${d.round}) • مقترح الوكيل $${agUsd.toLocaleString()}</div>
             </div>
-            <canvas id="spark-${d.id}" width="230" height="32" style="width:100%;height:30px;display:block;"></canvas>
+            <div style="display:flex;justify-content:center;align-items:center;gap:4px;" onclick="event.stopPropagation()">
+              <button type="button" class="admin-amt-btn" style="width:20px;height:20px;font-size:12px;" onclick="ui.adjustDealQty('${d.id}', -1)" title="إنقاص">−</button>
+              <strong class="num text-pri" style="font-size:11px;">$${m.invest.toLocaleString()}${d.userAdjusted ? ' 👑' : ''}</strong>
+              <button type="button" class="admin-amt-btn" style="width:20px;height:20px;font-size:12px;" onclick="ui.adjustDealQty('${d.id}', 1)" title="زيادة">+</button>
+              ${d.userAdjusted ? `<button type="button" class="admin-amt-btn" style="width:20px;height:20px;font-size:10px;" onclick="ui.resetDealToAgent('${d.id}')" title="إرجاع للوكيل">↺</button>` : ''}
+            </div>
+            <canvas id="spark-${d.id}" width="230" height="28" style="width:100%;height:26px;display:block;"></canvas>
             <div style="display:flex;justify-content:center;gap:4px;padding-top:3px;border-top:1px solid rgba(255,255,255,0.06);" onclick="event.stopPropagation()">
               <button type="button" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:2px 8px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء</button>
               <button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:2px 7px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'SELL')">▼ بيع</button>
@@ -4025,10 +4367,12 @@
         }
       },
 
-      openNextHourBriefModal() {
+      openNextHourBriefModal(silentRefresh = false) {
         const modal = document.getElementById('trilliurin-nexthour-modal');
         const body = document.getElementById('nexthour-modal-body');
         if (!modal || !body) return;
+        syncAutoPortfolioSizing();
+        const bud = getAgentBudgetUsage();
 
         // ترتيب صفقات الساعة القادمة أولاً ثم بقية الفرص الفورية والمحجوبة
         const ordered = ALL_CANDIDATE_DEALS.slice().sort((a, b) => {
@@ -4041,6 +4385,9 @@
         const rowsHtml = ordered.map((d) => {
           const ex = this.buildDecisionExplanation(d);
           const owned = +(state.spotHoldings[d.sym] || 0);
+          const agUsd = d.agentRecommendedUsd || 0;
+          const curUsd = ex.m.invest;
+          const isOverAgent = d.userAdjusted && curUsd > agUsd && agUsd > 0;
           let decBadge = '';
           if (!ex.isApproved) {
             decBadge = `<span class="hex-shield" style="color:#fda4af;border-color:#f43f5e;">🛡️ حجب وحياد (${d.conf}%)</span>`;
@@ -4052,6 +4399,20 @@
             decBadge = `<span class="hex-shield" style="color:#38bdf8;border-color:#38bdf8;">▲ شراء متدرج (${d.round})</span>`;
           }
 
+          const amountCell = ex.isApproved ? `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div style="font-size:10px;color:var(--sec);font-weight:800;">🤖 مقترح الوكيل: <span class="num">$${agUsd.toLocaleString()}</span></div>
+              <div class="admin-amt-wrap">
+                <button type="button" class="admin-amt-btn" onclick="ui.adjustDealQty('${d.id}', -1, true)" title="إنقاص">−</button>
+                <input type="number" class="admin-amt-inp" value="${curUsd}" min="50" step="500" onchange="ui.setDealUsd('${d.id}', this.value, true)" aria-label="تعديل مبلغ ${d.sym}" />
+                <button type="button" class="admin-amt-btn" onclick="ui.adjustDealQty('${d.id}', 1, true)" title="زيادة">+</button>
+                ${d.userAdjusted ? `<button type="button" class="admin-amt-btn" onclick="ui.resetDealToAgent('${d.id}', true)" title="إرجاع لمقترح الوكيل">↺</button>` : ''}
+              </div>
+              ${d.userAdjusted ? `<span style="font-size:9.5px;color:${isOverAgent ? '#fbbf24' : 'var(--pri)'};font-weight:800;">${isOverAgent ? '👑 تجاوز بصلاحية الأدمن' : '👑 تعديل الأدمن'}</span>` : ''}
+              ${d.quant?.ruleCapReason ? `<span style="font-size:9px;color:#93c5fd;">🛡️ ${d.quant.ruleCapReason}</span>` : ''}
+            </div>
+          ` : `<strong class="val-gold num">$0</strong>`;
+
           return `
             <tr>
               <td>
@@ -4059,9 +4420,9 @@
                 <span style="font-size:11px;color:#93c5fd;">${(d.name.split('•')[1] || d.name).trim()} • $${d.price.toLocaleString()}</span>
               </td>
               <td>${decBadge}</td>
-              <td class="val-gold num" style="font-weight:900;">${ex.isApproved ? '$' + ex.m.invest.toLocaleString() : '$0'}</td>
-              <td style="text-align:right!important;font-size:11.5px;color:#e2e8f0;max-width:340px;">
-                <strong style="color:#ffd86b;">الأساس:</strong> ${ex.tech} <span style="color:#38bdf8;">(${ex.calib})</span>
+              <td>${amountCell}</td>
+              <td style="text-align:right!important;font-size:11.5px;color:#e2e8f0;max-width:320px;">
+                <strong style="color:var(--pri);">الأساس:</strong> ${ex.tech} <span style="color:var(--sec);">(${ex.calib})</span>
               </td>
               <td>
                 <div style="display:inline-flex;gap:4px;flex-wrap:wrap;justify-content:center;">
@@ -4075,23 +4436,35 @@
         }).join('');
 
         body.innerHTML = `
-          <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:10px;margin-bottom:14px;">
+          <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:10px;margin-bottom:10px;">
             <div class="centered-stat-box">
               <span class="centered-stat-lbl">أقوى فرصة للساعة القادمة</span>
               <strong class="centered-stat-num val-emerald">SOLUSDT (+4.35%)</strong>
               <span style="font-size:10.5px;color:#cbd5e1;">معايرة PAVA: 94.9%</span>
             </div>
             <div class="centered-stat-box">
-              <span class="centered-stat-lbl">إجمالي الفرص المجازة (&ge;75%)</span>
-              <strong class="centered-stat-num val-gold">${ALL_CANDIDATE_DEALS.filter(x => x.quant && x.quant.approved).length} صفقات</strong>
-              <span style="font-size:10.5px;color:#cbd5e1;">تنفيذ صانع سوق بدون انزلاق</span>
+              <span class="centered-stat-lbl">المسموح للوكيل هذه الساعة</span>
+              <strong class="centered-stat-num val-gold num">$${bud.remHourUsd.toLocaleString()} / $${bud.maxHourlyUsd.toLocaleString()}</strong>
+              <span style="font-size:10.5px;color:#cbd5e1;">الصفقات: ${bud.tradesHour}/${bud.maxTradesPerHour} ساعة • سقف الصفقة ${bud.maxPerTradePct}%</span>
             </div>
             <div class="centered-stat-box">
-              <span class="centered-stat-lbl">الوكيل المالي المتحدث</span>
-              <strong class="centered-stat-num val-cyan">ترليورين (TRILLIURIN)</strong>
-              <span style="font-size:10.5px;color:#cbd5e1;">تحديث لحظي لإجماع الـ 5 وكلاء</span>
+              <span class="centered-stat-lbl">المسموح للوكيل اليوم</span>
+              <strong class="centered-stat-num val-cyan num">$${bud.remDayUsd.toLocaleString()} / $${bud.maxDailyUsd.toLocaleString()}</strong>
+              <span style="font-size:10.5px;color:#cbd5e1;">الصفقات: ${bud.tradesDay}/${bud.maxTradesPerDay} يوم • صلاحية الأدمن مفتوحة 👑</span>
             </div>
           </div>
+
+          <details class="holo-chamber" style="margin-bottom:10px;padding:7px 10px;">
+            <summary style="cursor:pointer;font-size:11.5px;font-weight:900;color:var(--pri);">⚙️ قواعد وحدود استثمار الوكيل الإلزامية (اضغط للتعديل بصلاحية الأدمن)</summary>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin-top:8px;align-items:end;">
+              <label style="font-size:10.5px;">سقف الصفقة (%):<input id="rule-max-pct" type="number" step="0.5" min="1" max="25" class="holo-inp num" style="width:100%;margin-top:2px;" value="${bud.maxPerTradePct}" /></label>
+              <label style="font-size:10.5px;">الحد الساعي ($):<input id="rule-max-hr-usd" type="number" step="5000" min="1000" class="holo-inp num" style="width:100%;margin-top:2px;" value="${bud.maxHourlyUsd}" /></label>
+              <label style="font-size:10.5px;">الحد اليومي ($):<input id="rule-max-day-usd" type="number" step="10000" min="5000" class="holo-inp num" style="width:100%;margin-top:2px;" value="${bud.maxDailyUsd}" /></label>
+              <label style="font-size:10.5px;">صفقات/ساعة:<input id="rule-max-hr-cnt" type="number" min="1" max="20" class="holo-inp num" style="width:100%;margin-top:2px;" value="${bud.maxTradesPerHour}" /></label>
+              <label style="font-size:10.5px;">صفقات/يوم:<input id="rule-max-day-cnt" type="number" min="1" max="50" class="holo-inp num" style="width:100%;margin-top:2px;" value="${bud.maxTradesPerDay}" /></label>
+              <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" onclick="ui.saveAgentRulesFromModal()">💾 حفظ قواعد الوكيل</button>
+            </div>
+          </details>
 
           <div class="table-wrap">
             <table>
@@ -4099,7 +4472,7 @@
                 <tr>
                   <th>الأصل والسعر</th>
                   <th>قرار الساعة القادمة</th>
-                  <th>مبلغ Kelly</th>
+                  <th>مبلغ الاستثمار (مقترح الوكيل / تعديل الأدمن)</th>
                   <th>علامَ بُني القرار؟ (الأساس الكمي والفني)</th>
                   <th>تنفيذ مباشر</th>
                 </tr>
@@ -4110,7 +4483,7 @@
         `;
 
         modal.classList.remove('hidden');
-        this.speakNextHourSummary();
+        if (!silentRefresh) this.speakNextHourSummary();
       },
 
       closeTrilliurinModals() {
@@ -4308,37 +4681,158 @@
       },
 
       renderGoogleAuthQR() {
-        const email = (document.getElementById('adm-email')?.value || 'majed@trillionaire.sa').trim().slice(0, 26);
-        document.getElementById('ga-secret-txt').textContent = state.gaSecret;
-        const mat = makeQrMatrix(`otpauth://totp/HTB:${email}?secret=${state.gaSecret}&issuer=HowToBeATrillionaire`);
+        const email = (document.getElementById('adm-email')?.value || 'majed@trillionaire.sa').trim().slice(0, 32);
+        const secretClean = (state.gaSecret || '').toUpperCase().replace(/[^A-Z2-7]/g, '');
+        const grouped = secretClean.match(/.{1,4}/g)?.join(' ') || secretClean;
+        const secEl = document.getElementById('ga-secret-txt');
+        if (secEl) secEl.textContent = grouped;
+        const uri = `otpauth://totp/TRILMAJED:${encodeURIComponent(email)}?secret=${secretClean}&issuer=TRILMAJED&algorithm=SHA1&digits=6&period=30`;
+        const mat = makeQrMatrix(uri);
         const cv = document.getElementById('ga-qr-canvas'); if (!cv) return;
-        const ctx = cv.getContext('2d'), n = mat.length, scale = Math.floor(cv.width / (n + 6)), off = Math.floor((cv.width - n * scale) / 2);
-        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); ctx.fillStyle = '#000';
-        for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (mat[r][c]) ctx.fillRect(off + c * scale, off + r * scale, scale, scale);
+        const n = mat.length;
+        const quiet = 4;
+        const scale = Math.max(3, Math.floor(204 / (n + quiet * 2)));
+        const dim = (n + quiet * 2) * scale;
+        cv.width = dim; cv.height = dim;
+        const ctx = cv.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, dim, dim);
+        ctx.fillStyle = '#000000';
+        for (let r = 0; r < n; r++) {
+          for (let c = 0; c < n; c++) {
+            if (mat[r][c]) ctx.fillRect((quiet + c) * scale, (quiet + r) * scale, scale, scale);
+          }
+        }
+      },
+      async copyGaSecret() {
+        const clean = (state.gaSecret || '').toUpperCase().replace(/[^A-Z2-7]/g, '');
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(clean);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = clean; document.body.appendChild(ta); ta.select();
+            document.execCommand('copy'); document.body.removeChild(ta);
+          }
+          sfx.buySuccess();
+          this.toast('📋 تم نسخ المفتاح السري (Base32) بدون مسافات — ألصقه في Google Authenticator (نوع: حسب الوقت)');
+        } catch (_) {
+          this.toast(`المفتاح: ${clean}`);
+        }
+      },
+      regenerateGaSecret() {
+        state.gaSecret = randomBase32(32);
+        state.gaVerified = false;
+        safeStore.set('htb_ga_secret', state.gaSecret);
+        safeStore.set('htb_ga_verified', '0');
+        this.renderGoogleAuthQR();
+        const badge = document.getElementById('ga-status-badge');
+        if (badge) badge.textContent = 'جاهز للربط';
+        this.syncLoginGateUI();
+        sfx.buySuccess();
+        this.toast('🔄 تم توليد مفتاح وباركود Google Authenticator جديد (32 حرف Base32)');
       },
       async fillTestGaCode() { document.getElementById('adm-ga-code').value = await computeTOTP(state.gaSecret, 0); },
       async verifyGoogleAuthenticatorEnrollment() {
-        const code = (document.getElementById('adm-ga-code')?.value || '').trim();
+        const code = (document.getElementById('adm-ga-code')?.value || '').replace(/\s+/g, '').trim();
         const c0 = await computeTOTP(state.gaSecret, 0), cm1 = await computeTOTP(state.gaSecret, -1), cp1 = await computeTOTP(state.gaSecret, 1);
-        if (![c0, cm1, cp1].includes(code)) { this.toast('❌ الرمز غير مطابق', 'var(--hot)'); return; }
-        state.gaVerified = true; safeStore.set('htb_ga_verified', '1'); this.syncLoginGateUI(); sfx.buySuccess(); document.getElementById('ga-status-badge').textContent = '✓ مفعل'; this.toast('✅ تم تفعيل Google Authenticator');
+        if (![c0, cm1, cp1].includes(code)) { sfx.sellSuccess(); this.toast('❌ الرمز غير مطابق — تأكد من مسح الباركود الجديد أو إدخال المفتاح بنمط «حسب الوقت Time-based»', 'var(--hot)'); return; }
+        state.gaVerified = true; safeStore.set('htb_ga_verified', '1'); this.syncLoginGateUI(); sfx.buySuccess(); document.getElementById('ga-status-badge').textContent = '✓ مفعل وموثّق'; this.toast('✅ تم التحقق وتفعيل Google Authenticator بنجاح!');
       },
-      openPasskeyModal() { document.getElementById('fp-ring').className = 'fp-sensor-ring'; document.getElementById('modal-passkey').classList.remove('hidden'); },
-      startBiometricHold() {
-        document.getElementById('fp-ring').classList.add('scanning');
-        let p = 0; clearInterval(this._fpInt);
-        this._fpInt = setInterval(() => { p += 34; if (p >= 100) { clearInterval(this._fpInt); this.completeBiometricSuccess(); } }, 180);
+      openPasskeyModal() {
+        const ring = document.getElementById('fp-ring');
+        if (ring) ring.className = 'fp-sensor-ring';
+        const txt = document.getElementById('fp-progress-txt');
+        const hasCred = !!safeStore.get('htb_webauthn_cred_id');
+        if (txt) txt.textContent = hasCred ? '✓ بصمة الجهاز مسجلة — اضغط للتحقق ببصمة الجهاز الأصلية' : 'اضغط لتسجيل بصمة جهازك الأصلية (Touch ID / Face ID / Fingerprint)';
+        document.getElementById('modal-passkey').classList.remove('hidden');
       },
+      startBiometricHold() { this.invokeNativeWebAuthn(false); },
       endBiometricHold() { clearInterval(this._fpInt); },
-      async invokeNativeWebAuthn() { this.completeBiometricSuccess(); },
-      completeBiometricSuccess() {
+
+      async _runRealPlatformBiometric(forceRegister = false) {
+        if (!window.PublicKeyCredential || !navigator.credentials || !window.isSecureContext) {
+          return { ok: false, reason: 'المتصفح الحالي أو الرابط غير الآمن لا يدعم WebAuthn — افتح الرابط عبر HTTPS على متصفح حديث.' };
+        }
+        const savedId = safeStore.get('htb_webauthn_cred_id');
+        const email = (document.getElementById('adm-email')?.value || 'majed@trillionaire.sa').trim();
+        const rpId = location.hostname || 'localhost';
+        try {
+          if (forceRegister || !savedId) {
+            const cred = await navigator.credentials.create({
+              publicKey: {
+                challenge: safeRandomBytes(32),
+                rp: { name: 'TRILMAJED Sovereign Cockpit', id: rpId },
+                user: { id: safeRandomBytes(16), name: email, displayName: 'Dr. Majed Hamdi' },
+                pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+                authenticatorSelection: {
+                  authenticatorAttachment: 'platform',
+                  residentKey: 'preferred',
+                  userVerification: 'required'
+                },
+                attestation: 'none',
+                timeout: 60000
+              }
+            });
+            if (!cred || !cred.rawId) return { ok: false, reason: 'لم يتم إكمال تسجيل بصمة الجهاز.' };
+            safeStore.set('htb_webauthn_cred_id', b64urlEncode(cred.rawId));
+            state.passkeyRegistered = true;
+            safeStore.set('htb_passkey_ok', '1');
+            return { ok: true, mode: 'register' };
+          } else {
+            const assertion = await navigator.credentials.get({
+              publicKey: {
+                challenge: safeRandomBytes(32),
+                rpId,
+                allowCredentials: [{ type: 'public-key', id: b64urlDecode(savedId), transports: ['internal'] }],
+                userVerification: 'required',
+                timeout: 60000
+              }
+            });
+            if (!assertion) return { ok: false, reason: 'لم يتم التحقق من بصمة الجهاز.' };
+            state.passkeyRegistered = true;
+            safeStore.set('htb_passkey_ok', '1');
+            return { ok: true, mode: 'verify' };
+          }
+        } catch (err) {
+          const name = err?.name || '';
+          if (name === 'NotAllowedError') return { ok: false, reason: 'تم إلغاء نافذة بصمة الجهاز أو انتهت المهلة.' };
+          if (name === 'InvalidStateError') {
+            safeStore.set('htb_passkey_ok', '1');
+            return { ok: true, mode: 'verify' };
+          }
+          return { ok: false, reason: `تعذّر تفعيل بصمة الجهاز (${name || 'WebAuthn'}): تأكد من تفعيل Touch ID / Face ID / بصمة الجهاز في إعدادات النظام.` };
+        }
+      },
+
+      async invokeNativeWebAuthn(forceRegister = false) {
+        const ring = document.getElementById('fp-ring');
+        const txt = document.getElementById('fp-progress-txt');
+        ring?.classList.add('scanning');
+        if (txt) txt.textContent = forceRegister ? '🔍 جاري تسجيل بصمة جهازك الأصلية...' : '🔍 جاري طلب بصمة جهازك الأصلية (Touch ID / Face ID)...';
+        const res = await this._runRealPlatformBiometric(forceRegister);
+        if (!res.ok) {
+          ring?.classList.remove('scanning');
+          if (txt) txt.textContent = '⚠️ ' + res.reason;
+          sfx.sellSuccess();
+          this.toast('⚠️ ' + res.reason, 'var(--hot)');
+          return;
+        }
+        this.syncLoginGateUI();
+        this.completeBiometricSuccess(res.mode === 'register' ? '🛡️ تم تسجيل بصمة جهازك الأصلية بنجاح!' : '🛡️ تم التحقق من بصمة جهازك الأصلية بنجاح!');
+      },
+      completeBiometricSuccess(msg) {
         try {
           if (location.origin && location.origin !== 'null') {
             fetch('/api/executive/auth/biometric-session', { method: 'POST' }).catch(() => {});
           }
         } catch (_) {}
-        sfx.buySuccess(); document.getElementById('fp-ring').className = 'fp-sensor-ring verified';
-        setTimeout(() => { this.closeModals(); this.toast('🛡️ تم اعتماد بصمتك الحيوية كمفتاح مرور!'); }, 450);
+        sfx.buySuccess();
+        const ring = document.getElementById('fp-ring');
+        if (ring) ring.className = 'fp-sensor-ring verified';
+        const txt = document.getElementById('fp-progress-txt');
+        if (txt) txt.textContent = '✅ ' + (msg || 'تم اعتماد بصمة الجهاز الأصلية!');
+        setTimeout(() => { this.closeModals(); this.toast(msg || '🛡️ تم اعتماد بصمتك الحيوية كمفتاح مرور!'); }, 450);
       },
       openRecoveryModal() { document.getElementById('rec-step2').classList.add('hidden'); document.getElementById('modal-recovery').classList.remove('hidden'); },
       setRecoveryChannel(ch) {
@@ -4379,7 +4873,7 @@
         document.getElementById('gate-2fa-opt')?.classList.toggle('hidden', !state.gaVerified);
         const st = document.getElementById('gate-security-status');
         if (st) {
-          st.textContent = 'Argon2id (64MB, t=3) • ' + (state.passkeyRegistered ? '✓ البصمة معتمدة' : 'البصمة جاهزة') + ' • ' + (hasPass ? '✓ كلمة السر معتمدة' : 'بانتظار كلمة السر');
+          st.textContent = 'Argon2id (64MB, t=3) • ' + (state.passkeyRegistered ? '✓ بصمة الجهاز مسجلة' : 'بصمة الجهاز جاهزة') + ' • ' + (hasPass ? '✓ كلمة السر معتمدة' : 'بانتظار كلمة السر');
         }
       },
 
@@ -4421,7 +4915,7 @@
         const ring = document.getElementById('gate-fp-ring');
         if (ring) ring.className = 'gate-fp-orb';
         const fpTxt = document.getElementById('gate-fp-status');
-        if (fpTxt) fpTxt.textContent = state.passkeyRegistered ? '✓ بصمتك معتمدة — اضغط للدخول بالبصمة' : 'اضغط على البصمة لاعتمادها والدخول فوراً';
+        if (fpTxt) fpTxt.textContent = state.passkeyRegistered ? '✓ بصمة جهازك مسجلة — اضغط للتحقق والدخول' : 'اضغط لتسجيل بصمة جهازك الأصلية والدخول فوراً';
         if (safeStore.get('htb_custom_pass_hash')) state.gatePassMode = 'login';
         this.syncLoginGateUI();
         this.toast('🔒 تم قفل المنصة والعودة لصفحة تسجيل الدخول');
@@ -4436,34 +4930,19 @@
         const ring = document.getElementById('gate-fp-ring');
         const fpTxt = document.getElementById('gate-fp-status');
         ring?.classList.add('scanning');
-        if (fpTxt) fpTxt.textContent = '🔍 جاري التحقق من بصمتك الحيوية...';
+        if (fpTxt) fpTxt.textContent = '🔍 جاري استدعاء بصمة الجهاز الأصلية (Touch ID / Face ID)...';
 
-        // محاولة استدعاء بصمة الجهاز الأصلية WebAuthn إن توفرت خارج الإطار المعزول
-        try {
-          if (window.PublicKeyCredential && navigator.credentials && window.isSecureContext) {
-            const challenge = safeRandomBytes(32);
-            if (!state.passkeyRegistered) {
-              await navigator.credentials.create({
-                publicKey: {
-                  challenge,
-                  rp: { name: 'HOW TO BE A TRILLIONAIRE' },
-                  user: { id: safeRandomBytes(16), name: 'majed@trillionaire.sa', displayName: 'Dr. Majed Hamdi' },
-                  pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
-                  authenticatorSelection: { userVerification: 'preferred' },
-                  timeout: 15000
-                }
-              }).catch(() => null);
-            }
-          }
-        } catch (_) {}
-
-        setTimeout(() => {
-          state.passkeyRegistered = true;
-          safeStore.set('htb_passkey_ok', '1');
-          if (ring) ring.className = 'gate-fp-orb verified';
-          if (fpTxt) fpTxt.textContent = '✅ تم التحقق من البصمة واعتمادها!';
-          setTimeout(() => this.unlockCockpit('🛡️ تم اعتماد بصمتك الحيوية وتسجيل الدخول بنجاح!'), 220);
-        }, 320);
+        const res = await this._runRealPlatformBiometric(false);
+        if (!res.ok) {
+          ring?.classList.remove('scanning');
+          if (fpTxt) fpTxt.textContent = '⚠️ ' + res.reason;
+          sfx.sellSuccess();
+          this.toast('⚠️ ' + res.reason, 'var(--hot)');
+          return;
+        }
+        if (ring) ring.className = 'gate-fp-orb verified';
+        if (fpTxt) fpTxt.textContent = res.mode === 'register' ? '✅ تم تسجيل بصمة جهازك الأصلية!' : '✅ تم التحقق من بصمة جهازك الأصلية!';
+        setTimeout(() => this.unlockCockpit(res.mode === 'register' ? '🛡️ تم تسجيل بصمة جهازك الأصلية وتسجيل الدخول بنجاح!' : '🛡️ تم التحقق من بصمة جهازك وتسجيل الدخول بنجاح!'), 220);
       },
 
       async approveCustomPassword() {
@@ -4894,44 +5373,93 @@
         this._syncAmbientMusicUI();
       },
 
-      _startAmbientSynth() {
+      async _startAmbientSynth() {
         try {
           const AC = window.AudioContext || window.webkitAudioContext;
-          if (!AC) return;
+          if (!AC) { this.toast('⚠️ المتصفح لا يدعم WebAudio', 'var(--hot)'); return; }
           if (!this._ambCtx) this._ambCtx = new AC();
-          if (this._ambCtx.state === 'suspended') this._ambCtx.resume();
+          if (this._ambCtx.state === 'suspended') {
+            await this._ambCtx.resume();
+          }
           this._stopAmbientSynth();
           const ctx = this._ambCtx;
+
+          const comp = ctx.createDynamicsCompressor();
+          comp.threshold.setValueAtTime(-16, ctx.currentTime);
+          comp.ratio.setValueAtTime(3, ctx.currentTime);
+
           const master = ctx.createGain();
+          const vol = Math.max(0.05, (state.musicVolume || 65) / 100);
           master.gain.setValueAtTime(0.0001, ctx.currentTime);
-          const targetGain = Math.max(0.001, (state.musicVolume / 100) * 0.14);
-          master.gain.exponentialRampToValueAtTime(targetGain, ctx.currentTime + 0.8);
+          master.gain.linearRampToValueAtTime(vol * 0.48, ctx.currentTime + 0.55);
 
           const filter = ctx.createBiquadFilter();
           filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(620, ctx.currentTime);
+          filter.frequency.setValueAtTime(980, ctx.currentTime);
+          filter.Q.setValueAtTime(1.1, ctx.currentTime);
 
-          const base = Number(state.musicFreq) === 528 ? 264 : 216;
-          const ratios = [0.5, 1.0, 1.25, 1.5];
-          this._ambOscs = ratios.map((r, idx) => {
+          // LFO هادئ لتنفس الصوت الموسيقي بعمق ودفء
+          const lfo = ctx.createOscillator();
+          const lfoGain = ctx.createGain();
+          lfo.type = 'sine';
+          lfo.frequency.setValueAtTime(0.09, ctx.currentTime);
+          lfoGain.gain.setValueAtTime(340, ctx.currentTime);
+          lfo.connect(lfoGain);
+          lfoGain.connect(filter.frequency);
+          lfo.start();
+
+          const freqMode = Number(state.musicFreq) || 432;
+          const base = freqMode === 528 ? 264 : (freqMode === 396 ? 198 : 216);
+          const padRatios = [0.5, 1.0, 1.25, 1.5, 2.0];
+          this._ambOscs = padRatios.map((r, idx) => {
             const osc = ctx.createOscillator();
             osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
             osc.frequency.setValueAtTime(base * r, ctx.currentTime);
+            osc.detune.setValueAtTime((idx - 2) * 4.5, ctx.currentTime);
             const g = ctx.createGain();
-            g.gain.setValueAtTime(0.22 / (idx + 1), ctx.currentTime);
+            g.gain.setValueAtTime(0.28 / (idx * 0.45 + 1), ctx.currentTime);
             osc.connect(g);
             g.connect(filter);
             osc.start();
             return osc;
           });
-          filter.connect(master);
+          this._ambOscs.push(lfo);
+
+          filter.connect(comp);
+          comp.connect(master);
           master.connect(ctx.destination);
           this._ambMaster = master;
+
+          // نغمات بيانو/جرس هادئة متتابعة (Pentatonic Focus Melody) لتكون الموسيقى واضحة ومريحة فوراً
+          const scaleRatios = [1, 1.125, 1.25, 1.5, 1.667, 2.0, 2.25, 2.5];
+          let step = 0;
+          const playSoftNote = () => {
+            if (!state.musicPlaying || !this._ambCtx || !this._ambMaster) return;
+            try {
+              const now = this._ambCtx.currentTime;
+              const noteOsc = this._ambCtx.createOscillator();
+              const noteGain = this._ambCtx.createGain();
+              const ratio = scaleRatios[(step * 3 + (step % 2)) % scaleRatios.length];
+              step += 1;
+              noteOsc.type = 'sine';
+              noteOsc.frequency.setValueAtTime(base * 2 * ratio, now);
+              noteGain.gain.setValueAtTime(0.0001, now);
+              noteGain.gain.linearRampToValueAtTime(0.24, now + 0.08);
+              noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.55);
+              noteOsc.connect(noteGain);
+              noteGain.connect(this._ambMaster);
+              noteOsc.start(now);
+              noteOsc.stop(now + 1.6);
+            } catch (_) {}
+          };
+          playSoftNote();
+          this._ambArpInt = setInterval(playSoftNote, 1550);
         } catch (_) {}
       },
 
       _stopAmbientSynth() {
         try {
+          if (this._ambArpInt) { clearInterval(this._ambArpInt); this._ambArpInt = null; }
           if (this._ambOscs) {
             this._ambOscs.forEach((o) => { try { o.stop(); o.disconnect(); } catch (_) {} });
             this._ambOscs = null;
@@ -4948,8 +5476,8 @@
         state.musicVolume = vol;
         safeStore.set('htb_music_vol', String(vol));
         if (this._ambMaster && this._ambCtx) {
-          const targetGain = Math.max(0.0005, (vol / 100) * 0.14);
-          this._ambMaster.gain.setTargetAtTime(targetGain, this._ambCtx.currentTime, 0.12);
+          const targetGain = Math.max(0.0005, (vol / 100) * 0.48);
+          this._ambMaster.gain.setTargetAtTime(targetGain, this._ambCtx.currentTime, 0.1);
         }
         this._syncAmbientMusicUI();
       },
@@ -4974,7 +5502,7 @@
         }
         const bPanel = document.getElementById('btn-ambient-music-panel');
         if (bPanel) {
-          bPanel.textContent = on ? '🔊 إيقاف موسيقى التركيز الهادئة' : '🎵 تشغيل موسيقى التركيز الهادئة';
+          bPanel.textContent = on ? '🔊 إيقاف موسيقى التركيز الهادئة (تعمل الآن)' : '🎵 تشغيل موسيقى التركيز الهادئة';
         }
         ['ambient-vol-slider', 'ambient-vol-slider-mob', 'ambient-vol-slider-panel'].forEach((id) => {
           const el = document.getElementById(id);
@@ -4986,22 +5514,28 @@
         });
       },
 
-      // === تبديل السمات الهولوغرافية الست ===
-      applyHoloTheme(themeId) {
-        const palettes = {
-          gold: { pri: '#f7c948', sec: '#00f5d4', ok: '#00e896' },
-          cyan: { pri: '#38bdf8', sec: '#00f5d4', ok: '#34d399' },
-          emerald: { pri: '#10b981', sec: '#f7c948', ok: '#34d399' },
-          amethyst: { pri: '#c084fc', sec: '#38bdf8', ok: '#00e896' },
-          crimson: { pri: '#fb7185', sec: '#fbbf24', ok: '#34d399' },
-          arctic: { pri: '#e2e8f0', sec: '#38bdf8', ok: '#00e896' }
+      // === تبديل السمات الهولوغرافية الست (تحويل كامل للخلفية والبطاقات والحدود والألوان مع الحفظ) ===
+      applyHoloTheme(themeId, silent = false) {
+        const valid = ['gold', 'cyan', 'emerald', 'amethyst', 'crimson', 'arctic'];
+        const t = valid.includes(themeId) ? themeId : 'gold';
+        const labels = {
+          gold: 'الملكي الذهبي',
+          cyan: 'السيان الكمي',
+          emerald: 'الزمرد السيادي',
+          amethyst: 'السديم البنفسجي',
+          crimson: 'الياقوت القرمزي',
+          arctic: 'التيتانيوم القطبي'
         };
-        const p = palettes[themeId] || palettes.gold;
-        document.documentElement.style.setProperty('--pri', p.pri);
-        document.documentElement.style.setProperty('--sec', p.sec);
-        document.documentElement.style.setProperty('--ok', p.ok);
-        sfx.buySuccess();
-        this.toast(`🎨 تم تفعيل السمة الهولوغرافية (${themeId.toUpperCase()}) بنجاح`);
+        state.holoTheme = t;
+        safeStore.set('htb_holo_theme', t);
+        document.documentElement.setAttribute('data-theme', t);
+        document.querySelectorAll('[data-theme-btn]').forEach((btn) => {
+          btn.classList.toggle('theme-btn-active', btn.getAttribute('data-theme-btn') === t);
+        });
+        if (!silent) {
+          sfx.buySuccess();
+          this.toast(`🎨 تم تفعيل سمة «${labels[t]}» بالكامل على كافة شاشات المنصة`);
+        }
       },
 
       // === اختبار قاطع السحب اليومي (1.5% نصف الحجم | 2.5% وقف الجديد | 3.0% إغلاق الكل) ===
@@ -5096,6 +5630,22 @@
       },
 
       renderTestnet14Page() {
+        const cal = getCalibrationDeadlineInfo();
+        const badge = document.getElementById('testnet-day-badge');
+        if (badge) {
+          badge.textContent = cal.isComplete
+            ? `✓ اكتملت المعايرة (${cal.deadlineLabel}) • LIVE UNLOCKED 🔓`
+            : `المعايرة حتى ${cal.deadlineLabel} (يتبقى ${cal.remDays}ي ${cal.remHours}س) • LIVE KEY LOCKED 🔒`;
+        }
+        const readout = document.getElementById('cal-deadline-readout');
+        if (readout) {
+          readout.textContent = cal.isComplete
+            ? `✅ اكتملت فترة المعايرة (${cal.deadlineLabel})`
+            : `حتى ${cal.deadlineLabel} (يتبقى ${cal.remDays} أيام و ${cal.remHours} ساعة)`;
+        }
+        const bar = document.getElementById('cal-deadline-bar');
+        if (bar) bar.style.width = `${cal.pct}%`;
+
         const bins = [
           { lbl: '75% – 80%', lo: 0.75, hi: 0.80 },
           { lbl: '80% – 85%', lo: 0.80, hi: 0.85 },
@@ -5145,15 +5695,16 @@
         const hex = Array.from(safeRandomBytes(18)).map((b) => b.toString(16).padStart(2, '0')).join('');
         document.getElementById('vault-pubkey-box').textContent = 'Ed25519 PubKey: MCowBQYDK2VwAyEA' + btoa(hex).slice(0, 40);
       },
-            async saveBinanceApiKeyToVault() {
+      async saveBinanceApiKeyToVault() {
         const rk = (document.getElementById('bn-read-key-inp')?.value || '').trim();
         const tk = (document.getElementById('bn-trade-key-inp')?.value || '').trim();
         const ip = (document.getElementById('bn-static-ip-inp')?.value || '').trim();
         const envMode = document.getElementById('bn-env-sel')?.value || 'SPOT_TESTNET';
         const noW = !!document.getElementById('bn-no-withdraw-chk')?.checked;
-        if (envMode === 'LIVE_PRODUCTION') {
+        const cal = getCalibrationDeadlineInfo();
+        if (envMode === 'LIVE_PRODUCTION' && !cal.isComplete) {
           sfx.sellSuccess();
-          this.toast('🚫 ممنوع ربط مفتاح تداول حقيقي قبل اكتمال الـ 14 يوماً على Binance Spot Testnet ومراجعة جدول المعايرة!', 'var(--hot)');
+          this.toast(`🚫 ممنوع ربط مفتاح تداول حقيقي قبل تاريخ ${cal.deadlineLabel} (يتبقى ${cal.remDays} أيام) ومراجعة جدول المعايرة!`, 'var(--hot)');
           return;
         }
         if (!rk || !tk) { this.toast('⚠️ أدخل مفتاح القراءة ومفتاح التداول منفصلين', 'var(--hot)'); return; }
@@ -5182,6 +5733,7 @@
 
     (function boot() {
       hydrateSigs();
+      ui.applyHoloTheme(state.holoTheme || 'gold', true);
       startVocalHologramLoop();
       ui.renderCrest();
       ui.renderFiveAiOrbs();
@@ -5191,11 +5743,11 @@
       ui.renderBotsLeaderboard();
       ui.renderStocks();
       ui.renderDailyPage();
-    if (location.hash && location.hash.toLowerCase().includes('cfo')) {
-      try { history.replaceState(null, '', location.pathname); } catch (_) {}
-    }
-    ui._syncAmbientMusicUI();
-    ui.renderTestnet14Page();
+      if (location.hash && location.hash.toLowerCase().includes('cfo')) {
+        try { history.replaceState(null, '', location.pathname); } catch (_) {}
+      }
+      ui._syncAmbientMusicUI();
+      ui.renderTestnet14Page();
       ui.renderGoogleAuthQR();
       ui.syncLoginGateUI();
 
