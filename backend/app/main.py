@@ -1058,30 +1058,64 @@ async def websocket_market_stream(websocket: WebSocket) -> None:
 
 
 def _configure_optional_spa_serving(fastapi_app: FastAPI) -> None:
-    """تركيب خدمة الملفات الثابتة للواجهة الأمامية في حال وجود حزمة البناء frontend/dist."""
+    """تقديم القمرة الهولوغرافية الأحدث (v1.4.1) على / و /mobile وإبقاء خزنة React المتقدمة على /vault."""
+    repo_root = Path(__file__).resolve().parents[2]
+    cockpit_candidates = [
+        repo_root / "standalone-preview.html",
+        Path("/app/standalone-preview.html"),
+    ]
+    mobile_candidates = [
+        repo_root / "mobile-cockpit.html",
+        Path("/app/mobile-cockpit.html"),
+    ]
+    cockpit_file = next((p for p in cockpit_candidates if p.is_file()), None)
+    mobile_file = next((p for p in mobile_candidates if p.is_file()), None)
+
     candidate_dirs = [
-        Path(__file__).resolve().parents[2] / "frontend" / "dist",
+        repo_root / "frontend" / "dist",
         Path("/app/frontend/dist"),
     ]
     dist_dir = next((d for d in candidate_dirs if (d / "index.html").is_file()), None)
-    if dist_dir is None:
-        return
 
-    assets_dir = dist_dir / "assets"
-    if assets_dir.is_dir():
-        fastapi_app.mount(
-            "/assets",
-            StaticFiles(directory=str(assets_dir)),
-            name="frontend-assets",
-        )
+    if dist_dir is not None:
+        assets_dir = dist_dir / "assets"
+        if assets_dir.is_dir():
+            fastapi_app.mount(
+                "/assets",
+                StaticFiles(directory=str(assets_dir)),
+                name="frontend-assets",
+            )
+
+    if cockpit_file is None and dist_dir is None:
+        return
 
     @fastapi_app.get("/{full_path:path}", include_in_schema=False)
     async def serve_spa(full_path: str) -> FileResponse:
         if full_path.startswith("api/") or full_path.startswith("ws/"):
             raise HTTPException(status_code=404, detail="Not Found")
-        requested_file = (dist_dir / full_path).resolve()
-        if str(requested_file).startswith(str(dist_dir.resolve())) and requested_file.is_file():
-            return FileResponse(str(requested_file))
+
+        clean = full_path.strip("/")
+
+        # نسخة الجوال الهولوغرافية v1.4.1
+        if clean in ("mobile", "mobile.html") and mobile_file is not None:
+            return FileResponse(str(mobile_file))
+
+        # خزنة Binance وبوابات الاعتماد الثماني (React Vault) على /vault
+        if clean == "vault" or clean.startswith("vault/"):
+            if dist_dir is not None:
+                return FileResponse(str(dist_dir / "index.html"))
+
+        # الصفحة الرئيسية: القمرة الهولوغرافية الأحدث v1.4.1 مباشرة
+        if clean in ("", "index.html", "cockpit", "standalone-preview.html") and cockpit_file is not None:
+            return FileResponse(str(cockpit_file))
+
+        if dist_dir is not None:
+            requested_file = (dist_dir / full_path).resolve()
+            if str(requested_file).startswith(str(dist_dir.resolve())) and requested_file.is_file():
+                return FileResponse(str(requested_file))
+
+        if cockpit_file is not None:
+            return FileResponse(str(cockpit_file))
         return FileResponse(str(dist_dir / "index.html"))
 
 
