@@ -1206,7 +1206,40 @@
     }
     @media (max-width: 880px) {
       .lux-kpi-five-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-      .lux-kpi-five-grid .lux-kpi-card:last-child { grid-column: span 2; }
+      .lux-kpi-five-grid .lux-kpi-card:last-child { grid-column: span 2 !important; }
+      .holo-stage { padding-bottom: 135px !important; }
+      .holo-prism, .holo-chamber, .table-wrap { max-width: 100% !important; min-width: 0 !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+    }
+    html[data-layout="mobile"] .holo-stage {
+      max-width: 460px !important;
+      padding: 6px 8px 140px !important;
+      overflow-x: hidden !important;
+    }
+    html[data-layout="mobile"] .lux-kpi-five-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 7px !important;
+    }
+    html[data-layout="mobile"] .lux-kpi-five-grid .lux-kpi-card:last-child {
+      grid-column: span 2 !important;
+    }
+    html[data-layout="mobile"] .lux-kpi-val {
+      font-size: 16px !important;
+      word-break: break-word !important;
+    }
+    html[data-layout="mobile"] .holo-prism,
+    html[data-layout="mobile"] .holo-chamber,
+    html[data-layout="mobile"] .table-wrap {
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+    html[data-layout="mobile"] .daily-split-grid,
+    html[data-layout="mobile"] .cfo-main-grid {
+      grid-template-columns: 1fr !important;
+    }
+    html[data-layout="mobile"] table {
+      font-size: 10.5px !important;
     }
     .lux-kpi-card {
       align-items: center !important;
@@ -1557,16 +1590,19 @@
       </div>
     </header>
 
-    <!-- 1B. هيدر الجوال مع زر موسيقى التركيز الواضح وأسماء كافة الأزرار -->
+    <!-- 1B. هيدر الجوال مع زر العودة لسطح المكتب وزر موسيقى التركيز وأسماء كافة الأزرار -->
     <header class="mob-bridge mobile-only">
       <div class="row-between">
-        <span class="hdr-eng-title eng-crown" style="font-size:13.5px;">HOW TO BE A TRILLIONAIRE</span>
-        <span class="hex-shield num" style="font-size:9.5px;color:var(--ok);border-color:var(--ok);">TESTNET•14D</span>
+        <span class="hdr-eng-title eng-crown" style="font-size:13px;">HOW TO BE A TRILLIONAIRE</span>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span id="live-feed-badge-mob" class="hex-shield num" style="font-size:9px;color:var(--ok);border-color:var(--ok);">TESTNET•28/11</span>
+          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold" style="padding:2px 8px;font-size:10px;" onclick="ui.exitMobileLayout()">🖥️ سطح المكتب</button>
+        </div>
       </div>
       <div class="row-between" style="flex-wrap:wrap;gap:4px;">
         <div class="music-ctrl-pill" style="padding:2px 6px;">
           <button type="button" id="btn-next-hr-mob" class="btn-3d btn-3d-sm btn-3d-buy" onclick="ui.openNextHourBriefModal()">⏱️ الساعة القادمة</button><button type="button" id="btn-ambient-music-mob" class="btn-3d btn-3d-sm" style="padding:3px 7px;font-size:10.5px;" onclick="ui.toggleAmbientMusic()">🎵 موسيقى: إيقاف</button>
-          <input id="ambient-vol-slider-mob" type="range" min="0" max="100" value="35" class="music-vol-range" style="width:48px;" aria-label="صوت الموسيقى" oninput="ui.setAmbientVolume(this.value)" />
+          <input id="ambient-vol-slider-mob" type="range" min="0" max="100" value="65" class="music-vol-range" style="width:48px;" aria-label="صوت الموسيقى" oninput="ui.setAmbientVolume(this.value)" />
         </div>
         <div style="display:flex;gap:4px;flex-wrap:wrap;">
           <button type="button" class="btn-3d btn-3d-sm" style="padding:3px 7px;font-size:10.5px;" onclick="ui.openBinanceModal()">🔑 مفاتيح</button>
@@ -1591,7 +1627,10 @@
     <section class="lux-metrics-shell">
       <div class="lux-sec-heading">
         <span class="lux-sec-title">لوحة المؤشرات المالية</span>
-        <span id="quant-header-telemetry" class="hex-shield num" style="color:#ffd86b;border-color:rgba(245,196,81,0.45);font-size:10.5px;">7 صفقات مؤهلة (&ge;75%) • وضع المحاكاة الآمن</span>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span id="live-feed-badge" class="hex-shield num" style="color:var(--sec);border-color:var(--sec);font-size:10.2px;">⏳ جاري الاتصال بالخادم...</span>
+          <span id="quant-header-telemetry" class="hex-shield num" style="color:var(--pri);border-color:var(--border-pri);font-size:10.5px;">7 صفقات مؤهلة (&ge;75%)</span>
+        </div>
       </div>
 
       <div class="lux-kpi-five-grid">
@@ -5725,6 +5764,97 @@
         document.getElementById('bn-trade-key-inp').value = '';
         this.toast('✅ تم التحقق وحفظ مفتاحي القراءة والتداول منفصلين (السحب معطّل + مقيد بـ Tokyo Static IP)');
       },
+      exitMobileLayout() {
+        document.documentElement.setAttribute('data-layout', 'auto');
+        if (location.pathname.endsWith('/mobile') || location.pathname.endsWith('/mobile.html')) {
+          location.href = location.pathname.replace(/mobile(\.html)?$/, '');
+          return;
+        }
+        this.renderAllCardCandles();
+        this.toast('🖥️ تم العودة إلى وضع سطح المكتب الكامل');
+      },
+
+      _applyLiveBackendTick(payload) {
+        if (!payload) return;
+        const assets = Array.isArray(payload) ? payload : (payload.assets || []);
+        let btcLive = null, solLive = null;
+        if (assets.length) {
+          const map = {};
+          assets.forEach((a) => {
+            const sym = String(a.symbol || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const price = Number(a.price || a.lastPrice || 0);
+            if (sym && price > 0) {
+              map[sym] = price;
+              if (!sym.endsWith('USDT')) map[sym + 'USDT'] = price;
+            }
+          });
+          ALL_CANDIDATE_DEALS.forEach((d) => {
+            const k = d.sym.toUpperCase();
+            const liveP = map[k] || map[k.replace('USDT', '')];
+            if (liveP && liveP > 0) d.price = liveP;
+          });
+          ORBIT_COINS.forEach((c) => {
+            const k = c.sym.toUpperCase();
+            const liveP = map[k] || map[c.code.toUpperCase()];
+            if (liveP && liveP > 0) c.price = liveP;
+          });
+          btcLive = map.BTCUSDT || map.BTC;
+          solLive = map.SOLUSDT || map.SOL;
+        }
+        if (typeof payload.totalEquity === 'number' && payload.totalEquity > 0 && !state._liveEqSynced) {
+          state._liveEqSynced = true;
+          state.equity = +payload.totalEquity.toFixed(2);
+          if (typeof payload.dailyPnl === 'number') state.netProfit = +payload.dailyPnl.toFixed(2);
+        }
+        const badgeText = btcLive
+          ? `🟢 بث حي متصل • BTC $${Math.round(btcLive).toLocaleString()}${solLive ? ` • SOL $${solLive.toFixed(2)}` : ''}`
+          : '🟢 بث حي متصل (Backend Live)';
+        const b1 = document.getElementById('live-feed-badge');
+        if (b1) { b1.textContent = badgeText; b1.style.color = 'var(--ok)'; b1.style.borderColor = 'var(--ok)'; }
+        const b2 = document.getElementById('live-feed-badge-mob');
+        if (b2) { b2.textContent = btcLive ? `🟢 LIVE • BTC $${Math.round(btcLive).toLocaleString()}` : '🟢 LIVE•28/11'; }
+
+        // تحديث الأسعار بهدوء دون مقاطعة الكتابة إن كان المستخدم يعدل مبلغاً
+        const activeTag = document.activeElement?.tagName;
+        if (activeTag !== 'INPUT' && activeTag !== 'SELECT') {
+          syncAutoPortfolioSizing();
+          this.refreshKpis();
+          if (state.activeTab === 'elite90') this.renderElite90Page();
+        }
+      },
+
+      async connectLiveBackendStream() {
+        const isStaticHost = !location.origin || location.origin === 'null' || location.hostname.endsWith('github.io');
+        if (isStaticHost) {
+          const b1 = document.getElementById('live-feed-badge');
+          if (b1) { b1.textContent = '☁️ السحابة العامة (PAPER • حتى 28/11/2026)'; b1.style.color = 'var(--pri)'; b1.style.borderColor = 'var(--border-pri)'; }
+          return;
+        }
+        try {
+          const r = await fetch('/api/market/assets');
+          if (r.ok) {
+            const assets = await r.json();
+            this._applyLiveBackendTick({ assets });
+          }
+        } catch (_) {}
+        try {
+          const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+          const ws = new WebSocket(`${wsProto}//${location.host}/ws/market`);
+          this._liveWs = ws;
+          ws.onmessage = (ev) => {
+            try {
+              const msg = JSON.parse(ev.data);
+              if (msg && (msg.type === 'MARKET_TICK' || msg.assets)) {
+                this._applyLiveBackendTick(msg);
+              }
+            } catch (_) {}
+          };
+          ws.onclose = () => {
+            setTimeout(() => { if (!this._liveWs || this._liveWs.readyState === 3) this.connectLiveBackendStream(); }, 4000);
+          };
+        } catch (_) {}
+      },
+
       closeModals() { ['modal-exec-receipt', 'modal-orbit-3d', 'modal-agent-trades', 'modal-passkey', 'modal-recovery', 'modal-ga-qr', 'modal-binance-vault'].forEach((id) => document.getElementById(id)?.classList.add('hidden')); }
     };
     window.ui = ui;
@@ -5744,6 +5874,7 @@
       ui.renderBotsLeaderboard();
       ui.renderStocks();
       ui.renderDailyPage();
+      ui.connectLiveBackendStream();
       if (location.hash && location.hash.toLowerCase().includes('cfo')) {
         try { history.replaceState(null, '', location.pathname); } catch (_) {}
       }
