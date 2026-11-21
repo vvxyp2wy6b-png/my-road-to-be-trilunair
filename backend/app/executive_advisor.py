@@ -1426,3 +1426,303 @@ def get_quant_engine_snapshot() -> dict[str, Any]:
         "evaluatedCandidates": evaluated,
     }
 
+
+# ==============================================================================
+# الجسر الحقيقي المباشر مع Binance Spot Testnet (أسعار وشموع حقيقية + أرصدة + تنفيذ فعلي)
+# ==============================================================================
+
+_TESTNET_BASE = "https://testnet.binance.vision"
+_BINANCE_PUB_FALLBACK = "https://api.binance.com"
+
+_TESTNET_CONN: dict[str, Any] = {
+    "connected": False,
+    "authType": "ED25519",
+    "apiKey": "",
+    "apiSecret": "",
+    "ed25519PrivateKeyPath": str(Path.home() / "trilunair_ed25519_private.pem"),
+    "lastSyncIso": None,
+    "balances": {},
+    "canTrade": False,
+}
+
+
+class TestnetConnectInput(BaseModel):
+    apiKey: str = Field(..., min_length=8)
+    authType: str = Field(default="ED25519")  # ED25519 or HMAC
+    apiSecret: str = Field(default="")
+    ed25519PrivateKeyPath: str = Field(default="~/trilunair_ed25519_private.pem")
+
+
+class TestnetOrderInput(BaseModel):
+    symbol: str = Field(..., min_length=4, max_length=20)
+    side: str = Field(..., pattern="^(BUY|SELL)$")
+    quoteUsd: float = Field(default=0.0, ge=0.0)
+    quantity: float = Field(default=0.0, ge=0.0)
+
+
+def _sign_testnet_params(params: dict[str, Any]) -> tuple[str, str]:
+    """توقيع طلبات Binance Spot Testnet بـ Ed25519 أو HMAC-SHA256 وفق المعيار الرسمي."""
+    import base64
+    import hashlib
+    import hmac
+    import urllib.parse
+
+    query = urllib.parse.urlencode(params)
+    auth_type = (_TESTNET_CONN.get("authType") or "ED25519").upper()
+    if auth_type == "ED25519":
+        from cryptography.hazmat.primitives.serialization import load_pem_private_key
+
+        key_path = Path(_TESTNET_CONN.get("ed25519PrivateKeyPath") or "~/trilunair_ed25519_private.pem").expanduser()
+        if not key_path.is_file():
+            raise FileNotFoundError(f"ملف المفتاح الخاص غير موجود: {key_path}")
+        priv_key = load_pem_private_key(key_path.read_bytes(), password=None)
+        sig_bytes = priv_key.sign(query.encode("ascii"))
+        sig = base64.b64encode(sig_bytes).decode("ascii")
+        return query, urllib.parse.quote(sig, safe="")
+    else:
+        secret = (_TESTNET_CONN.get("apiSecret") or "").strip()
+        if not secret:
+            raise ValueError("مفتاح HMAC Secret مطلوب للتوقيع.")
+        sig = hmac.new(secret.encode("utf-8"), query.encode("utf-8"), hashlib.sha256).hexdigest()
+        return query, sig
+
+
+def _fetch_testnet_account_sync() -> dict[str, Any]:
+    import httpx
+
+    api_key = (_TESTNET_CONN.get("apiKey") or "").strip()
+    if not api_key:
+        raise ValueError("لم يتم ربط مفتاح Binance Spot Testnet بعد.")
+    with httpx.Client(timeout=8.0) as client:
+        # مزامنة وقت خادم Binance Testnet لتفادي خطأ Timestamp
+        ts_ms = int(time.time() * 1000)
+        try:
+            tr = client.get(f"{_TESTNET_BASE}/api/v3/time")
+            if tr.status_code == 200:
+                ts_ms = int(tr.json().get("serverTime", ts_ms))
+        except Exception:
+            pass
+        params = {"timestamp": ts_ms, "recvWindow": 5000}
+        query, sig = _sign_testnet_params(params)
+        r = client.get(
+            f"{_TESTNET_BASE}/api/v3/account?{query}&signature={sig}",
+            headers={"X-MBX-APIKEY": api_key},
+        )
+        data = r.json()
+        if r.status_code != 200:
+            raise RuntimeError(f"Binance Testnet ({r.status_code}): {data.get('msg', data)}")
+
+    balances: dict[str, dict[str, float]] = {}
+    for b in data.get("balances", []):
+        free = float(b.get("free", 0.0))
+        locked = float(b.get("locked", 0.0))
+        if free > 0 or locked > 0 or b.get("asset") in ("USDT", "BTC", "ETH", "SOL", "BNB", "XRP", "DOGE"):
+            balances[str(b["asset"])] = {"free": free, "locked": locked, "total": round(free + locked, 8)}
+
+    _TESTNET_CONN["connected"] = True
+    _TESTNET_CONN["balances"] = balances
+    _TESTNET_CONN["canTrade"] = bool(data.get("canTrade", False))
+    _TESTNET_CONN["lastSyncIso"] = utc_now_iso()
+    return {
+        "connected": True,
+        "endpoint": _TESTNET_BASE,
+        "authType": _TESTNET_CONN["authType"],
+        "canTrade": _TESTNET_CONN["canTrade"],
+        "accountType": data.get("accountType", "SPOT"),
+        "balances": balances,
+        "lastSyncIso": _TESTNET_CONN["lastSyncIso"],
+    }
+
+
+@executive_router.get("/testnet/tickers")
+def get_real_binance_testnet_tickers() -> dict[str, Any]:
+    """جلب الأسعار الحقيقية الحية مباشرة من Binance Spot Testnet (مع بديل Binance Public للرموز الإضافية)."""
+    import httpx
+    import json as _json
+
+    symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "DOGEUSDT"]
+    out: dict[str, dict[str, Any]] = {}
+    source = "BINANCE_SPOT_TESTNET"
+    try:
+        with httpx.Client(timeout=6.0) as client:
+            r = client.get(f"{_TESTNET_BASE}/api/v3/ticker/24hr", params={"symbols": _json.dumps(symbols, separators=(",", ":"))})
+            if r.status_code == 200:
+                for item in r.json():
+                    sym = str(item.get("symbol", "")).upper()
+                    out[sym] = {
+                        "symbol": sym,
+                        "price": float(item.get("lastPrice", 0.0)),
+                        "priceChangePercent": float(item.get("priceChangePercent", 0.0)),
+                        "highPrice": float(item.get("highPrice", 0.0)),
+                        "lowPrice": float(item.get("lowPrice", 0.0)),
+                        "volume": float(item.get("volume", 0.0)),
+                    }
+            # محاولة جلب PAXGUSDT من Binance العام إن لم يتوفر في Testnet
+            try:
+                rp = client.get(f"{_BINANCE_PUB_FALLBACK}/api/v3/ticker/24hr", params={"symbol": "PAXGUSDT"})
+                if rp.status_code == 200:
+                    it = rp.json()
+                    out["PAXGUSDT"] = {
+                        "symbol": "PAXGUSDT",
+                        "price": float(it.get("lastPrice", 0.0)),
+                        "priceChangePercent": float(it.get("priceChangePercent", 0.0)),
+                        "highPrice": float(it.get("highPrice", 0.0)),
+                        "lowPrice": float(it.get("lowPrice", 0.0)),
+                        "volume": float(it.get("volume", 0.0)),
+                    }
+            except Exception:
+                pass
+    except Exception as exc:
+        return {"ok": False, "source": "UNREACHABLE", "error": str(exc), "tickers": out, "timestamp": utc_now_iso()}
+
+    return {"ok": len(out) > 0, "source": source, "tickers": out, "timestamp": utc_now_iso()}
+
+
+@executive_router.get("/testnet/klines/{symbol}")
+def get_real_binance_testnet_klines(symbol: str, interval: str = "1h", limit: int = 48) -> dict[str, Any]:
+    """جلب الشموع الحقيقية (OHLCV) مباشرة من Binance Spot Testnet دون أي تصنيع أو محاكاة."""
+    import httpx
+
+    sym = symbol.upper().strip()
+    valid_intervals = {"1m", "5m", "15m", "30m", "1h", "4h", "1d"}
+    iv = interval.lower().strip()
+    if iv not in valid_intervals:
+        iv = "1h"
+    lim = max(10, min(120, int(limit)))
+
+    bases = [(_TESTNET_BASE, "BINANCE_SPOT_TESTNET"), (_BINANCE_PUB_FALLBACK, "BINANCE_PUBLIC")]
+    for base_url, src in bases:
+        try:
+            with httpx.Client(timeout=6.0) as client:
+                r = client.get(f"{base_url}/api/v3/klines", params={"symbol": sym, "interval": iv, "limit": lim})
+                if r.status_code == 200:
+                    raw = r.json()
+                    if isinstance(raw, list) and len(raw) > 0:
+                        candles = [
+                            {
+                                "openTime": int(k[0]),
+                                "open": float(k[1]),
+                                "high": float(k[2]),
+                                "low": float(k[3]),
+                                "close": float(k[4]),
+                                "volume": float(k[5]),
+                            }
+                            for k in raw
+                        ]
+                        return {
+                            "ok": True,
+                            "symbol": sym,
+                            "interval": iv,
+                            "source": src,
+                            "candles": candles,
+                            "lastPrice": candles[-1]["close"],
+                            "timestamp": utc_now_iso(),
+                        }
+        except Exception:
+            continue
+    return {"ok": False, "symbol": sym, "interval": iv, "source": "NONE", "candles": [], "timestamp": utc_now_iso()}
+
+
+@executive_router.post("/testnet/connect")
+def connect_real_binance_testnet(payload: TestnetConnectInput) -> dict[str, Any]:
+    """ربط فعلي بحساب Binance Spot Testnet وجلب الأرصدة الحقيقية عبر توقيع Ed25519 أو HMAC-SHA256."""
+    _TESTNET_CONN["apiKey"] = payload.apiKey.strip()
+    _TESTNET_CONN["authType"] = payload.authType.strip().upper()
+    _TESTNET_CONN["apiSecret"] = payload.apiSecret.strip()
+    _TESTNET_CONN["ed25519PrivateKeyPath"] = payload.ed25519PrivateKeyPath.strip() or "~/trilunair_ed25519_private.pem"
+    try:
+        res = _fetch_testnet_account_sync()
+        return {"ok": True, **res, "messageAr": "✅ تم الاتصال الفعلي بحسابك على Binance Spot Testnet وجلب الأرصدة الحقيقية!"}
+    except Exception as exc:
+        _TESTNET_CONN["connected"] = False
+        return {"ok": False, "connected": False, "error": str(exc), "messageAr": f"❌ تعذّر الاتصال بـ Binance Spot Testnet: {exc}"}
+
+
+@executive_router.get("/testnet/account")
+def get_real_binance_testnet_account() -> dict[str, Any]:
+    """جلب الحالة الحالية وأرصدة حساب Binance Spot Testnet المتصل."""
+    if not _TESTNET_CONN.get("apiKey"):
+        return {"ok": False, "connected": False, "balances": {}, "messageAr": "لم يتم ربط مفتاح Binance Spot Testnet بعد."}
+    try:
+        res = _fetch_testnet_account_sync()
+        return {"ok": True, **res}
+    except Exception as exc:
+        return {"ok": False, "connected": False, "error": str(exc), "balances": _TESTNET_CONN.get("balances", {})}
+
+
+@executive_router.post("/testnet/order")
+def place_real_binance_testnet_order(payload: TestnetOrderInput) -> dict[str, Any]:
+    """إرسال وتنفيذ أمر شراء/بيع فوري حقيقي على شبكة Binance Spot Testnet (testnet.binance.vision فقط!)."""
+    import httpx
+
+    if _RUNTIME_QUANT_STATE.get("killSwitch"):
+        return {"ok": False, "messageAr": "🛑 قاطع الطوارئ مفعّل — الأوامر موقوفة."}
+    if not _TESTNET_CONN.get("apiKey"):
+        return {"ok": False, "messageAr": "⚠️ يرجى ربط مفتاح Binance Spot Testnet أولاً من نافذة «🔑 مفاتيح»."}
+
+    sym = payload.symbol.upper().strip()
+    side = payload.side.upper().strip()
+    try:
+        with httpx.Client(timeout=8.0) as client:
+            ts_ms = int(time.time() * 1000)
+            try:
+                tr = client.get(f"{_TESTNET_BASE}/api/v3/time")
+                if tr.status_code == 200:
+                    ts_ms = int(tr.json().get("serverTime", ts_ms))
+            except Exception:
+                pass
+
+            params: dict[str, Any] = {
+                "symbol": sym,
+                "side": side,
+                "type": "MARKET",
+                "timestamp": ts_ms,
+                "recvWindow": 5000,
+            }
+            if side == "BUY" and payload.quoteUsd > 0:
+                params["quoteOrderQty"] = round(float(payload.quoteUsd), 2)
+            elif payload.quantity > 0:
+                # تقريب الكمية بدقة مناسبة لأصول Binance الشائعة
+                prec = 5 if sym.startswith("BTC") else (4 if sym.startswith("ETH") else (2 if sym.startswith(("SOL", "BNB")) else 1))
+                params["quantity"] = round(float(payload.quantity), prec)
+            else:
+                return {"ok": False, "messageAr": "⚠️ يجب تحديد المبلغ أو الكمية لتنفيذ الأمر."}
+
+            query, sig = _sign_testnet_params(params)
+            r = client.post(
+                f"{_TESTNET_BASE}/api/v3/order?{query}&signature={sig}",
+                headers={"X-MBX-APIKEY": _TESTNET_CONN["apiKey"]},
+            )
+            data = r.json()
+            if r.status_code != 200:
+                return {
+                    "ok": False,
+                    "error": data.get("msg", str(data)),
+                    "messageAr": f"❌ رفض Binance Spot Testnet الأمر: {data.get('msg', data)}",
+                }
+
+        acct = {}
+        try:
+            acct = _fetch_testnet_account_sync()
+        except Exception:
+            pass
+
+        return {
+            "ok": True,
+            "realTestnetExecution": True,
+            "endpoint": _TESTNET_BASE,
+            "orderId": data.get("orderId"),
+            "clientOrderId": data.get("clientOrderId"),
+            "symbol": data.get("symbol", sym),
+            "side": data.get("side", side),
+            "status": data.get("status", "FILLED"),
+            "executedQty": float(data.get("executedQty", 0.0)),
+            "cummulativeQuoteQty": float(data.get("cummulativeQuoteQty", 0.0)),
+            "fills": data.get("fills", []),
+            "balances": acct.get("balances", _TESTNET_CONN.get("balances", {})),
+            "messageAr": f"✅ تم التنفيذ الفعلي على Binance Spot Testnet! رقم الأمر الرسمي: #{data.get('orderId')} ({data.get('status')})",
+        }
+    except Exception as exc:
+        return {"ok": False, "error": str(exc), "messageAr": f"❌ خطأ أثناء إرسال الأمر إلى Binance Testnet: {exc}"}
+
+

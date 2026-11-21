@@ -2509,11 +2509,17 @@
         <button type="button" class="btn-3d btn-3d-sm" onclick="ui.closeModals()">✕</button>
       </div>
       <div class="holo-chamber" style="display:grid;gap:7px;">
-        <div class="row-between"><span>🌏 عقدة التنفيذ والـ IP الثابت:</span><strong class="num-3d-ok">Tokyo ap-northeast-1 (~1.5ms)</strong></div>
-        <input id="bn-read-key-inp" dir="ltr" class="holo-inp num" style="width:100%;" placeholder="1) Read-Only API Key (مفتاح القراءة فقط — منفصل)..." />
-        <input id="bn-trade-key-inp" dir="ltr" class="holo-inp num" style="width:100%;" placeholder="2) Spot Trade-Only API Key (مفتاح التداول الفوري — منفصل)..." />
+        <div class="row-between"><span>🌏 الشبكة المعتمدة حتى 28/11/2026:</span><strong class="num-3d-ok">testnet.binance.vision</strong></div>
+        <select id="bn-auth-type-sel" class="holo-inp" style="width:100%;font-size:11.5px;" onchange="document.getElementById('bn-ed-path-inp').classList.toggle('hidden', this.value!=='ED25519'); document.getElementById('bn-hmac-secret-inp').classList.toggle('hidden', this.value==='ED25519');">
+          <option value="ED25519">🔐 Ed25519 (الموصى به — يستخدم ملف ~/trilunair_ed25519_private.pem)</option>
+          <option value="HMAC">🔑 HMAC-SHA-256 (يستخدم API Key + Secret Key)</option>
+        </select>
+        <input id="bn-read-key-inp" dir="ltr" class="holo-inp num" style="width:100%;" placeholder="1) Read-Only API Key (مفتاح القراءة — اختياري للتحقق)..." />
+        <input id="bn-trade-key-inp" dir="ltr" class="holo-inp num" style="width:100%;" placeholder="2) Binance Spot Testnet Trade API Key (مفتاح التداول الفعلي)..." />
+        <input id="bn-ed-path-inp" dir="ltr" class="holo-inp num" style="width:100%;" value="~/trilunair_ed25519_private.pem" placeholder="مسار ملف المفتاح الخاص Ed25519 على جهازك..." />
+        <input id="bn-hmac-secret-inp" dir="ltr" type="password" class="holo-inp num hidden" style="width:100%;" placeholder="HMAC Secret Key (فقط عند اختيار HMAC-SHA-256)..." />
         <select id="bn-env-sel" class="holo-inp" style="width:100%;font-size:11.5px;">
-          <option value="SPOT_TESTNET">🧪 Binance Spot Testnet (testnet.binance.vision — مسموح للتشغيل والمعايرة حتى 28/11/2026)</option>
+          <option value="SPOT_TESTNET">🧪 Binance Spot Testnet (testnet.binance.vision — تنفيذ فعلي تجريبي حتى 28/11/2026)</option>
           <option value="LIVE_PRODUCTION">🚫 الإنتاج الحقيقي Live Production (مقفل إلزامياً حتى تاريخ 28/11/2026 ومراجعة المعايرة)</option>
         </select>
         <input id="bn-static-ip-inp" dir="ltr" class="holo-inp num" style="width:100%;" value="54.65.128.44 (Tokyo Static IP Whitelist)" />
@@ -2522,9 +2528,9 @@
           <span>أؤكد أن صلاحية السحب (Enable Withdrawals) معطّلة تماماً في المفتاحين</span>
         </label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" onclick="ui.generateVaultKeypair()">🔑 توليد Ed25519</button>
-          <button type="button" id="btn-save-separated-keys" class="btn-3d btn-3d-buy" style="flex:1;" onclick="ui.saveBinanceApiKeyToVault()">🛡️ فحص وحفظ المفتاحين منفصلين</button>
+          <button type="button" id="btn-save-separated-keys" class="btn-3d btn-3d-buy" style="flex:1;" onclick="ui.saveBinanceApiKeyToVault()">🟢 اتصال فعلي بـ Binance Testnet وجلب الأرصدة الحقيقية</button>
         </div>
+        <div id="testnet-live-balances-box" class="holo-chamber num" style="font-size:11px;color:var(--sec);display:none;"></div>
         <a href="/vault" target="_blank" rel="noopener" class="btn-3d btn-3d-sm" style="width:100%;text-decoration:none;text-align:center;">🔐 فتح خزنة الباك-إند وبوابات الاعتماد الثماني (/vault)</a>
         <div id="vault-pubkey-box" class="num muted" style="font-size:10px;word-break:break-all;"></div>
       </div>
@@ -3827,7 +3833,7 @@
         this.renderElite90Page();
       },
 
-      executeEliteDeal(dealId, chosenSide) {
+      async executeEliteDeal(dealId, chosenSide) {
         if (state.killSwitch) {
           sfx.sellSuccess();
           this.toast('🛑 قاطع الطوارئ (أوقف كل شيء) مفعّل — قم بفك الإيقاف أولاً قبل فتح صفقات جديدة.', 'var(--hot)');
@@ -3844,15 +3850,51 @@
           return;
         }
 
-        const execQty = (chosenSide === 'SELL' && d.assetClass === 'crypto') ? fmtQty(Math.min(d.qty, heldQty), d.price) : d.qty;
-        const m = computeDealMetrics({ ...d, qty: execQty });
+        let execQty = (chosenSide === 'SELL' && d.assetClass === 'crypto') ? fmtQty(Math.min(d.qty, heldQty), d.price) : d.qty;
+        let m = computeDealMetrics({ ...d, qty: execQty });
+        let orderId = (chosenSide === 'BUY' ? 'MK-' : 'EX-') + Math.floor(100000 + Math.random() * 899999);
+        let realTestnetExec = false;
+
+        // عند الربط الفعلي مع Binance Spot Testnet: نرسل الأمر حقيقياً إلى testnet.binance.vision!
+        if (state.testnetConnected && d.assetClass === 'crypto' && location.origin && !location.hostname.endsWith('github.io')) {
+          try {
+            this.toast(`⏳ جاري إرسال أمر ${chosenSide} حقيقي لـ ${d.sym} إلى Binance Spot Testnet...`);
+            const resp = await fetch('/api/executive/testnet/order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                symbol: d.sym,
+                side: chosenSide,
+                quoteUsd: chosenSide === 'BUY' ? Math.max(15, m.invest) : 0,
+                quantity: chosenSide === 'SELL' ? execQty : 0
+              })
+            });
+            const jr = await resp.json();
+            if (!jr.ok) {
+              sfx.sellSuccess();
+              this.toast(jr.messageAr || `❌ رفض Binance Testnet الأمر: ${jr.error || ''}`, 'var(--hot)');
+              return;
+            }
+            realTestnetExec = true;
+            orderId = `BN-TEST-${jr.orderId}`;
+            if (jr.executedQty > 0) execQty = fmtQty(jr.executedQty, d.price);
+            if (jr.cummulativeQuoteQty > 0) m = { ...m, invest: Math.round(jr.cummulativeQuoteQty) };
+            if (jr.balances) this._applyTestnetBalances(jr.balances);
+          } catch (err) {
+            sfx.sellSuccess();
+            this.toast(`❌ تعذّر إرسال الأمر إلى Binance Testnet: ${err?.message || err}`, 'var(--hot)');
+            return;
+          }
+        }
+
         if (chosenSide === 'BUY') sfx.buySuccess(); else sfx.sellSuccess();
 
-        // تحديث الرصيد المملوك الفوري
-        if (chosenSide === 'BUY') state.spotHoldings[d.sym] = fmtQty(heldQty + execQty, d.price);
-        else state.spotHoldings[d.sym] = fmtQty(Math.max(0, heldQty - execQty), d.price);
+        // تحديث الرصيد المملوك الفوري (عند المحاكاة فقط؛ أما مع Testnet فقد تم التحديث من أرصدة Binance الحقيقية أعلاه)
+        if (!realTestnetExec) {
+          if (chosenSide === 'BUY') state.spotHoldings[d.sym] = fmtQty(heldQty + execQty, d.price);
+          else state.spotHoldings[d.sym] = fmtQty(Math.max(0, heldQty - execQty), d.price);
+        }
 
-        const orderId = (chosenSide === 'BUY' ? 'MK-' : 'EX-') + Math.floor(100000 + Math.random() * 899999);
         const grossGain = Math.round((m.minProf + m.maxProf) * 0.48);
         const feesUsd = +(m.invest * 0.0015).toFixed(2); // رسوم الدخول والخروج الفعلية (Maker/IOC)
         const netGainAfterFees = +(grossGain - feesUsd).toFixed(2);
@@ -4082,8 +4124,18 @@
         const allApproved = ALL_CANDIDATE_DEALS.filter((d) => d.quant && d.quant.approved);
         const d = allApproved.find((x) => x.id === state.heroDealId) || this.getTopShortTermDeal(allApproved) || ALL_CANDIDATE_DEALS[0];
         const m = computeDealMetrics(d);
+        const tfMap = { '15M': '15m', '1H': '1h', '4H': '4h', '1D': '1d' };
+        const iv = tfMap[state.heroTf || '1H'] || '1h';
+        const cacheKey = `${d.sym}:${iv}`;
+        if (!state.realKlinesCache) state.realKlinesCache = {};
+        const cached = state.realKlinesCache[cacheKey];
 
-        // خلفية شبكية أفقية ورأسية ناعمة مطابقة للصورة المرفقة
+        // إذا لم تُجلب الشموع الحقيقية لهذا الرمز والإطار بعد، نجلبها فوراً من Binance Spot Testnet
+        if (d.assetClass === 'crypto' && (!cached || Date.now() - cached.fetchedAt > 15000)) {
+          this.fetchRealKlinesForSymbol(d.sym, iv);
+        }
+
+        // خلفية شبكية أفقية ورأسية ناعمة
         ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
         ctx.lineWidth = 1;
         for (let gy = 28; gy < H - 20; gy += 48) {
@@ -4093,35 +4145,48 @@
           ctx.beginPath(); ctx.moveTo(gx, 16); ctx.lineTo(gx, H - 20); ctx.stroke();
         }
 
-        // توليد 44 شمعة يابانية متصاعدة реалистية مع تذبذب حي نحو الهدف القصير المدى
-        const N = 44;
-        let seed = 0;
-        const keyStr = d.sym + (state.heroTf || '1H');
-        for (let i = 0; i < keyStr.length; i++) seed = (seed * 31 + keyStr.charCodeAt(i)) % 9973;
-        const rnd = () => { seed = (seed * 16807 + 11) % 2147483647; return (seed % 1000) / 1000; };
-
-        const startP = d.price * 0.945;
-        const candles = [];
-        let cur = startP;
-        for (let i = 0; i < N; i++) {
-          const progress = i / (N - 1);
-          const wave = Math.sin(i * 0.34 + state.candleTick * 0.25) * d.price * 0.0045;
-          const target = startP + (d.price - startP) * Math.pow(progress, 0.86) + wave;
-          const open = cur;
-          const close = i === N - 1 ? d.price : target + (rnd() - 0.46) * d.price * 0.008;
-          const span = Math.abs(close - open) + d.price * (0.0025 + rnd() * 0.004);
-          const high = Math.max(open, close) + span * (0.35 + rnd() * 0.45);
-          const low = Math.min(open, close) - span * (0.35 + rnd() * 0.45);
-          candles.push({ open, close, high, low });
-          cur = close;
+        let candles = [];
+        let isRealBinance = false;
+        if (cached && Array.isArray(cached.candles) && cached.candles.length >= 10) {
+          candles = cached.candles.slice(-46);
+          isRealBinance = true;
+        } else {
+          // بديل مؤقت فقط لثوانٍ ريثما تصل الشموع الحقيقية من Binance (أو لأسهم NASDAQ مثل NVDA)
+          const N = 44;
+          let seed = 0;
+          const keyStr = d.sym + iv;
+          for (let i = 0; i < keyStr.length; i++) seed = (seed * 31 + keyStr.charCodeAt(i)) % 9973;
+          const rnd = () => { seed = (seed * 16807 + 11) % 2147483647; return (seed % 1000) / 1000; };
+          const startP = d.price * 0.965;
+          let cur = startP;
+          for (let i = 0; i < N; i++) {
+            const progress = i / (N - 1);
+            const target = startP + (d.price - startP) * progress;
+            const open = cur;
+            const close = i === N - 1 ? d.price : target + (rnd() - 0.5) * d.price * 0.006;
+            const span = Math.abs(close - open) + d.price * (0.002 + rnd() * 0.003);
+            candles.push({ open, close, high: Math.max(open, close) + span * 0.5, low: Math.min(open, close) - span * 0.5 });
+            cur = close;
+          }
         }
+        const N = candles.length;
 
         const minP = Math.min(...candles.map((c) => c.low), m.sl * 0.998);
         const maxP = Math.max(...candles.map((c) => c.high), m.tp1 * 1.003);
-        const padTop = 22, padBot = 24, chartH = H - padTop - padBot;
+        const padTop = 30, padBot = 24, chartH = H - padTop - padBot;
         const padLeft = 18, padRight = 82, chartW = W - padLeft - padRight;
         const yOf = (p) => padTop + (1 - (p - minP) / Math.max(1e-6, maxP - minP)) * chartH;
         const stepX = chartW / N;
+
+        // شارة واضحة وشفافة لمصدر الشموع أعلى الشارت
+        ctx.font = '700 11px Cairo, sans-serif';
+        const srcLbl = isRealBinance
+          ? `🟢 شموع حقيقية مباشرة • ${cached.source === 'BINANCE_SPOT_TESTNET' ? 'Binance Spot Testnet' : 'Binance'} (${iv.toUpperCase()})`
+          : (d.assetClass === 'crypto' ? `⏳ جاري تحميل شموع Binance الحقيقية (${iv.toUpperCase()})...` : `📊 بيانات مرجعية للأسهم (${d.sym})`);
+        ctx.fillStyle = isRealBinance ? 'rgba(16, 245, 160, 0.14)' : 'rgba(247, 201, 72, 0.14)';
+        ctx.fillRect(14, 6, 295, 20);
+        ctx.fillStyle = isRealBinance ? '#10f5a0' : '#ffd86b';
+        ctx.fillText(srcLbl, 20, 20);
 
         // هالة مضيئة خضراء-سيان أسفل منحنى المتوسط المتحرك كما في الصورة المرفقة!
         const emaPts = [];
@@ -5735,10 +5800,41 @@
         const hex = Array.from(safeRandomBytes(18)).map((b) => b.toString(16).padStart(2, '0')).join('');
         document.getElementById('vault-pubkey-box').textContent = 'Ed25519 PubKey: MCowBQYDK2VwAyEA' + btoa(hex).slice(0, 40);
       },
+      _applyTestnetBalances(balances) {
+        if (!balances || typeof balances !== 'object') return;
+        state.testnetConnected = true;
+        state.testnetBalances = balances;
+        const coins = ['BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE'];
+        let totalUsd = Number(balances.USDT?.total || balances.USDT?.free || 0);
+        coins.forEach((c) => {
+          const qty = Number(balances[c]?.total || balances[c]?.free || 0);
+          state.spotHoldings[c + 'USDT'] = qty;
+          const deal = ALL_CANDIDATE_DEALS.find((x) => x.sym === c + 'USDT');
+          if (deal && qty > 0) totalUsd += qty * deal.price;
+        });
+        if (totalUsd > 0) {
+          state.equity = +totalUsd.toFixed(2);
+          state.dayStartEquity = state.dayStartEquity || state.equity;
+        }
+        const box = document.getElementById('testnet-live-balances-box');
+        if (box) {
+          const usdt = Number(balances.USDT?.free || 0).toLocaleString(undefined, { maximumFractionDigits: 2 });
+          const summary = coins.filter((c) => Number(balances[c]?.free || 0) > 0)
+            .map((c) => `${c}: ${Number(balances[c].free).toFixed(4)}`).join(' • ');
+          box.style.display = 'block';
+          box.innerHTML = `<strong class="text-ok">🟢 متصل فعلياً بـ Binance Spot Testnet</strong><br/>الرصيد المتاح: <strong>$${usdt} USDT</strong>${summary ? `<br/>الأرصدة المملوكة: ${summary}` : ''}`;
+        }
+        syncAutoPortfolioSizing();
+        this.refreshKpis();
+        this.renderElite90Page();
+      },
+
       async saveBinanceApiKeyToVault() {
         const rk = (document.getElementById('bn-read-key-inp')?.value || '').trim();
         const tk = (document.getElementById('bn-trade-key-inp')?.value || '').trim();
-        const ip = (document.getElementById('bn-static-ip-inp')?.value || '').trim();
+        const authType = (document.getElementById('bn-auth-type-sel')?.value || 'ED25519').toUpperCase();
+        const edPath = (document.getElementById('bn-ed-path-inp')?.value || '~/trilunair_ed25519_private.pem').trim();
+        const hmacSecret = (document.getElementById('bn-hmac-secret-inp')?.value || '').trim();
         const envMode = document.getElementById('bn-env-sel')?.value || 'SPOT_TESTNET';
         const noW = !!document.getElementById('bn-no-withdraw-chk')?.checked;
         const cal = getCalibrationDeadlineInfo();
@@ -5747,23 +5843,115 @@
           this.toast(`🚫 ممنوع ربط مفتاح تداول حقيقي قبل تاريخ ${cal.deadlineLabel} (يتبقى ${cal.remDays} أيام) ومراجعة جدول المعايرة!`, 'var(--hot)');
           return;
         }
-        if (!rk || !tk) { this.toast('⚠️ أدخل مفتاح القراءة ومفتاح التداول منفصلين', 'var(--hot)'); return; }
-        if (rk === tk) { sfx.sellSuccess(); this.toast('❌ مرفوض أمنياً: يجب أن يكون مفتاح القراءة منفصلاً عن مفتاح التداول!', 'var(--hot)'); return; }
+        if (!tk) { this.toast('⚠️ أدخل مفتاح Binance Spot Testnet Trade API Key في الخانة (2)', 'var(--hot)'); return; }
+        if (rk && rk === tk) { sfx.sellSuccess(); this.toast('❌ مرفوض أمنياً: يجب أن يكون مفتاح القراءة منفصلاً عن مفتاح التداول!', 'var(--hot)'); return; }
         if (!noW) { sfx.sellSuccess(); this.toast('❌ خطر حرج: يجب تعطيل صلاحية السحب قبل اعتماد المفاتيح!', 'var(--hot)'); return; }
-        if (!ip) { this.toast('⚠️ حدد الـ Static IP الخاص بسيرفر طوكيو', 'var(--hot)'); return; }
+        if (authType === 'HMAC' && !hmacSecret) { this.toast('⚠️ أدخل HMAC Secret Key للتوقيع الحقيقي', 'var(--hot)'); return; }
+
+        const isStaticHost = !location.origin || location.origin === 'null' || location.hostname.endsWith('github.io');
+        if (isStaticHost) {
+          this.toast('⚠️ الاتصال الفعلي بمفاتيح Binance يتم عبر خادمك المحلي (http://localhost:8000) أو سيرفر طوكيو لحماية مفاتيحك السرية.', 'var(--pri)');
+          return;
+        }
+
         try {
-          if (location.origin && location.origin !== 'null') {
-            await fetch('/api/executive/vault/validate-keys', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ readOnlyKey: rk, tradeOnlyKey: tk, withdrawalsDisabled: noW, staticIpWhitelisted: !!ip })
-            });
+          this.toast('⏳ جاري الاتصال الفعلي بـ https://testnet.binance.vision وجلب أرصدتك الحقيقية...');
+          const r = await fetch('/api/executive/testnet/connect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              apiKey: tk,
+              authType,
+              apiSecret: hmacSecret,
+              ed25519PrivateKeyPath: edPath
+            })
+          });
+          const j = await r.json();
+          if (!j.ok) {
+            sfx.sellSuccess();
+            this.toast(j.messageAr || `❌ فشل الاتصال بـ Binance Testnet: ${j.error || ''}`, 'var(--hot)');
+            return;
+          }
+          this._applyTestnetBalances(j.balances);
+          sfx.buySuccess();
+          this.toast(j.messageAr || '✅ تم الاتصال الفعلي بـ Binance Spot Testnet وجلب الأرصدة الحقيقية!');
+        } catch (err) {
+          sfx.sellSuccess();
+          this.toast(`❌ خطأ في الاتصال بالخادم: ${err?.message || err}`, 'var(--hot)');
+        }
+      },
+
+      async fetchRealKlinesForSymbol(sym, iv = '1h') {
+        if (!state.realKlinesCache) state.realKlinesCache = {};
+        const key = `${sym}:${iv}`;
+        if (this._klineInFlight?.[key]) return;
+        if (!this._klineInFlight) this._klineInFlight = {};
+        this._klineInFlight[key] = true;
+        const isStaticHost = !location.origin || location.origin === 'null' || location.hostname.endsWith('github.io');
+        try {
+          let candles = [];
+          let source = 'BINANCE_SPOT_TESTNET';
+          if (!isStaticHost) {
+            const r = await fetch(`/api/executive/testnet/klines/${encodeURIComponent(sym)}?interval=${encodeURIComponent(iv)}&limit=48`);
+            if (r.ok) {
+              const j = await r.json();
+              if (j.ok && Array.isArray(j.candles) && j.candles.length) {
+                candles = j.candles;
+                source = j.source || source;
+              }
+            }
+          }
+          if (!candles.length) {
+            const r2 = await fetch(`https://testnet.binance.vision/api/v3/klines?symbol=${encodeURIComponent(sym)}&interval=${encodeURIComponent(iv)}&limit=48`);
+            if (r2.ok) {
+              const raw = await r2.json();
+              if (Array.isArray(raw) && raw.length) {
+                candles = raw.map((k) => ({
+                  openTime: +k[0], open: +k[1], high: +k[2], low: +k[3], close: +k[4], volume: +k[5]
+                }));
+              }
+            }
+          }
+          if (candles.length) {
+            state.realKlinesCache[key] = { candles, source, fetchedAt: Date.now() };
+            const lastClose = candles[candles.length - 1].close;
+            const deal = ALL_CANDIDATE_DEALS.find((x) => x.sym === sym);
+            if (deal && lastClose > 0) deal.price = lastClose;
+            if (state.activeTab === 'elite90') this.drawHeroShortTermChart();
+          }
+        } catch (_) {
+        } finally {
+          this._klineInFlight[key] = false;
+        }
+      },
+
+      async fetchRealTestnetTickers() {
+        const isStaticHost = !location.origin || location.origin === 'null' || location.hostname.endsWith('github.io');
+        try {
+          let assets = [];
+          if (!isStaticHost) {
+            const r = await fetch('/api/executive/testnet/tickers');
+            if (r.ok) {
+              const j = await r.json();
+              if (j.ok && j.tickers) assets = Object.values(j.tickers);
+            }
+          }
+          if (!assets.length) {
+            const syms = encodeURIComponent('["BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT","XRPUSDT","DOGEUSDT"]');
+            const r2 = await fetch(`https://testnet.binance.vision/api/v3/ticker/24hr?symbols=${syms}`);
+            if (r2.ok) {
+              const raw = await r2.json();
+              if (Array.isArray(raw)) {
+                assets = raw.map((it) => ({ symbol: it.symbol, price: +it.lastPrice }));
+              }
+            }
+          }
+          if (assets.length) {
+            this._applyLiveBackendTick({ assets, source: 'BINANCE_SPOT_TESTNET' });
           }
         } catch (_) {}
-        sfx.buySuccess();
-        document.getElementById('bn-read-key-inp').value = '';
-        document.getElementById('bn-trade-key-inp').value = '';
-        this.toast('✅ تم التحقق وحفظ مفتاحي القراءة والتداول منفصلين (السحب معطّل + مقيد بـ Tokyo Static IP)');
       },
+
       exitMobileLayout() {
         document.documentElement.setAttribute('data-layout', 'auto');
         if (location.pathname.endsWith('/mobile') || location.pathname.endsWith('/mobile.html')) {
@@ -5801,18 +5989,14 @@
           btcLive = map.BTCUSDT || map.BTC;
           solLive = map.SOLUSDT || map.SOL;
         }
-        if (typeof payload.totalEquity === 'number' && payload.totalEquity > 0 && !state._liveEqSynced) {
-          state._liveEqSynced = true;
-          state.equity = +payload.totalEquity.toFixed(2);
-          if (typeof payload.dailyPnl === 'number') state.netProfit = +payload.dailyPnl.toFixed(2);
-        }
+        const tnTag = state.testnetConnected ? ' • حساب Testnet متصل ✓' : '';
         const badgeText = btcLive
-          ? `🟢 بث حي متصل • BTC $${Math.round(btcLive).toLocaleString()}${solLive ? ` • SOL $${solLive.toFixed(2)}` : ''}`
-          : '🟢 بث حي متصل (Backend Live)';
+          ? `🟢 أسعار Binance Testnet الحقيقية • BTC $${Math.round(btcLive).toLocaleString()}${solLive ? ` • SOL $${solLive.toFixed(2)}` : ''}${tnTag}`
+          : `🟢 متصل بـ Binance Testnet${tnTag}`;
         const b1 = document.getElementById('live-feed-badge');
         if (b1) { b1.textContent = badgeText; b1.style.color = 'var(--ok)'; b1.style.borderColor = 'var(--ok)'; }
         const b2 = document.getElementById('live-feed-badge-mob');
-        if (b2) { b2.textContent = btcLive ? `🟢 LIVE • BTC $${Math.round(btcLive).toLocaleString()}` : '🟢 LIVE•28/11'; }
+        if (b2) { b2.textContent = btcLive ? `🟢 LIVE • SOL $${(solLive || 0).toFixed(1)}` : '🟢 LIVE•28/11'; }
 
         // تحديث الأسعار بهدوء دون مقاطعة الكتابة إن كان المستخدم يعدل مبلغاً
         const activeTag = document.activeElement?.tagName;
@@ -5824,19 +6008,30 @@
       },
 
       async connectLiveBackendStream() {
-        const isStaticHost = !location.origin || location.origin === 'null' || location.hostname.endsWith('github.io');
-        if (isStaticHost) {
-          const b1 = document.getElementById('live-feed-badge');
-          if (b1) { b1.textContent = '☁️ السحابة العامة (PAPER • حتى 28/11/2026)'; b1.style.color = 'var(--pri)'; b1.style.borderColor = 'var(--border-pri)'; }
-          return;
+        // 1. جلب الأسعار والشموع الحقيقية من Binance Spot Testnet فوراً (يعمل على اللابتوب والسحابة معاً!)
+        await this.fetchRealTestnetTickers();
+        const tfMap = { '15M': '15m', '1H': '1h', '4H': '4h', '1D': '1d' };
+        const hero = ALL_CANDIDATE_DEALS.find((x) => x.id === state.heroDealId) || ALL_CANDIDATE_DEALS[0];
+        if (hero && hero.assetClass === 'crypto') {
+          this.fetchRealKlinesForSymbol(hero.sym, tfMap[state.heroTf || '1H'] || '1h');
         }
+        if (!this._tnTickerInt) {
+          this._tnTickerInt = setInterval(() => this.fetchRealTestnetTickers(), 6000);
+        }
+
+        const isStaticHost = !location.origin || location.origin === 'null' || location.hostname.endsWith('github.io');
+        if (isStaticHost) return;
+
+        // 2. التحقق إن كان حساب Binance Testnet مربوطاً مسبقاً على الخادم المحلي
         try {
-          const r = await fetch('/api/market/assets');
-          if (r.ok) {
-            const assets = await r.json();
-            this._applyLiveBackendTick({ assets });
+          const ar = await fetch('/api/executive/testnet/account');
+          if (ar.ok) {
+            const aj = await ar.json();
+            if (aj.ok && aj.connected && aj.balances) this._applyTestnetBalances(aj.balances);
           }
         } catch (_) {}
+
+        // 3. فتح WebSocket الحي مع الخادم المحلي
         try {
           const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
           const ws = new WebSocket(`${wsProto}//${location.host}/ws/market`);
@@ -5850,7 +6045,7 @@
             } catch (_) {}
           };
           ws.onclose = () => {
-            setTimeout(() => { if (!this._liveWs || this._liveWs.readyState === 3) this.connectLiveBackendStream(); }, 4000);
+            setTimeout(() => { if (!this._liveWs || this._liveWs.readyState === 3) this.connectLiveBackendStream(); }, 5000);
           };
         } catch (_) {}
       },
