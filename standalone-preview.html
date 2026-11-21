@@ -1759,24 +1759,40 @@
         </div>
       </div>
 
+      <!-- شريط الدليل السريع للمبتدئ + عداد صفقات اليوم المرقّمة -->
+      <div id="daily-trading-guide-bar" class="holo-chamber" style="margin-bottom:8px;padding:8px 12px;border-radius:12px;background:rgba(8,20,38,0.88);border:1px solid rgba(56,189,248,0.32);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;color:#e2e8f0;">
+          <span class="hex-shield" style="color:#ffd86b;border-color:rgba(247,201,72,0.55);font-size:10.5px;">🧭 كيف تشتري في 3 خطوات؟</span>
+          <span><strong style="color:#38bdf8;">①</strong> اضغط أي <strong>صفقة مرقّمة (#1 إلى #6)</strong> يمين أو يسار</span>
+          <span style="color:#64748b;">←</span>
+          <span><strong style="color:#ffd86b;">②</strong> راجع شارتها الحي ومؤشرات الأمان بالمنتصف</span>
+          <span style="color:#64748b;">←</span>
+          <span><strong style="color:#10f5a0;">③</strong> اضغط <strong>«شراء»</strong> لتُسجَّل برقمها في جدول صفقاتك اليوم بالأسفل</span>
+        </div>
+        <div id="daily-counter-pills" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span id="daily-exec-count-pill" class="hex-shield num" style="background:rgba(16,245,160,0.12);color:#10f5a0;border-color:rgba(16,245,160,0.5);font-size:11px;padding:3px 9px;">📊 صفقاتك اليوم: 0 / 25</span>
+          <span id="daily-next-seq-pill" class="hex-shield num" style="background:rgba(247,201,72,0.14);color:#ffe484;border-color:rgba(247,201,72,0.55);font-size:11px;padding:3px 9px;">🎯 القادم: الصفقة رقم #1 اليوم</span>
+        </div>
+      </div>
+
       <div id="vetoed-deals-drawer" class="deals-cards-grid hidden" style="margin-bottom:10px;"></div>
 
       <div id="elite-90-cards" class="lux-trading-tri-arena">
-        <!-- الجانب الأيمن المجسم ثلاثي الأبعاد: الصفقات المقترحة -->
+        <!-- الجانب الأيمن المجسم ثلاثي الأبعاد: الصفقات المقترحة المرقّمة -->
         <aside class="lux-side-column lux-side-right-3d" aria-label="الصفقات المقترحة — يمين">
           <div class="row-between">
-            <span class="lux-sec-title" style="font-size:12.5px;">الصفقات المقترحة</span>
-            <span class="hex-shield num" style="font-size:9px;color:#22d3ee;border-color:rgba(34,211,238,0.4);">SPOT</span>
+            <span class="lux-sec-title" style="font-size:12px;">📋 صفقات مقترحة للشراء</span>
+            <span class="hex-shield num" style="font-size:9px;color:#22d3ee;border-color:rgba(34,211,238,0.4);">اضغط للعرض</span>
           </div>
           <div id="lux-right-deals" style="display:flex;flex-direction:column;gap:7px;flex:1;justify-content:space-between;"></div>
         </aside>
 
-        <!-- المنتصف البارز ثلاثي الأبعاد: أعلى صفقة ربحية على المدى القصير -->
-        <section id="lux-center-hero" class="lux-hero-center-panel" aria-label="أعلى صفقة ربحية على المدى القصير">
+        <!-- المنتصف البارز ثلاثي الأبعاد: الشارت الحي للصفقة المحددة -->
+        <section id="lux-center-hero" class="lux-hero-center-panel" aria-label="الشارت الحي للصفقة المحددة">
           <div class="row-between" style="flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <span id="hero-rank-badge" class="hex-shield" style="background:rgba(247,201,72,0.18);color:#ffe484;border-color:rgba(247,201,72,0.68);font-size:10.5px;padding:3px 9px;border-radius:9px;">
-                🔥 الأعلى ربحية (+4.35% · 1H)
+                📌 صفقة #1 • الأعلى ربحية
               </span>
               <strong id="hero-sym-title" class="num" style="font-size:19px;color:#ffffff;">SOLUSDT</strong>
               <span id="hero-ar-name" class="muted" style="font-size:12px;color:#cbd5e1;">سولانا</span>
@@ -1784,7 +1800,7 @@
             </div>
 
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <button type="button" id="btn-reset-top-short" class="btn-3d btn-3d-sm btn-3d-gold hidden" onclick="ui.selectHeroDeal('el-sol')">⚡ الأعلى ربحية (SOL)</button>
+              <button type="button" id="btn-reset-top-short" class="btn-3d btn-3d-sm btn-3d-gold hidden" onclick="ui.selectHeroDeal('el-sol')">⚡ العودة لصفقة #1</button>
               <div class="lux-tf-pill-group" dir="ltr">
                 <button type="button" class="btn-3d btn-3d-sm hero-tf-btn" data-htf="1D" onclick="ui.setHeroTimeframe('1D')">1D</button>
                 <button type="button" class="btn-3d btn-3d-sm hero-tf-btn" data-htf="4H" onclick="ui.setHeroTimeframe('4H')">4H</button>
@@ -1795,6 +1811,10 @@
             </div>
           </div>
 
+          <div id="hero-plain-guide" style="font-size:11px;color:#94a3b8;margin-top:2px;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+            <span>🕯️ هذا الرسم البياني يعرض حركة السعر الحقيقية لـ <strong id="hero-guide-sym" style="color:#ffe484;">صفقة #1 (SOLUSDT)</strong> — اضغط أي بطاقة صفقة يميناً أو يساراً للتبديل</span>
+          </div>
+
           <div class="lux-hero-canvas-wrap">
             <canvas id="hero-short-term-cv" width="760" height="272" style="width:100%;height:264px;display:block;"></canvas>
           </div>
@@ -1802,15 +1822,48 @@
           <div id="hero-exec-footer" class="holo-chamber" style="padding:7px 11px;border-radius:13px;background:rgba(8,18,33,0.94);border-color:rgba(34,211,238,0.32);box-shadow:inset 0 2px 6px rgba(0,0,0,0.7);"></div>
         </section>
 
-        <!-- الجانب الأيسر المجسم ثلاثي الأبعاد: الصفقات المقترحة -->
+        <!-- الجانب الأيسر المجسم ثلاثي الأبعاد: الصفقات المقترحة المرقّمة -->
         <aside class="lux-side-column lux-side-left-3d" aria-label="الصفقات المقترحة — يسار">
           <div class="row-between">
-            <span class="lux-sec-title" style="font-size:12.5px;">الصفقات المقترحة</span>
+            <span class="lux-sec-title" style="font-size:12px;">📋 صفقات مقترحة للشراء</span>
             <span class="hex-shield num" style="font-size:9px;color:#ffe484;border-color:rgba(247,201,72,0.4);">&ge;75%</span>
           </div>
           <div id="lux-left-deals" style="display:flex;flex-direction:column;gap:7px;flex:1;justify-content:space-between;"></div>
         </aside>
       </div>
+
+      <!-- سجل صفقاتي المنفذة اليوم المرقّمة تسلسلياً (#1 اليوم، #2 اليوم...) -->
+      <section id="today-executed-trades-box" class="holo-prism" style="margin-top:12px;padding:12px 14px;border-color:rgba(16,245,160,0.35);">
+        <div class="row-between" style="margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <strong style="font-size:14px;color:#10f5a0;">📋 سجل صفقاتي المنفذة اليوم (مرقّمة بالترتيب)</strong>
+            <span id="today-log-date-badge" class="hex-shield num" style="font-size:10px;color:#38bdf8;border-color:rgba(56,189,248,0.45);">—</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span id="today-log-summary-pill" class="hex-shield num" style="font-size:10.5px;color:#ffe484;border-color:rgba(247,201,72,0.45);">الإجمالي اليوم: 0 صفقة • $0</span>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.clearTodayExecutedLog()" title="تصفير عداد صفقات اليوم المحلي">🧹 تصفير سجل اليوم</button>
+          </div>
+        </div>
+        <div id="today-exec-empty" class="holo-chamber" style="text-align:center;padding:12px;font-size:12px;color:#cbd5e1;border-color:rgba(56,189,248,0.22);">
+          لم تقم بأي صفقة اليوم بعد — اختر إحدى <strong>الصفقات المرقّمة (#1 إلى #6)</strong> أعلاه، راجع مؤشراتها الخضراء في المنتصف، ثم اضغط <strong>«▲ شراء»</strong> لتبدأ <strong>الصفقة رقم #1 اليوم</strong>.
+        </div>
+        <div id="today-exec-table-wrap" class="table-wrap hidden">
+          <table>
+            <thead>
+              <tr>
+                <th>رقم الصفقة اليوم</th>
+                <th>الصفقة المقترحة والعملة</th>
+                <th>نوع العملية</th>
+                <th>المبلغ والكمية</th>
+                <th>سعر التنفيذ</th>
+                <th>حالة التنفيذ (Binance)</th>
+                <th>الوقت</th>
+              </tr>
+            </thead>
+            <tbody id="today-exec-tbody"></tbody>
+          </table>
+        </div>
+      </section>
     </main>
 
     <!-- ================================================================
@@ -2882,6 +2935,14 @@
       dailyTrades: INITIAL_DAILY_TRADES.slice(),
       executedDeals: INITIAL_DAILY_TRADES.slice(),
       lastStampByDeal: {},
+      todayExecutedLog: (() => {
+        try {
+          const dk = new Date().toISOString().slice(0, 10);
+          const raw = safeStore.get('htb_today_exec_' + dk);
+          const arr = raw ? JSON.parse(raw) : [];
+          return Array.isArray(arr) ? arr : [];
+        } catch (_) { return []; }
+      })(),
       gaSecret: (() => {
         const s = (safeStore.get('htb_ga_secret') || '').toUpperCase().replace(/[^A-Z2-7]/g, '');
         return (s.length === 32) ? s : randomBase32(32);
@@ -3943,7 +4004,35 @@
         }
 
         const timeStr = new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const rec = { orderId, ts: Date.now(), sym: d.sym, name: d.name, side: chosenSide, qty: execQty, price: d.price, invest: m.invest, fees: feesUsd, profit: netGainAfterFees, tp1: m.tp1, tp: m.tp, sl: m.sl, conf: d.conf, bots20, time: timeStr };
+        const todayKey = new Date().toISOString().slice(0, 10);
+        if (!Array.isArray(state.todayExecutedLog)) state.todayExecutedLog = [];
+        const dailySeqNo = state.todayExecutedLog.length + 1;
+        const evalNo = d._evalNo || 1;
+        const rec = {
+          dailySeqNo,
+          evalNo,
+          dealId: d.id,
+          orderId,
+          ts: Date.now(),
+          dateKey: todayKey,
+          sym: d.sym,
+          name: d.name,
+          side: chosenSide,
+          qty: execQty,
+          price: d.price,
+          invest: m.invest,
+          fees: feesUsd,
+          profit: netGainAfterFees,
+          tp1: m.tp1,
+          tp: m.tp,
+          sl: m.sl,
+          conf: d.conf,
+          bots20,
+          realTestnetExec,
+          time: timeStr
+        };
+        state.todayExecutedLog.unshift(rec);
+        try { safeStore.set('htb_today_exec_' + todayKey, JSON.stringify(state.todayExecutedLog.slice(0, 60))); } catch (_) {}
         state.executedDeals.unshift(rec);
         state.dailyTrades.unshift(rec);
         state.lastStampByDeal[d.id] = rec;
@@ -3957,22 +4046,22 @@
         this.renderBotsLeaderboard();
         this.renderDailyPage();
 
-        const sideAr = chosenSide === 'BUY' ? 'شراء LIMIT_MAKER (Spot Long)' : 'إغلاق مركز مملوك (Exit Spot)';
-        document.getElementById('rcpt-header').textContent = `✅ تم تنفيذ ${sideAr}! (#${orderId})`;
+        const sideAr = chosenSide === 'BUY' ? 'شراء (Spot)' : 'بيع / إغلاق (Exit Spot)';
+        document.getElementById('rcpt-header').textContent = `✅ تم تنفيذ الصفقة رقم #${dailySeqNo} اليوم — ${sideAr} (#${orderId})`;
         document.getElementById('rcpt-header').style.color = chosenSide === 'BUY' ? 'var(--ok)' : 'var(--pri)';
         document.getElementById('exec-receipt-box').style.borderColor = chosenSide === 'BUY' ? 'var(--ok)' : 'var(--pri)';
         document.getElementById('rcpt-body').innerHTML = `
-          <div class="row-between"><span>نوع التنفيذ الكمي:</span><strong class="text-ok">${sideAr} — ${d.sym}</strong></div>
-          <div class="row-between"><span>الكمية والمبلغ (Kelly ${d.quant.kellyPct}%):</span><strong class="num-3d">${execQty} ($${m.invest.toLocaleString()})</strong></div>
-          <div class="row-between"><span>الخروج المتدرج (Graduated):</span><span class="num text-sec">TP1(40%) $${m.tp1} • TP2 $${m.tp} • Chandelier SL $${m.sl}</span></div>
-          <div class="row-between"><span>صافي الربح بعد الرسوم ($${feesUsd}):</span><strong class="num-3d-ok">+$${netGainAfterFees.toLocaleString()}</strong></div>
-          <div class="row-between"><span>حصة الـ 20% فوق الـ HWM ($${state.highWaterMark.toLocaleString()}):</span><span class="num text-pri">$${bots20.toFixed(2)} (Thompson)</span></div>
+          <div class="row-between"><span>ترتيب الصفقة اليوم:</span><strong class="num text-pri">الصفقة رقم #${dailySeqNo} اليوم (من القائمة: صفقة #${evalNo})</strong></div>
+          <div class="row-between"><span>العملة والعملية:</span><strong class="text-ok">${sideAr} — ${d.sym}</strong></div>
+          <div class="row-between"><span>الكمية والمبلغ:</span><strong class="num-3d">${execQty} ($${m.invest.toLocaleString()})</strong></div>
+          <div class="row-between"><span>مصدر التنفيذ:</span><strong class="num ${realTestnetExec ? 'text-ok' : 'text-sec'}">${realTestnetExec ? '🟢 Binance Spot Testnet حقيقي' : '🧪 محاكاة محلية'}</strong></div>
+          <div class="row-between"><span>أهداف جني الربح ووقف الخسارة:</span><span class="num text-sec">TP1 $${m.tp1} • TP2 $${m.tp} • SL $${m.sl}</span></div>
         `;
         document.getElementById('modal-exec-receipt')?.classList.remove('hidden');
         if (typeof hydrateSigs === 'function') hydrateSigs();
 
         setTimeout(() => document.getElementById('card-' + d.id)?.classList.add(chosenSide === 'BUY' ? 'just-executed-buy' : 'just-executed-sell'), 25);
-        this.toast(`✅ #${orderId}: ${sideAr} ${execQty} ${d.sym} • صافي بعد الرسوم +$${netGainAfterFees} • 20% HWM: $${bots20}`);
+        this.toast(`✅ الصفقة رقم #${dailySeqNo} اليوم (صفقة #${evalNo}): ${sideAr} ${execQty} ${d.sym} بمبلغ $${m.invest.toLocaleString()}`);
       },
 
       selectHeroDeal(dealId) {
@@ -4027,21 +4116,32 @@
         }
 
         const topShortDeal = this.getTopShortTermDeal(allApproved);
+        // ترقيم كل صفقة مقيّمة تسلسلياً (#1 للأعلى ربحية، ثم #2، #3، #4...)
+        const orderedEvaluated = [topShortDeal, ...allApproved.filter((d) => d.id !== topShortDeal.id)];
+        orderedEvaluated.forEach((d, idx) => { d._evalNo = idx + 1; });
+
         const heroDeal = allApproved.find((d) => d.id === state.heroDealId) || topShortDeal || ALL_CANDIDATE_DEALS[0];
         state.heroDealId = heroDeal.id;
+        const heroNo = heroDeal._evalNo || 1;
+        const heroArName = (heroDeal.name.split('•')[1] || heroDeal.name).trim();
+        const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+        const nextDailyNo = todayLog.length + 1;
+        const heroTodayMatch = todayLog.find((t) => t.dealId === heroDeal.id || t.sym === heroDeal.sym);
 
         const isTopShort = heroDeal.id === topShortDeal.id;
         const rankBadge = document.getElementById('hero-rank-badge');
         if (rankBadge) {
           rankBadge.textContent = isTopShort
-            ? `🔥 #1 الأعلى ربحية (+${(heroDeal.tpPct * 100).toFixed(2)}% · ${heroDeal.round})`
-            : `🔎 معاينة (+${(heroDeal.tpPct * 100).toFixed(2)}% · ${heroDeal.round})`;
+            ? `📌 صفقة #${heroNo} • الأعلى ربحية (+${(heroDeal.tpPct * 100).toFixed(2)}% · ${heroDeal.round})`
+            : `📌 صفقة #${heroNo} • معاينة (+${(heroDeal.tpPct * 100).toFixed(2)}% · ${heroDeal.round})`;
         }
+        const guideSymEl = document.getElementById('hero-guide-sym');
+        if (guideSymEl) guideSymEl.textContent = `صفقة #${heroNo} — ${heroArName} (${heroDeal.sym})`;
         document.getElementById('btn-reset-top-short')?.classList.toggle('hidden', isTopShort);
         const symEl = document.getElementById('hero-sym-title');
         if (symEl) symEl.textContent = heroDeal.sym;
         const arEl = document.getElementById('hero-ar-name');
-        if (arEl) arEl.textContent = (heroDeal.name.split('•')[1] || heroDeal.name).trim();
+        if (arEl) arEl.textContent = heroArName;
         const pvEl = document.getElementById('hero-pava-pill');
         if (pvEl) pvEl.textContent = `${heroDeal.conf}% PAVA`;
 
@@ -4051,13 +4151,33 @@
         const hStamp = state.lastStampByDeal[heroDeal.id];
         const hAgUsd = heroDeal.agentRecommendedUsd || 0;
         const hBudget = getAgentBudgetUsage();
+        const greenAgents = (heroDeal.aiScores || []).filter((s) => s >= 75).length;
         const heroFooter = document.getElementById('hero-exec-footer');
         if (heroFooter) {
           heroFooter.innerHTML = `
+            <!-- شريط مؤشرات وبوابات الأمان (بوضوح كامل للمستخدم) -->
+            <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.08);font-size:10px;">
+              <span class="hex-shield" style="color:${state.killSwitch ? 'var(--hot)' : '#10f5a0'};border-color:${state.killSwitch ? 'var(--hot)' : 'rgba(16,245,160,0.45)'};padding:2px 7px;">
+                ${state.killSwitch ? '🛑 بوابة المخاطر: متوقفة' : '✅ بوابة المخاطر: آمنة'}
+              </span>
+              <span class="hex-shield" style="color:#10f5a0;border-color:rgba(16,245,160,0.45);padding:2px 7px;">
+                🤖 إجماع الوكلاء: ${greenAgents}/5 أخضر
+              </span>
+              <span class="hex-shield" style="color:${state.testnetConnected ? '#10f5a0' : '#ffe484'};border-color:${state.testnetConnected ? 'rgba(16,245,160,0.45)' : 'rgba(247,201,72,0.45)'};padding:2px 7px;">
+                ${state.testnetConnected ? '🟢 Binance Testnet: متصل حي' : '🧪 الوضع: محاكاة محلية'}
+              </span>
+              <span class="hex-shield" style="color:#38bdf8;border-color:rgba(56,189,248,0.45);padding:2px 7px;">
+                🛡️ حماية PAPER مفعّلة
+              </span>
+              <span class="hex-shield" style="color:#ffe484;border-color:rgba(247,201,72,0.55);padding:2px 7px;">
+                ${heroTodayMatch ? `✅ اشتريتها اليوم (الصفقة رقم #${heroTodayMatch.dailySeqNo})` : `🎯 ستُسجَّل كـ الصفقة رقم #${nextDailyNo} اليوم`}
+              </span>
+            </div>
+
             <div class="row-between" style="flex-wrap:wrap;gap:8px;">
               <div>
                 <div class="muted" style="font-size:10px;">
-                  🤖 مقترح الوكيل: <strong class="num text-sec">$${hAgUsd.toLocaleString()}</strong>
+                  🤖 مقترح الوكيل لـ <strong>صفقة #${heroNo}</strong>: <strong class="num text-sec">$${hAgUsd.toLocaleString()}</strong>
                   ${heroDeal.userAdjusted ? `<span class="hex-shield" style="font-size:9px;padding:0 5px;color:var(--pri);border-color:var(--pri);margin-inline-start:4px;">👑 تعديل الأدمن</span>` : ''}
                   • المملوك: <strong class="num text-pri">${hOwned} ${hUnit}</strong>
                 </div>
@@ -4069,7 +4189,7 @@
                     ${heroDeal.userAdjusted ? `<button type="button" class="admin-amt-btn" onclick="ui.resetDealToAgent('${heroDeal.id}')" title="إرجاع لمقترح الوكيل">↺</button>` : ''}
                   </div>
                   <span class="num text-sec" style="font-size:11.5px;">(${heroDeal.qty} ${hUnit})</span>
-                  <span class="num text-ok" style="font-size:11px;font-weight:900;">+$${hm.maxProf.toLocaleString()} (+${hm.expPct}%)</span>
+                  <span class="num text-ok" style="font-size:11px;font-weight:900;">ربح متوقع +$${hm.maxProf.toLocaleString()} (+${hm.expPct}%)</span>
                 </div>
               </div>
 
@@ -4077,23 +4197,22 @@
                 <div style="display:flex;gap:3px;margin:0 3px;">
                   ${AI_AGENTS.map((ag, i) => `<span class="ai-orb-sm num" style="--orb-c:${ag.col};--orb-g:${ag.glow};">${heroDeal.aiScores[i]}</span>`).join('')}
                 </div>
-                <button type="button" class="btn-3d btn-3d-buy" style="padding:7px 13px;font-size:12px;" onclick="ui.executeEliteDeal('${heroDeal.id}', 'BUY')">▲ شراء Maker</button>
+                <button type="button" class="btn-3d btn-3d-buy" style="padding:7px 13px;font-size:12px;" onclick="ui.executeEliteDeal('${heroDeal.id}', 'BUY')">▲ شراء صفقة #${heroNo}</button>
                 <button type="button" class="btn-3d ${hOwned > 0 ? 'btn-3d-sell' : 'btn-spot-neutral'}" style="padding:7px 10px;font-size:11px;" onclick="ui.executeEliteDeal('${heroDeal.id}', 'SELL')">${hOwned > 0 ? '▼ بيع مملوك' : '▼ بيع / حياد'}</button>
                 <button type="button" class="btn-3d btn-3d-gold" style="padding:7px 11px;font-size:11px;" onclick="ui.openDecisionBasisModal('${heroDeal.id}')">🧠 شرح القرار</button>
               </div>
             </div>
             <div class="row-between" style="margin-top:5px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.07);font-size:10.5px;flex-wrap:wrap;gap:8px;">
-              <strong class="num text-ok">TP1 $${hm.tp1} • TP2 $${hm.tp}</strong>
-              <strong class="num text-err">SL $${hm.sl}</strong>
+              <strong class="num text-ok">هدف الربح TP1 $${hm.tp1} • TP2 $${hm.tp}</strong>
+              <strong class="num text-err">وقف الخسارة SL $${hm.sl}</strong>
               <span class="num muted">🛡️ سقف الساعة: $${hBudget.remHourUsd.toLocaleString()} / $${hBudget.maxHourlyUsd.toLocaleString()} • اليوم: $${hBudget.remDayUsd.toLocaleString()}</span>
               <span class="num muted">${hStamp ? `✓ #${hStamp.orderId}` : `LIMIT_MAKER`}</span>
             </div>
           `;
         }
 
-        // توزيع الصفقات المقترحة على الجانبين الأيمن والأيسر (3 يمين + 3 يسار)!
+        // توزيع الصفقات المقترحة المرقّمة على الجانبين الأيمن والأيسر (3 يمين + 3 يسار)!
         const sideCandidates = (filteredApproved.length ? filteredApproved : allApproved).filter((d) => d.id !== heroDeal.id);
-        // في حال فلتر زمني ضيق نضمن ظهور كروت مقترحة متوازنة على الجانبين
         const paddedSides = sideCandidates.length >= 2 ? sideCandidates : allApproved.filter((d) => d.id !== heroDeal.id);
         const mid = Math.ceil(paddedSides.length / 2);
         const rightDeals = paddedSides.slice(0, mid);
@@ -4101,17 +4220,20 @@
 
         const renderSideCard = (d) => {
           const m = computeDealMetrics(d);
-          const tag = d.assetClass === 'crypto' ? 'SPOT' : 'EQUITY';
           const shortGainPct = +(d.tpPct * 100).toFixed(2);
           const agUsd = d.agentRecommendedUsd || 0;
+          const evNo = d._evalNo || 1;
+          const doneToday = todayLog.find((t) => t.dealId === d.id || t.sym === d.sym);
           return `<article id="card-${d.id}" class="lux-side-deal-card elite-deal-card ${d.id === state.heroDealId ? 'active-hero' : ''}" onclick="ui.selectHeroDeal('${d.id}')">
-            <div class="row-between" dir="ltr">
-              <strong class="num" style="font-size:12.5px;color:#93c5fd;">${d.sym} • ${(d.name.split('•')[1] || d.name).trim()}</strong>
-              <span class="hex-shield num" style="font-size:9px;padding:1px 6px;color:var(--pri);border-color:var(--border-pri);">${tag} • ${d.conf}%</span>
+            <div class="row-between" style="gap:4px;">
+              <span class="hex-shield num" style="font-size:9.5px;padding:1px 7px;background:rgba(247,201,72,0.16);color:#ffe484;border-color:rgba(247,201,72,0.55);font-weight:900;">صفقة #${evNo}</span>
+              <strong class="num" style="font-size:12px;color:#93c5fd;" dir="ltr">${d.sym}</strong>
+              <span class="hex-shield num" style="font-size:9px;padding:1px 6px;color:var(--ok);border-color:rgba(16,245,160,0.45);">${d.conf}%</span>
             </div>
+            ${doneToday ? `<div style="text-align:center;margin-top:2px;"><span class="hex-shield" style="font-size:9px;padding:1px 7px;background:rgba(16,245,160,0.14);color:#10f5a0;border-color:rgba(16,245,160,0.55);">✅ نُفّذت اليوم (الصفقة رقم #${doneToday.dailySeqNo})</span></div>` : ''}
             <div style="text-align:center;padding:1px 0;">
               <div class="num val-gold" dir="ltr" style="font-size:16px;font-weight:900;line-height:1.15;">$${d.price.toLocaleString()}</div>
-              <div class="num val-emerald" dir="ltr" style="font-size:10px;font-weight:800;">▲ +${shortGainPct}% (${d.round}) • مقترح الوكيل $${agUsd.toLocaleString()}</div>
+              <div class="num val-emerald" dir="ltr" style="font-size:10px;font-weight:800;">▲ +${shortGainPct}% (${d.round}) • مقترح $${agUsd.toLocaleString()}</div>
             </div>
             <div style="display:flex;justify-content:center;align-items:center;gap:4px;" onclick="event.stopPropagation()">
               <button type="button" class="admin-amt-btn" style="width:20px;height:20px;font-size:12px;" onclick="ui.adjustDealQty('${d.id}', -1)" title="إنقاص">−</button>
@@ -4121,7 +4243,7 @@
             </div>
             <canvas id="spark-${d.id}" width="230" height="28" style="width:100%;height:26px;display:block;"></canvas>
             <div style="display:flex;justify-content:center;gap:4px;padding-top:3px;border-top:1px solid rgba(255,255,255,0.06);" onclick="event.stopPropagation()">
-              <button type="button" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:2px 8px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء</button>
+              <button type="button" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:2px 8px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء #${evNo}</button>
               <button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:2px 7px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'SELL')">▼ بيع</button>
               <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" style="padding:2px 7px;font-size:10px;" onclick="ui.openDecisionBasisModal('${d.id}')">🧠 لماذا؟</button>
             </div>
@@ -4135,6 +4257,62 @@
 
         if (typeof hydrateSigs === 'function') hydrateSigs();
         this.renderAllCardCandles();
+        this.renderTodayExecutedBox();
+      },
+
+      renderTodayExecutedBox() {
+        const list = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+        const rules = state.agentRules || { maxDailyTrades: 25 };
+        const maxDay = Number(rules.maxDailyTrades || 25);
+        const count = list.length;
+        const totalUsd = list.reduce((s, r) => s + Number(r.invest || 0), 0);
+        const todayKey = new Date().toISOString().slice(0, 10);
+
+        const cntPill = document.getElementById('daily-exec-count-pill');
+        if (cntPill) cntPill.textContent = `📊 صفقاتك اليوم: ${count} / ${maxDay}`;
+        const nextPill = document.getElementById('daily-next-seq-pill');
+        if (nextPill) nextPill.textContent = `🎯 القادم: الصفقة رقم #${count + 1} اليوم`;
+        const dtBadge = document.getElementById('today-log-date-badge');
+        if (dtBadge) dtBadge.textContent = `📅 ${todayKey}`;
+        const sumPill = document.getElementById('today-log-summary-pill');
+        if (sumPill) sumPill.textContent = `الإجمالي اليوم: ${count} صفقة • $${totalUsd.toLocaleString()}`;
+
+        const emptyEl = document.getElementById('today-exec-empty');
+        const wrapEl = document.getElementById('today-exec-table-wrap');
+        const tbody = document.getElementById('today-exec-tbody');
+        if (!tbody) return;
+
+        if (!count) {
+          emptyEl?.classList.remove('hidden');
+          wrapEl?.classList.add('hidden');
+          tbody.innerHTML = '';
+          return;
+        }
+        emptyEl?.classList.add('hidden');
+        wrapEl?.classList.remove('hidden');
+        tbody.innerHTML = list.map((r) => {
+          const isBuy = r.side === 'BUY';
+          const arNm = ((r.name || '').split('•')[1] || r.name || r.sym).trim();
+          return `
+            <tr>
+              <td><span class="hex-shield num" style="background:rgba(247,201,72,0.16);color:#ffe484;border-color:rgba(247,201,72,0.55);font-weight:900;">الصفقة #${r.dailySeqNo} اليوم</span></td>
+              <td><strong class="num" style="color:#93c5fd;">صفقة مقترحة #${r.evalNo || 1}</strong> • <strong class="num">${r.sym}</strong> <span class="muted">(${arNm})</span></td>
+              <td><span class="hex-shield" style="color:${isBuy ? '#10f5a0' : '#ff6b8b'};border-color:${isBuy ? 'rgba(16,245,160,0.45)' : 'rgba(255,107,139,0.45)'};">${isBuy ? '▲ شراء' : '▼ بيع'}</span></td>
+              <td class="num"><strong class="text-pri">$${Number(r.invest || 0).toLocaleString()}</strong> <span class="muted">(${r.qty})</span></td>
+              <td class="num">$${Number(r.price || 0).toLocaleString()}</td>
+              <td class="num">${r.realTestnetExec ? `<span style="color:#10f5a0;">🟢 Binance Testnet (${r.orderId})</span>` : `<span style="color:#38bdf8;">🧪 محاكاة (${r.orderId})</span>`}</td>
+              <td class="num muted">${r.time || '—'}</td>
+            </tr>
+          `;
+        }).join('');
+      },
+
+      clearTodayExecutedLog() {
+        const todayKey = new Date().toISOString().slice(0, 10);
+        state.todayExecutedLog = [];
+        try { safeStore.set('htb_today_exec_' + todayKey, '[]'); } catch (_) {}
+        this.renderElite90Page();
+        this.toast('🧹 تم تصفير سجل وعداد صفقات اليوم — الصفقة القادمة ستكون رقم #1 اليوم.');
       },
 
       drawHeroShortTermChart() {
