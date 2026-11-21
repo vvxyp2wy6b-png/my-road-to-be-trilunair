@@ -1826,6 +1826,65 @@
         </div>
       </div>
 
+      <!-- لوحة الملخص الفوري (اشتر 1-2-3 / بع 1-2-3 + ساعي/أسبوعي/شهري) + حاسبة الهدف الذكية -->
+      <section id="quick-summary-planner" class="holo-prism" style="margin-bottom:10px;padding:11px 13px;border-color:rgba(245,196,81,0.42);">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(310px, 1fr));gap:12px;">
+          <!-- 1. ملخص الانطلاق الفوري: اشتر 1-2-3 / بع 1-2-3 -->
+          <div class="holo-chamber" style="padding:10px 12px;border-radius:12px;border-color:rgba(56,189,248,0.32);">
+            <div class="row-between" style="margin-bottom:7px;flex-wrap:wrap;gap:6px;">
+              <strong style="font-size:13px;color:#38bdf8;">⚡ ملخص الانطلاق السريع (اشتر 1-2-3 / بع 1-2-3)</strong>
+              <div style="display:flex;gap:4px;">
+                <button type="button" class="btn-3d btn-3d-sm btn-3d-gold qhz-btn" data-qhz="hourly" onclick="ui.setQuickHorizon('hourly')">⚡ ساعية</button>
+                <button type="button" class="btn-3d btn-3d-sm qhz-btn" data-qhz="weekly" onclick="ui.setQuickHorizon('weekly')">📅 أسبوعية</button>
+                <button type="button" class="btn-3d btn-3d-sm qhz-btn" data-qhz="monthly" onclick="ui.setQuickHorizon('monthly')">🗓️ شهرية</button>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));gap:8px;">
+              <div>
+                <div style="font-size:11px;font-weight:900;color:#10f5a0;margin-bottom:4px;">🟢 اشترِ الآن (1 • 2 • 3):</div>
+                <div id="quick-buy-123" style="display:flex;flex-direction:column;gap:5px;"></div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:900;color:#ff6b8b;margin-bottom:4px;">🔴 بِع / اجنِ ربحاً (1 • 2 • 3):</div>
+                <div id="quick-sell-123" style="display:flex;flex-direction:column;gap:5px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. حاسبة الهدف المالي الذكية (مثال: استثمار 100 ريال لتحقيق ربح 100 دولار) -->
+          <div class="holo-chamber" style="padding:10px 12px;border-radius:12px;border-color:rgba(245,196,81,0.38);">
+            <div class="row-between" style="margin-bottom:6px;flex-wrap:wrap;gap:6px;">
+              <strong style="font-size:13px;color:#ffd86b;">🎯 حاسبة الهدف الذكية (أسرع خطة من الوكيل)</strong>
+              <span class="hex-shield num" style="font-size:9.5px;color:#10f5a0;border-color:rgba(16,245,160,0.45);">1$ = 3.75 ريال</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:7px;">
+              <div>
+                <label style="font-size:10px;color:#94a3b8;display:block;margin-bottom:2px;">المبلغ الذي ستستثمره:</label>
+                <div style="display:flex;gap:4px;">
+                  <input id="goal-cap-inp" type="number" value="100" min="1" class="holo-inp num" style="width:100%;padding:5px 7px;font-size:12px;" />
+                  <select id="goal-cap-cur" class="holo-sel" style="padding:4px 6px;font-size:11px;">
+                    <option value="SAR" selected>ريال</option>
+                    <option value="USD">دولار $</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:10px;color:#94a3b8;display:block;margin-bottom:2px;">الربح المستهدف (التارجت):</label>
+                <div style="display:flex;gap:4px;">
+                  <input id="goal-tgt-inp" type="number" value="100" min="1" class="holo-inp num" style="width:100%;padding:5px 7px;font-size:12px;" />
+                  <select id="goal-tgt-cur" class="holo-sel" style="padding:4px 6px;font-size:11px;">
+                    <option value="USD" selected>دولار $</option>
+                    <option value="SAR">ريال</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" style="width:100%;padding:6px;font-size:11.5px;margin-bottom:7px;" onclick="ui.runGoalPlanner()">🤖 ادرس الحالة واحسب أسرع خطة لتحقيق الهدف</button>
+            <div id="goal-plan-result" style="font-size:11px;line-height:1.65;color:#e2e8f0;"></div>
+          </div>
+        </div>
+      </section>
+
       <div id="vetoed-deals-drawer" class="deals-cards-grid hidden" style="margin-bottom:10px;"></div>
 
       <div id="elite-90-cards" class="lux-trading-tri-arena">
@@ -1863,11 +1922,11 @@
           </div>
 
           <div id="hero-plain-guide" style="font-size:11px;color:#94a3b8;margin-top:2px;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
-            <span>🕯️ هذا الرسم البياني يعرض حركة السعر الحقيقية لـ <strong id="hero-guide-sym" style="color:#ffe484;">صفقة #1 (SOLUSDT)</strong> — اضغط أي بطاقة صفقة يميناً أو يساراً للتبديل</span>
+            <span>🕯️ شارت <strong id="hero-guide-sym" style="color:#ffe484;">صفقة #1 (SOLUSDT)</strong> — <span style="color:#38bdf8;">✨ مرّر على الشموع للتفاعل النجمي • اضغط لعرض سبب توصية المجلس</span></span>
           </div>
 
           <div class="lux-hero-canvas-wrap">
-            <canvas id="hero-short-term-cv" width="760" height="272" style="width:100%;height:264px;display:block;"></canvas>
+            <canvas id="hero-short-term-cv" width="760" height="272" style="width:100%;height:264px;display:block;cursor:crosshair;" title="مرّر للمعاينة النجمية واضغط لعرض تفاصيل موافقة مجلس التداول"></canvas>
           </div>
 
           <div id="hero-exec-footer" class="holo-chamber" style="padding:7px 11px;border-radius:13px;background:rgba(8,18,33,0.94);border-color:rgba(34,211,238,0.32);box-shadow:inset 0 2px 6px rgba(0,0,0,0.7);"></div>
@@ -4493,6 +4552,7 @@
         this.renderAllCardCandles();
         this.renderHeroAgentsCouncil(heroDeal);
         this.renderTodayExecutedBox();
+        this.renderQuickSummary();
       },
 
       renderHeroAgentsCouncil(d) {
@@ -4678,6 +4738,119 @@
             </tr>
           `;
         }).join('');
+        this.renderQuickSummary();
+      },
+
+      setQuickHorizon(hz) {
+        state.quickHorizon = hz;
+        document.querySelectorAll('.qhz-btn').forEach((b) => b.classList.toggle('btn-3d-gold', b.dataset.qhz === hz));
+        this.renderQuickSummary();
+        this.runGoalPlanner(true);
+      },
+
+      renderQuickSummary() {
+        const buyBox = document.getElementById('quick-buy-123');
+        const sellBox = document.getElementById('quick-sell-123');
+        if (!buyBox || !sellBox) return;
+
+        const hz = state.quickHorizon || 'hourly';
+        const multMap = { hourly: { m: 1, lbl: 'ساعة' }, weekly: { m: 2.6, lbl: 'أسبوع' }, monthly: { m: 5.4, lbl: 'شهر' } };
+        const hzInfo = multMap[hz] || multMap.hourly;
+
+        const approved = ALL_CANDIDATE_DEALS.filter((d) => d.quant && d.quant.approved)
+          .slice()
+          .sort((a, b) => (b.tpPct * b.conf) - (a.tpPct * a.conf));
+
+        const top3Buy = approved.slice(0, 3);
+        const nums = ['1️⃣', '2️⃣', '3️⃣'];
+        buyBox.innerHTML = top3Buy.map((d, i) => {
+          const arNm = (d.name.split('•')[1] || d.name).trim();
+          const estPct = (d.tpPct * 100 * hzInfo.m).toFixed(1);
+          return `
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:5px 7px;border-radius:8px;background:rgba(16,245,160,0.07);border:1px solid rgba(16,245,160,0.22);font-size:11px;">
+              <div style="cursor:pointer;" onclick="ui.selectHeroDeal('${d.id}')">
+                <strong>${nums[i]} ${d.sym}</strong> <span class="muted">(${arNm})</span>
+                <div class="num text-ok" style="font-size:10px;">+${estPct}% / ${hzInfo.lbl} • ثقة ${d.conf}%</div>
+              </div>
+              <button type="button" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:3px 8px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء</button>
+            </div>
+          `;
+        }).join('');
+
+        // قائمة بع / جني ربح 1-2-3 من الأرصدة المملوكة فعلياً
+        const ownedDeals = ALL_CANDIDATE_DEALS.filter((d) => Number(state.spotHoldings[d.sym] || 0) > 0).slice(0, 3);
+        if (ownedDeals.length) {
+          sellBox.innerHTML = ownedDeals.map((d, i) => {
+            const qty = Number(state.spotHoldings[d.sym] || 0);
+            const valUsd = Math.round(qty * d.price);
+            const m = computeDealMetrics(d);
+            return `
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:5px 7px;border-radius:8px;background:rgba(255,56,104,0.07);border:1px solid rgba(255,56,104,0.24);font-size:11px;">
+                <div style="cursor:pointer;" onclick="ui.selectHeroDeal('${d.id}')">
+                  <strong>${nums[i]} ${d.sym}</strong> <span class="num text-pri">($${valUsd.toLocaleString()})</span>
+                  <div class="num muted" style="font-size:10px;">مملوك: ${qty} • هدف جني $${m.tp1}</div>
+                </div>
+                <button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:3px 8px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'SELL')">▼ بيع</button>
+              </div>
+            `;
+          }).join('');
+        } else {
+          sellBox.innerHTML = `<div class="muted" style="font-size:11px;padding:8px;text-align:center;">لا تملك عملات مفتوحة للبيع الآن — ابدأ بشراء <strong>1️⃣</strong> أولاً ثم ستظهر هنا تلقائياً لجني الربح.</div>`;
+        }
+
+        if (!state._goalPlanInitialized) {
+          state._goalPlanInitialized = true;
+          this.runGoalPlanner(true);
+        }
+      },
+
+      runGoalPlanner(silent) {
+        const capRaw = Math.max(1, Number(document.getElementById('goal-cap-inp')?.value || 100));
+        const capCur = document.getElementById('goal-cap-cur')?.value || 'SAR';
+        const tgtRaw = Math.max(1, Number(document.getElementById('goal-tgt-inp')?.value || 100));
+        const tgtCur = document.getElementById('goal-tgt-cur')?.value || 'USD';
+        const out = document.getElementById('goal-plan-result');
+        if (!out) return;
+
+        const SAR_RATE = 3.75;
+        const capUsd = capCur === 'SAR' ? capRaw / SAR_RATE : capRaw;
+        const tgtUsd = tgtCur === 'SAR' ? tgtRaw / SAR_RATE : tgtRaw;
+        const finalUsd = capUsd + tgtUsd;
+        const reqReturnPct = (tgtUsd / capUsd) * 100;
+
+        const approved = ALL_CANDIDATE_DEALS.filter((d) => d.quant && d.quant.approved)
+          .slice()
+          .sort((a, b) => (b.tpPct * b.conf) - (a.tpPct * a.conf));
+        const top1 = approved[0] || ALL_CANDIDATE_DEALS[0];
+        const top2 = approved[1] || top1;
+        const top3 = approved[2] || top1;
+
+        const hz = state.quickHorizon || 'hourly';
+        const avgCycleGross = Math.max(0.025, ((top1.tpPct || 0.04) + (top2.tpPct || 0.03)) / 2);
+        // صافي العائد الواقعي لكل دورة تداول بعد خصم الرسوم واحتساب نسبة نجاح 75%
+        const netPerCycle = Math.max(0.018, (avgCycleGross - 0.0015) * 0.78);
+        const cyclesNeeded = Math.max(1, Math.ceil(Math.log(finalUsd / capUsd) / Math.log(1 + netPerCycle)));
+        const cyclesPerDay = hz === 'hourly' ? 4 : (hz === 'weekly' ? 1 : 0.4);
+        const estDays = Math.max(1, Math.ceil(cyclesNeeded / cyclesPerDay));
+        const step1Gain = +(capUsd * avgCycleGross).toFixed(2);
+
+        const isAggressive = reqReturnPct >= 100;
+        out.innerHTML = `
+          <div style="padding:7px 9px;border-radius:9px;background:rgba(8,22,40,0.88);border:1px solid rgba(56,189,248,0.28);">
+            <div style="color:#ffe484;font-weight:800;margin-bottom:3px;">
+              📊 دراسة الوكيل: رأس مالك <span class="num">$${capUsd.toFixed(2)}</span> ← التارجت ربح <span class="num text-ok">+$${tgtUsd.toFixed(2)}</span> (<span class="num">+${Math.round(reqReturnPct)}%</span>)
+            </div>
+            <div style="color:#cbd5e1;">
+              • <strong>أسرع مسار آمن (بإعادة استثمار الأرباح):</strong> حوالي <strong class="num text-pri">${cyclesNeeded} صفقة متتالية</strong> بمتوسط صافي <span class="num text-ok">+${(netPerCycle * 100).toFixed(1)}%</span> لكل صفقة (المدة التقديرية: <strong class="num text-sec">${estDays} يوم</strong>).<br/>
+              • <strong>خطة البداية (1 → 2 → 3):</strong> ابدأ بـ <strong class="num">${top1.sym}</strong> (+$${step1Gain} متوقع)، ثم <strong class="num">${top2.sym}</strong>، ثم <strong class="num">${top3.sym}</strong>.
+              ${isAggressive ? `<div style="color:#fbbf24;margin-top:3px;font-size:10.5px;">🛡️ تنبيه الحارس: مضاعفة رأس المال +${Math.round(reqReturnPct)}% تحتاج صبراً وتراكماً تدريجياً عبر صفقات صغيرة آمنة وليس بصفقة واحدة عالية المخاطرة.</div>` : ''}
+            </div>
+            <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" class="btn-3d btn-3d-buy btn-3d-sm" onclick="ui.selectHeroDeal('${top1.id}');ui.setDealUsd('${top1.id}', ${Math.max(15, Math.round(capUsd))});ui.toast('🎯 تم تجهيز الخطوة #1 على ${top1.sym} بمبلغ $${Math.max(15, Math.round(capUsd))} — اضغط شراء للتنفيذ!');">🚀 جهّز الخطوة #1 على ${top1.sym} الآن</button>
+            </div>
+          </div>
+        `;
+        if (!silent) this.toast(`🎯 تم حساب أسرع خطة لتحقيق ربح $${tgtUsd.toFixed(2)} من رأس مال $${capUsd.toFixed(2)} (${cyclesNeeded} صفقة تراكمية).`);
       },
 
       clearTodayExecutedLog() {
@@ -4850,6 +5023,94 @@
           const pv = maxP - r * (maxP - minP);
           ctx.fillText(pv.toFixed(dec), W - 10, padTop + r * chartH + 3);
         });
+
+        // ربط التفاعل النجمي عند المرور بالماوس + فتح تفاصيل موافقة المجلس عند الضغط على الشموع
+        if (!cv.dataset.boundStar) {
+          cv.dataset.boundStar = '1';
+          cv.addEventListener('mousemove', (ev) => {
+            const rect = cv.getBoundingClientRect();
+            const scaleX = cv.width / Math.max(1, rect.width);
+            const scaleY = cv.height / Math.max(1, rect.height);
+            state.heroCandleHover = {
+              x: (ev.clientX - rect.left) * scaleX,
+              y: (ev.clientY - rect.top) * scaleY
+            };
+            ui.drawHeroShortTermChart();
+          });
+          cv.addEventListener('mouseleave', () => {
+            state.heroCandleHover = null;
+            ui.drawHeroShortTermChart();
+          });
+          cv.addEventListener('click', () => {
+            ui.openDecisionBasisModal(state.heroDealId);
+          });
+        }
+
+        // رسم الشكل النجمي الهولوغرامي + خطوط التقاطع + بطاقة تفاصيل الشمعة عند المرور بالماوس
+        if (state.heroCandleHover && candles.length) {
+          const hx = state.heroCandleHover.x;
+          const idx = Math.max(0, Math.min(candles.length - 1, Math.floor((hx - padLeft) / stepX)));
+          const hc = candles[idx];
+          const cx = padLeft + idx * stepX + stepX * 0.5;
+          const cy = yOf(hc.close);
+          const up = hc.close >= hc.open;
+          const starCol = up ? '#10f5a0' : '#ff5b7f';
+
+          // خطوط تقاطع متقطعة
+          ctx.save();
+          ctx.setLineDash([3, 4]);
+          ctx.strokeStyle = 'rgba(255, 228, 132, 0.45)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(cx, padTop); ctx.lineTo(cx, H - padBot);
+          ctx.moveTo(padLeft, cy); ctx.lineTo(W - padRight, cy);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // هالة شعاعية نجمية (8 أشعة مضيئة حول الشمعة المختارة)
+          const rad = ctx.createRadialGradient(cx, cy, 1, cx, cy, 28);
+          rad.addColorStop(0, 'rgba(255, 228, 132, 0.95)');
+          rad.addColorStop(0.35, up ? 'rgba(16, 245, 160, 0.45)' : 'rgba(255, 91, 127, 0.45)');
+          rad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+          ctx.fillStyle = rad;
+          ctx.beginPath(); ctx.arc(cx, cy, 28, 0, Math.PI * 2); ctx.fill();
+
+          ctx.strokeStyle = '#ffe484';
+          ctx.lineWidth = 1.4;
+          for (let ray = 0; ray < 8; ray++) {
+            const ang = (ray * Math.PI) / 4;
+            const len = ray % 2 === 0 ? 18 : 11;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(ang) * 3, cy + Math.sin(ang) * 3);
+            ctx.lineTo(cx + Math.cos(ang) * len, cy + Math.sin(ang) * len);
+            ctx.stroke();
+          }
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath(); ctx.arc(cx, cy, 3.2, 0, Math.PI * 2); ctx.fill();
+
+          // بطاقة OHLC طافية مع دعوة للضغط لعرض سبب توصية المجلس
+          const tipW = 215, tipH = 62;
+          const tipX = cx + 16 + tipW < W - padRight ? cx + 16 : Math.max(16, cx - tipW - 16);
+          const tipY = Math.max(28, Math.min(H - tipH - 12, cy - tipH / 2));
+          ctx.fillStyle = 'rgba(6, 16, 32, 0.94)';
+          ctx.strokeStyle = starCol;
+          ctx.lineWidth = 1.2;
+          ctx.fillRect(tipX, tipY, tipW, tipH);
+          ctx.strokeRect(tipX, tipY, tipW, tipH);
+
+          ctx.textAlign = 'left';
+          ctx.font = '700 10.5px Cairo, sans-serif';
+          ctx.fillStyle = starCol;
+          ctx.fillText(`${d.sym} • #${idx + 1} (${up ? '▲ صاعدة' : '▼ هابطة'})`, tipX + 8, tipY + 15);
+          ctx.fillStyle = '#e2e8f0';
+          ctx.font = '600 10px monospace';
+          ctx.fillText(`O:${hc.open.toFixed(dec)} H:${hc.high.toFixed(dec)}`, tipX + 8, tipY + 31);
+          ctx.fillText(`L:${hc.low.toFixed(dec)} C:${hc.close.toFixed(dec)}`, tipX + 8, tipY + 44);
+          ctx.fillStyle = '#ffe484';
+          ctx.font = '700 9.5px Cairo, sans-serif';
+          ctx.fillText('👆 اضغط لعرض سبب موافقة مجلس الوكلاء', tipX + 8, tipY + 57);
+          ctx.restore();
+        }
       },
 
       drawSideSparklines() {
