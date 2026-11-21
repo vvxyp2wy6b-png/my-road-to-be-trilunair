@@ -1431,6 +1431,8 @@ def get_quant_engine_snapshot() -> dict[str, Any]:
 # الجسر الحقيقي المباشر مع Binance Spot Testnet (أسعار وشموع حقيقية + أرصدة + تنفيذ فعلي)
 # ==============================================================================
 
+from pathlib import Path
+
 _TESTNET_BASE = "https://testnet.binance.vision"
 _BINANCE_PUB_FALLBACK = "https://api.binance.com"
 
