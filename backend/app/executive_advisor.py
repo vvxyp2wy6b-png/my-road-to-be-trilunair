@@ -1728,3 +1728,217 @@ def place_real_binance_testnet_order(payload: TestnetOrderInput) -> dict[str, An
         return {"ok": False, "error": str(exc), "messageAr": f"❌ خطأ أثناء إرسال الأمر إلى Binance Testnet: {exc}"}
 
 
+# ==============================================================================
+# ربط مزودات الذكاء الاصطناعي والوكلاء (Gemini / OpenAI / Claude / Grok + المحرك الكمي المحلي)
+# ==============================================================================
+
+_AI_ENV_KEYS = {
+    "gemini": ("GEMINI_API_KEY", "Google Gemini (gemini-2.5-flash)"),
+    "openai": ("OPENAI_API_KEY", "OpenAI GPT (gpt-4o-mini)"),
+    "anthropic": ("ANTHROPIC_API_KEY", "Anthropic Claude (claude-3-5-haiku)"),
+    "xai": ("XAI_API_KEY", "xAI Grok (grok-3-mini)"),
+}
+
+
+class AiProviderConnectInput(BaseModel):
+    provider: str = Field(..., pattern="^(gemini|openai|anthropic|xai)$")
+    apiKey: str = Field(..., min_length=8)
+
+
+class AiAgentAskInput(BaseModel):
+    prompt: str = Field(..., min_length=2, max_length=1500)
+    provider: str = Field(default="auto")
+
+
+def _persist_env_local(env_name: str, value: str) -> None:
+    """حفظ المفتاح محلياً في .env.local فقط (مستثنى من Git) ليبقى متصلاً بعد إعادة التشغيل."""
+    try:
+        env_file = Path(__file__).resolve().parents[2] / ".env.local"
+        lines: list[str] = []
+        if env_file.is_file():
+            lines = env_file.read_text(encoding="utf-8").splitlines()
+        prefix = f"{env_name}="
+        updated = False
+        new_lines = []
+        for line in lines:
+            if line.startswith(prefix):
+                new_lines.append(f"{env_name}={value}")
+                updated = True
+            else:
+                new_lines.append(line)
+        if not updated:
+            new_lines.append(f"{env_name}={value}")
+        env_file.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+    except Exception:
+        pass
+
+
+@executive_router.get("/ai-providers/status")
+def get_ai_providers_status() -> dict[str, Any]:
+    """حالة اتصال مزودات الذكاء الاصطناعي الحقيقية للوكلاء داخل التصميم الموحّد."""
+    providers = [
+        {
+            "id": "local",
+            "name": "Local Quantitative Engine",
+            "connected": True,
+            "model": "quant-deterministic-v1",
+            "noteAr": "متصل دائماً — محرك كمي محلي فوري (PAVA + Kelly + ATR)",
+        }
+    ]
+    for pid, (env_name, label) in _AI_ENV_KEYS.items():
+        val = (os.getenv(env_name) or "").strip()
+        providers.append({
+            "id": pid,
+            "name": label,
+            "envKey": env_name,
+            "connected": len(val) >= 8,
+            "masked": (val[:5] + "•••" + val[-4:]) if len(val) >= 10 else "",
+            "noteAr": "🟢 متصل ومفعل للوكلاء" if len(val) >= 8 else "غير مهيأ — أدخل المفتاح للربط",
+        })
+    active_llm = next((p["id"] for p in providers if p["id"] != "local" and p["connected"]), "local")
+    return {"ok": True, "activeProvider": active_llm, "providers": providers}
+
+
+@executive_router.post("/ai-providers/connect")
+def connect_ai_provider(payload: AiProviderConnectInput) -> dict[str, Any]:
+    """ربط وفحص مفتاح مزود الذكاء الاصطناعي وحفظه في .env.local لتفعيل الوكلاء فوراً."""
+    import httpx
+
+    pid = payload.provider.lower().strip()
+    key = payload.apiKey.strip()
+    env_name, label = _AI_ENV_KEYS[pid]
+
+    # اختبار اتصال سريع حقيقي مع المزود للتأكد من صلاحية المفتاح
+    verified_msg = ""
+    try:
+        with httpx.Client(timeout=10.0) as client:
+            if pid == "gemini":
+                r = client.get(f"https://generativelanguage.googleapis.com/v1beta/models?key={key}")
+                if r.status_code != 200:
+                    return {"ok": False, "messageAr": f"❌ مفتاح Google Gemini غير صالح ({r.status_code})"}
+                verified_msg = "تم التحقق الحقيقي من Google Gemini API"
+            elif pid == "openai":
+                r = client.get("https://api.openai.com/v1/models", headers={"Authorization": f"Bearer {key}"})
+                if r.status_code != 200:
+                    return {"ok": False, "messageAr": f"❌ مفتاح OpenAI غير صالح ({r.status_code})"}
+                verified_msg = "تم التحقق الحقيقي من OpenAI API"
+            elif pid == "anthropic":
+                r = client.get(
+                    "https://api.anthropic.com/v1/models",
+                    headers={"x-api-key": key, "anthropic-version": "2023-06-01"},
+                )
+                if r.status_code != 200:
+                    return {"ok": False, "messageAr": f"❌ مفتاح Anthropic Claude غير صالح ({r.status_code})"}
+                verified_msg = "تم التحقق الحقيقي من Anthropic Claude API"
+            elif pid == "xai":
+                r = client.get("https://api.x.ai/v1/models", headers={"Authorization": f"Bearer {key}"})
+                if r.status_code != 200:
+                    return {"ok": False, "messageAr": f"❌ مفتاح xAI Grok غير صالح ({r.status_code})"}
+                verified_msg = "تم التحقق الحقيقي من xAI Grok API"
+    except Exception as exc:
+        return {"ok": False, "messageAr": f"❌ تعذّر التحقق من الاتصال بالمزود: {exc}"}
+
+    os.environ[env_name] = key
+    _persist_env_local(env_name, key)
+    return {
+        "ok": True,
+        "provider": pid,
+        "label": label,
+        "messageAr": f"✅ {verified_msg} — الوكلاء متصلون الآن بـ {label}!",
+        "status": get_ai_providers_status(),
+    }
+
+
+@executive_router.post("/ai-providers/ask")
+def ask_connected_ai_agent(payload: AiAgentAskInput) -> dict[str, Any]:
+    """استشارة الوكيل الذكي المتصل فعلياً (Gemini / OpenAI / Claude / Grok أو المحرك الكمي المحلي) ببيانات Binance Testnet الحية."""
+    import httpx
+
+    tickers_resp = get_real_binance_testnet_tickers()
+    tickers = tickers_resp.get("tickers", {})
+    market_ctx = ", ".join(
+        f"{s}: ${v['price']:.2f} ({v['priceChangePercent']:+.2f}%)"
+        for s, v in list(tickers.items())[:6]
+    ) or "Live market syncing"
+    sys_prompt = (
+        "أنت الوكيل المالي التنفيذي «ترليورين» لمنصة د. ماجد حمدي على Binance Spot Testnet (فترة المعايرة حتى 28/11/2026). "
+        f"الأسعار الحقيقية الحية الآن من Binance Testnet: {market_ctx}. "
+        "أجب بالعربية بإيجاز واحترافية ووضوح بالأرقام الدقيقة، مع التزام Spot Long-Only وحدود إدارة المخاطر."
+    )
+
+    pref = (payload.provider or "auto").lower().strip()
+    order = [pref] if pref in _AI_ENV_KEYS else ["gemini", "openai", "anthropic", "xai"]
+
+    for pid in order:
+        env_name, label = _AI_ENV_KEYS[pid]
+        key = (os.getenv(env_name) or "").strip()
+        if len(key) < 8:
+            continue
+        try:
+            with httpx.Client(timeout=18.0) as client:
+                if pid == "gemini":
+                    r = client.post(
+                        f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={key}",
+                        json={
+                            "contents": [{"parts": [{"text": f"{sys_prompt}\n\nسؤال د. ماجد: {payload.prompt}"}]}],
+                        },
+                    )
+                    if r.status_code == 200:
+                        txt = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+                        return {"ok": True, "provider": label, "reply": txt}
+                elif pid == "openai":
+                    r = client.post(
+                        "https://api.openai.com/v1/chat/completions",
+                        headers={"Authorization": f"Bearer {key}"},
+                        json={
+                            "model": "gpt-4o-mini",
+                            "messages": [
+                                {"role": "system", "content": sys_prompt},
+                                {"role": "user", "content": payload.prompt},
+                            ],
+                        },
+                    )
+                    if r.status_code == 200:
+                        txt = r.json()["choices"][0]["message"]["content"]
+                        return {"ok": True, "provider": label, "reply": txt}
+                elif pid == "anthropic":
+                    r = client.post(
+                        "https://api.anthropic.com/v1/messages",
+                        headers={"x-api-key": key, "anthropic-version": "2023-06-01"},
+                        json={
+                            "model": "claude-3-5-haiku-latest",
+                            "max_tokens": 500,
+                            "system": sys_prompt,
+                            "messages": [{"role": "user", "content": payload.prompt}],
+                        },
+                    )
+                    if r.status_code == 200:
+                        txt = r.json()["content"][0]["text"]
+                        return {"ok": True, "provider": label, "reply": txt}
+                elif pid == "xai":
+                    r = client.post(
+                        "https://api.x.ai/v1/chat/completions",
+                        headers={"Authorization": f"Bearer {key}"},
+                        json={
+                            "model": "grok-3-mini",
+                            "messages": [
+                                {"role": "system", "content": sys_prompt},
+                                {"role": "user", "content": payload.prompt},
+                            ],
+                        },
+                    )
+                    if r.status_code == 200:
+                        txt = r.json()["choices"][0]["message"]["content"]
+                        return {"ok": True, "provider": label, "reply": txt}
+        except Exception:
+            continue
+
+    # الرد الذكي من المحرك الكمي المحلي إذا لم يُربط مفتاح خارجي بعد
+    return {
+        "ok": True,
+        "provider": "Local Quantitative Engine",
+        "reply": f"📊 تحليل المحرك الكمي المحلي بناءً على أسعار Binance Testnet الحية ({market_ctx}): الالتزام الكامل بعتبة PAVA ≥ 75% ونظام Spot Long-Only حتى 28/11/2026. لتمكين التحليل اللغوي المتقدم من Gemini أو GPT أو Claude، اربط مفتاح المزود من قسم «🤖 ربط الوكلاء».",
+    }
+
+
+

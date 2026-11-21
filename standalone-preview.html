@@ -2383,6 +2383,30 @@
           </div>
           <div class="muted" style="font-size:10.8px;">صفحة «المدير المالي» وكافة مفاتيح المنصة محمية خلف بوابة الدخول السيادية ولا تُكشف على أي رابط عام (<span class="num">HTTP 401</span>).</div>
         </section>
+
+        <!-- 5. ربط مزودات الذكاء الاصطناعي والوكلاء (Gemini / OpenAI / Claude / Grok) داخل نفس التصميم الموحّد -->
+        <section class="holo-chamber" style="grid-column:1 / -1;display:flex;flex-direction:column;gap:9px;">
+          <div class="row-between" style="flex-wrap:wrap;gap:6px;">
+            <strong style="font-size:13.5px;color:var(--pri);">🤖 ربط مزودات الذكاء الاصطناعي والوكلاء (AI Agents Bridge)</strong>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.refreshAiProvidersUI()">🔄 تحديث الحالة</button>
+          </div>
+          <div id="ai-providers-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:7px;"></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <select id="ai-prov-sel" class="holo-inp" style="min-width:170px;">
+              <option value="gemini">Google Gemini (GEMINI_API_KEY)</option>
+              <option value="openai">OpenAI GPT (OPENAI_API_KEY)</option>
+              <option value="anthropic">Anthropic Claude (ANTHROPIC_API_KEY)</option>
+              <option value="xai">xAI Grok (XAI_API_KEY)</option>
+            </select>
+            <input id="ai-prov-key-inp" type="password" dir="ltr" class="holo-inp num" style="flex:1;min-width:210px;" placeholder="ألصق مفتاح الـ API الخاص بالمزود هنا للربط الفوري..." />
+            <button type="button" class="btn-3d btn-3d-buy btn-3d-sm" onclick="ui.connectAiProviderUI()">🔗 فحص وربط الوكلاء</button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);">
+            <input id="ai-agent-ask-inp" type="text" class="holo-inp" style="flex:1;min-width:220px;" placeholder="اسأل الوكيل المتصل الآن (مثال: ما أفضل فرصة شراء الآن على Binance Testnet؟)..." />
+            <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" onclick="ui.askConnectedAiAgentUI()">🧠 استشارة الوكيل</button>
+          </div>
+          <div id="ai-agent-reply-box" class="holo-chamber hidden" style="font-size:12px;line-height:1.7;color:var(--txt-1);white-space:pre-wrap;"></div>
+        </section>
       </div>
     </main>
 
@@ -2531,7 +2555,6 @@
           <button type="button" id="btn-save-separated-keys" class="btn-3d btn-3d-buy" style="flex:1;" onclick="ui.saveBinanceApiKeyToVault()">🟢 اتصال فعلي بـ Binance Testnet وجلب الأرصدة الحقيقية</button>
         </div>
         <div id="testnet-live-balances-box" class="holo-chamber num" style="font-size:11px;color:var(--sec);display:none;"></div>
-        <a href="/vault" target="_blank" rel="noopener" class="btn-3d btn-3d-sm" style="width:100%;text-decoration:none;text-align:center;">🔐 فتح خزنة الباك-إند وبوابات الاعتماد الثماني (/vault)</a>
         <div id="vault-pubkey-box" class="num muted" style="font-size:10px;word-break:break-all;"></div>
       </div>
     </div>
@@ -6050,6 +6073,77 @@
         } catch (_) {}
       },
 
+      async refreshAiProvidersUI() {
+        const grid = document.getElementById('ai-providers-grid');
+        if (!grid) return;
+        const isStaticHost = !location.origin || location.origin === 'null' || location.hostname.endsWith('github.io');
+        if (isStaticHost) {
+          grid.innerHTML = `<div class="holo-chamber" style="grid-column:1/-1;font-size:11.5px;color:var(--pri);">🤖 المحرك الكمي المحلي نشط. لربط مفاتيح Gemini / OpenAI / Claude / Grok بشكل آمن، افتح خادمك المحلي على <strong class="num">http://localhost:8000</strong>.</div>`;
+          return;
+        }
+        try {
+          const r = await fetch('/api/executive/ai-providers/status');
+          if (!r.ok) return;
+          const j = await r.json();
+          const list = j.providers || [];
+          grid.innerHTML = list.map((p) => `
+            <div class="holo-chamber" style="display:flex;flex-direction:column;gap:4px;border-color:${p.connected ? 'var(--ok)' : 'var(--border-sec)'};">
+              <div class="row-between">
+                <strong style="font-size:11.5px;color:#fff;">${p.name}</strong>
+                <span class="hex-shield" style="font-size:9.5px;color:${p.connected ? 'var(--ok)' : '#fbbf24'};border-color:${p.connected ? 'var(--ok)' : '#fbbf24'};">${p.connected ? '🟢 متصل' : 'غير مربوط'}</span>
+              </div>
+              <div class="muted" style="font-size:10px;">${p.noteAr}${p.masked ? ` (<span class="num">${p.masked}</span>)` : ''}</div>
+            </div>
+          `).join('');
+        } catch (_) {}
+      },
+
+      async connectAiProviderUI() {
+        const provider = document.getElementById('ai-prov-sel')?.value || 'gemini';
+        const apiKey = (document.getElementById('ai-prov-key-inp')?.value || '').trim();
+        if (apiKey.length < 8) { this.toast('⚠️ أدخل مفتاح الـ API الصحيح للمزود أولاً', 'var(--hot)'); return; }
+        const isStaticHost = !location.origin || location.origin === 'null' || location.hostname.endsWith('github.io');
+        if (isStaticHost) { this.toast('⚠️ اربط مفتاح الذكاء الاصطناعي من خادمك المحلي http://localhost:8000 لحماية مفتاحك.', 'var(--pri)'); return; }
+        try {
+          this.toast(`⏳ جاري فحص وربط ${provider.toUpperCase()}...`);
+          const r = await fetch('/api/executive/ai-providers/connect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ provider, apiKey })
+          });
+          const j = await r.json();
+          if (!j.ok) { sfx.sellSuccess(); this.toast(j.messageAr || '❌ فشل ربط المزود', 'var(--hot)'); return; }
+          document.getElementById('ai-prov-key-inp').value = '';
+          sfx.buySuccess();
+          this.toast(j.messageAr || '✅ تم ربط المزود وتفعيل الوكلاء بنجاح!');
+          this.refreshAiProvidersUI();
+        } catch (err) {
+          sfx.sellSuccess();
+          this.toast(`❌ خطأ في الاتصال: ${err?.message || err}`, 'var(--hot)');
+        }
+      },
+
+      async askConnectedAiAgentUI() {
+        const inp = document.getElementById('ai-agent-ask-inp');
+        const box = document.getElementById('ai-agent-reply-box');
+        const prompt = (inp?.value || '').trim();
+        if (!prompt || !box) { this.toast('⚠️ اكتب سؤالك للوكيل أولاً', 'var(--pri)'); return; }
+        box.classList.remove('hidden');
+        box.textContent = '⏳ الوكيل يحلل أسعار Binance Testnet الحية ويجيبك الآن...';
+        try {
+          const r = await fetch('/api/executive/ai-providers/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, provider: 'auto' })
+          });
+          const j = await r.json();
+          box.innerHTML = `<strong style="color:var(--ok);">🤖 ${j.provider || 'الوكيل المتصل'}:</strong>\n${j.reply || 'لا يوجد رد'}`;
+          sfx.buySuccess();
+        } catch (err) {
+          box.textContent = `❌ تعذّر الاتصال بالوكيل: ${err?.message || err}`;
+        }
+      },
+
       closeModals() { ['modal-exec-receipt', 'modal-orbit-3d', 'modal-agent-trades', 'modal-passkey', 'modal-recovery', 'modal-ga-qr', 'modal-binance-vault'].forEach((id) => document.getElementById(id)?.classList.add('hidden')); }
     };
     window.ui = ui;
@@ -6070,6 +6164,7 @@
       ui.renderStocks();
       ui.renderDailyPage();
       ui.connectLiveBackendStream();
+      ui.refreshAiProvidersUI();
       if (location.hash && location.hash.toLowerCase().includes('cfo')) {
         try { history.replaceState(null, '', location.pathname); } catch (_) {}
       }

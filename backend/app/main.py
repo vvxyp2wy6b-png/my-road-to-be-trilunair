@@ -1100,20 +1100,7 @@ def _configure_optional_spa_serving(fastapi_app: FastAPI) -> None:
         if clean in ("mobile", "mobile.html") and mobile_file is not None:
             return FileResponse(str(mobile_file))
 
-        # خزنة Binance وبوابات الاعتماد الثماني (React Vault) على /vault
-        if clean == "vault" or clean.startswith("vault/"):
-            if dist_dir is not None:
-                return FileResponse(str(dist_dir / "index.html"))
-
-        # الصفحة الرئيسية: القمرة الهولوغرافية الأحدث v1.4.1 مباشرة
-        if clean in ("", "index.html", "cockpit", "standalone-preview.html") and cockpit_file is not None:
-            return FileResponse(str(cockpit_file))
-
-        if dist_dir is not None:
-            requested_file = (dist_dir / full_path).resolve()
-            if str(requested_file).startswith(str(dist_dir.resolve())) and requested_file.is_file():
-                return FileResponse(str(requested_file))
-
+        # التصميم الموحّد الوحيد: القمرة الهولوغرافية الأحدث v1.4.1 مباشرة لكل المسارات
         if cockpit_file is not None:
             return FileResponse(str(cockpit_file))
         return FileResponse(str(dist_dir / "index.html"))
