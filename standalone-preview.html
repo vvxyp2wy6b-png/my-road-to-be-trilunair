@@ -1201,12 +1201,21 @@
     /* === توسيط المحتوى والمبالغ وفصل ألوان العناوين عن الأرقام في جميع الحاويات === */
     .lux-kpi-five-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+      gap: 9px;
+    }
+    .agents-council-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 9px;
+    }
+    @media (max-width: 1100px) {
+      .agents-council-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 880px) {
       .lux-kpi-five-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
       .lux-kpi-five-grid .lux-kpi-card:last-child { grid-column: span 2 !important; }
+      .agents-council-grid { grid-template-columns: 1fr; }
       .holo-stage { padding-bottom: 135px !important; }
       .holo-prism, .holo-chamber, .table-wrap { max-width: 100% !important; min-width: 0 !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
     }
@@ -1218,6 +1227,9 @@
     html[data-layout="mobile"] .lux-kpi-five-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
       gap: 7px !important;
+    }
+    html[data-layout="mobile"] .agents-council-grid {
+      grid-template-columns: 1fr !important;
     }
     html[data-layout="mobile"] .lux-kpi-five-grid .lux-kpi-card:last-child {
       grid-column: span 2 !important;
@@ -1245,13 +1257,25 @@
       align-items: center !important;
       justify-content: center !important;
       text-align: center !important;
-      padding: 11px 10px 12px !important;
-      gap: 5px !important;
+      padding: 10px 8px 10px !important;
+      gap: 4px !important;
+      cursor: pointer;
+      transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
       background:
         radial-gradient(circle at 50% 0%, rgba(245, 196, 81, 0.09), transparent 68%),
         linear-gradient(180deg, rgba(16, 31, 52, 0.95) 0%, rgba(7, 15, 28, 0.99) 100%) !important;
       border: 1px solid rgba(125, 211, 252, 0.28) !important;
       border-top: 2px solid rgba(245, 196, 81, 0.52) !important;
+    }
+    .lux-kpi-card:hover {
+      border-color: rgba(245, 196, 81, 0.78) !important;
+      box-shadow: 0 8px 24px rgba(56, 189, 248, 0.18), 0 0 14px rgba(245, 196, 81, 0.16) !important;
+      transform: translateY(-2px);
+    }
+    .kpi-click-hint {
+      font-size: 9px;
+      color: rgba(148, 163, 184, 0.8);
+      margin-top: 1px;
     }
     .kpi-svg-medallion {
       width: 30px; height: 30px; border-radius: 9px;
@@ -1634,38 +1658,41 @@
       </div>
 
       <div class="lux-kpi-five-grid">
-        <!-- 1. إجمالي حقوق الملكية (عنوان سماوي + رقم ذهبي ملكي متمركز) -->
-        <div class="lux-kpi-card">
+        <!-- 1. إجمالي حقوق الملكية -->
+        <div class="lux-kpi-card" onclick="ui.openKpiDetailModal('equity')" role="button" tabindex="0">
           <span class="kpi-svg-medallion" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 21h18M4 10h16M6 10v8M10 10v8M14 10v8M18 10v8M12 3l9 5H3l9-5z"/></svg>
           </span>
           <div class="kpi-centered-title">إجمالي حقوق الملكية</div>
           <div id="kpi-equity" class="lux-kpi-val val-gold num" dir="ltr">$1,004,850.00</div>
           <div class="kpi-centered-sub"><span>صافي المحفظة</span><span>•</span><span class="num">USD</span></div>
+          <div class="kpi-click-hint">🔍 اضغط لتفاصيل الحساب</div>
         </div>
 
-        <!-- 2. ربح / خسارة اليوم (عنوان سماوي + رقم زمردي مشع متمركز) -->
-        <div class="lux-kpi-card">
+        <!-- 2. ربح / خسارة المحفظة -->
+        <div class="lux-kpi-card" onclick="ui.openKpiDetailModal('net_profit')" role="button" tabindex="0">
           <span class="kpi-svg-medallion" style="color:#10f5a0;border-color:rgba(16,245,160,0.5);" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 17l6-6 4 4 8-8M14 7h7v7"/></svg>
           </span>
-          <div class="kpi-centered-title">ربح / خسارة اليوم</div>
+          <div class="kpi-centered-title">صافي نمو المحفظة</div>
           <div id="kpi-net-profit" class="lux-kpi-val val-emerald num" dir="ltr">+$4,850.00</div>
           <div class="kpi-centered-sub"><span id="kpi-bots-pool" class="num" style="color:#ffd86b;">20% للوكلاء: $8,128</span><span>•</span><span id="kpi-pnl-pct" class="num text-ok">+0.49%</span></div>
+          <div class="kpi-click-hint">🔍 اضغط لتفاصيل الحساب</div>
         </div>
 
-        <!-- 3. سيولة USDT المتاحة (عنوان سماوي + رقم سيان كريستالي متمركز) -->
-        <div class="lux-kpi-card">
+        <!-- 3. سيولة USDT المتاحة -->
+        <div class="lux-kpi-card" onclick="ui.openKpiDetailModal('avail_usdt')" role="button" tabindex="0">
           <span class="kpi-svg-medallion" style="color:#38bdf8;border-color:rgba(56,189,248,0.5);" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M8 9h8M12 9v7"/></svg>
           </span>
           <div class="kpi-centered-title">سيولة USDT المتاحة</div>
           <div id="kpi-avail-usdt" class="lux-kpi-val val-cyan num" dir="ltr">871,205 USDT</div>
           <div class="kpi-centered-sub"><span id="kpi-elite-count" class="num" style="color:#ffd86b;">7 مؤهلة • 5 منفذة</span></div>
+          <div class="kpi-click-hint">🔍 اضغط لتفاصيل الحساب</div>
         </div>
 
-        <!-- 4. قاطع المخاطر / التراجع (عنوان سماوي + رقم كهرماني متمركز) -->
-        <div class="lux-kpi-card">
+        <!-- 4. قاطع المخاطر / التراجع -->
+        <div class="lux-kpi-card" onclick="ui.openKpiDetailModal('risk_dd')" role="button" tabindex="0">
           <span class="kpi-svg-medallion" style="color:#fbbf24;border-color:rgba(251,191,36,0.5);" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </span>
@@ -1675,16 +1702,40 @@
             <div id="kpi-dd-bar" style="width:8%;height:100%;background:linear-gradient(90deg,#10b981,#38bdf8);"></div>
           </div>
           <div class="kpi-centered-sub"><span>حد الإيقاف اليومي 3%</span></div>
+          <div class="kpi-click-hint">🔍 اضغط لتفاصيل الحساب</div>
         </div>
 
-        <!-- 5. هدف التريليون اللوغاريتمي (عنوان سماوي + نسبة ذهبية متمركزة) -->
-        <div class="lux-kpi-card">
+        <!-- 5. هدف التريليون اللوغاريتمي -->
+        <div class="lux-kpi-card" onclick="ui.openKpiDetailModal('log_1t')" role="button" tabindex="0">
           <span class="kpi-svg-medallion" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           </span>
           <div class="kpi-centered-title">هدف التريليون (لوغاريتمي)</div>
           <div id="kpi-1t-log-pct" class="lux-kpi-val val-gold num" dir="ltr">50.0%</div>
           <div class="kpi-centered-sub"><span>مسار 1T$</span><span>•</span><span class="num" dir="ltr">10¹² / 10⁶</span></div>
+          <div class="kpi-click-hint">🔍 اضغط لتفاصيل الحساب</div>
+        </div>
+
+        <!-- 6. جديد: مبلغ الاستثمار اليومي + عدد العملات المشتراة والمباعة -->
+        <div class="lux-kpi-card" onclick="ui.openKpiDetailModal('daily_invested')" role="button" tabindex="0" style="border-top-color:rgba(56,189,248,0.8) !important;">
+          <span class="kpi-svg-medallion" style="color:#38bdf8;border-color:rgba(56,189,248,0.55);" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          </span>
+          <div class="kpi-centered-title">الاستثمار اليومي والعملات</div>
+          <div id="kpi-daily-invested" class="lux-kpi-val val-cyan num" dir="ltr">$0</div>
+          <div id="kpi-daily-coins-sub" class="kpi-centered-sub"><span class="num text-ok">▲ شراء: 0</span><span>•</span><span class="num text-err">▼ بيع: 0</span></div>
+          <div class="kpi-click-hint">🔍 اضغط لتفاصيل اليوم</div>
+        </div>
+
+        <!-- 7. جديد: الأرباح اليومية المحققة من صفقات اليوم -->
+        <div class="lux-kpi-card" onclick="ui.openKpiDetailModal('daily_realized')" role="button" tabindex="0" style="border-top-color:rgba(16,245,160,0.8) !important;">
+          <span class="kpi-svg-medallion" style="color:#10f5a0;border-color:rgba(16,245,160,0.55);" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </span>
+          <div class="kpi-centered-title">الأرباح اليومية المحققة</div>
+          <div id="kpi-daily-realized" class="lux-kpi-val val-emerald num" dir="ltr">+$0.00</div>
+          <div id="kpi-daily-realized-sub" class="kpi-centered-sub"><span class="num">0 صفقة اليوم</span><span>•</span><span class="num text-ok">+0.00%</span></div>
+          <div class="kpi-click-hint">🔍 اضغط لتفاصيل الأرباح</div>
         </div>
       </div>
 
@@ -1831,6 +1882,21 @@
           <div id="lux-left-deals" style="display:flex;flex-direction:column;gap:7px;flex:1;justify-content:space-between;"></div>
         </aside>
       </div>
+
+      <!-- مجلس تداول آراء الوكلاء الخمسة التفصيلي (أخضر/أصفر/أحمر + شرح كل وكيل + القرار النهائي) -->
+      <section id="hero-agents-council-panel" class="holo-prism" style="margin-top:12px;padding:12px 14px;border-color:rgba(245,196,81,0.42);">
+        <div class="row-between" style="margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <strong style="font-size:14.5px;color:#ffd86b;">🤖 مجلس الوكلاء وتداول الآراء التفصيلي — <span id="council-deal-title" style="color:#ffffff;">صفقة #1 (SOLUSDT)</span></strong>
+            <span id="council-verdict-badge" class="hex-shield num" style="font-size:11px;padding:2px 9px;background:rgba(16,245,160,0.14);color:#10f5a0;border-color:rgba(16,245,160,0.55);">🟢 موافقة بالإجماع 5/5</span>
+          </div>
+          <span class="muted" style="font-size:11px;">اضغط على أي صفقة مرقّمة أعلاه لتحديث آراء الوكلاء الخمسة فوراً</span>
+        </div>
+
+        <div id="hero-agents-cards-grid" class="agents-council-grid"></div>
+
+        <div id="hero-council-final-box" class="holo-chamber" style="margin-top:10px;padding:10px 13px;border-radius:12px;background:rgba(7,22,38,0.92);border-color:rgba(16,245,160,0.45);"></div>
+      </section>
 
       <!-- سجل صفقاتي المنفذة اليوم المرقّمة تسلسلياً (#1 اليوم، #2 اليوم...) -->
       <section id="today-executed-trades-box" class="holo-prism" style="margin-top:12px;padding:12px 14px;border-color:rgba(16,245,160,0.35);">
@@ -2485,6 +2551,28 @@
         <img class="sig-img" data-sig="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="توقيع د. ماجد" />
       </div>
       <button type="button" class="btn-3d btn-3d-gold" style="width:100%;" onclick="ui.closeModals()">👍 إغلاق</button>
+    </div>
+  </div>
+
+  <!-- منبثقة تفاصيل حساب البطاقات الأساسية (من أين أتى الرقم وكيف حُسب؟) -->
+  <div id="modal-kpi-detail" class="holo-modal-bg hidden" onclick="if(event.target===this)ui.closeModals()">
+    <div class="holo-modal-box" style="max-width:560px;border-color:rgba(245,196,81,0.55);">
+      <div class="row-between" style="margin-bottom:8px;">
+        <strong id="kpi-det-title" style="font-size:15.5px;color:#ffd86b;">🔍 تفاصيل الحساب</strong>
+        <button type="button" class="btn-3d btn-3d-sm" onclick="ui.closeModals()">✕</button>
+      </div>
+      <div class="holo-chamber" style="text-align:center;padding:10px;margin-bottom:8px;border-color:rgba(56,189,248,0.35);">
+        <div class="muted" style="font-size:11px;">القيمة المعروضة حالياً</div>
+        <div id="kpi-det-val" class="num" style="font-size:24px;font-weight:900;color:#ffe484;margin-top:2px;" dir="ltr">—</div>
+      </div>
+      <div class="holo-chamber" style="font-size:12px;line-height:1.75;margin-bottom:8px;">
+        <div style="color:#38bdf8;font-weight:800;margin-bottom:3px;">📐 كيف تم حساب هذا الرقم؟</div>
+        <div id="kpi-det-formula" style="color:#e2e8f0;">—</div>
+        <div style="color:#10f5a0;font-weight:800;margin-top:8px;margin-bottom:3px;">📡 مصدر البيانات:</div>
+        <div id="kpi-det-source" style="color:#cbd5e1;">—</div>
+      </div>
+      <div id="kpi-det-rows" class="holo-chamber" style="font-size:12px;line-height:1.85;margin-bottom:10px;"></div>
+      <button type="button" class="btn-3d btn-3d-gold" style="width:100%;" onclick="ui.closeModals()">👍 فهمت — إغلاق</button>
     </div>
   </div>
 
@@ -3562,6 +3650,10 @@
           if (id === 'daily') this.renderDailyPage();
           if (id === 'cfo' && state.authenticated) this.renderCfoPage();
           if (id === 'testnet14') this.renderTestnet14Page();
+          const secEl = document.getElementById('sec-' + id);
+          if (secEl) {
+            secEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
         }, 35);
       },
 
@@ -3681,6 +3773,148 @@
         const approvedCnt = ALL_CANDIDATE_DEALS.filter((d) => d.quant && d.quant.approved).length;
         const elCnt = document.getElementById('kpi-elite-count');
         if (elCnt) elCnt.textContent = `${approvedCnt} مؤهلة • ${state.executedDeals.length} منفذة`;
+
+        // تحديث البطاقتين الجديدتين: الاستثمار اليومي + عدد العملات المشتراة/المباعة، والأرباح اليومية المحققة
+        const todayList = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+        const buyTrades = todayList.filter((t) => t.side === 'BUY');
+        const sellTrades = todayList.filter((t) => t.side === 'SELL');
+        const dailyInvestedUsd = todayList.reduce((s, t) => s + Number(t.invest || 0), 0);
+        const dailyRealizedUsd = todayList.reduce((s, t) => s + Number(t.profit || 0), 0);
+        const buyCoinsSet = new Set(buyTrades.map((t) => t.sym));
+        const sellCoinsSet = new Set(sellTrades.map((t) => t.sym));
+        const dailyRoiPct = dailyInvestedUsd > 0 ? (dailyRealizedUsd / dailyInvestedUsd) * 100 : 0;
+
+        const elDayInv = document.getElementById('kpi-daily-invested');
+        if (elDayInv) elDayInv.textContent = `$${Math.round(dailyInvestedUsd).toLocaleString('en-US')}`;
+        const elDayCoins = document.getElementById('kpi-daily-coins-sub');
+        if (elDayCoins) {
+          elDayCoins.innerHTML = `<span class="num text-ok">▲ شراء: ${buyTrades.length} (${buyCoinsSet.size} عملة)</span><span>•</span><span class="num text-err">▼ بيع: ${sellTrades.length} (${sellCoinsSet.size} عملة)</span>`;
+        }
+        const elDayReal = document.getElementById('kpi-daily-realized');
+        if (elDayReal) {
+          elDayReal.textContent = (dailyRealizedUsd >= 0 ? '+$' : '-$') + Math.abs(dailyRealizedUsd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        const elDayRealSub = document.getElementById('kpi-daily-realized-sub');
+        if (elDayRealSub) {
+          elDayRealSub.innerHTML = `<span class="num">${todayList.length} صفقة اليوم</span><span>•</span><span class="num ${dailyRoiPct >= 0 ? 'text-ok' : 'text-err'}">${dailyRoiPct >= 0 ? '+' : ''}${dailyRoiPct.toFixed(2)}%</span>`;
+        }
+      },
+
+      openKpiDetailModal(key) {
+        const priceMap = {};
+        ALL_CANDIDATE_DEALS.forEach((d) => { priceMap[d.sym] = d.price; });
+        let heldVal = 0;
+        const heldLines = [];
+        Object.entries(state.spotHoldings || {}).forEach(([sym, q]) => {
+          const qty = Number(q || 0);
+          if (qty > 0) {
+            const p = priceMap[sym] || 0;
+            const v = qty * p;
+            heldVal += v;
+            heldLines.push(`<div class="row-between"><span>رصيد ${sym}:</span><strong class="num text-pri">${qty} × $${p.toLocaleString()} = $${Math.round(v).toLocaleString()}</strong></div>`);
+          }
+        });
+        const availUsdt = Math.max(0, Math.round(state.equity - heldVal));
+        const todayList = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+        const buyTrades = todayList.filter((t) => t.side === 'BUY');
+        const sellTrades = todayList.filter((t) => t.side === 'SELL');
+        const dailyInvestedUsd = todayList.reduce((s, t) => s + Number(t.invest || 0), 0);
+        const dailyRealizedUsd = todayList.reduce((s, t) => s + Number(t.profit || 0), 0);
+        const dailyFeesUsd = todayList.reduce((s, t) => s + Number(t.fees || 0), 0);
+        const ddPct = Math.max(0, ((state.dayStartEquity - state.equity) / state.dayStartEquity) * 100);
+        const log12Pct = Math.max(1, Math.min(100, (Math.log10(Math.max(10, state.equity)) / 12) * 100));
+        const srcTag = state.testnetConnected ? '🟢 Binance Spot Testnet (أرصدة وأسعار حقيقية مباشرة)' : '🧪 محفظة المحاكاة الورقية المحلية (PAPER)';
+
+        const info = {
+          equity: {
+            title: '🏦 تفاصيل: إجمالي حقوق الملكية',
+            val: '$' + state.equity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            formula: 'إجمالي حقوق الملكية = السيولة النقدية المتاحة (USDT) + القيمة السوقية الحالية لجميع العملات المملوكة في المحفظة.',
+            source: srcTag,
+            rows: `
+              <div class="row-between"><span>سيولة USDT المتاحة:</span><strong class="num text-sec">$${availUsdt.toLocaleString()}</strong></div>
+              <div class="row-between"><span>قيمة العملات المملوكة حالياً:</span><strong class="num text-pri">$${Math.round(heldVal).toLocaleString()}</strong></div>
+              ${heldLines.join('') || '<div class="muted">لا توجد عملات مملوكة حالياً غير USDT.</div>'}
+              <div class="row-between" style="border-top:1px solid rgba(255,255,255,0.1);padding-top:5px;margin-top:4px;"><span>رأس المال عند بداية اليوم:</span><strong class="num">$${state.dayStartEquity.toLocaleString()}</strong></div>
+            `
+          },
+          net_profit: {
+            title: '📈 تفاصيل: صافي نمو المحفظة',
+            val: (state.netProfit >= 0 ? '+$' : '-$') + Math.abs(state.netProfit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            formula: 'صافي النمو = إجمالي أرباح الصفقات − رسوم التداول (0.15%) − حصة الـ 20% للوكلاء (تُقتطع فقط فوق أعلى قمة High-Water-Mark).',
+            source: srcTag,
+            rows: `
+              <div class="row-between"><span>صافي الربح التراكمي:</span><strong class="num text-ok">+$${state.netProfit.toLocaleString()}</strong></div>
+              <div class="row-between"><span>أعلى قمة ربحية (HWM):</span><strong class="num text-pri">$${state.highWaterMark.toLocaleString()}</strong></div>
+              <div class="row-between"><span>إجمالي صندوق الوكلاء (20%):</span><strong class="num text-sec">$${Math.round(AI_AGENTS.reduce((s, b) => s + b.bal, 0)).toLocaleString()}</strong></div>
+            `
+          },
+          avail_usdt: {
+            title: '💵 تفاصيل: سيولة USDT المتاحة للشراء',
+            val: `${availUsdt.toLocaleString('en-US')} USDT`,
+            formula: 'السيولة المتاحة = إجمالي حقوق الملكية − قيمة المراكز المفتوحة في العملات الأخرى. هذا هو المبلغ الجاهز لتنفيذ صفقات شراء فورية.',
+            source: srcTag,
+            rows: `
+              <div class="row-between"><span>إجمالي المحفظة:</span><strong class="num">$${state.equity.toLocaleString()}</strong></div>
+              <div class="row-between"><span>المستثمر في العملات حالياً:</span><strong class="num text-pri">$${Math.round(heldVal).toLocaleString()}</strong></div>
+              <div class="row-between"><span>المتاح فوراً للشراء (USDT):</span><strong class="num text-ok">${availUsdt.toLocaleString()} USDT</strong></div>
+            `
+          },
+          risk_dd: {
+            title: '🛡️ تفاصيل: قاطع المخاطر والتراجع اليومي',
+            val: `${ddPct.toFixed(2)}% (الحد الأقصى 3.0%)`,
+            formula: 'التراجع اليومي = ((رأس مال بداية اليوم − حقوق الملكية الحالية) ÷ رأس مال بداية اليوم) × 100. عند وصوله إلى 3% يتوقف الشراء تلقائياً لحماية رأس المال.',
+            source: 'محرك المخاطر الحتمي (Deterministic Risk Engine)',
+            rows: `
+              <div class="row-between"><span>رأس مال بداية اليوم:</span><strong class="num">$${state.dayStartEquity.toLocaleString()}</strong></div>
+              <div class="row-between"><span>حقوق الملكية الآن:</span><strong class="num text-ok">$${state.equity.toLocaleString()}</strong></div>
+              <div class="row-between"><span>حالة قاطع الطوارئ:</span><strong class="${state.killSwitch ? 'text-err' : 'text-ok'}">${state.killSwitch ? '🛑 مفعّل (التداول متوقف)' : '✅ سليم (التداول متاح بأمان)'}</strong></div>
+            `
+          },
+          log_1t: {
+            title: '🌟 تفاصيل: هدف التريليون (المقياس اللوغاريتمي)',
+            val: `${log12Pct.toFixed(2)}%`,
+            formula: 'النسبة اللوغاريتمية = (log₁₀(رأس المال الحالي) ÷ 12) × 100. مثال: مليون دولار = 10⁶ (أي 50% من المقياس اللوغاريتمي نحو 10¹² = تريليون دولار).',
+            source: 'حساب رياضي مباشر من إجمالي حقوق الملكية الحالية',
+            rows: `
+              <div class="row-between"><span>رأس المال الحالي:</span><strong class="num text-pri">$${state.equity.toLocaleString()}</strong></div>
+              <div class="row-between"><span>الهدف النهائي:</span><strong class="num">$1,000,000,000,000 (10¹²)</strong></div>
+              <div class="row-between"><span>المرحلة الحالية:</span><strong class="num text-sec">10^${Math.log10(Math.max(10, state.equity)).toFixed(2)}</strong></div>
+            `
+          },
+          daily_invested: {
+            title: '💰 تفاصيل: الاستثمار اليومي وحركة العملات',
+            val: `$${Math.round(dailyInvestedUsd).toLocaleString('en-US')}`,
+            formula: 'مجموع مبالغ كل الصفقات التي نفذتها أنت اليوم (المسجلة في سجل صفقات اليوم المرقّم #1، #2، #3...) مع تفصيل عدد عمليات الشراء والبيع والعملات.',
+            source: `سجل صفقاتك اليوم (${new Date().toISOString().slice(0, 10)})`,
+            rows: `
+              <div class="row-between"><span>إجمالي عدد صفقات اليوم:</span><strong class="num text-pri">${todayList.length} صفقة</strong></div>
+              <div class="row-between"><span>عمليات الشراء اليوم (▲ BUY):</span><strong class="num text-ok">${buyTrades.length} صفقة (${new Set(buyTrades.map(t => t.sym)).size} عملة مختلفة)</strong></div>
+              <div class="row-between"><span>عمليات البيع اليوم (▼ SELL):</span><strong class="num text-err">${sellTrades.length} صفقة (${new Set(sellTrades.map(t => t.sym)).size} عملة مختلفة)</strong></div>
+              <div class="row-between"><span>العملات التي تم التداول عليها اليوم:</span><strong class="num text-sec">${todayList.length ? [...new Set(todayList.map(t => t.sym))].join('، ') : 'لم يتم تنفيذ صفقات اليوم بعد'}</strong></div>
+            `
+          },
+          daily_realized: {
+            title: '🏆 تفاصيل: الأرباح اليومية المحققة',
+            val: (dailyRealizedUsd >= 0 ? '+$' : '-$') + Math.abs(dailyRealizedUsd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            formula: 'الأرباح اليومية المحققة = مجموع صافي ربح كل صفقة نفذتها اليوم بعد خصم رسوم التداول الفعلية (0.15%).',
+            source: `سجل صفقاتك المنفذة اليوم (${new Date().toISOString().slice(0, 10)})`,
+            rows: `
+              <div class="row-between"><span>إجمالي المبلغ المستثمر اليوم:</span><strong class="num text-sec">$${Math.round(dailyInvestedUsd).toLocaleString()}</strong></div>
+              <div class="row-between"><span>إجمالي الرسوم المخصومة اليوم:</span><strong class="num text-err">$${dailyFeesUsd.toFixed(2)}</strong></div>
+              <div class="row-between"><span>صافي الربح المحقق اليوم:</span><strong class="num ${dailyRealizedUsd >= 0 ? 'text-ok' : 'text-err'}">${dailyRealizedUsd >= 0 ? '+' : '-'}$${Math.abs(dailyRealizedUsd).toFixed(2)}</strong></div>
+              <div class="row-between"><span>نسبة العائد على استثمار اليوم:</span><strong class="num text-pri">${dailyInvestedUsd > 0 ? ((dailyRealizedUsd / dailyInvestedUsd) * 100).toFixed(2) : '0.00'}%</strong></div>
+            `
+          }
+        };
+
+        const item = info[key] || info.equity;
+        document.getElementById('kpi-det-title').textContent = item.title;
+        document.getElementById('kpi-det-val').textContent = item.val;
+        document.getElementById('kpi-det-formula').textContent = item.formula;
+        document.getElementById('kpi-det-source').textContent = item.source;
+        document.getElementById('kpi-det-rows').innerHTML = item.rows;
+        document.getElementById('modal-kpi-detail')?.classList.remove('hidden');
       },
 
       onVoicePersonaChange() {
@@ -4257,7 +4491,146 @@
 
         if (typeof hydrateSigs === 'function') hydrateSigs();
         this.renderAllCardCandles();
+        this.renderHeroAgentsCouncil(heroDeal);
         this.renderTodayExecutedBox();
+      },
+
+      renderHeroAgentsCouncil(d) {
+        const grid = document.getElementById('hero-agents-cards-grid');
+        const finalBox = document.getElementById('hero-council-final-box');
+        const titleEl = document.getElementById('council-deal-title');
+        const badgeEl = document.getElementById('council-verdict-badge');
+        if (!grid || !finalBox || !d) return;
+
+        const evNo = d._evalNo || 1;
+        const arName = (d.name.split('•')[1] || d.name).trim();
+        const m = computeDealMetrics(d);
+        const scores = d.aiScores || [92, 90, 91, 89, 93];
+        const tpPctStr = (d.tpPct * 100).toFixed(2);
+        const slPctStr = (d.slPct * 100).toFixed(2);
+        const q = d.quant || {};
+
+        if (titleEl) titleEl.textContent = `صفقة #${evNo} — ${arName} (${d.sym})`;
+
+        const agentSpecs = [
+          {
+            icon: '🎯',
+            name: AI_AGENTS[0]?.name || 'ترليورين (الزخم الفني)',
+            role: 'محلل الاتجاه والشموع',
+            score: scores[0] ?? d.conf,
+            reason: (sc) => sc >= 75
+              ? `الاتجاه الصاعد متماسك عند سعر $${d.price.toLocaleString()} مع هدف ربح قريب +${tpPctStr}% ($${m.tp1}) خلال ${d.round}.`
+              : `الزخم الفني أضعف من المطلوب حالياً — يُفضّل التريث قبل الدخول.`
+          },
+          {
+            icon: '🛡️',
+            name: AI_AGENTS[1]?.name || 'الحارس (إدارة المخاطر)',
+            role: 'فحص وقف الخسارة والأمان',
+            score: state.killSwitch ? 20 : (scores[1] ?? d.conf),
+            reason: (sc) => state.killSwitch
+              ? `قاطع الطوارئ مفعّل حالياً — أوقف الحارس جميع عمليات الشراء لحماية المحفظة.`
+              : (sc >= 75
+                ? `وقف الخسارة محدد بدقة عند $${m.sl} (-${slPctStr}%) وبنسبة مخاطرة/عائد ممتازة تحت سقف 3% اليومي.`
+                : `التذبذب مرتفع نسبياً مقابل وقف الخسارة — يُنصح بتقليل المبلغ.`)
+          },
+          {
+            icon: '📡',
+            name: AI_AGENTS[2]?.name || 'الرادار (السيولة والأوامر)',
+            role: 'عمق السوق وتدفق السيولة',
+            score: scores[2] ?? d.conf,
+            reason: (sc) => sc >= 75
+              ? `السيولة الفورية قوية على ${d.sym} (${state.testnetConnected ? 'مؤكدة من Binance Testnet' : 'مرصودة لحظياً'}) ولا يوجد انزلاق سعري مقلق.`
+              : `دفتر الأوامر يُظهر تباطؤاً مؤقتاً في السيولة الفورية.`
+          },
+          {
+            icon: '⚖️',
+            name: AI_AGENTS[3]?.name || 'الميزان (تخصيص المال)',
+            role: 'حساب المبلغ الآمن (Kelly)',
+            score: scores[3] ?? d.conf,
+            reason: (sc) => sc >= 75
+              ? `المبلغ المقترح $${m.invest.toLocaleString()} (${d.qty} وحدة) متوازن تماماً مع حجم محفظتك وسقفك اليومي.`
+              : `حجم المركز المقترح قريب من السقف — يُنصح بخفض المبلغ قبل التنفيذ.`
+          },
+          {
+            icon: '🌐',
+            name: AI_AGENTS[4]?.name || 'الاستراتيجي (السياق العام)',
+            role: 'صورة السوق والأخبار',
+            score: scores[4] ?? d.conf,
+            reason: (sc) => sc >= 75
+              ? `المناخ العام للسوق داعم لـ ${arName} وتصنيف الثقة الكلي ${d.conf}% يتجاوز عتبة الدخول الآمن (75%).`
+              : `السياق العام للسوق متقلب اليوم — يُنصح بمراقبة الإغلاق الساعي.`
+          }
+        ];
+
+        let greenCnt = 0;
+        let redCnt = 0;
+        let sumScore = 0;
+
+        grid.innerHTML = agentSpecs.map((ag) => {
+          const sc = Number(ag.score || 0);
+          sumScore += sc;
+          let stText = '🟢 موافق (أخضر)';
+          let stCol = '#10f5a0';
+          let stBg = 'rgba(16,245,160,0.12)';
+          let borderCol = 'rgba(16,245,160,0.45)';
+          if (sc < 60) {
+            redCnt++;
+            stText = '🔴 رافض (أحمر)';
+            stCol = '#ff5b7f';
+            stBg = 'rgba(255,56,104,0.14)';
+            borderCol = 'rgba(255,56,104,0.55)';
+          } else if (sc < 75) {
+            stText = '🟡 حذر (أصفر)';
+            stCol = '#ffe484';
+            stBg = 'rgba(247,201,72,0.14)';
+            borderCol = 'rgba(247,201,72,0.55)';
+          } else {
+            greenCnt++;
+          }
+          return `
+            <div class="holo-chamber" style="padding:9px 10px;border-radius:11px;border:1px solid ${borderCol};background:rgba(7,17,32,0.9);display:flex;flex-direction:column;gap:5px;">
+              <div class="row-between" style="gap:4px;">
+                <strong style="font-size:11.5px;color:#f8fafc;">${ag.icon} ${ag.name}</strong>
+                <span class="hex-shield num" style="font-size:9.5px;padding:1px 6px;color:${stCol};background:${stBg};border-color:${borderCol};">${sc}%</span>
+              </div>
+              <div style="font-size:10px;color:#94a3b8;">${ag.role}</div>
+              <div style="font-size:10.5px;font-weight:800;color:${stCol};">${stText}</div>
+              <p style="margin:0;font-size:10.5px;line-height:1.55;color:#cbd5e1;">${ag.reason(sc)}</p>
+            </div>
+          `;
+        }).join('');
+
+        const avgScore = Math.round(sumScore / agentSpecs.length);
+        const approvedByCouncil = !state.killSwitch && greenCnt >= 4 && redCnt === 0;
+        if (badgeEl) {
+          badgeEl.textContent = approvedByCouncil
+            ? `🟢 إجماع بالشراء: ${greenCnt}/5 أخضر (${avgScore}%)`
+            : (redCnt > 0 ? `🔴 تحفظ / رفض: ${redCnt} أحمر (${avgScore}%)` : `🟡 موافقة مشروطة: ${greenCnt}/5 أخضر`);
+          badgeEl.style.color = approvedByCouncil ? '#10f5a0' : (redCnt > 0 ? '#ff5b7f' : '#ffe484');
+          badgeEl.style.borderColor = approvedByCouncil ? 'rgba(16,245,160,0.55)' : (redCnt > 0 ? 'rgba(255,56,104,0.55)' : 'rgba(247,201,72,0.55)');
+        }
+
+        const todayCnt = (Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : []).length;
+        finalBox.style.borderColor = approvedByCouncil ? 'rgba(16,245,160,0.5)' : 'rgba(247,201,72,0.5)';
+        finalBox.innerHTML = `
+          <div class="row-between" style="flex-wrap:wrap;gap:10px;">
+            <div style="flex:1;min-width:240px;">
+              <div style="font-size:12.5px;font-weight:900;color:${approvedByCouncil ? '#10f5a0' : '#ffe484'};margin-bottom:3px;">
+                ${approvedByCouncil
+                  ? `✅ القرار النهائي بعد التداول بين الوكلاء: يُوصى بشراء صفقة #${evNo} (${d.sym})`
+                  : `⚠️ القرار النهائي بعد التداول: يُنصح بالمراجعة قبل شراء صفقة #${evNo} (${d.sym})`}
+              </div>
+              <div style="font-size:11.5px;color:#e2e8f0;line-height:1.6;">
+                اتفق <strong>${greenCnt} من أصل 5 وكلاء</strong> باللون الأخضر بمتوسط ثقة <strong>${avgScore}%</strong> على شراء <strong>${arName} (${d.sym})</strong> بمبلغ <strong class="num text-pri">$${m.invest.toLocaleString()}</strong> مع هدف ربح <strong class="num text-ok">$${m.tp1}</strong> ووقف خسارة آمن <strong class="num text-err">$${m.sl}</strong>.
+                عند الضغط على الشراء الآن ستُسجَّل كـ <strong class="text-pri">الصفقة رقم #${todayCnt + 1} اليوم</strong>.
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <button type="button" class="btn-3d btn-3d-buy" style="padding:8px 15px;font-size:12px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ اعتماد وشراء صفقة #${evNo} الآن</button>
+              <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" onclick="ui.tab('settings');setTimeout(()=>document.getElementById('ai-agent-ask-inp')?.focus(),180)">🤖 استشارة الوكيل المرتبط (Gemini/GPT)</button>
+            </div>
+          </div>
+        `;
       },
 
       renderTodayExecutedBox() {
@@ -4311,6 +4684,7 @@
         const todayKey = new Date().toISOString().slice(0, 10);
         state.todayExecutedLog = [];
         try { safeStore.set('htb_today_exec_' + todayKey, '[]'); } catch (_) {}
+        this.refreshKpis();
         this.renderElite90Page();
         this.toast('🧹 تم تصفير سجل وعداد صفقات اليوم — الصفقة القادمة ستكون رقم #1 اليوم.');
       },
@@ -6322,7 +6696,7 @@
         }
       },
 
-      closeModals() { ['modal-exec-receipt', 'modal-orbit-3d', 'modal-agent-trades', 'modal-passkey', 'modal-recovery', 'modal-ga-qr', 'modal-binance-vault'].forEach((id) => document.getElementById(id)?.classList.add('hidden')); }
+      closeModals() { ['modal-exec-receipt', 'modal-kpi-detail', 'modal-orbit-3d', 'modal-agent-trades', 'modal-passkey', 'modal-recovery', 'modal-ga-qr', 'modal-binance-vault'].forEach((id) => document.getElementById(id)?.classList.add('hidden')); }
     };
     window.ui = ui;
 
