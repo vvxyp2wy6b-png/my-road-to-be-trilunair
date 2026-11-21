@@ -1942,19 +1942,39 @@
         </aside>
       </div>
 
-      <!-- مجلس تداول آراء الوكلاء الخمسة التفصيلي (أخضر/أصفر/أحمر + شرح كل وكيل + القرار النهائي) -->
-      <section id="hero-agents-council-panel" class="holo-prism" style="margin-top:12px;padding:12px 14px;border-color:rgba(245,196,81,0.42);">
-        <div class="row-between" style="margin-bottom:10px;flex-wrap:wrap;gap:8px;">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <strong style="font-size:14.5px;color:#ffd86b;">🤖 مجلس الوكلاء وتداول الآراء التفصيلي — <span id="council-deal-title" style="color:#ffffff;">صفقة #1 (SOLUSDT)</span></strong>
-            <span id="council-verdict-badge" class="hex-shield num" style="font-size:11px;padding:2px 9px;background:rgba(16,245,160,0.14);color:#10f5a0;border-color:rgba(16,245,160,0.55);">🟢 موافقة بالإجماع 5/5</span>
+      <!-- مجلس تداول آراء الوكلاء الخمسة التفصيلي + شريط الصفقات الخمس اليومية + صندوق المحفظة والموافقة الفردية والجماعية -->
+      <section id="hero-agents-council-panel" class="holo-prism" style="margin-top:12px;padding:12px 14px;border-color:rgba(245,196,81,0.45);">
+        <!-- الصف 1: أزرار التنقل بين الصفقات اليومية الـ 5 (#1 .. #5) + زر الموافقة الجماعية -->
+        <div class="row-between" style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08);flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <strong style="font-size:13px;color:#38bdf8;">🎯 الصفقات الـ 5 اليومية:</strong>
+            <div id="council-top5-tabs" style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;"></div>
           </div>
-          <span class="muted" style="font-size:11px;">اضغط على أي صفقة مرقّمة أعلاه لتحديث آراء الوكلاء الخمسة فوراً</span>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <button type="button" id="btn-batch-approve-5" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:5px 12px;font-size:11px;" onclick="ui.executeBatchTop5Deals()">⚡ موافقة وشراء جماعي للـ 5 صفقات</button>
+            <button type="button" class="btn-3d btn-3d-sm" style="padding:5px 9px;font-size:10.5px;" onclick="ui.resetRejectedDeals()" title="إعادة إظهار الصفقات المرفوضة">↺ إعادة المرفوضة</button>
+          </div>
         </div>
 
+        <!-- الصف 2: عنوان الصفقة الحالية + اختيار الفترة الزمنية للاستثمار -->
+        <div class="row-between" style="margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <strong style="font-size:14.5px;color:#ffd86b;">🤖 مجلس الوكلاء وتداول الآراء — <span id="council-deal-title" style="color:#ffffff;">صفقة #1 (SOLUSDT)</span></strong>
+            <span id="council-verdict-badge" class="hex-shield num" style="font-size:11px;padding:2px 9px;background:rgba(16,245,160,0.14);color:#10f5a0;border-color:rgba(16,245,160,0.55);">🟢 موافقة بالإجماع 5/5</span>
+          </div>
+          <div id="council-horizon-bar" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+            <span class="muted" style="font-size:11px;">⏱️ الفترة الزمنية للاستثمار:</span>
+            <button type="button" class="btn-3d btn-3d-sm btn-3d-gold chz-btn" data-chz="1H" onclick="ui.setCouncilHorizon('1H')">⚡ ساعي (1H)</button>
+            <button type="button" class="btn-3d btn-3d-sm chz-btn" data-chz="24H" onclick="ui.setCouncilHorizon('24H')">☀️ يومي (24H)</button>
+            <button type="button" class="btn-3d btn-3d-sm chz-btn" data-chz="7D" onclick="ui.setCouncilHorizon('7D')">📅 أسبوعي (7D)</button>
+            <button type="button" class="btn-3d btn-3d-sm chz-btn" data-chz="30D" onclick="ui.setCouncilHorizon('30D')">🗓️ شهري (30D)</button>
+          </div>
+        </div>
+
+        <!-- الصف 3: آراء الوكلاء الخمسة + مستطيل المحفظة وكمية الشراء والقرار الفوري -->
         <div id="hero-agents-cards-grid" class="agents-council-grid"></div>
 
-        <div id="hero-council-final-box" class="holo-chamber" style="margin-top:10px;padding:10px 13px;border-radius:12px;background:rgba(7,22,38,0.92);border-color:rgba(16,245,160,0.45);"></div>
+        <div id="hero-council-final-box" class="holo-chamber" style="margin-top:10px;padding:11px 13px;border-radius:12px;background:rgba(7,22,38,0.92);border-color:rgba(16,245,160,0.45);"></div>
       </section>
 
       <!-- سجل صفقاتي المنفذة اليوم المرقّمة تسلسلياً (#1 اليوم، #2 اليوم...) -->
@@ -4555,22 +4575,136 @@
         this.renderQuickSummary();
       },
 
+      setCouncilHorizon(hz) {
+        state.councilHorizon = hz;
+        document.querySelectorAll('.chz-btn').forEach((b) => b.classList.toggle('btn-3d-gold', b.dataset.chz === hz));
+        const allApproved = ALL_CANDIDATE_DEALS.filter((x) => x.quant && x.quant.approved);
+        const cur = allApproved.find((x) => x.id === state.heroDealId) || allApproved[0];
+        this.renderHeroAgentsCouncil(cur);
+      },
+
+      getTop5DailyDeals() {
+        const allApproved = ALL_CANDIDATE_DEALS.filter((x) => x.quant && x.quant.approved);
+        const topShort = this.getTopShortTermDeal(allApproved);
+        const ordered = [topShort, ...allApproved.filter((x) => x.id !== topShort.id)];
+        ordered.forEach((x, idx) => { x._evalNo = idx + 1; });
+        return ordered.slice(0, 5);
+      },
+
+      advanceToNextPendingDeal(currentDealId) {
+        const top5 = this.getTop5DailyDeals();
+        const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+        const rejected = state.rejectedDealIds || {};
+        const nextDeal = top5.find((x) => x.id !== currentDealId && !rejected[x.id] && !todayLog.some((t) => t.dealId === x.id || t.sym === x.sym));
+        if (nextDeal) {
+          state.heroDealId = nextDeal.id;
+          this.renderElite90Page();
+          this.toast(`➡️ انتقلنا تلقائياً إلى صفقة #${nextDeal._evalNo} (${nextDeal.sym}) لمراجعتها.`);
+        } else {
+          this.renderElite90Page();
+          this.toast('🎉 أحسنت! تم التعامل مع جميع الصفقات اليومية الـ 5.');
+        }
+      },
+
+      async approveCouncilDeal(dealId) {
+        await this.executeEliteDeal(dealId, 'BUY');
+        if (state.killSwitch) return;
+        setTimeout(() => this.advanceToNextPendingDeal(dealId), 350);
+      },
+
+      rejectCouncilDeal(dealId) {
+        if (!state.rejectedDealIds) state.rejectedDealIds = {};
+        state.rejectedDealIds[dealId] = true;
+        const d = ALL_CANDIDATE_DEALS.find((x) => x.id === dealId);
+        this.toast(`⏭️ تم رفض / تخطي صفقة #${d?._evalNo || ''} (${d?.sym || ''}) والانتقال للصفقة التالية.`);
+        this.advanceToNextPendingDeal(dealId);
+      },
+
+      resetRejectedDeals() {
+        state.rejectedDealIds = {};
+        this.renderElite90Page();
+        this.toast('↺ تمت إعادة إظهار جميع الصفقات المرفوضة.');
+      },
+
+      async executeBatchTop5Deals() {
+        if (state.killSwitch) {
+          sfx.sellSuccess();
+          this.toast('🛑 قاطع الطوارئ مفعّل — قم بفك الإيقاف أولاً قبل الشراء الجماعي.', 'var(--hot)');
+          return;
+        }
+        const top5 = this.getTop5DailyDeals();
+        const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+        const rejected = state.rejectedDealIds || {};
+        const pending = top5.filter((x) => !rejected[x.id] && !todayLog.some((t) => t.dealId === x.id || t.sym === x.sym));
+        if (!pending.length) {
+          this.toast('✅ جميع الصفقات الـ 5 اليومية إما تم شراؤها بالفعل أو مرفوضة.');
+          return;
+        }
+        this.toast(`⚡ جاري تنفيذ الشراء الجماعي لـ ${pending.length} صفقات يومية متبقية...`);
+        for (const deal of pending) {
+          await this.executeEliteDeal(deal.id, 'BUY');
+        }
+        this.closeModals();
+        this.renderElite90Page();
+        this.toast(`🎉 تم تنفيذ الموافقة الجماعية لـ ${pending.length} صفقات بنجاح! راجع جدول «سجل صفقاتي اليوم» بالأسفل.`);
+      },
+
       renderHeroAgentsCouncil(d) {
         const grid = document.getElementById('hero-agents-cards-grid');
         const finalBox = document.getElementById('hero-council-final-box');
         const titleEl = document.getElementById('council-deal-title');
         const badgeEl = document.getElementById('council-verdict-badge');
+        const tabsEl = document.getElementById('council-top5-tabs');
         if (!grid || !finalBox || !d) return;
+
+        const top5 = this.getTop5DailyDeals();
+        const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+        const rejected = state.rejectedDealIds || {};
+
+        // 1) رسم أزرار التنقل بين الصفقات اليومية الـ 5 (#1 .. #5)
+        if (tabsEl) {
+          tabsEl.innerHTML = top5.map((item) => {
+            const isActive = item.id === d.id;
+            const boughtRec = todayLog.find((t) => t.dealId === item.id || t.sym === item.sym);
+            const isRej = !!rejected[item.id];
+            const statusIcon = boughtRec ? '✅' : (isRej ? '❌' : '●');
+            const btnCls = isActive ? 'btn-3d-gold' : (boughtRec ? 'btn-3d-buy' : '');
+            return `<button type="button" class="btn-3d btn-3d-sm ${btnCls}" style="padding:4px 9px;font-size:11px;${isRej ? 'opacity:0.55;' : ''}" onclick="ui.selectHeroDeal('${item.id}')">${statusIcon} صفقة #${item._evalNo} (${item.sym.replace('USDT', '')})</button>`;
+          }).join('');
+        }
+
+        const pendingCnt = top5.filter((x) => !rejected[x.id] && !todayLog.some((t) => t.dealId === x.id || t.sym === x.sym)).length;
+        const batchBtn = document.getElementById('btn-batch-approve-5');
+        if (batchBtn) batchBtn.textContent = pendingCnt > 0 ? `⚡ موافقة وشراء جماعي (${pendingCnt} متبقية)` : `✅ اكتملت الـ 5 صفقات اليوم`;
+
+        // 2) حساب الفترة الزمنية المختارة للاستثمار
+        const hz = state.councilHorizon || '1H';
+        document.querySelectorAll('.chz-btn').forEach((b) => b.classList.toggle('btn-3d-gold', b.dataset.chz === hz));
+        const hzMeta = {
+          '1H': { label: 'ساعي (1 ساعة)', mult: 1.0 },
+          '24H': { label: 'يومي (24 ساعة)', mult: 1.45 },
+          '7D': { label: 'أسبوعي (7 أيام)', mult: 2.6 },
+          '30D': { label: 'شهري (30 يوماً)', mult: 5.2 }
+        }[hz] || { label: 'ساعي (1 ساعة)', mult: 1.0 };
+
+        // 3) حساب الرصيد الفعلي المتاح في المحفظة (USDT) ليبني الوكلاء قرارهم عليه
+        const priceMap = {};
+        ALL_CANDIDATE_DEALS.forEach((x) => { priceMap[x.sym] = x.price; });
+        let heldVal = 0;
+        Object.entries(state.spotHoldings || {}).forEach(([sym, qv]) => { heldVal += Number(qv || 0) * (priceMap[sym] || 0); });
+        const availUsdt = Math.max(0, Math.round(state.equity - heldVal));
 
         const evNo = d._evalNo || 1;
         const arName = (d.name.split('•')[1] || d.name).trim();
+        const unitSym = d.sym.replace('USDT', '');
         const m = computeDealMetrics(d);
         const scores = d.aiScores || [92, 90, 91, 89, 93];
-        const tpPctStr = (d.tpPct * 100).toFixed(2);
+        const tpPctAdj = +(d.tpPct * 100 * hzMeta.mult).toFixed(2);
         const slPctStr = (d.slPct * 100).toFixed(2);
-        const q = d.quant || {};
+        const estProfitAdj = Math.round(m.invest * (tpPctAdj / 100));
+        const walletSharePct = availUsdt > 0 ? ((m.invest / availUsdt) * 100).toFixed(1) : '0.0';
 
-        if (titleEl) titleEl.textContent = `صفقة #${evNo} — ${arName} (${d.sym})`;
+        if (titleEl) titleEl.textContent = `صفقة #${evNo} — ${arName} (${d.sym}) • ${hzMeta.label}`;
 
         const agentSpecs = [
           {
@@ -4579,7 +4713,7 @@
             role: 'محلل الاتجاه والشموع',
             score: scores[0] ?? d.conf,
             reason: (sc) => sc >= 75
-              ? `الاتجاه الصاعد متماسك عند سعر $${d.price.toLocaleString()} مع هدف ربح قريب +${tpPctStr}% ($${m.tp1}) خلال ${d.round}.`
+              ? `الاتجاه الصاعد متماسك عند $${d.price.toLocaleString()} للفترة (${hzMeta.label}) مع عائد متوقع +${tpPctAdj}%.`
               : `الزخم الفني أضعف من المطلوب حالياً — يُفضّل التريث قبل الدخول.`
           },
           {
@@ -4590,7 +4724,7 @@
             reason: (sc) => state.killSwitch
               ? `قاطع الطوارئ مفعّل حالياً — أوقف الحارس جميع عمليات الشراء لحماية المحفظة.`
               : (sc >= 75
-                ? `وقف الخسارة محدد بدقة عند $${m.sl} (-${slPctStr}%) وبنسبة مخاطرة/عائد ممتازة تحت سقف 3% اليومي.`
+                ? `وقف الخسارة محدد عند $${m.sl} (-${slPctStr}%) ويحمي رصيد محفظتك المتاح ($${availUsdt.toLocaleString()}).`
                 : `التذبذب مرتفع نسبياً مقابل وقف الخسارة — يُنصح بتقليل المبلغ.`)
           },
           {
@@ -4605,11 +4739,11 @@
           {
             icon: '⚖️',
             name: AI_AGENTS[3]?.name || 'الميزان (تخصيص المال)',
-            role: 'حساب المبلغ الآمن (Kelly)',
+            role: 'مبني على رصيد محفظتك',
             score: scores[3] ?? d.conf,
             reason: (sc) => sc >= 75
-              ? `المبلغ المقترح $${m.invest.toLocaleString()} (${d.qty} وحدة) متوازن تماماً مع حجم محفظتك وسقفك اليومي.`
-              : `حجم المركز المقترح قريب من السقف — يُنصح بخفض المبلغ قبل التنفيذ.`
+              ? `بناءً على سيولتك المتاحة ($${availUsdt.toLocaleString()})، اقترحنا $${m.invest.toLocaleString()} (${walletSharePct}% من المتاح = ${d.qty} ${unitSym}).`
+              : `حجم المركز المقترح مرتفع نسبةً لسيولتك — يُنصح بخفض المبلغ.`
           },
           {
             icon: '🌐',
@@ -4617,8 +4751,8 @@
             role: 'صورة السوق والأخبار',
             score: scores[4] ?? d.conf,
             reason: (sc) => sc >= 75
-              ? `المناخ العام للسوق داعم لـ ${arName} وتصنيف الثقة الكلي ${d.conf}% يتجاوز عتبة الدخول الآمن (75%).`
-              : `السياق العام للسوق متقلب اليوم — يُنصح بمراقبة الإغلاق الساعي.`
+              ? `المناخ العام داعم لـ ${arName} خلال الأفق (${hzMeta.label}) بثقة كلية ${d.conf}% فوق عتبة 75%.`
+              : `السياق العام للسوق متقلب اليوم — يُنصح بمراقبة الإغلاق.`
           }
         ];
 
@@ -4670,24 +4804,49 @@
           badgeEl.style.borderColor = approvedByCouncil ? 'rgba(16,245,160,0.55)' : (redCnt > 0 ? 'rgba(255,56,104,0.55)' : 'rgba(247,201,72,0.55)');
         }
 
-        const todayCnt = (Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : []).length;
+        const todayCnt = todayLog.length;
+        const alreadyBought = todayLog.find((t) => t.dealId === d.id || t.sym === d.sym);
         finalBox.style.borderColor = approvedByCouncil ? 'rgba(16,245,160,0.5)' : 'rgba(247,201,72,0.5)';
         finalBox.innerHTML = `
-          <div class="row-between" style="flex-wrap:wrap;gap:10px;">
-            <div style="flex:1;min-width:240px;">
-              <div style="font-size:12.5px;font-weight:900;color:${approvedByCouncil ? '#10f5a0' : '#ffe484'};margin-bottom:3px;">
-                ${approvedByCouncil
-                  ? `✅ القرار النهائي بعد التداول بين الوكلاء: يُوصى بشراء صفقة #${evNo} (${d.sym})`
-                  : `⚠️ القرار النهائي بعد التداول: يُنصح بالمراجعة قبل شراء صفقة #${evNo} (${d.sym})`}
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:10px;align-items:center;">
+            <!-- مستطيل المحفظة وكمية الشراء المبنية على رصيدك الفعلي -->
+            <div class="holo-chamber" style="padding:9px 11px;border-radius:10px;background:rgba(10,25,47,0.92);border:1px solid rgba(56,189,248,0.4);">
+              <div style="font-size:11px;font-weight:900;color:#38bdf8;margin-bottom:5px;">💼 تخصيص المحفظة لـ صفقة #${evNo} (${hzMeta.label})</div>
+              <div class="row-between" style="font-size:11px;margin-bottom:4px;">
+                <span class="muted">المتاح فعلياً في محفظتك:</span>
+                <strong class="num text-sec">$${availUsdt.toLocaleString()} USDT</strong>
               </div>
-              <div style="font-size:11.5px;color:#e2e8f0;line-height:1.6;">
-                اتفق <strong>${greenCnt} من أصل 5 وكلاء</strong> باللون الأخضر بمتوسط ثقة <strong>${avgScore}%</strong> على شراء <strong>${arName} (${d.sym})</strong> بمبلغ <strong class="num text-pri">$${m.invest.toLocaleString()}</strong> مع هدف ربح <strong class="num text-ok">$${m.tp1}</strong> ووقف خسارة آمن <strong class="num text-err">$${m.sl}</strong>.
-                عند الضغط على الشراء الآن ستُسجَّل كـ <strong class="text-pri">الصفقة رقم #${todayCnt + 1} اليوم</strong>.
+              <div class="row-between" style="font-size:11px;margin-bottom:5px;gap:6px;">
+                <span class="muted">مبلغ الاستثمار المقترح (${walletSharePct}%):</span>
+                <div class="admin-amt-wrap" style="padding:1px 4px;">
+                  <button type="button" class="admin-amt-btn" onclick="ui.adjustDealQty('${d.id}', -1)" title="إنقاص">−</button>
+                  <input type="number" class="admin-amt-inp" value="${m.invest}" min="15" step="100" onchange="ui.setDealUsd('${d.id}', this.value)" style="width:76px;font-size:11.5px;" />
+                  <button type="button" class="admin-amt-btn" onclick="ui.adjustDealQty('${d.id}', 1)" title="زيادة">+</button>
+                </div>
+              </div>
+              <div class="row-between" style="font-size:11px;">
+                <span class="muted">الكمية والربح المتوقع:</span>
+                <strong class="num text-ok">${d.qty} ${unitSym} • +$${estProfitAdj.toLocaleString()} (+${tpPctAdj}%)</strong>
               </div>
             </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <button type="button" class="btn-3d btn-3d-buy" style="padding:8px 15px;font-size:12px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ اعتماد وشراء صفقة #${evNo} الآن</button>
-              <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" onclick="ui.tab('settings');setTimeout(()=>document.getElementById('ai-agent-ask-inp')?.focus(),180)">🤖 استشارة الوكيل المرتبط (Gemini/GPT)</button>
+
+            <!-- القرار النهائي + أزرار الشراء والرفض والانتقال التلقائي للصفقة التالية -->
+            <div>
+              <div style="font-size:12.5px;font-weight:900;color:${approvedByCouncil ? '#10f5a0' : '#ffe484'};margin-bottom:4px;">
+                ${alreadyBought
+                  ? `✅ تم شراء صفقة #${evNo} (${d.sym}) اليوم (الصفقة رقم #${alreadyBought.dailySeqNo})`
+                  : (approvedByCouncil
+                    ? `✅ القرار النهائي: يُوصى بشراء صفقة #${evNo} (${d.sym}) — ${hzMeta.label}`
+                    : `⚠️ القرار النهائي: يُنصح بالمراجعة قبل شراء صفقة #${evNo}`)}
+              </div>
+              <div style="font-size:11px;color:#cbd5e1;line-height:1.55;margin-bottom:7px;">
+                اتفق <strong>${greenCnt}/5 وكلاء</strong> (ثقة ${avgScore}%) بناءً على رصيد محفظتك المتاح • هدف الربح <strong class="num text-ok">$${m.tp1}</strong> • وقف الخسارة <strong class="num text-err">$${m.sl}</strong> • ستُسجَّل كـ <strong class="text-pri">الصفقة رقم #${todayCnt + 1} اليوم</strong>.
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <button type="button" class="btn-3d btn-3d-buy" style="padding:7px 14px;font-size:12px;" onclick="ui.approveCouncilDeal('${d.id}')">✅ شراء صفقة #${evNo} والانتقال للتالية</button>
+                <button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:7px 11px;font-size:11px;" onclick="ui.rejectCouncilDeal('${d.id}')">❌ رفض / تخطي</button>
+                <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" style="padding:7px 10px;font-size:11px;" onclick="ui.tab('settings');setTimeout(()=>document.getElementById('ai-agent-ask-inp')?.focus(),180)">🤖 سؤال الوكيل</button>
+              </div>
             </div>
           </div>
         `;
