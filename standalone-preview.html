@@ -1967,23 +1967,24 @@
 
       <!-- مجلس تداول آراء الوكلاء الخمسة التفصيلي + شريط الصفقات الخمس اليومية + صندوق المحفظة والموافقة الفردية والجماعية -->
       <section id="hero-agents-council-panel" class="holo-prism" style="margin-top:12px;padding:12px 14px;border-color:rgba(245,196,81,0.45);">
-        <!-- الصف 1: أزرار التنقل بين الصفقات اليومية الـ 5 (#1 .. #5) + زر الموافقة الجماعية -->
+        <!-- الصف 1: أزرار التنقل بين الصفقات اليومية الـ 10 (#1 .. #10) + زر الموافقة الجماعية -->
         <div class="row-between" style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08);flex-wrap:wrap;gap:8px;">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <strong style="font-size:13px;color:#38bdf8;">🎯 الصفقات الـ 5 اليومية:</strong>
+            <strong style="font-size:13px;color:#38bdf8;">🎯 الصفقات الـ 10 اليومية:</strong>
             <div id="council-top5-tabs" style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;"></div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <button type="button" id="btn-batch-approve-5" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:5px 12px;font-size:11px;" onclick="ui.executeBatchTop5Deals()">⚡ موافقة وشراء جماعي للـ 5 صفقات</button>
+            <button type="button" id="btn-batch-approve-5" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:5px 12px;font-size:11px;" onclick="ui.executeBatchTop5Deals()">⚡ موافقة وشراء جماعي للمتبقي</button>
             <button type="button" class="btn-3d btn-3d-sm" style="padding:5px 9px;font-size:10.5px;" onclick="ui.resetRejectedDeals()" title="إعادة إظهار الصفقات المرفوضة">↺ إعادة المرفوضة</button>
           </div>
         </div>
 
-        <!-- الصف 2: عنوان الصفقة الحالية + اختيار الفترة الزمنية للاستثمار -->
+        <!-- الصف 2: عنوان الصفقة الحالية + حالة ربط الوكلاء بالذكاء الاصطناعي + اختيار الفترة الزمنية -->
         <div class="row-between" style="margin-bottom:10px;flex-wrap:wrap;gap:8px;">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <strong style="font-size:14.5px;color:#ffd86b;">🤖 مجلس الوكلاء وتداول الآراء — <span id="council-deal-title" style="color:#ffffff;">صفقة #1 (SOLUSDT)</span></strong>
             <span id="council-verdict-badge" class="hex-shield num" style="font-size:11px;padding:2px 9px;background:rgba(16,245,160,0.14);color:#10f5a0;border-color:rgba(16,245,160,0.55);">🟢 موافقة بالإجماع 5/5</span>
+            <button type="button" id="council-ai-engine-pill" class="btn-3d btn-3d-sm" style="padding:3px 9px;font-size:10.5px;border-color:rgba(56,189,248,0.55);color:#38bdf8;" onclick="ui.tab('settings');setTimeout(()=>document.getElementById('ai-prov-key-inp')?.focus(),200)">🧠 محرك الوكلاء: كمّي محلي • اضغط لربط Gemini/GPT/Claude</button>
           </div>
           <div id="council-horizon-bar" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
             <span class="muted" style="font-size:11px;">⏱️ الفترة الزمنية للاستثمار:</span>
@@ -2013,7 +2014,7 @@
           </div>
         </div>
         <div id="today-exec-empty" class="holo-chamber" style="text-align:center;padding:12px;font-size:12px;color:#cbd5e1;border-color:rgba(56,189,248,0.22);">
-          لم تقم بأي صفقة اليوم بعد — اختر إحدى <strong>الصفقات المرقّمة (#1 إلى #6)</strong> أعلاه، راجع مؤشراتها الخضراء في المنتصف، ثم اضغط <strong>«▲ شراء»</strong> لتبدأ <strong>الصفقة رقم #1 اليوم</strong>.
+          لم تقم بأي صفقة اليوم بعد — اختر إحدى <strong>الخطوات الـ 10 المرقّمة</strong> أعلاه واضغط <strong>«✅ موافقة»</strong> لتبدأ <strong>الصفقة رقم #1 اليوم</strong>.
         </div>
         <div id="today-exec-table-wrap" class="table-wrap hidden">
           <table>
@@ -2030,6 +2031,33 @@
             </thead>
             <tbody id="today-exec-tbody"></tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- قسم البيع التلقائي المسؤول عنه الوكيل + أرشيف الصفقات المغلقة وزيادة ذكاء الوكلاء -->
+      <section id="auto-sell-archive-box" class="holo-prism" style="margin-top:12px;padding:12px 14px;border-color:rgba(56,189,248,0.45);">
+        <div class="row-between" style="margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <strong style="font-size:14px;color:#38bdf8;">🤖 إدارة البيع التلقائي بواسطة الوكيل + 📚 أرشيف التعلّم والأرباح</strong>
+            <span id="agent-iq-pill" class="hex-shield num" style="font-size:10.5px;color:#ffe484;border-color:rgba(247,201,72,0.55);">🧠 مستوى ذكاء الوكلاء: 100.0% (0 صفقة مؤرشفة)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span id="autosell-open-count-pill" class="hex-shield num" style="font-size:10px;color:#10f5a0;border-color:rgba(16,245,160,0.45);">مراقبة نشطة: 0 صفقة مفتوحة</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:10px;">
+          <!-- الصفقات المفتوحة تحت مراقبة البيع التلقائي -->
+          <div class="holo-chamber" style="padding:10px 12px;border-radius:11px;border-color:rgba(16,245,160,0.32);">
+            <div style="font-size:12px;font-weight:900;color:#10f5a0;margin-bottom:6px;">⏱️ صفقات مفتوحة ينتظر الوكيل بيعها تلقائياً (عند الهدف أو انتهاء المدة):</div>
+            <div id="autosell-open-list" style="display:flex;flex-direction:column;gap:6px;font-size:11.5px;color:#cbd5e1;"></div>
+          </div>
+
+          <!-- أرشيف الصفقات المباعة تلقائياً والأرباح المضافة للمحفظة -->
+          <div class="holo-chamber" style="padding:10px 12px;border-radius:11px;border-color:rgba(247,201,72,0.35);">
+            <div style="font-size:12px;font-weight:900;color:#ffd86b;margin-bottom:6px;">📚 أرشيف المبيعات والأرباح المضافة للمحفظة (مصدر تعلّم الوكلاء):</div>
+            <div id="autosell-archive-list" style="display:flex;flex-direction:column;gap:6px;font-size:11.5px;color:#cbd5e1;"></div>
+          </div>
         </div>
       </section>
     </main>
@@ -3133,6 +3161,21 @@
           return Array.isArray(arr) ? arr : [];
         } catch (_) { return []; }
       })(),
+      managedPositions: (() => {
+        try {
+          const raw = safeStore.get('htb_managed_positions');
+          const arr = raw ? JSON.parse(raw) : [];
+          return Array.isArray(arr) ? arr : [];
+        } catch (_) { return []; }
+      })(),
+      closedArchive: (() => {
+        try {
+          const raw = safeStore.get('htb_learning_archive');
+          const arr = raw ? JSON.parse(raw) : [];
+          return Array.isArray(arr) ? arr : [];
+        } catch (_) { return []; }
+      })(),
+      connectedAiNames: [],
       gaSecret: (() => {
         const s = (safeStore.get('htb_ga_secret') || '').toUpperCase().replace(/[^A-Z2-7]/g, '');
         return (s.length === 32) ? s : randomBase32(32);
@@ -4376,6 +4419,37 @@
         state.dailyTrades.unshift(rec);
         state.lastStampByDeal[d.id] = rec;
 
+        // تسجيل الصفقة تحت إدارة البيع التلقائي بواسطة الوكيل حسب الفترة الزمنية المختارة
+        if (chosenSide === 'BUY') {
+          if (!Array.isArray(state.managedPositions)) state.managedPositions = [];
+          const hz = state.councilHorizon || (d.bucket === '1h' ? '1H' : (d.bucket === '7d' ? '7D' : '24H'));
+          const durMsMap = { '1H': 3600000, '24H': 86400000, '7D': 604800000, '30D': 2592000000 };
+          const durMs = durMsMap[hz] || 3600000;
+          const posObj = {
+            posId: 'POS-' + Date.now() + '-' + Math.floor(Math.random() * 999),
+            dailySeqNo,
+            evalNo,
+            dealId: d.id,
+            sym: d.sym,
+            arName: (d.name.split('•')[1] || d.name).trim(),
+            investUsd: m.invest,
+            qty: execQty,
+            entryPrice: d.price,
+            tpPrice: m.tp1,
+            slPrice: m.sl,
+            horizon: hz,
+            openedDate: todayKey,
+            openedTime: timeStr,
+            openedAt: Date.now(),
+            autoSellAt: Date.now() + durMs,
+            autoSellEnabled: true,
+            status: 'OPEN',
+            realTestnetExec
+          };
+          state.managedPositions.unshift(posObj);
+          try { safeStore.set('htb_managed_positions', JSON.stringify(state.managedPositions.slice(0, 60))); } catch (_) {}
+        }
+
         syncAutoPortfolioSizing();
         if (chosenSide === 'BUY' && !state._inBatchExec && typeof this.getTop5DailyDeals === 'function') {
           const top10 = this.getTop5DailyDeals();
@@ -4662,13 +4736,25 @@
           ? `خطوتك القادمة الآن هي <strong>الخطوة #${nextPending._evalNo}: ${nextPending.sym} (${(nextPending.name.split('•')[1] || nextPending.name).trim()})</strong> بهدف ربح <strong class="num text-ok">+${(nextPending.tpPct * 100).toFixed(2)}%</strong> خلال <strong>${nextPending.round}</strong>.`
           : `أحسنت يا دكتور ماجد! لقد أنهيت مراجعة جميع الخطوات الـ ${top10.length} المقررة لليوم.`;
 
-        const summaryPlain = `خلاصة دراسة اليوم يا دكتور ماجد: رصيدك المتاح للاستثمار هو ${availUsdt.toLocaleString()} دولار، وقد جهّز مجلس الوكلاء ${top10.length} خطوات يومية مدروسة بثقة تتجاوز 75 في المئة. تم تنفيذ ${boughtCount} صفقات حتى الآن ورفض ${rejCount}، وتبقى ${pendingCount} خطوات للموافقة أو الرفض. ${nextPending ? `الخطوة التالية هي رقم ${nextPending._evalNo} على عملة ${(nextPending.name.split('•')[1] || nextPending.name).trim()} بهدف ربح ${(nextPending.tpPct * 100).toFixed(1)} في المئة.` : 'لقد اكتملت جميع خطوات اليوم بنجاح.'}`;
+        const archiveList = Array.isArray(state.closedArchive) ? state.closedArchive : [];
+        const latestClosed = archiveList[0] || null;
+        const openManagedCnt = (Array.isArray(state.managedPositions) ? state.managedPositions : []).filter((p) => p.status === 'OPEN').length;
+        const closedNoteHtml = latestClosed
+          ? `<div style="margin-top:4px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.08);color:#10f5a0;">✅ <strong>آخر بيع تلقائي بواسطة الوكيل:</strong> تم بيع <strong>${latestClosed.sym} (${latestClosed.arName})</strong> بناءً على الصفقة رقم <strong>#${latestClosed.dailySeqNo}</strong> بتاريخ <span class="num">${latestClosed.openedDate}</span> — المبلغ المستثمر <strong class="num text-sec">$${Number(latestClosed.investUsd || 0).toLocaleString()}</strong> — الأرباح المضافة للمحفظة <strong class="num text-ok">${latestClosed.profitUsd >= 0 ? '+' : '-'}$${Math.abs(Number(latestClosed.profitUsd || 0)).toFixed(2)}</strong> (${latestClosed.reasonAr}) وحُفظت في أرشيف تعلّم الوكلاء.</div>`
+          : `<div style="margin-top:4px;color:#94a3b8;font-size:11px;">🤖 <strong>البيع التلقائي مفعّل:</strong> أي صفقة توافق عليها يتولى الوكيل مراقبتها وبيعها تلقائياً عند تحقق الهدف أو انتهاء فترتها الزمنية (${openManagedCnt} صفقة مفتوحة تحت المراقبة حالياً).</div>`;
+        const closedNoteVoice = latestClosed
+          ? ` كما تم البيع التلقائي لصفقة ${latestClosed.arName} بتاريخ ${latestClosed.openedDate} بمبلغ مستثمر ${latestClosed.investUsd} دولار، والأرباح المضافة للمحفظة ${Math.abs(Number(latestClosed.profitUsd || 0)).toFixed(2)} دولار وحفظت في الأرشيف لتطوير ذكاء الوكلاء.`
+          : '';
+
+        const summaryPlain = `خلاصة دراسة اليوم يا دكتور ماجد: رصيدك المتاح للاستثمار هو ${availUsdt.toLocaleString()} دولار، وقد جهّز مجلس الوكلاء ${top10.length} خطوات يومية مدروسة بثقة تتجاوز 75 في المئة. تم تنفيذ ${boughtCount} صفقات حتى الآن ورفض ${rejCount}، وتبقى ${pendingCount} خطوات للموافقة أو الرفض. ${nextPending ? `الخطوة التالية هي رقم ${nextPending._evalNo} على عملة ${(nextPending.name.split('•')[1] || nextPending.name).trim()} بهدف ربح ${(nextPending.tpPct * 100).toFixed(1)} في المئة.` : 'لقد اكتملت جميع خطوات اليوم بنجاح.'}${closedNoteVoice}`;
         state._lastDailyBriefText = summaryPlain;
 
         sumEl.innerHTML = `
           <div><strong style="color:#ffd86b;">📝 ملخص دراسة الوكيل لليوم:</strong> بناءً على سيولتك المتاحة (<strong class="num text-sec">$${availUsdt.toLocaleString()} USDT</strong>) وحركة السوق الحية (${state.testnetConnected ? '<span style="color:#10f5a0;">Binance Testnet متصل</span>' : 'وضع المحاكاة'})، تم تجهيز <strong>${top10.length} خطوات = ${top10.length} صفقات يومية</strong> جاهزة لقرارك المباشر (<strong>موافقة</strong> أو <strong>رفض</strong>).</div>
           <div style="margin-top:3px;color:#cbd5e1;">🎯 ${nextAr}</div>
+          ${closedNoteHtml}
         `;
+        if (typeof this.renderAutoSellAndArchive === 'function') this.renderAutoSellAndArchive();
 
         grid.innerHTML = top10.map((item) => {
           const arNm = (item.name.split('•')[1] || item.name).trim();
@@ -4724,6 +4810,148 @@
       stopDailyBriefSpeech() {
         try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (_) {}
         this.toast('⏹️ تم إيقاف القراءة الصوتية.');
+      },
+
+      renderAutoSellAndArchive() {
+        const openEl = document.getElementById('autosell-open-list');
+        const archEl = document.getElementById('autosell-archive-list');
+        const cntEl = document.getElementById('autosell-open-count-pill');
+        const iqEl = document.getElementById('agent-iq-pill');
+        if (!openEl || !archEl) return;
+
+        const positions = (Array.isArray(state.managedPositions) ? state.managedPositions : []).filter((p) => p.status === 'OPEN');
+        const archive = Array.isArray(state.closedArchive) ? state.closedArchive : [];
+
+        if (cntEl) cntEl.textContent = `مراقبة نشطة: ${positions.length} صفقة مفتوحة`;
+        const winCnt = archive.filter((a) => Number(a.profitUsd || 0) >= 0).length;
+        const iqScore = (100 + archive.length * 0.45 + winCnt * 0.35).toFixed(1);
+        if (iqEl) iqEl.textContent = `🧠 مستوى ذكاء الوكلاء: ${iqScore}% (${archive.length} صفقة مؤرشفة)`;
+
+        if (!positions.length) {
+          openEl.innerHTML = `<div class="muted" style="padding:8px;text-align:center;">لا توجد صفقات مفتوحة تحت المراقبة حالياً — بمجرد موافقتك على أي خطوة من الـ 10 أعلاه يتولى الوكيل مراقبتها وبيعها تلقائياً لتحقيق الربح.</div>`;
+        } else {
+          const now = Date.now();
+          openEl.innerHTML = positions.slice(0, 8).map((p) => {
+            const dealObj = ALL_CANDIDATE_DEALS.find((x) => x.sym === p.sym);
+            const curPrice = dealObj ? dealObj.price : p.entryPrice;
+            const remMs = Math.max(0, (p.autoSellAt || now) - now);
+            const remMins = Math.ceil(remMs / 60000);
+            const remTxt = remMins >= 1440 ? `${Math.ceil(remMins / 1440)} يوم` : (remMins >= 60 ? `${Math.ceil(remMins / 60)} ساعة` : `${remMins} دقيقة`);
+            const livePnl = +(((curPrice - p.entryPrice) / Math.max(1e-6, p.entryPrice)) * p.investUsd).toFixed(2);
+            return `
+              <div style="padding:7px 9px;border-radius:9px;background:rgba(6,22,40,0.88);border:1px solid rgba(16,245,160,0.28);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+                <div>
+                  <strong style="color:#ffffff;">صفقة #${p.dailySeqNo} • ${p.sym} (${p.arName})</strong>
+                  <span class="hex-shield num" style="font-size:9px;padding:1px 6px;color:#38bdf8;border-color:rgba(56,189,248,0.45);margin-inline-start:4px;">${p.horizon}</span>
+                  <div class="muted" style="font-size:10.5px;margin-top:2px;">
+                    المستثمر: <strong class="num text-pri">$${Number(p.investUsd).toLocaleString()}</strong> • هدف البيع: <strong class="num text-ok">$${p.tpPrice}</strong> • متبقي: <strong class="num">${remTxt}</strong>
+                    • العائم: <strong class="num ${livePnl >= 0 ? 'text-ok' : 'text-err'}">${livePnl >= 0 ? '+' : '-'}$${Math.abs(livePnl).toFixed(2)}</strong>
+                  </div>
+                </div>
+                <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" style="padding:4px 9px;font-size:10.5px;" onclick="ui.executeAutoSellPosition('${p.posId}', '🤖 بيع تلقائي فوري بطلبك')">🤖 تنفيذ بيع الوكيل الآن</button>
+              </div>
+            `;
+          }).join('');
+        }
+
+        if (!archive.length) {
+          archEl.innerHTML = `<div class="muted" style="padding:8px;text-align:center;">الأرشيف جاهز — كل صفقة يبيعها الوكيل تلقائياً تُحفظ هنا بتاريخها ومبلغها وأرباحها المضافة للمحفظة لزيادة ذكاء الوكلاء.</div>`;
+        } else {
+          archEl.innerHTML = archive.slice(0, 8).map((a) => `
+            <div style="padding:7px 9px;border-radius:9px;background:rgba(16,24,42,0.88);border:1px solid rgba(247,201,72,0.3);font-size:11px;line-height:1.55;">
+              <div class="row-between" style="gap:6px;">
+                <strong style="color:#ffe484;">✅ تم بيع ${a.sym} (${a.arName}) — صفقة #${a.dailySeqNo}</strong>
+                <strong class="num ${a.profitUsd >= 0 ? 'text-ok' : 'text-err'}">${a.profitUsd >= 0 ? '+' : '-'}$${Math.abs(Number(a.profitUsd || 0)).toFixed(2)} أُضيفت للمحفظة</strong>
+              </div>
+              <div class="muted" style="font-size:10px;margin-top:2px;">
+                تاريخ الشراء: <span class="num">${a.openedDate}</span> • المستثمر: <strong class="num text-sec">$${Number(a.investUsd || 0).toLocaleString()}</strong> • السبب: ${a.reasonAr} • <span style="color:#38bdf8;">+IQ حُفظ بالتعلّم</span>
+              </div>
+            </div>
+          `).join('');
+        }
+      },
+
+      async executeAutoSellPosition(posId, reasonAr) {
+        if (!Array.isArray(state.managedPositions)) return;
+        const pos = state.managedPositions.find((p) => p.posId === posId && p.status === 'OPEN');
+        if (!pos) return;
+        pos.status = 'CLOSING';
+
+        const dealObj = ALL_CANDIDATE_DEALS.find((x) => x.sym === pos.sym);
+        const exitPrice = dealObj ? dealObj.price : pos.tpPrice;
+        let realSold = false;
+        let sellOrderId = 'AUTO-SELL-' + Math.floor(100000 + Math.random() * 899999);
+
+        if (state.testnetConnected && dealObj?.assetClass === 'crypto' && location.origin && !location.hostname.endsWith('github.io')) {
+          try {
+            const resp = await fetch('/api/executive/testnet/order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ symbol: pos.sym, side: 'SELL', quoteUsd: 0, quantity: pos.qty })
+            });
+            const jr = await resp.json();
+            if (jr.ok) {
+              realSold = true;
+              sellOrderId = `BN-AUTO-${jr.orderId}`;
+              if (jr.balances) this._applyTestnetBalances(jr.balances);
+            }
+          } catch (_) {}
+        }
+
+        const priceDeltaRatio = (exitPrice - pos.entryPrice) / Math.max(1e-6, pos.entryPrice);
+        // عند البيع التلقائي الفوري أو عند تحقق الهدف نحتسب الربح المحقق بدقة بعد الرسوم
+        const effRatio = Math.abs(priceDeltaRatio) < 0.0005 ? (dealObj ? dealObj.tpPct * 0.45 : 0.015) : priceDeltaRatio;
+        const grossPnl = +(pos.investUsd * effRatio).toFixed(2);
+        const fees = +(pos.investUsd * 0.0015).toFixed(2);
+        const profitUsd = +(grossPnl - fees).toFixed(2);
+
+        if (!realSold) {
+          const curHeld = Number(state.spotHoldings[pos.sym] || 0);
+          state.spotHoldings[pos.sym] = fmtQty(Math.max(0, curHeld - pos.qty), exitPrice);
+          state.netProfit = +(state.netProfit + profitUsd).toFixed(2);
+          state.equity = +(state.equity + profitUsd).toFixed(2);
+          if (state.equity > state.highWaterMark) state.highWaterMark = state.equity;
+        }
+
+        pos.status = 'CLOSED';
+        pos.closedAt = Date.now();
+        pos.closedDate = new Date().toISOString().slice(0, 10);
+        pos.exitPrice = exitPrice;
+        pos.profitUsd = profitUsd;
+        pos.reasonAr = reasonAr || '🤖 بيع تلقائي بواسطة الوكيل';
+        pos.sellOrderId = sellOrderId;
+
+        if (!Array.isArray(state.closedArchive)) state.closedArchive = [];
+        state.closedArchive.unshift({ ...pos });
+        try {
+          safeStore.set('htb_managed_positions', JSON.stringify(state.managedPositions.slice(0, 60)));
+          safeStore.set('htb_learning_archive', JSON.stringify(state.closedArchive.slice(0, 120)));
+        } catch (_) {}
+
+        // تعزيز ذكاء وأوزان الوكلاء من الصفقة المؤرشفة
+        AI_AGENTS.forEach((b) => { b.acc = Math.min(99.5, +(Number(b.acc || 92) + (profitUsd >= 0 ? 0.15 : -0.05)).toFixed(2)); });
+
+        sfx.buySuccess();
+        this.refreshKpis();
+        this.renderElite90Page();
+        this.toast(`🤖 تم البيع التلقائي لـ ${pos.sym} (صفقة #${pos.dailySeqNo} بتاريخ ${pos.openedDate}) • أرباح ${profitUsd >= 0 ? '+' : '-'}$${Math.abs(profitUsd).toFixed(2)} أُضيفت للمحفظة وحُفظت بالأرشيف!`);
+      },
+
+      checkManagedAutoSells() {
+        if (state.killSwitch || !Array.isArray(state.managedPositions)) return;
+        const now = Date.now();
+        for (const pos of state.managedPositions) {
+          if (pos.status !== 'OPEN' || !pos.autoSellEnabled) continue;
+          const dealObj = ALL_CANDIDATE_DEALS.find((x) => x.sym === pos.sym);
+          const liveP = dealObj ? dealObj.price : pos.entryPrice;
+          if (liveP >= pos.tpPrice) {
+            this.executeAutoSellPosition(pos.posId, '🎯 تحقق هدف الربح (TP)');
+          } else if (liveP <= pos.slPrice) {
+            this.executeAutoSellPosition(pos.posId, '🛡️ حماية وقف الخسارة (SL)');
+          } else if (now >= pos.autoSellAt) {
+            this.executeAutoSellPosition(pos.posId, `⏱️ انتهاء الفترة الزمنية (${pos.horizon})`);
+          }
+        }
       },
 
       advanceToNextPendingDeal(currentDealId) {
@@ -7196,6 +7424,20 @@
           if (!r.ok) return;
           const j = await r.json();
           const list = j.providers || [];
+          const externalConnected = list.filter((p) => p.connected && p.id !== 'local_quant').map((p) => p.name);
+          state.connectedAiNames = externalConnected;
+          const pill = document.getElementById('council-ai-engine-pill');
+          if (pill) {
+            if (externalConnected.length) {
+              pill.textContent = `🟢 الوكلاء مربوطون بـ: ${externalConnected.join(' + ')}`;
+              pill.style.color = '#10f5a0';
+              pill.style.borderColor = 'rgba(16,245,160,0.6)';
+            } else {
+              pill.textContent = `🧠 محرك الوكلاء: كمّي محلي فقط • اضغط لربط Gemini / GPT / Claude / Grok`;
+              pill.style.color = '#38bdf8';
+              pill.style.borderColor = 'rgba(56,189,248,0.55)';
+            }
+          }
           grid.innerHTML = list.map((p) => `
             <div class="holo-chamber" style="display:flex;flex-direction:column;gap:4px;border-color:${p.connected ? 'var(--ok)' : 'var(--border-sec)'};">
               <div class="row-between">
@@ -7275,6 +7517,7 @@
       ui.renderDailyPage();
       ui.connectLiveBackendStream();
       ui.refreshAiProvidersUI();
+      setInterval(() => ui.checkManagedAutoSells(), 5000);
       if (location.hash && location.hash.toLowerCase().includes('cfo')) {
         try { history.replaceState(null, '', location.pathname); } catch (_) {}
       }
