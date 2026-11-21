@@ -1810,6 +1810,29 @@
         </div>
       </div>
 
+      <!-- شريط خلاصة اليوم المكتوبة والمسموعة + خطة الـ 10 خطوات (10 صفقات يومية للموافقة أو الرفض فقط) -->
+      <section id="daily-10step-brief-bar" class="holo-prism" style="margin-bottom:10px;padding:12px 14px;border-color:rgba(16,245,160,0.48);background:linear-gradient(135deg, rgba(6,22,42,0.95), rgba(8,16,32,0.96));">
+        <div class="row-between" style="margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <strong style="font-size:14.5px;color:#10f5a0;">🎙️ خلاصة اليوم وخطة الـ 10 خطوات (10 صفقات للموافقة أو الرفض)</strong>
+            <span id="brief-10step-progress-pill" class="hex-shield num" style="font-size:10.5px;color:#ffe484;border-color:rgba(247,201,72,0.55);padding:2px 9px;">المنجز: 0 / 10</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <button type="button" id="btn-listen-brief" class="btn-3d btn-3d-gold btn-3d-sm" style="padding:5px 11px;font-size:11px;" onclick="ui.speakDailyExecutiveBrief()">🔊 استمع للخلاصة صوتياً</button>
+            <button type="button" class="btn-3d btn-3d-sm" style="padding:5px 9px;font-size:10.5px;" onclick="ui.stopDailyBriefSpeech()">⏹️ إيقاف</button>
+            <button type="button" id="btn-batch-approve-10" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:5px 11px;font-size:11px;" onclick="ui.executeBatchTop5Deals()">⚡ موافقة جماعية على المتبقي</button>
+          </div>
+        </div>
+
+        <!-- الملخص المكتوب لليوم -->
+        <div id="brief-written-summary" class="holo-chamber" style="padding:9px 12px;margin-bottom:9px;font-size:12px;line-height:1.7;color:#e2e8f0;border-color:rgba(56,189,248,0.32);background:rgba(5,14,28,0.85);">
+          جاري إعداد خلاصة دراسة السوق وخطة الصفقات الـ 10 لليوم...
+        </div>
+
+        <!-- شريط الخطوات الـ 10 اليومية: كل خطوة = صفقة مرقّمة مع زري موافقة أو رفض فقط -->
+        <div id="daily-10steps-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(215px, 1fr));gap:7px;"></div>
+      </section>
+
       <!-- شريط الدليل السريع للمبتدئ + عداد صفقات اليوم المرقّمة -->
       <div id="daily-trading-guide-bar" class="holo-chamber" style="margin-bottom:8px;padding:8px 12px;border-radius:12px;background:rgba(8,20,38,0.88);border:1px solid rgba(56,189,248,0.32);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;color:#e2e8f0;">
@@ -3354,7 +3377,10 @@
       // مع تعديل عتبة التحجيم إلى >=75% تتأهل صفقة XRP الفورية (~81.8% PAVA) وتُحجّم بمعيار Kelly تلقائياً!
       { id: 'el-xrp', sym: 'XRPUSDT', assetClass: 'crypto', name: 'XRP • ريبل', bucket: '1h', round: '45m', recSide: 'BUY', price: 2.46, atr: 0.048, rr: 2.1, tpPct: 0.032, slPct: 0.011, predProbs: [0.85, 0.83, 0.81] },
       { id: 'el-paxg', sym: 'PAXGUSDT', assetClass: 'crypto', name: 'PAXG • الذهب الفوري', bucket: '24h', round: '4H', recSide: 'BUY', price: 2671.00, atr: 24.5, rr: 2.2, tpPct: 0.026, slPct: 0.009, predProbs: [0.905, 0.895, 0.888] },
-      // مرشح سابع دون عتبة 75% (~67.5% PAVA) يُحجب آلياً ويظهر عند اختيار فلتر «المحجوبة (<75%)»
+      { id: 'el-avax', sym: 'AVAXUSDT', assetClass: 'crypto', name: 'Avalanche • أفالانش', bucket: '1h', round: '2H', recSide: 'BUY', price: 38.40, atr: 0.92, rr: 2.3, tpPct: 0.036, slPct: 0.012, predProbs: [0.902, 0.888, 0.879] },
+      { id: 'el-ada', sym: 'ADAUSDT', assetClass: 'crypto', name: 'Cardano • كاردانو', bucket: '24h', round: '6H', recSide: 'BUY', price: 0.98, atr: 0.025, rr: 2.15, tpPct: 0.033, slPct: 0.011, predProbs: [0.878, 0.865, 0.858] },
+      { id: 'el-link', sym: 'LINKUSDT', assetClass: 'crypto', name: 'Chainlink • تشين لينك', bucket: '24h', round: '4H', recSide: 'BUY', price: 22.15, atr: 0.54, rr: 2.25, tpPct: 0.034, slPct: 0.011, predProbs: [0.892, 0.881, 0.872] },
+      // مرشح حادي عشر دون عتبة 75% (~67.5% PAVA) يُحجب آلياً ويظهر عند اختيار فلتر «المحجوبة (<75%)»
       { id: 'el-doge-v', sym: 'DOGEUSDT', assetClass: 'crypto', name: 'DOGE • دوجكوين', bucket: '1h', round: '30m', recSide: 'BUY', price: 0.395, atr: 0.012, rr: 1.6, tpPct: 0.025, slPct: 0.012, predProbs: [0.71, 0.69, 0.68] }
     ];
 
@@ -4351,6 +4377,12 @@
         state.lastStampByDeal[d.id] = rec;
 
         syncAutoPortfolioSizing();
+        if (chosenSide === 'BUY' && !state._inBatchExec && typeof this.getTop5DailyDeals === 'function') {
+          const top10 = this.getTop5DailyDeals();
+          const rej = state.rejectedDealIds || {};
+          const nextPending = top10.find((x) => x.id !== d.id && !rej[x.id] && !state.todayExecutedLog.some((t) => t.dealId === x.id || t.sym === x.sym));
+          if (nextPending) state.heroDealId = nextPending.id;
+        }
         this.refreshKpis();
         this.renderElite90Page();
         if (!document.getElementById('trilliurin-nexthour-modal')?.classList.contains('hidden')) {
@@ -4570,6 +4602,7 @@
 
         if (typeof hydrateSigs === 'function') hydrateSigs();
         this.renderAllCardCandles();
+        this.renderDaily10StepBrief();
         this.renderHeroAgentsCouncil(heroDeal);
         this.renderTodayExecutedBox();
         this.renderQuickSummary();
@@ -4588,35 +4621,135 @@
         const topShort = this.getTopShortTermDeal(allApproved);
         const ordered = [topShort, ...allApproved.filter((x) => x.id !== topShort.id)];
         ordered.forEach((x, idx) => { x._evalNo = idx + 1; });
-        return ordered.slice(0, 5);
+        return ordered.slice(0, 10);
+      },
+
+      renderDaily10StepBrief() {
+        const grid = document.getElementById('daily-10steps-grid');
+        const sumEl = document.getElementById('brief-written-summary');
+        const progEl = document.getElementById('brief-10step-progress-pill');
+        const batchBtn = document.getElementById('btn-batch-approve-10');
+        if (!grid || !sumEl) return;
+
+        const top10 = this.getTop5DailyDeals();
+        const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+        const rejected = state.rejectedDealIds || {};
+
+        let doneCount = 0;
+        let boughtCount = 0;
+        let rejCount = 0;
+        let nextPending = null;
+
+        top10.forEach((item) => {
+          const bought = todayLog.find((t) => t.dealId === item.id || t.sym === item.sym);
+          const isRej = !!rejected[item.id];
+          if (bought) { boughtCount++; doneCount++; }
+          else if (isRej) { rejCount++; doneCount++; }
+          else if (!nextPending) nextPending = item;
+        });
+
+        const pendingCount = top10.length - doneCount;
+        if (progEl) progEl.textContent = `المنجز: ${doneCount} / ${top10.length} (✅ ${boughtCount} • ❌ ${rejCount})`;
+        if (batchBtn) batchBtn.textContent = pendingCount > 0 ? `⚡ موافقة جماعية (${pendingCount} متبقية)` : `✅ اكتملت الـ ${top10.length} خطوات اليوم`;
+
+        const priceMap = {};
+        ALL_CANDIDATE_DEALS.forEach((x) => { priceMap[x.sym] = x.price; });
+        let heldVal = 0;
+        Object.entries(state.spotHoldings || {}).forEach(([sym, qv]) => { heldVal += Number(qv || 0) * (priceMap[sym] || 0); });
+        const availUsdt = Math.max(0, Math.round(state.equity - heldVal));
+
+        const nextAr = nextPending
+          ? `خطوتك القادمة الآن هي <strong>الخطوة #${nextPending._evalNo}: ${nextPending.sym} (${(nextPending.name.split('•')[1] || nextPending.name).trim()})</strong> بهدف ربح <strong class="num text-ok">+${(nextPending.tpPct * 100).toFixed(2)}%</strong> خلال <strong>${nextPending.round}</strong>.`
+          : `أحسنت يا دكتور ماجد! لقد أنهيت مراجعة جميع الخطوات الـ ${top10.length} المقررة لليوم.`;
+
+        const summaryPlain = `خلاصة دراسة اليوم يا دكتور ماجد: رصيدك المتاح للاستثمار هو ${availUsdt.toLocaleString()} دولار، وقد جهّز مجلس الوكلاء ${top10.length} خطوات يومية مدروسة بثقة تتجاوز 75 في المئة. تم تنفيذ ${boughtCount} صفقات حتى الآن ورفض ${rejCount}، وتبقى ${pendingCount} خطوات للموافقة أو الرفض. ${nextPending ? `الخطوة التالية هي رقم ${nextPending._evalNo} على عملة ${(nextPending.name.split('•')[1] || nextPending.name).trim()} بهدف ربح ${(nextPending.tpPct * 100).toFixed(1)} في المئة.` : 'لقد اكتملت جميع خطوات اليوم بنجاح.'}`;
+        state._lastDailyBriefText = summaryPlain;
+
+        sumEl.innerHTML = `
+          <div><strong style="color:#ffd86b;">📝 ملخص دراسة الوكيل لليوم:</strong> بناءً على سيولتك المتاحة (<strong class="num text-sec">$${availUsdt.toLocaleString()} USDT</strong>) وحركة السوق الحية (${state.testnetConnected ? '<span style="color:#10f5a0;">Binance Testnet متصل</span>' : 'وضع المحاكاة'})، تم تجهيز <strong>${top10.length} خطوات = ${top10.length} صفقات يومية</strong> جاهزة لقرارك المباشر (<strong>موافقة</strong> أو <strong>رفض</strong>).</div>
+          <div style="margin-top:3px;color:#cbd5e1;">🎯 ${nextAr}</div>
+        `;
+
+        grid.innerHTML = top10.map((item) => {
+          const arNm = (item.name.split('•')[1] || item.name).trim();
+          const m = computeDealMetrics(item);
+          const bought = todayLog.find((t) => t.dealId === item.id || t.sym === item.sym);
+          const isRej = !!rejected[item.id];
+          const isActive = item.id === state.heroDealId;
+          const borderCol = bought ? 'rgba(16,245,160,0.6)' : (isRej ? 'rgba(255,56,104,0.35)' : (isActive ? 'rgba(247,201,72,0.85)' : 'rgba(56,189,248,0.28)'));
+          const bgCol = bought ? 'rgba(16,245,160,0.08)' : (isActive ? 'rgba(247,201,72,0.10)' : 'rgba(7,16,32,0.88)');
+
+          return `
+            <div class="holo-chamber" onclick="ui.selectHeroDeal('${item.id}')" style="cursor:pointer;padding:7px 9px;border-radius:10px;border:1px solid ${borderCol};background:${bgCol};${isRej ? 'opacity:0.55;' : ''}">
+              <div class="row-between" style="gap:4px;margin-bottom:3px;">
+                <span class="hex-shield num" style="font-size:9.5px;padding:1px 6px;color:${isActive ? '#ffe484' : '#38bdf8'};border-color:${borderCol};font-weight:900;">خطوة #${item._evalNo}</span>
+                <strong class="num" style="font-size:11.5px;color:#ffffff;" dir="ltr">${item.sym.replace('USDT', '')}</strong>
+                <span class="num text-ok" style="font-size:10px;font-weight:800;">+${(item.tpPct * 100).toFixed(1)}%</span>
+              </div>
+              <div style="font-size:10px;color:#cbd5e1;margin-bottom:5px;">
+                ${arNm} • <span class="num text-pri">$${m.invest.toLocaleString()}</span> • <span class="muted">${item.round} (${item.conf}%)</span>
+              </div>
+              <div style="display:flex;gap:4px;" onclick="event.stopPropagation()">
+                ${bought
+                  ? `<span class="hex-shield" style="width:100%;text-align:center;font-size:10px;color:#10f5a0;border-color:rgba(16,245,160,0.55);padding:3px 4px;">✅ تمت الموافقة (صفقة #${bought.dailySeqNo} اليوم)</span>`
+                  : (isRej
+                    ? `<button type="button" class="btn-3d btn-3d-sm" style="width:100%;padding:3px 6px;font-size:10px;" onclick="delete state.rejectedDealIds['${item.id}'];ui.renderElite90Page();">↺ مرفوضة — استرجاع</button>`
+                    : `<button type="button" class="btn-3d btn-3d-buy btn-3d-sm" style="flex:1;padding:3px 6px;font-size:10.5px;" onclick="ui.approveCouncilDeal('${item.id}')">✅ موافقة</button>
+                       <button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="flex:1;padding:3px 6px;font-size:10.5px;" onclick="ui.rejectCouncilDeal('${item.id}')">❌ رفض</button>`
+                  )}
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      speakDailyExecutiveBrief() {
+        const txt = state._lastDailyBriefText || 'أهلاً بك يا دكتور ماجد في خلاصة صفقات اليوم.';
+        try {
+          if (typeof speakSmartResponse === 'function') {
+            speakSmartResponse(txt, 'Daily executive brief ready.', null);
+          } else if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(txt);
+            u.lang = 'ar-SA';
+            u.rate = 0.98;
+            window.speechSynthesis.speak(u);
+          }
+          this.toast('🔊 جاري قراءة خلاصة اليوم وخطة الـ 10 خطوات صوتياً...');
+        } catch (err) {
+          this.toast('⚠️ تعذّر تشغيل القراءة الصوتية في هذا المتصفح.');
+        }
+      },
+
+      stopDailyBriefSpeech() {
+        try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (_) {}
+        this.toast('⏹️ تم إيقاف القراءة الصوتية.');
       },
 
       advanceToNextPendingDeal(currentDealId) {
-        const top5 = this.getTop5DailyDeals();
+        const top10 = this.getTop5DailyDeals();
         const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
         const rejected = state.rejectedDealIds || {};
-        const nextDeal = top5.find((x) => x.id !== currentDealId && !rejected[x.id] && !todayLog.some((t) => t.dealId === x.id || t.sym === x.sym));
+        const nextDeal = top10.find((x) => x.id !== currentDealId && !rejected[x.id] && !todayLog.some((t) => t.dealId === x.id || t.sym === x.sym));
         if (nextDeal) {
           state.heroDealId = nextDeal.id;
           this.renderElite90Page();
-          this.toast(`➡️ انتقلنا تلقائياً إلى صفقة #${nextDeal._evalNo} (${nextDeal.sym}) لمراجعتها.`);
+          this.toast(`➡️ انتقلنا تلقائياً إلى خطوة #${nextDeal._evalNo} (${nextDeal.sym}) لمراجعتها.`);
         } else {
           this.renderElite90Page();
-          this.toast('🎉 أحسنت! تم التعامل مع جميع الصفقات اليومية الـ 5.');
+          this.toast('🎉 أحسنت! تم التعامل مع جميع الخطوات الـ 10 اليومية.');
         }
       },
 
       async approveCouncilDeal(dealId) {
         await this.executeEliteDeal(dealId, 'BUY');
-        if (state.killSwitch) return;
-        setTimeout(() => this.advanceToNextPendingDeal(dealId), 350);
       },
 
       rejectCouncilDeal(dealId) {
         if (!state.rejectedDealIds) state.rejectedDealIds = {};
         state.rejectedDealIds[dealId] = true;
         const d = ALL_CANDIDATE_DEALS.find((x) => x.id === dealId);
-        this.toast(`⏭️ تم رفض / تخطي صفقة #${d?._evalNo || ''} (${d?.sym || ''}) والانتقال للصفقة التالية.`);
+        this.toast(`⏭️ تم رفض / تخطي خطوة #${d?._evalNo || ''} (${d?.sym || ''}) والانتقال للتالية.`);
         this.advanceToNextPendingDeal(dealId);
       },
 
@@ -4632,17 +4765,22 @@
           this.toast('🛑 قاطع الطوارئ مفعّل — قم بفك الإيقاف أولاً قبل الشراء الجماعي.', 'var(--hot)');
           return;
         }
-        const top5 = this.getTop5DailyDeals();
+        const top10 = this.getTop5DailyDeals();
         const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
         const rejected = state.rejectedDealIds || {};
-        const pending = top5.filter((x) => !rejected[x.id] && !todayLog.some((t) => t.dealId === x.id || t.sym === x.sym));
+        const pending = top10.filter((x) => !rejected[x.id] && !todayLog.some((t) => t.dealId === x.id || t.sym === x.sym));
         if (!pending.length) {
-          this.toast('✅ جميع الصفقات الـ 5 اليومية إما تم شراؤها بالفعل أو مرفوضة.');
+          this.toast('✅ جميع الخطوات الـ 10 اليومية إما تم شراؤها بالفعل أو مرفوضة.');
           return;
         }
+        state._inBatchExec = true;
         this.toast(`⚡ جاري تنفيذ الشراء الجماعي لـ ${pending.length} صفقات يومية متبقية...`);
-        for (const deal of pending) {
-          await this.executeEliteDeal(deal.id, 'BUY');
+        try {
+          for (const deal of pending) {
+            await this.executeEliteDeal(deal.id, 'BUY');
+          }
+        } finally {
+          state._inBatchExec = false;
         }
         this.closeModals();
         this.renderElite90Page();
