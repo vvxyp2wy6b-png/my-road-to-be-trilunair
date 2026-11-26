@@ -1040,10 +1040,11 @@
         0 0 38px rgba(0, 245, 212, 0.15),
         inset 0 1.5px 0 rgba(255, 255, 255, 0.18);
       transform: translateZ(10px);
-      display: flex; flex-direction: column; justify-content: space-between; gap: 7px;
+      display: flex; flex-direction: column; justify-content: flex-start; gap: 4px;
     }
     .lux-hero-canvas-wrap {
-      position: relative; width: 100%; border-radius: 13px; overflow: hidden;
+      position: relative; width: 100%; flex: 1; min-height: 290px; display: flex; flex-direction: column;
+      border-radius: 13px; overflow: hidden;
       background: radial-gradient(ellipse at 50% 88%, rgba(0, 212, 170, 0.18), rgba(4, 11, 22, 0.98) 72%);
       border: 1px solid rgba(56, 189, 248, 0.28);
       box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.8);
@@ -1883,6 +1884,7 @@
               <strong id="hero-sym-title" class="num" style="font-size:19px;color:#ffffff;">SOLUSDT</strong>
               <span id="hero-ar-name" class="muted" style="font-size:12px;color:#cbd5e1;">سولانا</span>
               <span id="hero-pava-pill" class="hex-shield num" style="color:#10f5a0;border-color:rgba(16,245,160,0.45);">94.9% PAVA</span>
+              <span id="hero-agents-vote-pill" class="hex-shield num" style="color:#38bdf8;border-color:rgba(56,189,248,0.48);">🤖 5/5 وكلاء</span>
             </div>
 
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -1897,12 +1899,12 @@
             </div>
           </div>
 
-          <div id="hero-plain-guide" style="font-size:11px;color:#94a3b8;margin-top:2px;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
-            <span>🕯️ شارت <strong id="hero-guide-sym" style="color:#ffe484;">صفقة #1 (SOLUSDT)</strong> — <span style="color:#38bdf8;">✨ مرّر على الشموع للتفاعل النجمي • اضغط لعرض سبب توصية المجلس</span></span>
+          <div id="hero-plain-guide" style="font-size:10px;line-height:1.2;color:#94a3b8;margin:0;padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            🕯️ شارت <strong id="hero-guide-sym" style="color:#ffe484;">صفقة #1 (SOLUSDT)</strong> — <span style="color:#38bdf8;">✨ مرّر على الشموع للتفاعل النجمي • اضغط لعرض سبب توصية المجلس</span>
           </div>
 
           <div class="lux-hero-canvas-wrap">
-            <canvas id="hero-short-term-cv" width="760" height="272" style="width:100%;height:264px;display:block;cursor:crosshair;" title="مرّر للمعاينة النجمية واضغط لعرض تفاصيل موافقة مجلس التداول"></canvas>
+            <canvas id="hero-short-term-cv" width="760" height="420" style="width:100%;height:100%;flex:1;display:block;cursor:crosshair;" title="مرّر للمعاينة النجمية واضغط لعرض تفاصيل موافقة مجلس التداول"></canvas>
           </div>
 
           <div id="hero-exec-footer" class="holo-chamber" style="padding:7px 11px;border-radius:13px;background:rgba(8,18,33,0.94);border-color:rgba(34,211,238,0.32);box-shadow:inset 0 2px 6px rgba(0,0,0,0.7);"></div>
@@ -3311,50 +3313,59 @@
       else if (spotShortBlocked) vetoReason = '🚫 فيتو Spot Long-Only: لا بيع على المكشوف في Spot دون رصيد مملوك';
       else if (calProb < 0.75) vetoReason = `★ بوابة AI-5: الثقة المُعايَرة ${confPct}% أقل من عتبة 75% المفروضة للتحجيم`;
 
-      // تحجيم Fractional Kelly المربوط بـ ATR والعمولات ومضاعف قاطع السحب اليومي (1.0x أو 0.5x عند 1.5%)
-      const stopDist = d.atr * 1.8;
-      const stopPct = stopDist / d.price;
+      // حساب عدد الوكلاء الموافقين من إجمالي 5 وكلاء (AI-1..AI-3 متنبئون >=75%، AI-4 المخاطر/Kelly، AI-5 معايرة PAVA >=75%)
+      const approvedAgentsCount = [p1 >= 0.75, p2 >= 0.75, p3 >= 0.75, !vetoReason, calProb >= 0.75].filter(Boolean).length;
+
+      // تحجيم Fractional Kelly لكل صفقة على حدة بناءً على ATR الفعلي، نسبة العائد للمخاطرة، والثقة المُعايَرة
+      const hasValidInputs = Number.isFinite(d.price) && d.price > 0 && Number.isFinite(d.atr) && d.atr > 0 && Number.isFinite(d.rr) && d.rr > 0;
+      const stopDist = hasValidInputs ? d.atr * 1.8 : 0;
+      const stopPct = hasValidInputs ? stopDist / d.price : 0;
       const feePct = 0.0015;
-      const bNet = Math.max(0.2, (d.rr * stopPct - feePct) / (stopPct + feePct));
-      const pConservative = quantClip(0.65 * calProb + 0.35 * 0.78, 0.05, 0.98);
-      const fullKelly = Math.max(0, pConservative - (1 - pConservative) / bNet);
+      const bNet = hasValidInputs ? Math.max(0.2, (d.rr * stopPct - feePct) / (stopPct + feePct)) : 0;
+      const pConservative = quantClip(0.75 * calProb + 0.25 * 0.72, 0.05, 0.96);
+      const fullKelly = hasValidInputs ? Math.max(0, pConservative - (1 - pConservative) / bNet) : 0;
       const fracKelly = fullKelly * 0.25 * sizeMult;
-      const riskBudgetUsd = state.equity * quantClip(fullKelly * 0.25 * 0.055, 0.0025, 0.011);
-      const rawNotional = riskBudgetUsd / Math.max(stopPct + feePct, 1e-4);
       const budget = getAgentBudgetUsage();
       const maxCapPct = Math.min(d.assetClass === 'crypto' ? 0.065 : 0.055, budget.maxPerTradePct / 100);
-      const kellyRawUsd = Math.round(Math.min(rawNotional, state.equity * maxCapPct) * sizeMult);
+      const volAdj = hasValidInputs ? quantClip(0.018 / Math.max(stopPct + feePct, 0.008), 0.35, 1.35) : 0;
+      const targetWeight = hasValidInputs && fracKelly > 0 ? quantClip(fracKelly * 0.24 * volAdj, 0.005, maxCapPct) : 0;
+      const kellyRawUsd = (hasValidInputs && !vetoReason && targetWeight > 0)
+        ? Math.round(state.equity * targetWeight)
+        : null;
 
       // التزام الوكيل الصارم بحدود الاستثمار المسموحة (في الساعة واليوم ولكل صفقة)
       let ruleCapReason = null;
       let agentAllowedUsd = kellyRawUsd;
-      if (budget.remTradesHour <= 0) {
-        agentAllowedUsd = 0;
-        ruleCapReason = `بلغ الوكيل الحد الساعي (${budget.tradesHour}/${budget.maxTradesPerHour} صفقات/ساعة)`;
-      } else if (budget.remTradesDay <= 0) {
-        agentAllowedUsd = 0;
-        ruleCapReason = `بلغ الوكيل الحد اليومي (${budget.tradesDay}/${budget.maxTradesPerDay} صفقات/يوم)`;
-      } else {
-        if (agentAllowedUsd > budget.maxSingleUsd) {
-          agentAllowedUsd = budget.maxSingleUsd;
-          ruleCapReason = `مقيد بسقف الصفقة (${budget.maxPerTradePct}%)`;
-        }
-        if (agentAllowedUsd > budget.remHourUsd) {
-          agentAllowedUsd = budget.remHourUsd;
-          ruleCapReason = `مقيد بالمتبقي للساعة ($${budget.remHourUsd.toLocaleString()})`;
-        }
-        if (agentAllowedUsd > budget.remDayUsd) {
-          agentAllowedUsd = budget.remDayUsd;
-          ruleCapReason = `مقيد بالمتبقي لليوم ($${budget.remDayUsd.toLocaleString()})`;
+      if (agentAllowedUsd !== null) {
+        if (budget.remTradesHour <= 0) {
+          agentAllowedUsd = 0;
+          ruleCapReason = `بلغ الوكيل الحد الساعي (${budget.tradesHour}/${budget.maxTradesPerHour} صفقات/ساعة)`;
+        } else if (budget.remTradesDay <= 0) {
+          agentAllowedUsd = 0;
+          ruleCapReason = `بلغ الوكيل الحد اليومي (${budget.tradesDay}/${budget.maxTradesPerDay} صفقات/يوم)`;
+        } else {
+          if (agentAllowedUsd > budget.maxSingleUsd) {
+            agentAllowedUsd = budget.maxSingleUsd;
+            ruleCapReason = `مقيد بسقف الصفقة (${budget.maxPerTradePct}%)`;
+          }
+          if (agentAllowedUsd > budget.remHourUsd) {
+            agentAllowedUsd = budget.remHourUsd;
+            ruleCapReason = `مقيد بالمتبقي للساعة ($${budget.remHourUsd.toLocaleString()})`;
+          }
+          if (agentAllowedUsd > budget.remDayUsd) {
+            agentAllowedUsd = budget.remDayUsd;
+            ruleCapReason = `مقيد بالمتبقي لليوم ($${budget.remDayUsd.toLocaleString()})`;
+          }
         }
       }
-      const autoUsd = Math.max(0, Math.round(agentAllowedUsd));
+      const autoUsd = (agentAllowedUsd !== null && agentAllowedUsd > 0) ? Math.round(agentAllowedUsd) : null;
 
       return {
         rawConsensus,
         calProb,
         confPct,
         approved: !vetoReason,
+        approvedAgentsCount,
         vetoReason,
         autoUsd,
         kellyRawUsd,
@@ -3362,6 +3373,11 @@
         kellyPct: +(fracKelly * 100).toFixed(1),
         stopDist
       };
+    }
+
+    function dealRoundToBinanceInterval(round) {
+      const map = { '1M': '1m', '15M': '15m', '30M': '30m', '45M': '15m', '1H': '1h', '2H': '2h', '4H': '4h', '6H': '6h', '12H': '12h', '24H': '1d', '1D': '1d', '7D': '1d' };
+      return map[String(round || '1H').toUpperCase()] || '1h';
     }
 
     const ALL_CANDIDATE_DEALS = [
@@ -3400,11 +3416,11 @@
           qEval.approved ? 'OK' : 'VT',
           Math.round(qEval.confPct)
         ];
-        const baseUsd = Math.max(250, qEval.autoUsd || qEval.kellyRawUsd || 2500);
-        d.step = fmtQty(Math.max(0.0005, Math.max(1000, baseUsd * 0.1) / d.price), d.price);
+        const baseUsd = qEval.autoUsd || qEval.kellyRawUsd || 0;
+        d.step = baseUsd > 0 && d.price > 0 ? fmtQty(Math.max(0.0005, Math.max(500, baseUsd * 0.1) / d.price), d.price) : 0;
         if (!d.userAdjusted) {
-          const usd = qEval.autoUsd > 0 ? Math.max(250, qEval.autoUsd) : 0;
-          d.qty = usd > 0 ? fmtQty(usd / d.price, d.price) : 0;
+          const usd = qEval.autoUsd && qEval.autoUsd > 0 ? Math.max(250, qEval.autoUsd) : 0;
+          d.qty = usd > 0 && d.price > 0 ? fmtQty(usd / d.price, d.price) : 0;
         }
       });
     }
@@ -4516,14 +4532,21 @@
         if (arEl) arEl.textContent = heroArName;
         const pvEl = document.getElementById('hero-pava-pill');
         if (pvEl) pvEl.textContent = `${heroDeal.conf}% PAVA`;
+        const heroAgCount = heroDeal.quant?.approvedAgentsCount ?? 0;
+        const agVoteEl = document.getElementById('hero-agents-vote-pill');
+        if (agVoteEl) {
+          agVoteEl.textContent = `🤖 موافقة ${heroAgCount}/5 وكلاء`;
+          agVoteEl.style.color = heroAgCount >= 5 ? '#10f5a0' : (heroAgCount >= 4 ? '#38bdf8' : '#fbbf24');
+        }
 
         const hm = computeDealMetrics(heroDeal);
         const hOwned = +(state.spotHoldings[heroDeal.sym] || 0);
         const hUnit = heroDeal.sym.replace('USDT', '');
         const hStamp = state.lastStampByDeal[heroDeal.id];
-        const hAgUsd = heroDeal.agentRecommendedUsd || 0;
+        const hAgUsd = heroDeal.agentRecommendedUsd;
+        const hAgUsdTxt = (Number.isFinite(hAgUsd) && hAgUsd > 0) ? `$${hAgUsd.toLocaleString()}` : '—';
         const hBudget = getAgentBudgetUsage();
-        const greenAgents = (heroDeal.aiScores || []).filter((s) => s >= 75).length;
+        const greenAgents = heroAgCount;
         const heroFooter = document.getElementById('hero-exec-footer');
         if (heroFooter) {
           heroFooter.innerHTML = `
@@ -4533,7 +4556,7 @@
                 ${state.killSwitch ? '🛑 بوابة المخاطر: متوقفة' : '✅ بوابة المخاطر: آمنة'}
               </span>
               <span class="hex-shield" style="color:#10f5a0;border-color:rgba(16,245,160,0.45);padding:2px 7px;">
-                🤖 إجماع الوكلاء: ${greenAgents}/5 أخضر
+                🤖 موافقة الوكلاء: ${greenAgents}/5
               </span>
               <span class="hex-shield" style="color:${state.testnetConnected ? '#10f5a0' : '#ffe484'};border-color:${state.testnetConnected ? 'rgba(16,245,160,0.45)' : 'rgba(247,201,72,0.45)'};padding:2px 7px;">
                 ${state.testnetConnected ? '🟢 Binance Testnet: متصل حي' : '🧪 الوضع: محاكاة محلية'}
@@ -4549,7 +4572,7 @@
             <div class="row-between" style="flex-wrap:wrap;gap:8px;">
               <div>
                 <div class="muted" style="font-size:10px;">
-                  🤖 مقترح الوكيل لـ <strong>صفقة #${heroNo}</strong>: <strong class="num text-sec">$${hAgUsd.toLocaleString()}</strong>
+                  🤖 مقترح الوكيل لـ <strong>صفقة #${heroNo}</strong>: <strong class="num text-sec">${hAgUsdTxt}</strong>
                   ${heroDeal.userAdjusted ? `<span class="hex-shield" style="font-size:9px;padding:0 5px;color:var(--pri);border-color:var(--pri);margin-inline-start:4px;">👑 تعديل الأدمن</span>` : ''}
                   • المملوك: <strong class="num text-pri">${hOwned} ${hUnit}</strong>
                 </div>
@@ -4592,28 +4615,39 @@
 
         const renderSideCard = (d) => {
           const m = computeDealMetrics(d);
-          const shortGainPct = +(d.tpPct * 100).toFixed(2);
-          const agUsd = d.agentRecommendedUsd || 0;
+          const agUsd = d.agentRecommendedUsd;
+          const agUsdTxt = (Number.isFinite(agUsd) && agUsd > 0) ? `$${agUsd.toLocaleString()}` : '—';
           const evNo = d._evalNo || 1;
+          const agCount = d.quant?.approvedAgentsCount ?? 0;
           const doneToday = todayLog.find((t) => t.dealId === d.id || t.sym === d.sym);
-          return `<article id="card-${d.id}" class="lux-side-deal-card elite-deal-card ${d.id === state.heroDealId ? 'active-hero' : ''}" onclick="ui.selectHeroDeal('${d.id}')">
+          const isLive = Boolean(d.hasLiveMarketData && d.assetClass === 'crypto');
+          const hasLiveChg = isLive && Number.isFinite(d.liveChangePct);
+          const chgHtml = hasLiveChg
+            ? `<span style="color:${d.liveChangePct >= 0 ? '#10f5a0' : '#f43f5e'};">${d.liveChangePct >= 0 ? '▲ +' : '▼ '}${d.liveChangePct.toFixed(2)}% (${d.round})</span>`
+            : `<span style="color:#fbbf24;">تجريبي (${d.round})</span>`;
+          const priceDec = d.price < 10 ? 4 : (d.price < 500 ? 2 : 2);
+          const priceStr = Number.isFinite(d.price) && d.price > 0
+            ? `$${d.price.toLocaleString('en-US', { minimumFractionDigits: d.price < 10 ? 3 : 2, maximumFractionDigits: priceDec })}`
+            : '—';
+          return `<article id="card-${d.id}" data-deal-sym="${d.sym}" data-kelly-usd="${Number.isFinite(agUsd) && agUsd > 0 ? agUsd : ''}" data-agents-approved="${agCount}" class="lux-side-deal-card elite-deal-card ${d.id === state.heroDealId ? 'active-hero' : ''}" onclick="ui.selectHeroDeal('${d.id}')">
             <div class="row-between" style="gap:4px;">
-              <span class="hex-shield num" style="font-size:9.5px;padding:1px 7px;background:rgba(247,201,72,0.16);color:#ffe484;border-color:rgba(247,201,72,0.55);font-weight:900;">صفقة #${evNo}</span>
-              <strong class="num" style="font-size:12px;color:#93c5fd;" dir="ltr">${d.sym}</strong>
-              <span class="hex-shield num" style="font-size:9px;padding:1px 6px;color:var(--ok);border-color:rgba(16,245,160,0.45);">${d.conf}%</span>
+              <span class="hex-shield num" style="font-size:9.5px;padding:1px 6px;background:rgba(247,201,72,0.16);color:#ffe484;border-color:rgba(247,201,72,0.55);font-weight:900;">صفقة #${evNo}</span>
+              <strong class="num" style="font-size:11.5px;color:#93c5fd;" dir="ltr">${d.sym}</strong>
+              <span class="hex-shield num" style="font-size:9px;padding:1px 5px;color:${agCount >= 5 ? '#10f5a0' : '#38bdf8'};border-color:rgba(56,189,248,0.45);" title="عدد الوكلاء الموافقين من إجمالي 5 وكلاء">🤖 ${agCount}/5</span>
+              <span class="hex-shield num" style="font-size:9px;padding:1px 5px;color:var(--ok);border-color:rgba(16,245,160,0.45);">${d.conf}%</span>
             </div>
             ${doneToday ? `<div style="text-align:center;margin-top:2px;"><span class="hex-shield" style="font-size:9px;padding:1px 7px;background:rgba(16,245,160,0.14);color:#10f5a0;border-color:rgba(16,245,160,0.55);">✅ نُفّذت اليوم (الصفقة رقم #${doneToday.dailySeqNo})</span></div>` : ''}
             <div style="text-align:center;padding:1px 0;">
-              <div class="num val-gold" dir="ltr" style="font-size:16px;font-weight:900;line-height:1.15;">$${d.price.toLocaleString()}</div>
-              <div class="num val-emerald" dir="ltr" style="font-size:10px;font-weight:800;">▲ +${shortGainPct}% (${d.round}) • مقترح $${agUsd.toLocaleString()}</div>
+              <div class="num val-gold" dir="ltr" style="font-size:15px;font-weight:900;line-height:1.15;">${priceStr}${!isLive ? ' <span style="font-size:9px;color:#fbbf24;font-weight:700;">تجريبي</span>' : ''}</div>
+              <div class="num" dir="ltr" style="font-size:10px;font-weight:800;">${chgHtml} • <span class="side-kelly-val" style="color:#38bdf8;">مقترح ${agUsdTxt}</span></div>
             </div>
             <div style="display:flex;justify-content:center;align-items:center;gap:4px;" onclick="event.stopPropagation()">
               <button type="button" class="admin-amt-btn" style="width:20px;height:20px;font-size:12px;" onclick="ui.adjustDealQty('${d.id}', -1)" title="إنقاص">−</button>
-              <strong class="num text-pri" style="font-size:11px;">$${m.invest.toLocaleString()}${d.userAdjusted ? ' 👑' : ''}</strong>
+              <strong class="num text-pri" style="font-size:11px;">${m.invest > 0 ? '$' + m.invest.toLocaleString() : '—'}${d.userAdjusted ? ' 👑' : ''}</strong>
               <button type="button" class="admin-amt-btn" style="width:20px;height:20px;font-size:12px;" onclick="ui.adjustDealQty('${d.id}', 1)" title="زيادة">+</button>
               ${d.userAdjusted ? `<button type="button" class="admin-amt-btn" style="width:20px;height:20px;font-size:10px;" onclick="ui.resetDealToAgent('${d.id}')" title="إرجاع للوكيل">↺</button>` : ''}
             </div>
-            <canvas id="spark-${d.id}" width="230" height="28" style="width:100%;height:26px;display:block;"></canvas>
+            <canvas id="spark-${d.id}" width="240" height="58" data-chart-type="candlestick" style="width:100%;height:56px;display:block;border-radius:7px;background:rgba(4,11,22,0.85);border:1px solid rgba(56,189,248,0.18);"></canvas>
             <div style="display:flex;justify-content:center;gap:4px;padding-top:3px;border-top:1px solid rgba(255,255,255,0.06);" onclick="event.stopPropagation()">
               <button type="button" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:2px 8px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء #${evNo}</button>
               <button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:2px 7px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'SELL')">▼ بيع</button>
@@ -4726,7 +4760,7 @@
                 <span class="num text-ok" style="font-size:10px;font-weight:800;">+${(item.tpPct * 100).toFixed(1)}%</span>
               </div>
               <div style="font-size:10px;color:#cbd5e1;margin-bottom:5px;">
-                ${arNm} • <span class="num text-pri">$${m.invest.toLocaleString()}</span> • <span class="muted">${item.round} (${item.conf}%)</span>
+                ${arNm} • <span class="num text-pri">${m.invest > 0 ? '$' + m.invest.toLocaleString() : '—'}</span> • <span class="num" style="color:#38bdf8;">🤖 ${item.quant?.approvedAgentsCount ?? 0}/5</span> • <span class="muted">${item.round} (${item.conf}%)</span>
               </div>
               <div style="display:flex;gap:4px;" onclick="event.stopPropagation()">
                 ${bought
@@ -5343,6 +5377,14 @@
       drawHeroShortTermChart() {
         const cv = document.getElementById('hero-short-term-cv');
         if (!cv) return;
+        const wrap = cv.parentElement;
+        if (wrap) {
+          const wr = wrap.getBoundingClientRect();
+          const targetW = Math.max(460, Math.round(wr.width || 760));
+          const targetH = Math.max(290, Math.round(wr.height || 420));
+          if (Math.abs(cv.width - targetW) > 4) cv.width = targetW;
+          if (Math.abs(cv.height - targetH) > 4) cv.height = targetH;
+        }
         const ctx = cv.getContext('2d');
         const W = cv.width, H = cv.height;
         ctx.clearRect(0, 0, W, H);
@@ -5592,39 +5634,126 @@
       },
 
       drawSideSparklines() {
-        ALL_CANDIDATE_DEALS.forEach((d, idx) => {
+        if (!state.realKlinesCache) state.realKlinesCache = {};
+        ALL_CANDIDATE_DEALS.forEach((d) => {
           const cv = document.getElementById('spark-' + d.id);
           if (!cv) return;
           const ctx = cv.getContext('2d');
           const W = cv.width, H = cv.height;
           ctx.clearRect(0, 0, W, H);
-          const pts = [];
-          const N = 22;
-          for (let i = 0; i < N; i++) {
-            const prog = i / (N - 1);
-            const wv = Math.sin(i * 0.65 + idx * 1.7 + state.candleTick * 0.3) * 0.22;
-            const yNorm = 0.22 + prog * 0.56 + wv * 0.35;
-            pts.push({ x: 4 + (i / (N - 1)) * (W - 8), y: H - 6 - quantClip(yNorm, 0.08, 0.92) * (H - 12) });
-          }
-          const grad = ctx.createLinearGradient(0, 0, 0, H);
-          grad.addColorStop(0, 'rgba(16, 245, 160, 0.30)');
-          grad.addColorStop(1, 'rgba(16, 245, 160, 0.0)');
-          ctx.beginPath();
-          ctx.moveTo(pts[0].x, H);
-          pts.forEach((p) => ctx.lineTo(p.x, p.y));
-          ctx.lineTo(pts[pts.length - 1].x, H);
-          ctx.closePath();
-          ctx.fillStyle = grad;
-          ctx.fill();
 
+          const iv = dealRoundToBinanceInterval(d.round);
+          const cacheKey = `${d.sym}:${iv}`;
+          const cached = state.realKlinesCache[cacheKey];
+
+          // جلب شموع حقيقية من Binance Testnet على الإطار الزمني الخاص بالصفقة
+          if (d.assetClass === 'crypto' && (!cached || Date.now() - cached.fetchedAt > 25000)) {
+            this.fetchRealKlinesForSymbol(d.sym, iv);
+          }
+
+          const hasReal = Boolean(cached && Array.isArray(cached.candles) && cached.candles.length >= 10);
+          if (!hasReal) {
+            cv.dataset.chartType = 'candlestick';
+            cv.dataset.candlesCount = '0';
+            cv.dataset.source = d.assetClass === 'crypto' ? 'LOADING' : 'DEMO';
+            ctx.fillStyle = 'rgba(4, 11, 22, 0.92)';
+            ctx.fillRect(0, 0, W, H);
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = '700 10px Cairo, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(
+              d.assetClass === 'crypto' ? `⏳ جاري جلب شموع ${iv.toUpperCase()} الحية...` : `تجريبي — غير مدرج على Binance Testnet`,
+              W / 2, H / 2 + 3
+            );
+            return;
+          }
+
+          const candles = cached.candles.slice(-36);
+          const N = candles.length;
+          const m = computeDealMetrics(d);
+          const tpVal = Number(m.tp1 || 0);
+          const slVal = Number(m.sl || 0);
+
+          let minP = Math.min(...candles.map((c) => c.low));
+          let maxP = Math.max(...candles.map((c) => c.high));
+          if (slVal > 0 && slVal < minP && slVal > minP * 0.90) minP = slVal;
+          if (tpVal > 0 && tpVal > maxP && tpVal < maxP * 1.12) maxP = tpVal;
+          const span = Math.max(1e-8, maxP - minP);
+          minP -= span * 0.08;
+          maxP += span * 0.08;
+
+          const padL = 4, padR = 26, padT = 5, padB = 5;
+          const chartW = W - padL - padR;
+          const chartH = H - padT - padB;
+          const yOf = (p) => padT + (1 - (p - minP) / Math.max(1e-8, maxP - minP)) * chartH;
+          const stepX = chartW / N;
+
+          // شبكة خفيفة
+          ctx.strokeStyle = 'rgba(56, 189, 248, 0.07)';
+          ctx.lineWidth = 1;
           ctx.beginPath();
-          pts.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
-          ctx.strokeStyle = '#10f5a0';
-          ctx.lineWidth = 2;
-          ctx.shadowColor = 'rgba(16, 245, 160, 0.6)';
-          ctx.shadowBlur = 6;
+          ctx.moveTo(padL, padT + chartH * 0.5);
+          ctx.lineTo(W - padR, padT + chartH * 0.5);
           ctx.stroke();
-          ctx.shadowBlur = 0;
+
+          // رسم الشموع اليابانية الحقيقية (أخضر صاعد / أحمر هابط)
+          const bodyW = Math.max(2.2, stepX * 0.62);
+          candles.forEach((c, i) => {
+            const cx = padL + i * stepX + stepX * 0.5;
+            const up = c.close >= c.open;
+            const col = up ? '#10f5a0' : '#f43f5e';
+            ctx.strokeStyle = col;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(cx, yOf(c.high));
+            ctx.lineTo(cx, yOf(c.low));
+            ctx.stroke();
+
+            const yTop = yOf(Math.max(c.open, c.close));
+            const yBot = yOf(Math.min(c.open, c.close));
+            const bh = Math.max(1.5, yBot - yTop);
+            ctx.fillStyle = col;
+            ctx.fillRect(cx - bodyW / 2, yTop, bodyW, bh);
+          });
+
+          // منحنى EMA الذهبي المصغّر (نفس مكوّن الشارت الأوسط)
+          let ema = candles[0].close;
+          ctx.beginPath();
+          candles.forEach((c, i) => {
+            ema = ema * 0.72 + c.close * 0.28;
+            const x = padL + i * stepX + stepX * 0.5;
+            const y = yOf(ema);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          });
+          ctx.strokeStyle = 'rgba(250, 204, 21, 0.85)';
+          ctx.lineWidth = 1.1;
+          ctx.stroke();
+
+          // خطي TP و SL إن وُجدا
+          const drawMiniLevel = (val, col, lbl) => {
+            if (!Number.isFinite(val) || val <= 0) return;
+            const y = quantClip(yOf(val), padT + 2, H - padB - 2);
+            ctx.save();
+            ctx.setLineDash([2, 2]);
+            ctx.strokeStyle = col;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padL, y);
+            ctx.lineTo(W - padR + 1, y);
+            ctx.stroke();
+            ctx.restore();
+            ctx.fillStyle = col;
+            ctx.font = '700 8px monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText(lbl, W - padR + 3, y + 2.5);
+          };
+          drawMiniLevel(tpVal, '#10f5a0', 'TP');
+          drawMiniLevel(slVal, '#f59e0b', 'SL');
+
+          cv.dataset.chartType = 'candlestick';
+          cv.dataset.candlesCount = String(N);
+          cv.dataset.interval = iv;
+          cv.dataset.source = cached.source || 'BINANCE_SPOT_TESTNET';
         });
       },
 
@@ -7229,9 +7358,34 @@
           if (candles.length) {
             state.realKlinesCache[key] = { candles, source, fetchedAt: Date.now() };
             const lastClose = candles[candles.length - 1].close;
+            const win = candles.slice(-36);
+            const firstOpen = win[0]?.open || lastClose;
+            // حساب ATR-14 الحقيقي من الشموع الفعلية لحساب Kelly لكل عملة بدقة
+            let trSum = 0, trCnt = 0;
+            const atrSlice = candles.slice(-15);
+            for (let i = 1; i < atrSlice.length; i++) {
+              const cur = atrSlice[i], prev = atrSlice[i - 1];
+              const tr = Math.max(cur.high - cur.low, Math.abs(cur.high - prev.close), Math.abs(cur.low - prev.close));
+              if (Number.isFinite(tr) && tr > 0) { trSum += tr; trCnt += 1; }
+            }
+            const realAtr = trCnt > 0 ? trSum / trCnt : 0;
+
             const deal = ALL_CANDIDATE_DEALS.find((x) => x.sym === sym);
-            if (deal && lastClose > 0) deal.price = lastClose;
-            if (state.activeTab === 'elite90') this.drawHeroShortTermChart();
+            if (deal && lastClose > 0) {
+              deal.price = lastClose;
+              deal.hasLiveMarketData = true;
+              if (iv === dealRoundToBinanceInterval(deal.round) || !Number.isFinite(deal.liveChangePct)) {
+                deal.liveChangePct = firstOpen > 0 ? ((lastClose - firstOpen) / firstOpen) * 100 : null;
+              }
+              if (realAtr > 0) deal.atr = realAtr;
+              syncAutoPortfolioSizing();
+            }
+            if (state.activeTab === 'elite90') {
+              clearTimeout(this._sideKlineRenderTimer);
+              this._sideKlineRenderTimer = setTimeout(() => {
+                this.renderElite90Page();
+              }, 120);
+            }
           }
         } catch (_) {
         } finally {
@@ -7251,12 +7405,17 @@
             }
           }
           if (!assets.length) {
-            const syms = encodeURIComponent('["BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT","XRPUSDT","DOGEUSDT"]');
+            const cryptoSyms = ALL_CANDIDATE_DEALS.filter((d) => d.assetClass === 'crypto').map((d) => d.sym);
+            const syms = encodeURIComponent(JSON.stringify(cryptoSyms));
             const r2 = await fetch(`https://testnet.binance.vision/api/v3/ticker/24hr?symbols=${syms}`);
             if (r2.ok) {
               const raw = await r2.json();
               if (Array.isArray(raw)) {
-                assets = raw.map((it) => ({ symbol: it.symbol, price: +it.lastPrice }));
+                assets = raw.map((it) => ({
+                  symbol: it.symbol,
+                  price: +it.lastPrice,
+                  priceChangePercent: Number.isFinite(+it.priceChangePercent) ? +it.priceChangePercent : null
+                }));
               }
             }
           }
@@ -7282,19 +7441,32 @@
         let btcLive = null, solLive = null;
         if (assets.length) {
           const map = {};
+          const chgMap = {};
           assets.forEach((a) => {
             const sym = String(a.symbol || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
             const price = Number(a.price || a.lastPrice || 0);
+            const chg = Number(a.priceChangePercent ?? a.change24hPct);
             if (sym && price > 0) {
               map[sym] = price;
               if (!sym.endsWith('USDT')) map[sym + 'USDT'] = price;
+              if (Number.isFinite(chg)) {
+                chgMap[sym] = chg;
+                if (!sym.endsWith('USDT')) chgMap[sym + 'USDT'] = chg;
+              }
             }
           });
           ALL_CANDIDATE_DEALS.forEach((d) => {
             const k = d.sym.toUpperCase();
             const liveP = map[k] || map[k.replace('USDT', '')];
-            if (liveP && liveP > 0) d.price = liveP;
+            if (liveP && liveP > 0) {
+              d.price = liveP;
+              d.hasLiveMarketData = true;
+              if (!Number.isFinite(d.liveChangePct) && Number.isFinite(chgMap[k])) {
+                d.liveChangePct = chgMap[k];
+              }
+            }
           });
+          syncAutoPortfolioSizing();
           ORBIT_COINS.forEach((c) => {
             const k = c.sym.toUpperCase();
             const liveP = map[k] || map[c.code.toUpperCase()];
