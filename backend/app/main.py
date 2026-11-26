@@ -1095,15 +1095,20 @@ def _configure_optional_spa_serving(fastapi_app: FastAPI) -> None:
             raise HTTPException(status_code=404, detail="Not Found")
 
         clean = full_path.strip("/")
+        no_cache_headers = {
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        }
 
         # نسخة الجوال الهولوغرافية v1.4.1
         if clean in ("mobile", "mobile.html") and mobile_file is not None:
-            return FileResponse(str(mobile_file))
+            return FileResponse(str(mobile_file), headers=no_cache_headers)
 
         # التصميم الموحّد الوحيد: القمرة الهولوغرافية الأحدث v1.4.1 مباشرة لكل المسارات
         if cockpit_file is not None:
-            return FileResponse(str(cockpit_file))
-        return FileResponse(str(dist_dir / "index.html"))
+            return FileResponse(str(cockpit_file), headers=no_cache_headers)
+        return FileResponse(str(dist_dir / "index.html"), headers=no_cache_headers)
 
 
 try:

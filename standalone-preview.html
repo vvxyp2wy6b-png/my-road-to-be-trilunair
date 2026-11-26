@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>HOW TO BE A TRILLIONAIRE | Dr. Majed Hamdi</title>
   <style>
     @font-face {
@@ -4411,7 +4414,7 @@
             openedTime: timeStr,
             openedAt: Date.now(),
             autoSellAt: Date.now() + durMs,
-            autoSellEnabled: true,
+            autoSellEnabled: false,
             status: 'OPEN',
             realTestnetExec
           };
@@ -4592,8 +4595,10 @@
                 <div style="display:flex;gap:3px;margin:0 3px;">
                   ${AI_AGENTS.map((ag, i) => `<span class="ai-orb-sm num" style="--orb-c:${ag.col};--orb-g:${ag.glow};">${heroDeal.aiScores[i]}</span>`).join('')}
                 </div>
-                <button type="button" class="btn-3d btn-3d-buy" style="padding:7px 13px;font-size:12px;" onclick="ui.executeEliteDeal('${heroDeal.id}', 'BUY')">▲ شراء صفقة #${heroNo}</button>
-                <button type="button" class="btn-3d ${hOwned > 0 ? 'btn-3d-sell' : 'btn-spot-neutral'}" style="padding:7px 10px;font-size:11px;" onclick="ui.executeEliteDeal('${heroDeal.id}', 'SELL')">${hOwned > 0 ? '▼ بيع مملوك' : '▼ بيع / حياد'}</button>
+                ${heroTodayMatch
+                  ? `<button type="button" class="btn-3d" disabled data-executed-lock="true" style="padding:7px 13px;font-size:12px;opacity:0.55;cursor:not-allowed;">تم التنفيذ ✓</button>`
+                  : `<button type="button" class="btn-3d btn-3d-buy" style="padding:7px 13px;font-size:12px;" onclick="ui.executeEliteDeal('${heroDeal.id}', 'BUY')">▲ شراء صفقة #${heroNo}</button>`}
+                <button type="button" class="btn-3d ${hOwned > 0 ? 'btn-3d-sell' : 'btn-spot-neutral'}" ${hOwned > 0 ? '' : 'disabled style="padding:7px 10px;font-size:11px;opacity:0.45;cursor:not-allowed;"'} style="padding:7px 10px;font-size:11px;" onclick="ui.executeSpotSellNow('${heroDeal.sym}')">${hOwned > 0 ? '🔻 بيع الآن (مملوك)' : '▼ غير مملوك'}</button>
                 <button type="button" class="btn-3d btn-3d-gold" style="padding:7px 11px;font-size:11px;" onclick="ui.openDecisionBasisModal('${heroDeal.id}')">🧠 شرح القرار</button>
               </div>
             </div>
@@ -4620,6 +4625,7 @@
           const evNo = d._evalNo || 1;
           const agCount = d.quant?.approvedAgentsCount ?? 0;
           const doneToday = todayLog.find((t) => t.dealId === d.id || t.sym === d.sym);
+          const ownedQty = Number(state.spotHoldings[d.sym] || 0);
           const isLive = Boolean(d.hasLiveMarketData && d.assetClass === 'crypto');
           const hasLiveChg = isLive && Number.isFinite(d.liveChangePct);
           const chgHtml = hasLiveChg
@@ -4649,8 +4655,12 @@
             </div>
             <canvas id="spark-${d.id}" width="240" height="58" data-chart-type="candlestick" style="width:100%;height:56px;display:block;border-radius:7px;background:rgba(4,11,22,0.85);border:1px solid rgba(56,189,248,0.18);"></canvas>
             <div style="display:flex;justify-content:center;gap:4px;padding-top:3px;border-top:1px solid rgba(255,255,255,0.06);" onclick="event.stopPropagation()">
-              <button type="button" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:2px 8px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء #${evNo}</button>
-              <button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:2px 7px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'SELL')">▼ بيع</button>
+              ${doneToday
+                ? `<button type="button" class="btn-3d btn-3d-sm" disabled data-executed-lock="true" style="padding:2px 8px;font-size:10px;opacity:0.55;cursor:not-allowed;">تم التنفيذ ✓</button>`
+                : `<button type="button" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:2px 8px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء #${evNo}</button>`}
+              ${ownedQty > 0
+                ? `<button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:2px 7px;font-size:10px;" onclick="ui.executeSpotSellNow('${d.sym}')">🔻 بيع الآن</button>`
+                : `<button type="button" class="btn-3d btn-3d-sm" disabled style="padding:2px 7px;font-size:10px;opacity:0.4;cursor:not-allowed;" title="لا يوجد رصيد مملوك للبيع في السوق الفوري">▼ بيع</button>`}
               <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" style="padding:2px 7px;font-size:10px;" onclick="ui.openDecisionBasisModal('${d.id}')">🧠 لماذا؟</button>
             </div>
           </article>`;
@@ -4685,6 +4695,116 @@
         return ordered.slice(0, 10);
       },
 
+      buildOwnedSellRecommendations() {
+        const holdings = state.spotHoldings || {};
+        const openManaged = Array.isArray(state.managedPositions) ? state.managedPositions.filter((p) => p.status === 'OPEN') : [];
+        const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+        const recs = [];
+        Object.entries(holdings).forEach(([sym, rawQty]) => {
+          const qty = Number(rawQty || 0);
+          if (!(qty > 0)) return;
+          const deal = ALL_CANDIDATE_DEALS.find((x) => x.sym === sym) || null;
+          const livePrice = Number(deal?.price || 0);
+          if (!(livePrice > 0)) return;
+          const managed = openManaged.find((p) => p.sym === sym);
+          const logBuy = todayLog.find((t) => t.sym === sym && t.side === 'BUY');
+          const entryPrice = Number(managed?.entryPrice || logBuy?.price || (livePrice * 0.988));
+          const costUsd = entryPrice * qty;
+          const curUsd = livePrice * qty;
+          const pnlUsd = curUsd - costUsd;
+          const pnlPct = costUsd > 0 ? (pnlUsd / costUsd) * 100 : 0;
+          const tp1 = Number(managed?.tpPrice || (entryPrice * (1 + (deal?.tpPct || 0.03) * 0.65)));
+          const tp2 = entryPrice * (1 + (deal?.tpPct || 0.035));
+          const sl = Number(managed?.slPrice || (entryPrice * (1 - (deal?.slPct || 0.012))));
+          let signalText = '📊 مركز مفتوح — مراقبة الزخم';
+          let signalCol = '#38bdf8';
+          let priority = 3;
+          if (livePrice >= tp2) {
+            signalText = '🎯 تحقق TP2 — جني ربح قوي';
+            signalCol = '#10f5a0';
+            priority = 1;
+          } else if (livePrice >= tp1) {
+            signalText = '🎯 تحقق TP1 — جني ربح مقترح';
+            signalCol = '#10f5a0';
+            priority = 1;
+          } else if (livePrice <= sl) {
+            signalText = '🛡️ ملامسة SL — حماية رأس المال';
+            signalCol = '#ff5b7f';
+            priority = 1;
+          } else if (pnlPct >= 0.5) {
+            signalText = '💰 ربح عائم إيجابي — متاح لجني الربح';
+            signalCol = '#ffe484';
+            priority = 2;
+          } else if (deal && deal.quant && !deal.quant.approved) {
+            signalText = '⚠️ ضعف زخم من الوكلاء — مراجعة خروج';
+            signalCol = '#fbbf24';
+            priority = 2;
+          }
+          recs.push({
+            sym,
+            dealId: deal?.id || null,
+            arName: deal ? (deal.name.split('•')[1] || deal.name).trim() : sym.replace('USDT', ''),
+            qty,
+            entryPrice,
+            livePrice,
+            curUsd,
+            pnlUsd,
+            pnlPct,
+            tp1,
+            tp2,
+            sl,
+            signalText,
+            signalCol,
+            priority,
+            posId: managed?.posId || null
+          });
+        });
+        return recs.sort((a, b) => (a.priority - b.priority) || (b.pnlPct - a.pnlPct));
+      },
+
+      async executeSpotSellNow(sym) {
+        const owned = Number((state.spotHoldings || {})[sym] || 0);
+        if (!(owned > 0)) {
+          this.toast(`🚫 لا يوجد رصيد مملوك من ${sym} للبيع في السوق الفوري (Spot Long-Only).`, 'var(--hot)');
+          return;
+        }
+        const openPositions = (Array.isArray(state.managedPositions) ? state.managedPositions : []).filter((p) => p.status === 'OPEN' && p.sym === sym);
+        openPositions.forEach((p) => {
+          this.executeAutoSellPosition(p.posId, '👤 بيع وجني ربح يدوي بواسطة المالك');
+        });
+        const remOwned = Number((state.spotHoldings || {})[sym] || 0);
+        if (remOwned > 0) {
+          const deal = ALL_CANDIDATE_DEALS.find((x) => x.sym === sym);
+          const liveP = Number(deal?.price || 0);
+          const rec = this.buildOwnedSellRecommendations().find((r) => r.sym === sym);
+          const entryP = Number(rec?.entryPrice || (liveP * 0.988));
+          const investUsd = Math.round(entryP * remOwned);
+          const profitUsd = +((liveP - entryP) * remOwned).toFixed(2);
+          state.spotHoldings[sym] = 0;
+          state.equity = +(state.equity + profitUsd).toFixed(2);
+          state.netProfit = +(state.netProfit + profitUsd).toFixed(2);
+          if (!Array.isArray(state.closedArchive)) state.closedArchive = [];
+          const todayKey = new Date().toISOString().slice(0, 10);
+          state.closedArchive.unshift({
+            posId: 'SELL-' + Date.now(),
+            dailySeqNo: (state.todayExecutedLog?.length || 0) + 1,
+            sym,
+            arName: deal ? (deal.name.split('•')[1] || deal.name).trim() : sym.replace('USDT', ''),
+            openedDate: todayKey,
+            closedAt: new Date().toISOString(),
+            investUsd,
+            entryPrice: entryP,
+            exitPrice: liveP,
+            profitUsd,
+            reasonAr: '👤 بيع وجني ربح يدوي بواسطة المالك'
+          });
+          try { safeStore.set('htb_learning_archive', JSON.stringify(state.closedArchive.slice(0, 120))); } catch (_) {}
+          this.refreshKpis();
+          this.renderElite90Page();
+          this.toast(`✅ تم بيع ${remOwned} ${sym.replace('USDT', '')} يدوياً • الربح المحقق: ${profitUsd >= 0 ? '+' : '-'}$${Math.abs(profitUsd).toFixed(2)}`);
+        }
+      },
+
       renderDaily10StepBrief() {
         const grid = document.getElementById('daily-10steps-grid');
         const sumEl = document.getElementById('brief-written-summary');
@@ -4693,6 +4813,7 @@
         if (!grid || !sumEl) return;
 
         const top10 = this.getTop5DailyDeals();
+        const sellRecs = this.buildOwnedSellRecommendations();
         const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
         const rejected = state.rejectedDealIds || {};
 
@@ -4710,8 +4831,14 @@
         });
 
         const pendingCount = top10.length - doneCount;
+        const allDailyDone = pendingCount === 0 && top10.length > 0;
         if (progEl) progEl.textContent = `المنجز: ${doneCount} / ${top10.length} (✅ ${boughtCount} • ❌ ${rejCount})`;
-        if (batchBtn) batchBtn.textContent = pendingCount > 0 ? `⚡ موافقة جماعية (${pendingCount} متبقية)` : `✅ اكتملت الـ ${top10.length} خطوات اليوم`;
+        if (batchBtn) {
+          batchBtn.textContent = pendingCount > 0 ? `⚡ موافقة جماعية (${pendingCount} متبقية)` : `✅ اكتملت الـ ${top10.length} صفقات اليوم`;
+          batchBtn.disabled = pendingCount === 0;
+          batchBtn.style.opacity = pendingCount === 0 ? '0.55' : '1';
+          batchBtn.style.cursor = pendingCount === 0 ? 'not-allowed' : 'pointer';
+        }
 
         const priceMap = {};
         ALL_CANDIDATE_DEALS.forEach((x) => { priceMap[x.sym] = x.price; });
@@ -4719,61 +4846,102 @@
         Object.entries(state.spotHoldings || {}).forEach(([sym, qv]) => { heldVal += Number(qv || 0) * (priceMap[sym] || 0); });
         const availUsdt = Math.max(0, Math.round(state.equity - heldVal));
 
-        const nextAr = nextPending
-          ? `خطوتك القادمة الآن هي <strong>الخطوة #${nextPending._evalNo}: ${nextPending.sym} (${(nextPending.name.split('•')[1] || nextPending.name).trim()})</strong> بهدف ربح <strong class="num text-ok">+${(nextPending.tpPct * 100).toFixed(2)}%</strong> خلال <strong>${nextPending.round}</strong>.`
-          : `أحسنت يا دكتور ماجد! لقد أنهيت مراجعة جميع الخطوات الـ ${top10.length} المقررة لليوم.`;
-
+        // فصل الربح المحقق (Realized PnL) عن الربح العائم (Unrealized PnL) بوضوح تام
         const archiveList = Array.isArray(state.closedArchive) ? state.closedArchive : [];
-        const latestClosed = archiveList[0] || null;
-        const openManagedCnt = (Array.isArray(state.managedPositions) ? state.managedPositions : []).filter((p) => p.status === 'OPEN').length;
-        const closedNoteHtml = latestClosed
-          ? `<div style="margin-top:4px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.08);color:#10f5a0;">✅ <strong>آخر بيع تلقائي بواسطة الوكيل:</strong> تم بيع <strong>${latestClosed.sym} (${latestClosed.arName})</strong> بناءً على الصفقة رقم <strong>#${latestClosed.dailySeqNo}</strong> بتاريخ <span class="num">${latestClosed.openedDate}</span> — المبلغ المستثمر <strong class="num text-sec">$${Number(latestClosed.investUsd || 0).toLocaleString()}</strong> — الأرباح المضافة للمحفظة <strong class="num text-ok">${latestClosed.profitUsd >= 0 ? '+' : '-'}$${Math.abs(Number(latestClosed.profitUsd || 0)).toFixed(2)}</strong> (${latestClosed.reasonAr}) وحُفظت في أرشيف تعلّم الوكلاء.</div>`
-          : `<div style="margin-top:4px;color:#94a3b8;font-size:11px;">🤖 <strong>البيع التلقائي مفعّل:</strong> أي صفقة توافق عليها يتولى الوكيل مراقبتها وبيعها تلقائياً عند تحقق الهدف أو انتهاء فترتها الزمنية (${openManagedCnt} صفقة مفتوحة تحت المراقبة حالياً).</div>`;
-        const closedNoteVoice = latestClosed
-          ? ` كما تم البيع التلقائي لصفقة ${latestClosed.arName} بتاريخ ${latestClosed.openedDate} بمبلغ مستثمر ${latestClosed.investUsd} دولار، والأرباح المضافة للمحفظة ${Math.abs(Number(latestClosed.profitUsd || 0)).toFixed(2)} دولار وحفظت في الأرشيف لتطوير ذكاء الوكلاء.`
-          : '';
+        const realizedPnlUsd = archiveList.reduce((acc, r) => acc + (Number(r.profitUsd) || 0), 0);
+        const unrealizedPnlUsd = sellRecs.reduce((acc, r) => acc + (Number(r.pnlUsd) || 0), 0);
 
-        const summaryPlain = `خلاصة دراسة اليوم يا دكتور ماجد: رصيدك المتاح للاستثمار هو ${availUsdt.toLocaleString()} دولار، وقد جهّز مجلس الوكلاء ${top10.length} خطوات يومية مدروسة بثقة تتجاوز 75 في المئة. تم تنفيذ ${boughtCount} صفقات حتى الآن ورفض ${rejCount}، وتبقى ${pendingCount} خطوات للموافقة أو الرفض. ${nextPending ? `الخطوة التالية هي رقم ${nextPending._evalNo} على عملة ${(nextPending.name.split('•')[1] || nextPending.name).trim()} بهدف ربح ${(nextPending.tpPct * 100).toFixed(1)} في المئة.` : 'لقد اكتملت جميع خطوات اليوم بنجاح.'}${closedNoteVoice}`;
+        const nextAr = allDailyDone
+          ? `<strong style="color:#10f5a0;">✅ تم تطبيق المقترحات اليومية (اكتملت الـ ${top10.length} صفقات اليوم)</strong> — انتقل الآن لإدارة البيع وجني الأرباح للمراكز المملوكة أو صفقات الجلسة (15m / 1H).`
+          : `خطوتك القادمة الآن هي <strong>الخطوة #${nextPending._evalNo}: ${nextPending.sym} (${(nextPending.name.split('•')[1] || nextPending.name).trim()})</strong> بهدف ربح <strong class="num text-ok">+${(nextPending.tpPct * 100).toFixed(2)}%</strong> خلال <strong>${nextPending.round}</strong>.`;
+
+        const latestClosed = archiveList[0] || null;
+        const closedNoteHtml = latestClosed
+          ? `<div style="margin-top:4px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.08);color:#10f5a0;">✅ <strong>آخر صفقة مباعة (ربح محقق):</strong> ${latestClosed.sym} (${latestClosed.arName}) — <strong class="num">${latestClosed.profitUsd >= 0 ? '+' : '-'}$${Math.abs(Number(latestClosed.profitUsd || 0)).toFixed(2)}</strong> (${latestClosed.reasonAr}).</div>`
+          : `<div style="margin-top:4px;color:#94a3b8;font-size:11px;">🛡️ <strong>التحكم اليدوي بالبيع مفعّل:</strong> لا يُنفّذ أي بيع تلقائي إلا بضغطك على «بيع الآن» (أو تفعيلك لـ TP/SL بنفسك). المراكز المفتوحة حالياً: <strong class="num text-sec">${sellRecs.length}</strong>.</div>`;
+
+        const pnlStripHtml = `
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:5px;padding:5px 8px;border-radius:8px;background:rgba(4,12,24,0.85);border:1px solid rgba(56,189,248,0.22);font-size:11px;">
+            <span>💰 <strong>الربح المحقق (Realized PnL):</strong> <strong class="num" style="color:${realizedPnlUsd >= 0 ? '#10f5a0' : '#ff5b7f'};">${realizedPnlUsd >= 0 ? '+' : '-'}$${Math.abs(realizedPnlUsd).toFixed(2)}</strong> <span class="muted">(${archiveList.length} صفقة مباعة)</span></span>
+            <span class="muted">|</span>
+            <span>📈 <strong>الربح العائم (Unrealized PnL):</strong> <strong class="num" style="color:${unrealizedPnlUsd >= 0 ? '#38bdf8' : '#ff5b7f'};">${unrealizedPnlUsd >= 0 ? '+' : '-'}$${Math.abs(unrealizedPnlUsd).toFixed(2)}</strong> <span class="muted">(${sellRecs.length} مركز مفتوح)</span></span>
+          </div>
+        `;
+
+        const summaryPlain = `خلاصة دراسة اليوم يا دكتور ماجد: رصيدك المتاح للاستثمار هو ${availUsdt.toLocaleString()} دولار. الربح المحقق من الصفقات المباعة ${realizedPnlUsd.toFixed(2)} دولار، والربح العائم للمراكز المفتوحة ${unrealizedPnlUsd.toFixed(2)} دولار. لديك ${sellRecs.length} توصيات بيع وجني ربح لمراكزك المملوكة، وتبقى ${pendingCount} فرص شراء يومية.`;
         state._lastDailyBriefText = summaryPlain;
 
         sumEl.innerHTML = `
-          <div><strong style="color:#ffd86b;">📝 ملخص دراسة الوكيل لليوم:</strong> بناءً على سيولتك المتاحة (<strong class="num text-sec">$${availUsdt.toLocaleString()} USDT</strong>) وحركة السوق الحية (${state.testnetConnected ? '<span style="color:#10f5a0;">Binance Testnet متصل</span>' : 'وضع المحاكاة'})، تم تجهيز <strong>${top10.length} خطوات = ${top10.length} صفقات يومية</strong> جاهزة لقرارك المباشر (<strong>موافقة</strong> أو <strong>رفض</strong>).</div>
+          <div><strong style="color:#ffd86b;">📝 ملخص دراسة الوكيل لليوم:</strong> السيولة المتاحة (<strong class="num text-sec">$${availUsdt.toLocaleString()} USDT</strong>) • توصيات البيع للمراكز المملوكة: <strong class="num" style="color:#ff9bb3;">${sellRecs.length}</strong> • فرص الشراء الجديدة المتبقية: <strong class="num text-ok">${pendingCount}</strong>.</div>
           <div style="margin-top:3px;color:#cbd5e1;">🎯 ${nextAr}</div>
+          ${pnlStripHtml}
           ${closedNoteHtml}
         `;
         if (typeof this.renderAutoSellAndArchive === 'function') this.renderAutoSellAndArchive();
 
-        grid.innerHTML = top10.map((item) => {
-          const arNm = (item.name.split('•')[1] || item.name).trim();
-          const m = computeDealMetrics(item);
-          const bought = todayLog.find((t) => t.dealId === item.id || t.sym === item.sym);
-          const isRej = !!rejected[item.id];
-          const isActive = item.id === state.heroDealId;
-          const borderCol = bought ? 'rgba(16,245,160,0.6)' : (isRej ? 'rgba(255,56,104,0.35)' : (isActive ? 'rgba(247,201,72,0.85)' : 'rgba(56,189,248,0.28)'));
-          const bgCol = bought ? 'rgba(16,245,160,0.08)' : (isActive ? 'rgba(247,201,72,0.10)' : 'rgba(7,16,32,0.88)');
-
+        // 1) أولوية أولى: بطاقات توصيات البيع / جني الربح للمراكز المملوكة فعلياً في المحفظة (Spot SELL)
+        const sellCardsHtml = sellRecs.map((s) => {
+          const dec = s.livePrice < 10 ? 4 : 2;
+          const pnlSign = s.pnlUsd >= 0 ? '+' : '-';
+          const pnlCol = s.pnlUsd >= 0 ? '#10f5a0' : '#ff5b7f';
           return `
-            <div class="holo-chamber" onclick="ui.selectHeroDeal('${item.id}')" style="cursor:pointer;padding:7px 9px;border-radius:10px;border:1px solid ${borderCol};background:${bgCol};${isRej ? 'opacity:0.55;' : ''}">
+            <div class="holo-chamber sell-priority-card" data-sell-sym="${s.sym}" onclick="${s.dealId ? `ui.selectHeroDeal('${s.dealId}')` : ''}" style="cursor:pointer;padding:7px 9px;border-radius:10px;border:1.5px solid rgba(244,63,94,0.68);background:linear-gradient(165deg,rgba(48,10,24,0.92),rgba(14,7,18,0.96));">
               <div class="row-between" style="gap:4px;margin-bottom:3px;">
-                <span class="hex-shield num" style="font-size:9.5px;padding:1px 6px;color:${isActive ? '#ffe484' : '#38bdf8'};border-color:${borderCol};font-weight:900;">خطوة #${item._evalNo}</span>
-                <strong class="num" style="font-size:11.5px;color:#ffffff;" dir="ltr">${item.sym.replace('USDT', '')}</strong>
-                <span class="num text-ok" style="font-size:10px;font-weight:800;">+${(item.tpPct * 100).toFixed(1)}%</span>
+                <span class="hex-shield" style="font-size:9px;padding:1px 6px;color:#fda4af;border-color:rgba(244,63,94,0.65);background:rgba(244,63,94,0.16);font-weight:900;">🔻 بيع / جني ربح</span>
+                <strong class="num" style="font-size:11.5px;color:#ffffff;" dir="ltr">${s.sym.replace('USDT', '')}</strong>
+                <span class="num" style="font-size:10px;font-weight:900;color:${pnlCol};">${pnlSign}${Math.abs(s.pnlPct).toFixed(2)}%</span>
               </div>
-              <div style="font-size:10px;color:#cbd5e1;margin-bottom:5px;">
-                ${arNm} • <span class="num text-pri">${m.invest > 0 ? '$' + m.invest.toLocaleString() : '—'}</span> • <span class="num" style="color:#38bdf8;">🤖 ${item.quant?.approvedAgentsCount ?? 0}/5</span> • <span class="muted">${item.round} (${item.conf}%)</span>
+              <div style="font-size:9.5px;color:#e2e8f0;line-height:1.4;margin-bottom:4px;">
+                <div>${s.arName} • شراء <strong class="num">$${s.entryPrice.toFixed(dec)}</strong> ← الآن <strong class="num text-pri">$${s.livePrice.toFixed(dec)}</strong></div>
+                <div>الربح العائم: <strong class="num" style="color:${pnlCol};">${pnlSign}$${Math.abs(s.pnlUsd).toFixed(2)}</strong> • <span style="color:${s.signalCol};font-weight:700;">${s.signalText}</span></div>
               </div>
               <div style="display:flex;gap:4px;" onclick="event.stopPropagation()">
-                ${bought
-                  ? `<span class="hex-shield" style="width:100%;text-align:center;font-size:10px;color:#10f5a0;border-color:rgba(16,245,160,0.55);padding:3px 4px;">✅ تمت الموافقة (صفقة #${bought.dailySeqNo} اليوم)</span>`
-                  : (isRej
-                    ? `<button type="button" class="btn-3d btn-3d-sm" style="width:100%;padding:3px 6px;font-size:10px;" onclick="delete state.rejectedDealIds['${item.id}'];ui.renderElite90Page();">↺ مرفوضة — استرجاع</button>`
-                    : `<button type="button" class="btn-3d btn-3d-buy btn-3d-sm" style="flex:1;padding:3px 6px;font-size:10.5px;" onclick="ui.approveCouncilDeal('${item.id}')">✅ موافقة</button>
-                       <button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="flex:1;padding:3px 6px;font-size:10.5px;" onclick="ui.rejectCouncilDeal('${item.id}')">❌ رفض</button>`
-                  )}
+                <button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="flex:1;padding:3px 6px;font-size:10.5px;" onclick="ui.executeSpotSellNow('${s.sym}')">🔻 بيع الآن (${s.qty})</button>
               </div>
             </div>
           `;
         }).join('');
+
+        // 2) فرص الشراء الجديدة للسيولة المتبقية (أو رسالة الاكتمال عند إتمام الـ 10 صفقات)
+        const buySlotsRemaining = Math.max(0, 10 - sellRecs.length);
+        const buyCandidates = allDailyDone ? [] : top10.slice(0, Math.max(buySlotsRemaining, pendingCount > 0 ? 1 : 0));
+        const buyCardsHtml = allDailyDone
+          ? `<div class="holo-chamber" style="grid-column:1 / -1;padding:10px 12px;border-radius:10px;border:1px solid rgba(16,245,160,0.55);background:rgba(6,28,22,0.85);text-align:center;">
+               <strong style="color:#10f5a0;font-size:12px;">✅ تم تطبيق المقترحات اليومية — اكتملت الـ ${top10.length} صفقات اليوم</strong>
+               <div style="font-size:10.5px;color:#cbd5e1;margin-top:3px;">أُغلقت قائمة الشراء اليومية تلقائياً. يمكنك الآن إدارة البيع وجني الأرباح أعلاه أو التبديل لصفقات الجلسة (15m / 1H).</div>
+             </div>`
+          : buyCandidates.map((item) => {
+              const arNm = (item.name.split('•')[1] || item.name).trim();
+              const m = computeDealMetrics(item);
+              const bought = todayLog.find((t) => t.dealId === item.id || t.sym === item.sym);
+              const isRej = !!rejected[item.id];
+              const isActive = item.id === state.heroDealId;
+              const borderCol = bought ? 'rgba(16,245,160,0.6)' : (isRej ? 'rgba(255,56,104,0.35)' : (isActive ? 'rgba(247,201,72,0.85)' : 'rgba(56,189,248,0.28)'));
+              const bgCol = bought ? 'rgba(16,245,160,0.08)' : (isActive ? 'rgba(247,201,72,0.10)' : 'rgba(7,16,32,0.88)');
+              return `
+                <div class="holo-chamber" onclick="ui.selectHeroDeal('${item.id}')" style="cursor:pointer;padding:7px 9px;border-radius:10px;border:1px solid ${borderCol};background:${bgCol};${isRej ? 'opacity:0.55;' : ''}">
+                  <div class="row-between" style="gap:4px;margin-bottom:3px;">
+                    <span class="hex-shield num" style="font-size:9.5px;padding:1px 6px;color:${isActive ? '#ffe484' : '#38bdf8'};border-color:${borderCol};font-weight:900;">شراء #${item._evalNo}</span>
+                    <strong class="num" style="font-size:11.5px;color:#ffffff;" dir="ltr">${item.sym.replace('USDT', '')}</strong>
+                    <span class="num text-ok" style="font-size:10px;font-weight:800;">+${(item.tpPct * 100).toFixed(1)}%</span>
+                  </div>
+                  <div style="font-size:10px;color:#cbd5e1;margin-bottom:5px;">
+                    ${arNm} • <span class="num text-pri">${m.invest > 0 ? '$' + m.invest.toLocaleString() : '—'}</span> • <span class="num" style="color:#38bdf8;">🤖 ${item.quant?.approvedAgentsCount ?? 0}/5</span> • <span class="muted">${item.round} (${item.conf}%)</span>
+                  </div>
+                  <div style="display:flex;gap:4px;" onclick="event.stopPropagation()">
+                    ${bought
+                      ? `<button type="button" class="btn-3d btn-3d-sm" disabled data-executed-lock="true" style="width:100%;padding:3px 6px;font-size:10px;opacity:0.55;cursor:not-allowed;">تم التنفيذ ✓ (صفقة #${bought.dailySeqNo})</button>`
+                      : (isRej
+                        ? `<button type="button" class="btn-3d btn-3d-sm" style="width:100%;padding:3px 6px;font-size:10px;" onclick="delete state.rejectedDealIds['${item.id}'];ui.renderElite90Page();">↺ مرفوضة — استرجاع</button>`
+                        : `<button type="button" class="btn-3d btn-3d-buy btn-3d-sm" style="flex:1;padding:3px 6px;font-size:10.5px;" onclick="ui.approveCouncilDeal('${item.id}')">✅ موافقة</button>
+                           <button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="flex:1;padding:3px 6px;font-size:10.5px;" onclick="ui.rejectCouncilDeal('${item.id}')">❌ رفض</button>`
+                      )}
+                  </div>
+                </div>
+              `;
+            }).join('');
+
+        grid.innerHTML = sellCardsHtml + buyCardsHtml;
       },
 
       speakDailyExecutiveBrief() {
@@ -5028,7 +5196,12 @@
 
         const pendingCnt = top5.filter((x) => !rejected[x.id] && !todayLog.some((t) => t.dealId === x.id || t.sym === x.sym)).length;
         const batchBtn = document.getElementById('btn-batch-approve-5');
-        if (batchBtn) batchBtn.textContent = pendingCnt > 0 ? `⚡ موافقة وشراء جماعي (${pendingCnt} متبقية)` : `✅ اكتملت الـ 5 صفقات اليوم`;
+        if (batchBtn) {
+          batchBtn.textContent = pendingCnt > 0 ? `⚡ موافقة وشراء جماعي (${pendingCnt} متبقية)` : `✅ اكتملت الـ ${top5.length} صفقات اليوم`;
+          batchBtn.disabled = pendingCnt === 0;
+          batchBtn.style.opacity = pendingCnt === 0 ? '0.55' : '1';
+          batchBtn.style.cursor = pendingCnt === 0 ? 'not-allowed' : 'pointer';
+        }
 
         // 2) حساب الفترة الزمنية المختارة للاستثمار
         const hz = state.councilHorizon || '1H';
@@ -5051,11 +5224,18 @@
         const arName = (d.name.split('•')[1] || d.name).trim();
         const unitSym = d.sym.replace('USDT', '');
         const m = computeDealMetrics(d);
-        const scores = d.aiScores || [92, 90, 91, 89, 93];
+        const scores = d.aiScores || [];
         const tpPctAdj = +(d.tpPct * 100 * hzMeta.mult).toFixed(2);
         const slPctStr = (d.slPct * 100).toFixed(2);
         const estProfitAdj = Math.round(m.invest * (tpPctAdj / 100));
-        const walletSharePct = availUsdt > 0 ? ((m.invest / availUsdt) * 100).toFixed(1) : '0.0';
+        const hasValidAlloc = Number.isFinite(d.agentRecommendedUsd) && d.agentRecommendedUsd > 0 && Number.isFinite(m.invest) && m.invest > 0 && availUsdt > 0;
+        const walletShareNum = hasValidAlloc ? (m.invest / availUsdt) * 100 : null;
+        const walletSharePct = walletShareNum !== null && Number.isFinite(walletShareNum) ? walletShareNum.toFixed(1) : '—';
+
+        // حساب درجة رقمية صالحة لوكيل «الميزان» (لا يُسمح بأي NaN أو 0$ أو موافقة خضراء لحسبة غير صالحة)
+        const mizanScore = (hasValidAlloc && d.quant && d.quant.approved && !state.killSwitch)
+          ? Math.round(quantClip(walletShareNum <= 15 ? (80 + (d.quant.kellyPct || 0) * 1.1) : (74 - (walletShareNum - 15)), 40, 97))
+          : null;
 
         if (titleEl) titleEl.textContent = `صفقة #${evNo} — ${arName} (${d.sym}) • ${hzMeta.label}`;
 
@@ -5064,65 +5244,71 @@
             icon: '🎯',
             name: AI_AGENTS[0]?.name || 'ترليورين (الزخم الفني)',
             role: 'محلل الاتجاه والشموع',
-            score: scores[0] ?? d.conf,
-            reason: (sc) => sc >= 75
+            score: Number.isFinite(Number(scores[0])) ? Number(scores[0]) : null,
+            reason: (sc, ok) => ok && sc >= 75
               ? `الاتجاه الصاعد متماسك عند $${d.price.toLocaleString()} للفترة (${hzMeta.label}) مع عائد متوقع +${tpPctAdj}%.`
-              : `الزخم الفني أضعف من المطلوب حالياً — يُفضّل التريث قبل الدخول.`
+              : `الزخم الفني غير مكتمل أو أضعف من المطلوب حالياً — يُفضّل التريث.`
           },
           {
             icon: '🛡️',
             name: AI_AGENTS[1]?.name || 'الحارس (إدارة المخاطر)',
             role: 'فحص وقف الخسارة والأمان',
-            score: state.killSwitch ? 20 : (scores[1] ?? d.conf),
-            reason: (sc) => state.killSwitch
+            score: state.killSwitch ? 20 : (Number.isFinite(Number(scores[1])) ? Number(scores[1]) : null),
+            reason: (sc, ok) => state.killSwitch
               ? `قاطع الطوارئ مفعّل حالياً — أوقف الحارس جميع عمليات الشراء لحماية المحفظة.`
-              : (sc >= 75
+              : (ok && sc >= 75
                 ? `وقف الخسارة محدد عند $${m.sl} (-${slPctStr}%) ويحمي رصيد محفظتك المتاح ($${availUsdt.toLocaleString()}).`
-                : `التذبذب مرتفع نسبياً مقابل وقف الخسارة — يُنصح بتقليل المبلغ.`)
+                : `التذبذب مرتفع نسبياً أو بيانات المخاطر غير صالحة — يُنصح بتقليل المبلغ.`)
           },
           {
             icon: '📡',
             name: AI_AGENTS[2]?.name || 'الرادار (السيولة والأوامر)',
             role: 'عمق السوق وتدفق السيولة',
-            score: scores[2] ?? d.conf,
-            reason: (sc) => sc >= 75
+            score: Number.isFinite(Number(scores[2])) ? Number(scores[2]) : null,
+            reason: (sc, ok) => ok && sc >= 75
               ? `السيولة الفورية قوية على ${d.sym} (${state.testnetConnected ? 'مؤكدة من Binance Testnet' : 'مرصودة لحظياً'}) ولا يوجد انزلاق سعري مقلق.`
-              : `دفتر الأوامر يُظهر تباطؤاً مؤقتاً في السيولة الفورية.`
+              : `دفتر الأوامر يُظهر تباطؤاً مؤقتاً أو نقصاً في بيانات السيولة.`
           },
           {
             icon: '⚖️',
             name: AI_AGENTS[3]?.name || 'الميزان (تخصيص المال)',
             role: 'مبني على رصيد محفظتك',
-            score: scores[3] ?? d.conf,
-            reason: (sc) => sc >= 75
+            score: mizanScore,
+            reason: (sc, ok) => ok && sc >= 75
               ? `بناءً على سيولتك المتاحة ($${availUsdt.toLocaleString()})، اقترحنا $${m.invest.toLocaleString()} (${walletSharePct}% من المتاح = ${d.qty} ${unitSym}).`
-              : `حجم المركز المقترح مرتفع نسبةً لسيولتك — يُنصح بخفض المبلغ.`
+              : `حسبة التخصيص غير صالحة أو السيولة المتاحة غير كافية — تم حجب الموافقة التلقائية.`
           },
           {
             icon: '🌐',
             name: AI_AGENTS[4]?.name || 'الاستراتيجي (السياق العام)',
             role: 'صورة السوق والأخبار',
-            score: scores[4] ?? d.conf,
-            reason: (sc) => sc >= 75
+            score: Number.isFinite(Number(scores[4])) ? Number(scores[4]) : (Number.isFinite(Number(d.conf)) ? Number(d.conf) : null),
+            reason: (sc, ok) => ok && sc >= 75
               ? `المناخ العام داعم لـ ${arName} خلال الأفق (${hzMeta.label}) بثقة كلية ${d.conf}% فوق عتبة 75%.`
-              : `السياق العام للسوق متقلب اليوم — يُنصح بمراقبة الإغلاق.`
+              : `السياق العام للسوق متقلب أو البيانات غير مكتملة — يُنصح بالمراقبة.`
           }
         ];
 
         let greenCnt = 0;
         let redCnt = 0;
         let sumScore = 0;
+        let validScoreCnt = 0;
 
         grid.innerHTML = agentSpecs.map((ag) => {
-          const sc = Number(ag.score || 0);
-          sumScore += sc;
+          const rawNum = ag.score === null || ag.score === undefined ? NaN : Number(ag.score);
+          const isValid = Number.isFinite(rawNum) && rawNum > 0;
+          const sc = isValid ? Math.round(rawNum) : 0;
+          if (isValid) {
+            sumScore += sc;
+            validScoreCnt++;
+          }
           let stText = '🟢 موافق (أخضر)';
           let stCol = '#10f5a0';
           let stBg = 'rgba(16,245,160,0.12)';
           let borderCol = 'rgba(16,245,160,0.45)';
-          if (sc < 60) {
+          if (!isValid || sc < 60) {
             redCnt++;
-            stText = '🔴 رافض (أحمر)';
+            stText = !isValid ? '🔴 حسبة غير صالحة' : '🔴 رافض (أحمر)';
             stCol = '#ff5b7f';
             stBg = 'rgba(255,56,104,0.14)';
             borderCol = 'rgba(255,56,104,0.55)';
@@ -5134,31 +5320,34 @@
           } else {
             greenCnt++;
           }
+          const scoreBadge = isValid ? `${sc}%` : '—';
           return `
             <div class="holo-chamber" style="padding:9px 10px;border-radius:11px;border:1px solid ${borderCol};background:rgba(7,17,32,0.9);display:flex;flex-direction:column;gap:5px;">
               <div class="row-between" style="gap:4px;">
                 <strong style="font-size:11.5px;color:#f8fafc;">${ag.icon} ${ag.name}</strong>
-                <span class="hex-shield num" style="font-size:9.5px;padding:1px 6px;color:${stCol};background:${stBg};border-color:${borderCol};">${sc}%</span>
+                <span class="hex-shield num" style="font-size:9.5px;padding:1px 6px;color:${stCol};background:${stBg};border-color:${borderCol};">${scoreBadge}</span>
               </div>
               <div style="font-size:10px;color:#94a3b8;">${ag.role}</div>
               <div style="font-size:10.5px;font-weight:800;color:${stCol};">${stText}</div>
-              <p style="margin:0;font-size:10.5px;line-height:1.55;color:#cbd5e1;">${ag.reason(sc)}</p>
+              <p style="margin:0;font-size:10.5px;line-height:1.55;color:#cbd5e1;">${ag.reason(sc, isValid)}</p>
             </div>
           `;
         }).join('');
 
-        const avgScore = Math.round(sumScore / agentSpecs.length);
-        const approvedByCouncil = !state.killSwitch && greenCnt >= 4 && redCnt === 0;
+        const avgScore = validScoreCnt > 0 ? Math.round(sumScore / validScoreCnt) : 0;
+        const avgScoreTxt = validScoreCnt > 0 ? `${avgScore}%` : '—';
+        const approvedByCouncil = !state.killSwitch && greenCnt >= 4 && redCnt === 0 && hasValidAlloc;
         if (badgeEl) {
           badgeEl.textContent = approvedByCouncil
-            ? `🟢 إجماع بالشراء: ${greenCnt}/5 أخضر (${avgScore}%)`
-            : (redCnt > 0 ? `🔴 تحفظ / رفض: ${redCnt} أحمر (${avgScore}%)` : `🟡 موافقة مشروطة: ${greenCnt}/5 أخضر`);
+            ? `🟢 إجماع بالشراء: ${greenCnt}/5 أخضر (${avgScoreTxt})`
+            : (redCnt > 0 ? `🔴 تحفظ / رفض: ${redCnt} أحمر (${avgScoreTxt})` : `🟡 موافقة مشروطة: ${greenCnt}/5 أخضر (${avgScoreTxt})`);
           badgeEl.style.color = approvedByCouncil ? '#10f5a0' : (redCnt > 0 ? '#ff5b7f' : '#ffe484');
           badgeEl.style.borderColor = approvedByCouncil ? 'rgba(16,245,160,0.55)' : (redCnt > 0 ? 'rgba(255,56,104,0.55)' : 'rgba(247,201,72,0.55)');
         }
 
         const todayCnt = todayLog.length;
         const alreadyBought = todayLog.find((t) => t.dealId === d.id || t.sym === d.sym);
+        const councilOwnedQty = Number((state.spotHoldings || {})[d.sym] || 0);
         finalBox.style.borderColor = approvedByCouncil ? 'rgba(16,245,160,0.5)' : 'rgba(247,201,72,0.5)';
         finalBox.innerHTML = `
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:10px;align-items:center;">
@@ -5170,16 +5359,16 @@
                 <strong class="num text-sec">$${availUsdt.toLocaleString()} USDT</strong>
               </div>
               <div class="row-between" style="font-size:11px;margin-bottom:5px;gap:6px;">
-                <span class="muted">مبلغ الاستثمار المقترح (${walletSharePct}%):</span>
+                <span class="muted">مبلغ الاستثمار المقترح (${walletSharePct === '—' ? '—' : walletSharePct + '%'}):</span>
                 <div class="admin-amt-wrap" style="padding:1px 4px;">
                   <button type="button" class="admin-amt-btn" onclick="ui.adjustDealQty('${d.id}', -1)" title="إنقاص">−</button>
-                  <input type="number" class="admin-amt-inp" value="${m.invest}" min="15" step="100" onchange="ui.setDealUsd('${d.id}', this.value)" style="width:76px;font-size:11.5px;" />
+                  <input type="number" class="admin-amt-inp" value="${m.invest > 0 ? m.invest : ''}" placeholder="—" min="15" step="100" onchange="ui.setDealUsd('${d.id}', this.value)" style="width:76px;font-size:11.5px;" />
                   <button type="button" class="admin-amt-btn" onclick="ui.adjustDealQty('${d.id}', 1)" title="زيادة">+</button>
                 </div>
               </div>
               <div class="row-between" style="font-size:11px;">
                 <span class="muted">الكمية والربح المتوقع:</span>
-                <strong class="num text-ok">${d.qty} ${unitSym} • +$${estProfitAdj.toLocaleString()} (+${tpPctAdj}%)</strong>
+                <strong class="num text-ok">${m.invest > 0 ? `${d.qty} ${unitSym} • +$${estProfitAdj.toLocaleString()} (+${tpPctAdj}%)` : '—'}</strong>
               </div>
             </div>
 
@@ -5193,11 +5382,15 @@
                     : `⚠️ القرار النهائي: يُنصح بالمراجعة قبل شراء صفقة #${evNo}`)}
               </div>
               <div style="font-size:11px;color:#cbd5e1;line-height:1.55;margin-bottom:7px;">
-                اتفق <strong>${greenCnt}/5 وكلاء</strong> (ثقة ${avgScore}%) بناءً على رصيد محفظتك المتاح • هدف الربح <strong class="num text-ok">$${m.tp1}</strong> • وقف الخسارة <strong class="num text-err">$${m.sl}</strong> • ستُسجَّل كـ <strong class="text-pri">الصفقة رقم #${todayCnt + 1} اليوم</strong>.
+                اتفق <strong>${greenCnt}/5 وكلاء</strong> (ثقة ${avgScoreTxt}) بناءً على رصيد محفظتك المتاح • هدف الربح <strong class="num text-ok">$${m.tp1}</strong> • وقف الخسارة <strong class="num text-err">$${m.sl}</strong> • ستُسجَّل كـ <strong class="text-pri">الصفقة رقم #${todayCnt + 1} اليوم</strong>.
               </div>
               <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <button type="button" class="btn-3d btn-3d-buy" style="padding:7px 14px;font-size:12px;" onclick="ui.approveCouncilDeal('${d.id}')">✅ شراء صفقة #${evNo} والانتقال للتالية</button>
-                <button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:7px 11px;font-size:11px;" onclick="ui.rejectCouncilDeal('${d.id}')">❌ رفض / تخطي</button>
+                ${alreadyBought
+                  ? `<button type="button" class="btn-3d" disabled data-executed-lock="true" style="padding:7px 14px;font-size:12px;opacity:0.55;cursor:not-allowed;">تم التنفيذ ✓</button>`
+                  : `<button type="button" class="btn-3d btn-3d-buy" style="padding:7px 14px;font-size:12px;" onclick="ui.approveCouncilDeal('${d.id}')">✅ شراء صفقة #${evNo} والانتقال للتالية</button>`}
+                ${councilOwnedQty > 0
+                  ? `<button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:7px 11px;font-size:11px;" onclick="ui.executeSpotSellNow('${d.sym}')">🔻 بيع الآن (${councilOwnedQty} ${unitSym})</button>`
+                  : `<button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:7px 11px;font-size:11px;" onclick="ui.rejectCouncilDeal('${d.id}')">❌ رفض / تخطي</button>`}
                 <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" style="padding:7px 10px;font-size:11px;" onclick="ui.tab('settings');setTimeout(()=>document.getElementById('ai-agent-ask-inp')?.focus(),180)">🤖 سؤال الوكيل</button>
               </div>
             </div>
