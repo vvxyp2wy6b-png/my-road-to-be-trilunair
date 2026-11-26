@@ -5419,24 +5419,21 @@
           candles = cached.candles.slice(-46);
           isRealBinance = true;
         } else {
-          // بديل مؤقت فقط لثوانٍ ريثما تصل الشموع الحقيقية من Binance (أو لأسهم NASDAQ مثل NVDA)
-          const N = 44;
-          let seed = 0;
-          const keyStr = d.sym + iv;
-          for (let i = 0; i < keyStr.length; i++) seed = (seed * 31 + keyStr.charCodeAt(i)) % 9973;
-          const rnd = () => { seed = (seed * 16807 + 11) % 2147483647; return (seed % 1000) / 1000; };
-          const startP = d.price * 0.965;
-          let cur = startP;
-          for (let i = 0; i < N; i++) {
-            const progress = i / (N - 1);
-            const target = startP + (d.price - startP) * progress;
-            const open = cur;
-            const close = i === N - 1 ? d.price : target + (rnd() - 0.5) * d.price * 0.006;
-            const span = Math.abs(close - open) + d.price * (0.002 + rnd() * 0.003);
-            candles.push({ open, close, high: Math.max(open, close) + span * 0.5, low: Math.min(open, close) - span * 0.5 });
-            cur = close;
-          }
+          cv.dataset.candlesCount = '0';
+          cv.dataset.source = 'UNAVAILABLE';
+          ctx.fillStyle = 'rgba(4, 11, 22, 0.92)';
+          ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = '#fbbf24';
+          ctx.font = '700 15px Cairo, Tajawal, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('بيانات غير متاحة', W / 2, H / 2 - 4);
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '600 11px Cairo, Tajawal, sans-serif';
+          ctx.fillText(`لا توجد شموع حية من Binance Testnet لـ ${d.sym} (${iv.toUpperCase()})`, W / 2, H / 2 + 18);
+          return;
         }
+        cv.dataset.candlesCount = String(candles.length);
+        cv.dataset.source = cached.source || 'BINANCE_SPOT_TESTNET';
         const N = candles.length;
 
         const minP = Math.min(...candles.map((c) => c.low), m.sl * 0.998);
@@ -5655,16 +5652,14 @@
           if (!hasReal) {
             cv.dataset.chartType = 'candlestick';
             cv.dataset.candlesCount = '0';
-            cv.dataset.source = d.assetClass === 'crypto' ? 'LOADING' : 'DEMO';
+            cv.dataset.source = 'UNAVAILABLE';
+            cv.dataset.emptyText = 'بيانات غير متاحة';
             ctx.fillStyle = 'rgba(4, 11, 22, 0.92)';
             ctx.fillRect(0, 0, W, H);
             ctx.fillStyle = '#fbbf24';
-            ctx.font = '700 10px Cairo, sans-serif';
+            ctx.font = '700 11px Cairo, Tajawal, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(
-              d.assetClass === 'crypto' ? `⏳ جاري جلب شموع ${iv.toUpperCase()} الحية...` : `تجريبي — غير مدرج على Binance Testnet`,
-              W / 2, H / 2 + 3
-            );
+            ctx.fillText('بيانات غير متاحة', W / 2, H / 2 + 4);
             return;
           }
 
