@@ -1404,8 +1404,35 @@
       display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
       padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);
     }
+    .capital-clarity-grid{
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:8px;
+    }
+    .capital-clarity-card{
+      padding:8px 11px;border-radius:10px;
+      background:linear-gradient(165deg,#13181E 0%,#0A0D10 100%);
+      border:1px solid rgba(255,255,255,0.12);
+      display:flex;flex-direction:column;gap:2px;
+    }
+    .capital-clarity-card.cap-free{border-color:rgba(0,230,91,0.5);box-shadow:0 0 12px rgba(0,230,91,0.12)}
+    .capital-clarity-card.cap-held{border-color:rgba(201,206,214,0.34)}
+    .capital-clarity-card.cap-unreal{border-color:rgba(229,37,70,0.36)}
+    .capital-clarity-card.cap-real{border-color:rgba(0,230,91,0.34)}
+    .cap-lbl{font-size:10.5px;font-weight:800;color:#C9CED6}
+    .cap-val{font-size:15.5px;font-weight:900;color:#FFFFFF;line-height:1.25}
+    .cap-hint{font-size:9.8px;color:#9EA7B3;line-height:1.35}
+    .capital-flow-line{
+      font-size:10.5px;color:#E2E8F0;padding:6px 10px;border-radius:8px;margin-bottom:9px;
+      background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;
+    }
+    @media (max-width: 1024px){
+      .capital-clarity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
     @media (max-width: 900px){
       .guided-3step-grid{grid-template-columns:1fr;gap:8px}
+    }
+    @media (max-width: 540px){
+      .capital-clarity-grid{grid-template-columns:1fr}
     }
     .lux-kpi-card{position:relative;overflow:hidden;background:linear-gradient(170deg,#171B1F,#111417) !important;border:1px solid rgba(255,255,255,0.12) !important}
     .lux-kpi-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:#C9CED6}
@@ -2206,8 +2233,35 @@
         </div>
       </div>
 
-      <!-- شريط المسار الموجّه في 3 خطوات واضحة فور الدخول -->
-      <section id="daily-trading-guide-bar" class="guided-3step-shell" aria-label="خطوات التداول اليومي في 3 خطوات">
+      <!-- شريط المسار المالي الموجّه في 3 خطوات واضحة فور الدخول -->
+      <section id="daily-trading-guide-bar" class="guided-3step-shell" aria-label="خريطة رأس المال وخطوات التداول اليومي">
+        <!-- خريطة رأس المال والسيولة: توضح بدقة ما هو متاح للشراء وما هو مملوك وما هو ربح عائم/محقق -->
+        <div id="capital-clarity-strip" class="capital-clarity-grid">
+          <div class="capital-clarity-card cap-free">
+            <span class="cap-lbl">💵 الكاش الحر المتاح للشراء الآن</span>
+            <strong id="cap-free-cash" class="cap-val num" dir="ltr" style="color:#00E65B;">$0 USDT</strong>
+            <span class="cap-hint">المبلغ الجاهز فعلياً في محفظتك لتمويل الصفقات الجديدة الآن.</span>
+          </div>
+          <div class="capital-clarity-card cap-held">
+            <span class="cap-lbl">🪙 العملات المملوكة حالياً (قيد التداول)</span>
+            <strong id="cap-held-assets" class="cap-val num" dir="ltr">$0</strong>
+            <span id="cap-held-hint" class="cap-hint">موزعة على عملاتك المملوكة • لا تُشترى بها صفقات إلا بعد بيعها.</span>
+          </div>
+          <div class="capital-clarity-card cap-unreal">
+            <span class="cap-lbl">📈 أرباح غير محققة (عائمة على المملوك)</span>
+            <strong id="cap-unrealized-pnl" class="cap-val num" dir="ltr">+$0</strong>
+            <span class="cap-hint">ربح دفتري • يتحول إلى كاش USDT للشراء فقط بعد البيع.</span>
+          </div>
+          <div class="capital-clarity-card cap-real">
+            <span class="cap-lbl">✅ الأرباح المحققة الصافية (المُحصَّلة)</span>
+            <strong id="cap-realized-pnl" class="cap-val num" dir="ltr" style="color:#16B853;">+$0</strong>
+            <span class="cap-hint">أرباح تم بيعها وتحصيلها وأُضيفت تلقائياً للكاش الحر المتاح.</span>
+          </div>
+        </div>
+        <div class="capital-flow-line">
+          <span><strong>🧭 خط سير أموالك:</strong> <span style="color:#00E65B;">① كاش USDT حر في محفظتك</span> ← <span>② شراء صفقة بمبلغ محدد (ممنوع الشراء بقيمة 0$)</span> ← <span>③ ربح عائم على العملات المملوكة</span> ← <span style="color:#E52546;">④ البيع متاح فقط للمملوك ويحوّل الربح لكاش حر يموّل صفقات جديدة</span></span>
+        </div>
+
         <div class="guided-3step-grid">
           <!-- الخطوة 1: اختيار الصفقة -->
           <div id="guided-step-1" class="guided-step-card step-active">
@@ -2411,8 +2465,8 @@
           </div>
         </div>
 
-        <!-- الصف 2: شبكة الـ 10 صفقات اليومية المتساوية تماماً (10 أعمدة متناسقة) -->
-        <div id="council-top5-tabs" class="council-deals-grid" aria-label="الصفقات الـ 10 اليومية"></div>
+        <!-- تم إخفاء تكرار الصفقات الـ 10 هنا لأن اختيار الصفقة يتم من مكان واحد فقط في قاعة التداول أعلاه -->
+        <div id="council-top5-tabs" class="council-deals-grid hidden" aria-hidden="true"></div>
 
         <!-- الصف 3: شريط الأوامر الموحد (4 أزرار متساوية العرض والارتفاع في صف واحد نظيف) -->
         <div class="council-cmd-bar">
@@ -4755,16 +4809,42 @@
         const d = ALL_CANDIDATE_DEALS.find((x) => x.id === dealId);
         if (!d) return;
 
-        // التصحيح الإلزامي #3: سوق Spot هو Long-Only (لا بيع مكشوف، البيع يغلق رصيداً مملوكاً فقط!)
+        // الحماية الصارمة #1: سوق Spot هو Long-Only — يُمنع البيع نهائياً لأي أصل لا تملك منه رصيداً فعلياً (> 0)
         const heldQty = +(state.spotHoldings[d.sym] || 0);
-        if (chosenSide === 'SELL' && d.assetClass === 'crypto' && heldQty <= 0) {
+        if (chosenSide === 'SELL' && heldQty <= 0) {
           sfx.sellSuccess();
-          this.toast(`🚫 حماية Spot Long-Only: لا تملك رصيداً مفتوحاً من ${d.sym} لإغلاقه (يُمنع البيع على المكشوف في Spot).`, 'var(--hot)');
+          this.toast(`🚫 لا يمكنك البيع لأن رصيدك المملوك من ${d.sym} يساوي 0 — اشترِ العملة أولاً ثم ستُتاح للبيع.`, 'var(--hot)');
           return;
         }
 
-        let execQty = (chosenSide === 'SELL' && d.assetClass === 'crypto') ? fmtQty(Math.min(d.qty, heldQty), d.price) : d.qty;
+        let execQty = chosenSide === 'SELL' ? fmtQty(Math.min(d.qty || heldQty, heldQty), d.price) : d.qty;
         let m = computeDealMetrics({ ...d, qty: execQty });
+
+        // الحماية الصارمة #2: منع أي عملية شراء بقيمة صفرية (0$) أو بدون كاش حر كافٍ في المحفظة
+        if (chosenSide === 'BUY') {
+          const priceMap = {};
+          ALL_CANDIDATE_DEALS.forEach((x) => { priceMap[x.sym] = Number(x.price || 0); });
+          let heldValNow = 0;
+          Object.entries(state.spotHoldings || {}).forEach(([sym, qv]) => {
+            heldValNow += Number(qv || 0) * (priceMap[sym] || 0);
+          });
+          const availFreeUsdt = Math.max(0, Math.round(Number(state.equity || 0) - heldValNow));
+          if (!Number.isFinite(m.invest) || m.invest <= 0 || !Number.isFinite(execQty) || execQty <= 0) {
+            sfx.sellSuccess();
+            this.toast(`🚫 لا يمكن الشراء بقيمة 0$ — حدد مبلغ الاستثمار الصحيح لـ ${d.sym} أولاً.`, 'var(--hot)');
+            return;
+          }
+          if (m.invest > availFreeUsdt) {
+            sfx.sellSuccess();
+            this.toast(`🚫 الكاش الحر المتاح في محفظتك ($${availFreeUsdt.toLocaleString()} USDT) لا يكفي لشراء $${m.invest.toLocaleString()} — خفّض المبلغ أو بِع عملة مملوكة لتحرير الكاش.`, 'var(--hot)');
+            return;
+          }
+        }
+        if (chosenSide === 'SELL' && (!Number.isFinite(execQty) || execQty <= 0)) {
+          sfx.sellSuccess();
+          this.toast(`🚫 الكمية القابلة للبيع من ${d.sym} تساوي 0 — تم إيقاف العملية.`, 'var(--hot)');
+          return;
+        }
         let orderId = (chosenSide === 'BUY' ? 'MK-' : 'EX-') + Math.floor(100000 + Math.random() * 899999);
         let realTestnetExec = false;
 
@@ -5072,8 +5152,10 @@
                 </div>
                 ${heroTodayMatch
                   ? `<button type="button" class="btn-3d" disabled data-executed-lock="true" style="padding:7px 13px;font-size:12px;opacity:0.55;cursor:not-allowed;">تم التنفيذ ✓</button>`
-                  : `<button type="button" class="btn-3d btn-3d-buy" style="padding:7px 13px;font-size:12px;" onclick="ui.executeEliteDeal('${heroDeal.id}', 'BUY')">▲ شراء صفقة #${heroNo}</button>`}
-                <button type="button" class="btn-3d ${hOwned > 0 ? 'btn-3d-sell' : 'btn-spot-neutral'}" ${hOwned > 0 ? '' : 'disabled style="padding:7px 10px;font-size:11px;opacity:0.45;cursor:not-allowed;"'} style="padding:7px 10px;font-size:11px;" onclick="ui.executeSpotSellNow('${heroDeal.sym}')">${hOwned > 0 ? '🔻 بيع الآن (مملوك)' : '▼ غير مملوك'}</button>
+                  : `<button type="button" class="btn-3d btn-3d-buy" ${hm.invest > 0 ? '' : 'disabled'} style="padding:7px 13px;font-size:12px;${hm.invest > 0 ? '' : 'opacity:0.45;cursor:not-allowed;'}" onclick="ui.executeEliteDeal('${heroDeal.id}', 'BUY')">▲ شراء صفقة #${heroNo}</button>`}
+                ${hOwned > 0
+                  ? `<button type="button" class="btn-3d btn-3d-sell" style="padding:7px 10px;font-size:11px;" onclick="ui.executeSpotSellNow('${heroDeal.sym}')">🔻 بيع الآن (${hOwned})</button>`
+                  : `<button type="button" class="btn-3d" disabled data-unowned-sell-lock="true" style="padding:7px 10px;font-size:11px;opacity:0.42;cursor:not-allowed;" title="لا تملك رصيداً من هذه العملة للبيع">غير مملوك (0)</button>`}
                 <button type="button" class="btn-3d btn-3d-gold" style="padding:7px 11px;font-size:11px;" onclick="ui.openDecisionBasisModal('${heroDeal.id}')">🧠 شرح القرار</button>
               </div>
             </div>
@@ -5132,10 +5214,10 @@
             <div style="display:flex;justify-content:center;gap:4px;padding-top:3px;border-top:1px solid rgba(255,255,255,0.06);" onclick="event.stopPropagation()">
               ${doneToday
                 ? `<button type="button" class="btn-3d btn-3d-sm" disabled data-executed-lock="true" style="padding:2px 8px;font-size:10px;opacity:0.55;cursor:not-allowed;">تم التنفيذ ✓</button>`
-                : `<button type="button" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:2px 8px;font-size:10px;" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء #${evNo}</button>`}
+                : `<button type="button" class="btn-3d btn-3d-buy btn-3d-sm" ${m.invest > 0 ? '' : 'disabled'} style="padding:2px 8px;font-size:10px;${m.invest > 0 ? '' : 'opacity:0.45;cursor:not-allowed;'}" onclick="ui.executeEliteDeal('${d.id}', 'BUY')">▲ شراء #${evNo}</button>`}
               ${ownedQty > 0
-                ? `<button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:2px 7px;font-size:10px;" onclick="ui.executeSpotSellNow('${d.sym}')">🔻 بيع الآن</button>`
-                : `<button type="button" class="btn-3d btn-3d-sm" disabled style="padding:2px 7px;font-size:10px;opacity:0.4;cursor:not-allowed;" title="لا يوجد رصيد مملوك للبيع في السوق الفوري">▼ بيع</button>`}
+                ? `<button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:2px 7px;font-size:10px;" onclick="ui.executeSpotSellNow('${d.sym}')">🔻 بيع الآن (${ownedQty})</button>`
+                : `<button type="button" class="btn-3d btn-3d-sm" disabled data-unowned-sell-lock="true" style="padding:2px 7px;font-size:9.5px;opacity:0.42;cursor:not-allowed;" title="لا يوجد رصيد مملوك للبيع في السوق الفوري">غير مملوك (0)</button>`}
               <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" style="padding:2px 7px;font-size:10px;" onclick="ui.openDecisionBasisModal('${d.id}')">🧠 لماذا؟</button>
             </div>
           </article>`;
@@ -5916,6 +5998,31 @@
             </div>
           </div>
         `;
+
+        // تحديث خريطة رأس المال والسيولة لحظياً (الكاش الحر vs العملات المملوكة vs الربح العائم vs الربح المحقق)
+        const ownedEntries = Object.entries(state.spotHoldings || {}).filter(([, qv]) => Number(qv || 0) > 0);
+        const ownedCoinsLabel = ownedEntries.length
+          ? ownedEntries.slice(0, 4).map(([s]) => s.replace('USDT', '')).join(' • ') + (ownedEntries.length > 4 ? ` +${ownedEntries.length - 4}` : '')
+          : 'لا توجد عملات مملوكة حالياً';
+        const sellRecsLive = typeof this.buildOwnedSellRecommendations === 'function' ? this.buildOwnedSellRecommendations() : [];
+        const unrealizedTotal = sellRecsLive.reduce((acc, r) => acc + Number(r.pnlUsd || 0), 0);
+        const realizedTotal = Number(state.netProfit || 0);
+        const elCapFree = document.getElementById('cap-free-cash');
+        const elCapHeld = document.getElementById('cap-held-assets');
+        const elCapHeldHint = document.getElementById('cap-held-hint');
+        const elCapUnreal = document.getElementById('cap-unrealized-pnl');
+        const elCapReal = document.getElementById('cap-realized-pnl');
+        if (elCapFree) elCapFree.textContent = `$${availUsdt.toLocaleString()} USDT`;
+        if (elCapHeld) elCapHeld.textContent = `$${Math.round(heldVal).toLocaleString()} (${ownedEntries.length} عملات)`;
+        if (elCapHeldHint) elCapHeldHint.textContent = `${ownedCoinsLabel} • لا تُشترى بها صفقات إلا بعد البيع.`;
+        if (elCapUnreal) {
+          elCapUnreal.textContent = `${unrealizedTotal >= 0 ? '+' : '-'}$${Math.abs(Math.round(unrealizedTotal)).toLocaleString()}`;
+          elCapUnreal.style.color = unrealizedTotal >= 0 ? '#00E65B' : '#E52546';
+        }
+        if (elCapReal) {
+          elCapReal.textContent = `${realizedTotal >= 0 ? '+' : '-'}$${Math.abs(Math.round(realizedTotal)).toLocaleString()}`;
+          elCapReal.style.color = realizedTotal >= 0 ? '#16B853' : '#E52546';
+        }
 
         // تحديث شريط الخطوات الـ 3 التفاعلي أعلى قاعة التداول لحظياً
         const s1Desc = document.getElementById('guided-s1-desc');
