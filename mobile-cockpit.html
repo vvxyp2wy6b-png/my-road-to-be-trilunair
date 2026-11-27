@@ -1219,19 +1219,155 @@
     .k.on .sw::after,.k .btn-music-on + .sw::after{inset-inline-end:18px}
     .vol{font:700 12px var(--num);color:#F2F4F7;background:#090B0C;border-radius:6px;padding:3px 6px;box-shadow:inset 0 1px 2px rgba(0,0,0,.75)}
 
-    /* === SUDANESE TRILLIONAIRE GLOBAL BUTTONS & 7 KPI CARDS === */
-    .btn-3d-gold{background:linear-gradient(180deg,#12A845 0%,#007229 100%) !important;color:#FFFFFF !important;border-color:rgba(22,184,83,0.65) !important;text-shadow:0 1px 1px rgba(0,0,0,0.45) !important}
-    .btn-3d-buy{background:linear-gradient(180deg,#16B853 0%,#007229 100%) !important;color:#FFFFFF !important;border-color:rgba(22,184,83,0.72) !important}
-    .btn-3d-sell,.kill-btn-3d{background:linear-gradient(180deg,#E52546 0%,#A80D29 100%) !important;color:#FFFFFF !important;border-color:rgba(229,37,70,0.72) !important}
+    /* === SUDANESE TRILLIONAIRE — ELECTRIC FLAG GRADIENTS & BUTTONS === */
+    @keyframes sdElectricFlow{0%{background-position:0% 50%}100%{background-position:220% 50%}}
+    @media (prefers-reduced-motion:reduce){.sd-electric-bar,.btn-sd-electric-flag::before{animation:none !important}}
+    .btn-3d-gold{
+      background:linear-gradient(135deg,#00E65B 0%,#009A38 46%,#005C20 100%) !important;
+      color:#FFFFFF !important;
+      border:1px solid rgba(0,230,91,0.72) !important;
+      box-shadow:0 0 14px rgba(0,230,91,0.34),inset 0 1px 0 rgba(255,255,255,0.42) !important;
+      text-shadow:0 1px 2px rgba(0,0,0,0.55) !important;
+    }
+    .btn-3d-buy{
+      background:linear-gradient(135deg,#00E65B 0%,#009A38 48%,#006224 100%) !important;
+      color:#FFFFFF !important;
+      border:1px solid rgba(0,230,91,0.75) !important;
+      box-shadow:0 0 16px rgba(0,230,91,0.36),inset 0 1px 0 rgba(255,255,255,0.44) !important;
+      text-shadow:0 1px 2px rgba(0,0,0,0.55) !important;
+    }
+    .btn-3d-sell,.kill-btn-3d{
+      background:linear-gradient(135deg,#E52546 0%,#D21034 52%,#8A0A21 100%) !important;
+      color:#FFFFFF !important;
+      border:1px solid rgba(229,37,70,0.8) !important;
+      box-shadow:0 0 16px rgba(229,37,70,0.38),inset 0 1px 0 rgba(255,255,255,0.36) !important;
+      text-shadow:0 1px 2px rgba(0,0,0,0.55) !important;
+    }
+    /* Electric Sudan Flag Gradient Button (Red -> White -> Black -> Electric Green) */
+    .btn-sd-electric-flag{
+      position:relative !important;
+      background:linear-gradient(125deg,rgba(210,16,52,0.28) 0%,rgba(255,255,255,0.14) 30%,rgba(11,14,17,0.92) 55%,rgba(0,230,91,0.32) 100%) !important;
+      color:#FFFFFF !important;
+      border:1.5px solid transparent !important;
+      background-clip:padding-box !important;
+      box-shadow:0 0 16px rgba(0,230,91,0.28),0 0 12px rgba(229,37,70,0.24),inset 0 1px 0 rgba(255,255,255,0.32) !important;
+      text-shadow:0 1px 2px rgba(0,0,0,0.7) !important;
+      overflow:hidden;
+    }
+    .btn-sd-electric-flag::after{
+      content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;
+      background:linear-gradient(95deg,#E52546 0%,#FFFFFF 33%,#171B1F 54%,#00E65B 100%);
+      -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+      -webkit-mask-composite:xor;mask-composite:exclude;
+    }
+    .btn-sd-electric-flag:hover:not(:disabled){
+      box-shadow:0 0 22px rgba(0,230,91,0.45),0 0 16px rgba(229,37,70,0.38),inset 0 1px 0 rgba(255,255,255,0.45) !important;
+      transform:translateY(-1px);
+    }
+    /* Council Panel Electric Top Bar & Structured Grids */
+    #hero-agents-council-panel{
+      position:relative;overflow:hidden;
+      background:linear-gradient(175deg,#14191F 0%,#0E1216 55%,#090B0C 100%) !important;
+      border:1px solid rgba(255,255,255,0.14) !important;
+      box-shadow:0 10px 30px rgba(0,0,0,0.55),0 0 24px rgba(0,230,91,0.08) !important;
+    }
+    #hero-agents-council-panel::before{
+      content:"";position:absolute;top:0;left:0;right:0;height:3px;z-index:2;
+      background:linear-gradient(90deg,#E52546 0%,#D21034 18%,#FFFFFF 36%,#090B0C 54%,#007229 74%,#00E65B 90%,#E52546 100%);
+      background-size:220% 100%;animation:sdElectricFlow 6s linear infinite;
+      box-shadow:0 0 12px rgba(0,230,91,0.55),0 0 14px rgba(229,37,70,0.45);
+    }
+    .council-top-header{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+      padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .council-hz-seg{
+      display:inline-grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;
+      border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.22);
+      background:#090B0C;box-shadow:0 0 12px rgba(0,230,91,0.12);
+    }
+    .council-hz-seg .chz-btn{
+      border-radius:0 !important;border:0 !important;margin:0 !important;height:32px;
+      padding:0 11px !important;font-size:11px !important;white-space:nowrap;
+      border-inline-start:1px solid rgba(255,255,255,0.14) !important;
+      background:linear-gradient(180deg,#1A2026,#101418) !important;color:#C9CED6 !important;
+      box-shadow:none !important;
+    }
+    .council-hz-seg .chz-btn:first-child{border-inline-start:0 !important}
+    .council-hz-seg .chz-btn.btn-3d-gold{
+      background:linear-gradient(135deg,#00E65B 0%,#009A38 55%,#005C20 100%) !important;
+      color:#FFFFFF !important;font-weight:900 !important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.45),0 0 14px rgba(0,230,91,0.4) !important;
+    }
+    .council-deals-grid{
+      display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;
+      margin-bottom:9px;
+    }
+    .council-deal-pill{
+      height:33px;width:100%;padding:0 4px !important;font-size:10.8px !important;font-weight:800 !important;
+      border-radius:8px !important;display:flex;align-items:center;justify-content:center;gap:3px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      background:linear-gradient(180deg,#181D23 0%,#0F1317 100%) !important;
+      border:1px solid rgba(255,255,255,0.14) !important;color:#E2E8F0 !important;
+      transition:all 0.18s ease;
+    }
+    .council-deal-pill:hover{border-color:rgba(0,230,91,0.6) !important;box-shadow:0 0 10px rgba(0,230,91,0.22) !important}
+    .council-deal-pill.is-active{
+      background:linear-gradient(135deg,rgba(229,37,70,0.34) 0%,rgba(255,255,255,0.14) 34%,rgba(11,14,17,0.92) 55%,rgba(0,230,91,0.42) 100%) !important;
+      border:1.5px solid #00E65B !important;color:#FFFFFF !important;
+      box-shadow:0 0 14px rgba(0,230,91,0.42),0 0 10px rgba(229,37,70,0.28) !important;
+    }
+    .council-deal-pill.is-bought{
+      border-color:rgba(0,230,91,0.5) !important;color:#16B853 !important;
+      background:linear-gradient(180deg,rgba(0,114,41,0.28),rgba(9,11,12,0.94)) !important;
+    }
+    .council-cmd-bar{
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;
+      margin-bottom:11px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .council-cmd-btn{
+      height:36px;width:100%;padding:0 10px !important;font-size:11.2px !important;font-weight:800 !important;
+      border-radius:9px !important;display:flex;align-items:center;justify-content:center;gap:6px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .agent-card-electric{
+      position:relative;overflow:hidden;
+      background:linear-gradient(170deg,#161B21 0%,#0E1216 65%,#090B0C 100%) !important;
+      border-radius:11px;padding:10px 11px;display:flex;flex-direction:column;gap:5px;
+      transition:transform 0.16s ease,box-shadow 0.16s ease;
+    }
+    .agent-card-electric::before{
+      content:"";position:absolute;top:0;left:0;right:0;height:2.5px;
+      background:linear-gradient(90deg,#E52546 0%,#FFFFFF 35%,#111417 56%,#00E65B 100%);
+      box-shadow:0 0 8px rgba(0,230,91,0.4);
+    }
+    .agent-card-electric:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.5),0 0 14px rgba(0,230,91,0.18)}
+    .council-final-actions{
+      display:grid;grid-template-columns:1.5fr 1fr 0.85fr;gap:8px;align-items:stretch;
+    }
+    .council-final-actions button{
+      height:38px;width:100%;padding:0 10px !important;font-size:11.5px !important;font-weight:800 !important;
+      border-radius:9px !important;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;
+    }
+    @media (max-width: 1120px){
+      .council-deals-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+      .council-cmd-bar{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media (max-width: 640px){
+      .council-deals-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .council-cmd-bar{grid-template-columns:1fr}
+      .council-final-actions{grid-template-columns:1fr}
+      .council-hz-seg{width:100%}
+    }
     .lux-kpi-card{position:relative;overflow:hidden;background:linear-gradient(170deg,#171B1F,#111417) !important;border:1px solid rgba(255,255,255,0.12) !important}
     .lux-kpi-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:#C9CED6}
-    .lux-kpi-card.kpi-sd-green::before{background:linear-gradient(90deg,#007229,#16B853)}
+    .lux-kpi-card.kpi-sd-green::before{background:linear-gradient(90deg,#007229,#00E65B)}
     .lux-kpi-card.kpi-sd-red::before{background:linear-gradient(90deg,#D21034,#E52546)}
-    .lux-kpi-card.kpi-sd-flag::before{background:linear-gradient(90deg,#D21034 0% 25%,#FFFFFF 25% 50%,#090B0C 50% 75%,#007229 75% 100%)}
+    .lux-kpi-card.kpi-sd-flag::before{background:linear-gradient(90deg,#E52546 0%,#FFFFFF 35%,#090B0C 56%,#00E65B 100%)}
     .lux-kpi-card.kpi-sd-silver::before{background:linear-gradient(90deg,#9AA3AE,#FFFFFF,#C9CED6)}
     .lux-side-column,.lux-hero-center-panel,.trilliurin-deck,.lux-metrics-shell{background:linear-gradient(175deg,#171B1F 0%,#111417 55%,#090B0C 100%) !important;border-color:rgba(201,206,214,0.22) !important}
     .lux-side-deal-card{background:linear-gradient(165deg,#171B1F,#090B0C) !important;border-color:rgba(255,255,255,0.14) !important}
-    .lux-side-deal-card.active-hero,.lux-side-deal-card:hover{border-color:#16B853 !important;box-shadow:0 6px 0 #040506,0 14px 24px rgba(0,0,0,0.7),0 0 16px rgba(0,154,56,0.28) !important}
+    .lux-side-deal-card.active-hero,.lux-side-deal-card:hover{border-color:#00E65B !important;box-shadow:0 6px 0 #040506,0 14px 24px rgba(0,0,0,0.7),0 0 16px rgba(0,230,91,0.32) !important}
     .val-gold,.num-3d{color:#F2F4F7 !important}
     .val-emerald,.text-ok{color:#16B853 !important}
     .text-err{color:#E52546 !important}
@@ -2178,41 +2314,40 @@
         </aside>
       </div>
 
-      <!-- مجلس تداول آراء الوكلاء الخمسة التفصيلي + شريط الصفقات الخمس اليومية + صندوق المحفظة والموافقة الفردية والجماعية -->
-      <section id="hero-agents-council-panel" class="holo-prism" style="margin-top:12px;padding:12px 14px;border-color:rgba(201, 206, 214,0.45);">
-        <!-- الصف 1: أزرار التنقل بين الصفقات اليومية الـ 10 (#1 .. #10) + زر الموافقة الجماعية -->
-        <div class="row-between" style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08);flex-wrap:wrap;gap:8px;">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <strong style="font-size:13px;color:#38bdf8;">🎯 الصفقات الـ 10 اليومية:</strong>
-            <div id="council-top5-tabs" style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;"></div>
+      <!-- مجلس تداول آراء الوكلاء الخمسة التفصيلي + شريط الصفقات اليومية + صندوق المحفظة والموافقة الفردية والجماعية -->
+      <section id="hero-agents-council-panel" class="holo-prism" style="margin-top:12px;padding:14px 15px;">
+        <!-- الصف 1: العنوان + شارة الإجماع يميناً | شريط الفترة الزمنية المتصل يساراً -->
+        <div class="council-top-header">
+          <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
+            <strong style="font-size:15px;color:#FFFFFF;">🤖 مجلس الوكلاء وتداول الآراء — <span id="council-deal-title" style="color:#00E65B;">صفقة #1 (SOLUSDT)</span></strong>
+            <span id="council-verdict-badge" class="hex-shield num" style="font-size:11px;padding:3px 10px;background:rgba(0,230,91,0.14);color:#00E65B;border-color:rgba(0,230,91,0.6);">🟢 موافقة بالإجماع 5/5</span>
           </div>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <button type="button" id="btn-batch-approve-5" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:5px 12px;font-size:11px;" onclick="ui.executeBatchTop5Deals()">⚡ موافقة وشراء جماعي للمتبقي</button>
-            <button type="button" class="btn-3d btn-3d-sm" style="padding:5px 9px;font-size:10.5px;" onclick="ui.resetRejectedDeals()" title="إعادة إظهار الصفقات المرفوضة">↺ إعادة المرفوضة</button>
-          </div>
-        </div>
-
-        <!-- الصف 2: عنوان الصفقة الحالية + حالة ربط الوكلاء بالذكاء الاصطناعي + اختيار الفترة الزمنية -->
-        <div class="row-between" style="margin-bottom:10px;flex-wrap:wrap;gap:8px;">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <strong style="font-size:14.5px;color:#F2F4F7;">🤖 مجلس الوكلاء وتداول الآراء — <span id="council-deal-title" style="color:#ffffff;">صفقة #1 (SOLUSDT)</span></strong>
-            <span id="council-verdict-badge" class="hex-shield num" style="font-size:11px;padding:2px 9px;background:rgba(22, 184, 83,0.14);color:#16B853;border-color:rgba(22, 184, 83,0.55);">🟢 موافقة بالإجماع 5/5</span>
-            <button type="button" id="btn-live-5agents-deliberate" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:3px 10px;font-size:10.5px;" onclick="ui.runLiveFiveAgentDeliberation()">⚡ مداولة الـ 5 وكلاء الحية</button>
-            <button type="button" id="council-ai-engine-pill" class="btn-3d btn-3d-sm" style="padding:3px 9px;font-size:10.5px;border-color:rgba(201,206,214,0.45);color:#F2F4F7;" onclick="ui.tab('settings');setTimeout(()=>document.getElementById('ai-prov-key-inp')?.focus(),200)">🤖 الوكلاء: 1/5 متصل (المحرك الكمي) • ربط المنصات</button>
-          </div>
-          <div id="council-horizon-bar" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
-            <span class="muted" style="font-size:11px;">⏱️ الفترة الزمنية للاستثمار:</span>
-            <button type="button" class="btn-3d btn-3d-sm btn-3d-gold chz-btn" data-chz="1H" onclick="ui.setCouncilHorizon('1H')">⚡ ساعي (1H)</button>
-            <button type="button" class="btn-3d btn-3d-sm chz-btn" data-chz="24H" onclick="ui.setCouncilHorizon('24H')">☀️ يومي (24H)</button>
-            <button type="button" class="btn-3d btn-3d-sm chz-btn" data-chz="7D" onclick="ui.setCouncilHorizon('7D')">📅 أسبوعي (7D)</button>
-            <button type="button" class="btn-3d btn-3d-sm chz-btn" data-chz="30D" onclick="ui.setCouncilHorizon('30D')">🗓️ شهري (30D)</button>
+          <div id="council-horizon-bar" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="muted" style="font-size:11px;font-weight:700;">⏱️ الإطار:</span>
+            <div class="council-hz-seg" role="group" aria-label="الفترة الزمنية للاستثمار">
+              <button type="button" class="btn-3d btn-3d-sm btn-3d-gold chz-btn" data-chz="1H" onclick="ui.setCouncilHorizon('1H')">⚡ ساعي 1H</button>
+              <button type="button" class="btn-3d btn-3d-sm chz-btn" data-chz="24H" onclick="ui.setCouncilHorizon('24H')">☀️ يومي 24H</button>
+              <button type="button" class="btn-3d btn-3d-sm chz-btn" data-chz="7D" onclick="ui.setCouncilHorizon('7D')">📅 أسبوعي 7D</button>
+              <button type="button" class="btn-3d btn-3d-sm chz-btn" data-chz="30D" onclick="ui.setCouncilHorizon('30D')">🗓️ شهري 30D</button>
+            </div>
           </div>
         </div>
 
-        <!-- الصف 3: آراء الوكلاء الخمسة + مستطيل المحفظة وكمية الشراء والقرار الفوري -->
+        <!-- الصف 2: شبكة الـ 10 صفقات اليومية المتساوية تماماً (10 أعمدة متناسقة) -->
+        <div id="council-top5-tabs" class="council-deals-grid" aria-label="الصفقات الـ 10 اليومية"></div>
+
+        <!-- الصف 3: شريط الأوامر الموحد (4 أزرار متساوية العرض والارتفاع في صف واحد نظيف) -->
+        <div class="council-cmd-bar">
+          <button type="button" id="btn-live-5agents-deliberate" class="btn-3d btn-sd-electric-flag council-cmd-btn" onclick="ui.runLiveFiveAgentDeliberation()">⚡ مداولة الـ 5 وكلاء الحية</button>
+          <button type="button" id="council-ai-engine-pill" class="btn-3d council-cmd-btn" style="border-color:rgba(201,206,214,0.38);color:#F2F4F7;" onclick="ui.tab('settings');setTimeout(()=>document.getElementById('ai-prov-key-inp')?.focus(),200)">🤖 الوكلاء: 1/5 متصل • ربط المنصات</button>
+          <button type="button" id="btn-batch-approve-5" class="btn-3d btn-3d-buy council-cmd-btn" onclick="ui.executeBatchTop5Deals()">⚡ موافقة وشراء جماعي للمتبقي</button>
+          <button type="button" class="btn-3d council-cmd-btn" style="border-color:rgba(229,37,70,0.42);color:#F2F4F7;" onclick="ui.resetRejectedDeals()" title="إعادة إظهار الصفقات المرفوضة">↺ إعادة الصفقات المرفوضة</button>
+        </div>
+
+        <!-- الصف 4: آراء الوكلاء الخمسة + مستطيل المحفظة والقرار الفوري -->
         <div id="hero-agents-cards-grid" class="agents-council-grid"></div>
 
-        <div id="hero-council-final-box" class="holo-chamber" style="margin-top:10px;padding:11px 13px;border-radius:12px;background:rgba(7,22,38,0.92);border-color:rgba(22, 184, 83,0.45);"></div>
+        <div id="hero-council-final-box" class="holo-chamber" style="margin-top:10px;padding:12px 14px;border-radius:12px;background:linear-gradient(170deg,#12171D,#090B0C);border-color:rgba(0,230,91,0.42);"></div>
       </section>
 
       <!-- سجل صفقاتي المنفذة اليوم المرقّمة تسلسلياً (#1 اليوم، #2 اليوم...) -->
@@ -5444,15 +5579,15 @@
         const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
         const rejected = state.rejectedDealIds || {};
 
-        // 1) رسم أزرار التنقل بين الصفقات اليومية الـ 5 (#1 .. #5)
+        // 1) رسم أزرار التنقل بين الصفقات اليومية الـ 10 (#1 .. #10) في شبكة متساوية
         if (tabsEl) {
           tabsEl.innerHTML = top5.map((item) => {
             const isActive = item.id === d.id;
             const boughtRec = todayLog.find((t) => t.dealId === item.id || t.sym === item.sym);
             const isRej = !!rejected[item.id];
             const statusIcon = boughtRec ? '✅' : (isRej ? '❌' : '●');
-            const btnCls = isActive ? 'btn-3d-gold' : (boughtRec ? 'btn-3d-buy' : '');
-            return `<button type="button" class="btn-3d btn-3d-sm ${btnCls}" style="padding:4px 9px;font-size:11px;${isRej ? 'opacity:0.55;' : ''}" onclick="ui.selectHeroDeal('${item.id}')">${statusIcon} صفقة #${item._evalNo} (${item.sym.replace('USDT', '')})</button>`;
+            const stCls = isActive ? 'is-active' : (boughtRec ? 'is-bought' : '');
+            return `<button type="button" class="btn-3d council-deal-pill ${stCls}" style="${isRej ? 'opacity:0.5;' : ''}" onclick="ui.selectHeroDeal('${item.id}')">${statusIcon} #${item._evalNo} ${item.sym.replace('USDT', '')}</button>`;
           }).join('');
         }
 
@@ -5626,7 +5761,7 @@
             ? live.reasonAr
             : ag.reason(sc, isValid);
           return `
-            <div class="holo-chamber" data-agent-idx="${ag.idx}" data-provider-id="${bind.providerId}" style="padding:9px 10px;border-radius:11px;border:1px solid ${borderCol};background:rgba(17,20,23,0.94);display:flex;flex-direction:column;gap:5px;">
+            <div class="holo-chamber agent-card-electric" data-agent-idx="${ag.idx}" data-provider-id="${bind.providerId}" style="border:1px solid ${borderCol};">
               <div class="row-between" style="gap:4px;">
                 <strong style="font-size:11.5px;color:#FFFFFF;">${ag.icon} ${ag.name}</strong>
                 <span class="hex-shield num" style="font-size:9.5px;padding:1px 6px;color:${stCol};background:${stBg};border-color:${borderCol};">${scoreBadge}</span>
@@ -5648,19 +5783,19 @@
           badgeEl.textContent = approvedByCouncil
             ? `🟢 إجماع بالشراء: ${greenCnt}/5 أخضر (${avgScoreTxt})`
             : (redCnt > 0 ? `🔴 تحفظ / رفض: ${redCnt} أحمر (${avgScoreTxt})` : `🟡 موافقة مشروطة: ${greenCnt}/5 أخضر (${avgScoreTxt})`);
-          badgeEl.style.color = approvedByCouncil ? '#16B853' : (redCnt > 0 ? '#E52546' : '#FFFFFF');
-          badgeEl.style.borderColor = approvedByCouncil ? 'rgba(22, 184, 83,0.55)' : (redCnt > 0 ? 'rgba(210, 16, 52,0.55)' : 'rgba(201, 206, 214,0.55)');
+          badgeEl.style.color = approvedByCouncil ? '#00E65B' : (redCnt > 0 ? '#E52546' : '#FFFFFF');
+          badgeEl.style.borderColor = approvedByCouncil ? 'rgba(0,230,91,0.6)' : (redCnt > 0 ? 'rgba(229,37,70,0.6)' : 'rgba(201,206,214,0.55)');
         }
 
         const todayCnt = todayLog.length;
         const alreadyBought = todayLog.find((t) => t.dealId === d.id || t.sym === d.sym);
         const councilOwnedQty = Number((state.spotHoldings || {})[d.sym] || 0);
-        finalBox.style.borderColor = approvedByCouncil ? 'rgba(22, 184, 83,0.5)' : 'rgba(201, 206, 214,0.5)';
+        finalBox.style.borderColor = approvedByCouncil ? 'rgba(0,230,91,0.48)' : 'rgba(201,206,214,0.45)';
         finalBox.innerHTML = `
-          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:10px;align-items:center;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:12px;align-items:center;">
             <!-- مستطيل المحفظة وكمية الشراء المبنية على رصيدك الفعلي -->
-            <div class="holo-chamber" style="padding:9px 11px;border-radius:10px;background:rgba(10,25,47,0.92);border:1px solid rgba(56,189,248,0.4);">
-              <div style="font-size:11px;font-weight:900;color:#38bdf8;margin-bottom:5px;">💼 تخصيص المحفظة لـ صفقة #${evNo} (${hzMeta.label})</div>
+            <div class="holo-chamber" style="padding:10px 12px;border-radius:10px;background:linear-gradient(170deg,#151A20,#0B0E11);border:1px solid rgba(201,206,214,0.28);">
+              <div style="font-size:11.5px;font-weight:900;color:#FFFFFF;margin-bottom:6px;">💼 تخصيص المحفظة لـ صفقة #${evNo} (${hzMeta.label})</div>
               <div class="row-between" style="font-size:11px;margin-bottom:4px;">
                 <span class="muted">المتاح فعلياً في محفظتك:</span>
                 <strong class="num text-sec">$${availUsdt.toLocaleString()} USDT</strong>
@@ -5681,24 +5816,24 @@
 
             <!-- القرار النهائي + أزرار الشراء والرفض والانتقال التلقائي للصفقة التالية -->
             <div>
-              <div style="font-size:12.5px;font-weight:900;color:${approvedByCouncil ? '#16B853' : '#FFFFFF'};margin-bottom:4px;">
+              <div style="font-size:13px;font-weight:900;color:${approvedByCouncil ? '#00E65B' : '#FFFFFF'};margin-bottom:4px;">
                 ${alreadyBought
                   ? `✅ تم شراء صفقة #${evNo} (${d.sym}) اليوم (الصفقة رقم #${alreadyBought.dailySeqNo})`
                   : (approvedByCouncil
                     ? `✅ القرار النهائي: يُوصى بشراء صفقة #${evNo} (${d.sym}) — ${hzMeta.label}`
                     : `⚠️ القرار النهائي: يُنصح بالمراجعة قبل شراء صفقة #${evNo}`)}
               </div>
-              <div style="font-size:11px;color:#cbd5e1;line-height:1.55;margin-bottom:7px;">
+              <div style="font-size:11px;color:#C9CED6;line-height:1.55;margin-bottom:9px;">
                 اتفق <strong>${greenCnt}/5 وكلاء</strong> (ثقة ${avgScoreTxt}) بناءً على رصيد محفظتك المتاح • هدف الربح <strong class="num text-ok">$${m.tp1}</strong> • وقف الخسارة <strong class="num text-err">$${m.sl}</strong> • ستُسجَّل كـ <strong class="text-pri">الصفقة رقم #${todayCnt + 1} اليوم</strong>.
               </div>
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <div class="council-final-actions">
                 ${alreadyBought
-                  ? `<button type="button" class="btn-3d" disabled data-executed-lock="true" style="padding:7px 14px;font-size:12px;opacity:0.55;cursor:not-allowed;">تم التنفيذ ✓</button>`
-                  : `<button type="button" class="btn-3d btn-3d-buy" style="padding:7px 14px;font-size:12px;" onclick="ui.approveCouncilDeal('${d.id}')">✅ شراء صفقة #${evNo} والانتقال للتالية</button>`}
+                  ? `<button type="button" class="btn-3d" disabled data-executed-lock="true" style="opacity:0.55;cursor:not-allowed;">تم التنفيذ ✓</button>`
+                  : `<button type="button" class="btn-3d btn-3d-buy" onclick="ui.approveCouncilDeal('${d.id}')">✅ شراء صفقة #${evNo} والانتقال للتالية</button>`}
                 ${councilOwnedQty > 0
-                  ? `<button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:7px 11px;font-size:11px;" onclick="ui.executeSpotSellNow('${d.sym}')">🔻 بيع الآن (${councilOwnedQty} ${unitSym})</button>`
-                  : `<button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:7px 11px;font-size:11px;" onclick="ui.rejectCouncilDeal('${d.id}')">❌ رفض / تخطي</button>`}
-                <button type="button" class="btn-3d btn-3d-gold btn-3d-sm" style="padding:7px 10px;font-size:11px;" onclick="ui.tab('settings');setTimeout(()=>document.getElementById('ai-agent-ask-inp')?.focus(),180)">🤖 سؤال الوكيل</button>
+                  ? `<button type="button" class="btn-3d btn-3d-sell" onclick="ui.executeSpotSellNow('${d.sym}')">🔻 بيع الآن (${councilOwnedQty} ${unitSym})</button>`
+                  : `<button type="button" class="btn-3d btn-3d-sell" onclick="ui.rejectCouncilDeal('${d.id}')">❌ رفض / تخطي</button>`}
+                <button type="button" class="btn-3d btn-sd-electric-flag" onclick="ui.tab('settings');setTimeout(()=>document.getElementById('ai-agent-ask-inp')?.focus(),180)">🤖 سؤال الوكيل</button>
               </div>
             </div>
           </div>
@@ -8191,7 +8326,8 @@
       },
 
       async runLiveFiveAgentDeliberation() {
-        const d = ELITE_DEALS.find((x) => x.id === state.heroDealId) || ELITE_DEALS[0];
+        const allDeals = (typeof ALL_CANDIDATE_DEALS !== 'undefined' && Array.isArray(ALL_CANDIDATE_DEALS)) ? ALL_CANDIDATE_DEALS : [];
+        const d = allDeals.find((x) => x.id === state.heroDealId) || allDeals[0];
         if (!d) return;
         const btn = document.getElementById('btn-live-5agents-deliberate');
         const origTxt = btn ? btn.textContent : '';
@@ -8199,7 +8335,7 @@
         try {
           const m = computeDealMetrics(d);
           const priceMap = {};
-          ELITE_DEALS.forEach((x) => { priceMap[x.sym] = x.price; });
+          allDeals.forEach((x) => { priceMap[x.sym] = x.price; });
           let heldVal = 0;
           Object.entries(state.spotHoldings || {}).forEach(([sym, qv]) => { heldVal += Number(qv || 0) * (priceMap[sym] || 0); });
           const availUsdt = Math.max(0, Math.round(state.equity - heldVal));
