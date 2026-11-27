@@ -1359,6 +1359,54 @@
       .council-final-actions{grid-template-columns:1fr}
       .council-hz-seg{width:100%}
     }
+    /* === 3-STEP GUIDED TRADING FLOW BAR === */
+    .guided-3step-shell{
+      position:relative;overflow:hidden;margin-bottom:10px;padding:12px 14px;border-radius:13px;
+      background:linear-gradient(175deg,#151A20 0%,#0E1216 60%,#090B0C 100%);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 24px rgba(0,0,0,0.48),0 0 18px rgba(0,230,91,0.08);
+    }
+    .guided-3step-shell::before{
+      content:"";position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,#E52546 0%,#D21034 18%,#FFFFFF 36%,#090B0C 54%,#007229 74%,#00E65B 90%,#E52546 100%);
+      background-size:220% 100%;animation:sdElectricFlow 6s linear infinite;
+      box-shadow:0 0 10px rgba(0,230,91,0.5),0 0 12px rgba(229,37,70,0.4);
+    }
+    .guided-3step-grid{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:9px;
+    }
+    .guided-step-card{
+      display:flex;flex-direction:column;justify-content:space-between;gap:7px;
+      padding:10px 12px;border-radius:11px;
+      background:linear-gradient(165deg,#181E25 0%,#0F1317 100%);
+      border:1px solid rgba(255,255,255,0.13);
+    }
+    .guided-step-card.step-active{
+      border-color:rgba(0,230,91,0.62);
+      box-shadow:0 0 16px rgba(0,230,91,0.16),inset 0 1px 0 rgba(255,255,255,0.16);
+    }
+    .guided-step-head{display:flex;align-items:center;gap:8px}
+    .guided-step-num{
+      width:24px;height:24px;border-radius:50%;flex:none;
+      display:inline-flex;align-items:center;justify-content:center;
+      font:900 12px/1 var(--num);color:#FFFFFF;
+      background:linear-gradient(135deg,#E52546 0%,#111417 50%,#00E65B 100%);
+      border:1px solid rgba(255,255,255,0.45);
+      box-shadow:0 0 10px rgba(0,230,91,0.35);
+    }
+    .guided-step-title{font-size:12.5px;font-weight:900;color:#FFFFFF}
+    .guided-step-sub{font-size:11px;color:#C9CED6;line-height:1.45;min-height:16px}
+    .guided-step-btn{
+      height:34px;width:100%;padding:0 10px !important;font-size:11.2px !important;font-weight:800 !important;
+      border-radius:8px !important;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;
+    }
+    .guided-drawer-bar{
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+      padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);
+    }
+    @media (max-width: 900px){
+      .guided-3step-grid{grid-template-columns:1fr;gap:8px}
+    }
     .lux-kpi-card{position:relative;overflow:hidden;background:linear-gradient(170deg,#171B1F,#111417) !important;border:1px solid rgba(255,255,255,0.12) !important}
     .lux-kpi-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:#C9CED6}
     .lux-kpi-card.kpi-sd-green::before{background:linear-gradient(90deg,#007229,#00E65B)}
@@ -2158,11 +2206,57 @@
         </div>
       </div>
 
-      <!-- شريط خلاصة اليوم المكتوبة والمسموعة + خطة الـ 10 خطوات (10 صفقات يومية للموافقة أو الرفض فقط) -->
-      <section id="daily-10step-brief-bar" class="holo-prism" style="margin-bottom:10px;padding:12px 14px;border-color:rgba(22, 184, 83,0.48);background:linear-gradient(135deg, rgba(6,22,42,0.95), rgba(8,16,32,0.96));">
+      <!-- شريط المسار الموجّه في 3 خطوات واضحة فور الدخول -->
+      <section id="daily-trading-guide-bar" class="guided-3step-shell" aria-label="خطوات التداول اليومي في 3 خطوات">
+        <div class="guided-3step-grid">
+          <!-- الخطوة 1: اختيار الصفقة -->
+          <div id="guided-step-1" class="guided-step-card step-active">
+            <div class="guided-step-head">
+              <span class="guided-step-num">1</span>
+              <span class="guided-step-title">اختر الصفقة أو فرصة البيع</span>
+            </div>
+            <div id="guided-s1-desc" class="guided-step-sub">الصفقة المختارة الآن: <strong style="color:#FFFFFF;">صفقة #1 (SOLUSDT)</strong> — اضغط أي بطاقة يميناً أو يساراً.</div>
+            <button type="button" id="guided-s1-btn" class="btn-3d guided-step-btn" style="border-color:rgba(201,206,214,0.35);color:#FFFFFF;" onclick="ui.selectNextPendingDeal()">🎯 الانتقال للصفقة التالية المتاحة</button>
+          </div>
+
+          <!-- الخطوة 2: مراجعة الشارت ومجلس الـ 5 وكلاء -->
+          <div id="guided-step-2" class="guided-step-card">
+            <div class="guided-step-head">
+              <span class="guided-step-num">2</span>
+              <span class="guided-step-title">راجع الشارت وإجماع الـ 5 وكلاء</span>
+            </div>
+            <div id="guided-s2-desc" class="guided-step-sub">إجماع الوكلاء: <strong style="color:#00E65B;">5/5 موافق</strong> • المبلغ المقترح حسب رصيدك المتاح.</div>
+            <button type="button" id="guided-s2-btn" class="btn-3d btn-sd-electric-flag guided-step-btn" onclick="document.getElementById('hero-agents-council-panel')?.scrollIntoView({behavior:'smooth',block:'start'});ui.runLiveFiveAgentDeliberation()">⚡ استعراض ومداولة الـ 5 وكلاء</button>
+          </div>
+
+          <!-- الخطوة 3: التنفيذ المباشر -->
+          <div id="guided-step-3" class="guided-step-card">
+            <div class="guided-step-head">
+              <span class="guided-step-num">3</span>
+              <span class="guided-step-title">نفّذ الصفقة وانتقل للتالية</span>
+            </div>
+            <div id="guided-s3-desc" class="guided-step-sub">تُسجَّل الصفقة برقمها اليومي ويُقفل زرها تلقائياً كـ «تم التنفيذ ✓».</div>
+            <button type="button" id="guided-s3-btn" class="btn-3d btn-3d-buy guided-step-btn" onclick="ui.approveCouncilDeal(ui.getCurrentHeroId())">✅ شراء صفقة #1 الآن</button>
+          </div>
+        </div>
+
+        <div class="guided-drawer-bar">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <button type="button" id="btn-toggle-10step-brief" class="btn-3d btn-3d-sm" style="padding:4px 10px;font-size:10.8px;border-color:rgba(201,206,214,0.35);color:#F2F4F7;" onclick="ui.toggleGuidedDrawer('daily-10step-brief-bar', this)">📋 الخلاصة الصوتية وخطة الـ 10 خطوات ▾</button>
+            <button type="button" id="btn-toggle-quick-planner" class="btn-3d btn-3d-sm" style="padding:4px 10px;font-size:10.8px;border-color:rgba(201,206,214,0.35);color:#F2F4F7;" onclick="ui.toggleGuidedDrawer('quick-summary-planner', this)">🎯 حاسبة الهدف وملخص (اشتر/بع 1-2-3) ▾</button>
+          </div>
+          <div id="daily-counter-pills" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span id="daily-exec-count-pill" class="hex-shield num" style="background:rgba(0,230,91,0.12);color:#00E65B;border-color:rgba(0,230,91,0.5);font-size:11px;padding:3px 9px;">📊 صفقاتك اليوم: 0 / 25</span>
+            <span id="daily-next-seq-pill" class="hex-shield num" style="background:rgba(201,206,214,0.12);color:#FFFFFF;border-color:rgba(201,206,214,0.45);font-size:11px;padding:3px 9px;">🎯 القادم: الصفقة رقم #1 اليوم</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- شريط خلاصة اليوم المكتوبة والمسموعة + خطة الـ 10 خطوات (قابل للفتح بضغطة واحدة لعدم تشتيت قاعة التداول) -->
+      <section id="daily-10step-brief-bar" class="holo-prism hidden" style="margin-bottom:10px;padding:12px 14px;border-color:rgba(0,230,91,0.42);background:linear-gradient(170deg,#14191F,#090B0C);">
         <div class="row-between" style="margin-bottom:8px;flex-wrap:wrap;gap:8px;">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <strong style="font-size:14.5px;color:#16B853;">🎙️ خلاصة اليوم وخطة الـ 10 خطوات (10 صفقات للموافقة أو الرفض)</strong>
+            <strong style="font-size:14px;color:#00E65B;">🎙️ خلاصة اليوم وخطة الـ 10 خطوات (10 صفقات للموافقة أو الرفض)</strong>
             <span id="brief-10step-progress-pill" class="hex-shield num" style="font-size:10.5px;color:#FFFFFF;border-color:rgba(201, 206, 214,0.55);padding:2px 9px;">المنجز: 0 / 10</span>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -2173,7 +2267,7 @@
         </div>
 
         <!-- الملخص المكتوب لليوم -->
-        <div id="brief-written-summary" class="holo-chamber" style="padding:9px 12px;margin-bottom:9px;font-size:12px;line-height:1.7;color:#e2e8f0;border-color:rgba(56,189,248,0.32);background:rgba(5,14,28,0.85);">
+        <div id="brief-written-summary" class="holo-chamber" style="padding:9px 12px;margin-bottom:9px;font-size:12px;line-height:1.7;color:#E2E8F0;border-color:rgba(201,206,214,0.28);background:rgba(11,14,17,0.9);">
           جاري إعداد خلاصة دراسة السوق وخطة الصفقات الـ 10 لليوم...
         </div>
 
@@ -2181,29 +2275,13 @@
         <div id="daily-10steps-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(215px, 1fr));gap:7px;"></div>
       </section>
 
-      <!-- شريط الدليل السريع للمبتدئ + عداد صفقات اليوم المرقّمة -->
-      <div id="daily-trading-guide-bar" class="holo-chamber" style="margin-bottom:8px;padding:8px 12px;border-radius:12px;background:rgba(8,20,38,0.88);border:1px solid rgba(56,189,248,0.32);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;color:#e2e8f0;">
-          <span class="hex-shield" style="color:#F2F4F7;border-color:rgba(201, 206, 214,0.55);font-size:10.5px;">🧭 كيف تشتري في 3 خطوات؟</span>
-          <span><strong style="color:#38bdf8;">①</strong> اضغط أي <strong>صفقة مرقّمة (#1 إلى #6)</strong> يمين أو يسار</span>
-          <span style="color:#64748b;">←</span>
-          <span><strong style="color:#F2F4F7;">②</strong> راجع شارتها الحي ومؤشرات الأمان بالمنتصف</span>
-          <span style="color:#64748b;">←</span>
-          <span><strong style="color:#16B853;">③</strong> اضغط <strong>«شراء»</strong> لتُسجَّل برقمها في جدول صفقاتك اليوم بالأسفل</span>
-        </div>
-        <div id="daily-counter-pills" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <span id="daily-exec-count-pill" class="hex-shield num" style="background:rgba(22, 184, 83,0.12);color:#16B853;border-color:rgba(22, 184, 83,0.5);font-size:11px;padding:3px 9px;">📊 صفقاتك اليوم: 0 / 25</span>
-          <span id="daily-next-seq-pill" class="hex-shield num" style="background:rgba(201, 206, 214,0.14);color:#FFFFFF;border-color:rgba(201, 206, 214,0.55);font-size:11px;padding:3px 9px;">🎯 القادم: الصفقة رقم #1 اليوم</span>
-        </div>
-      </div>
-
-      <!-- لوحة الملخص الفوري (اشتر 1-2-3 / بع 1-2-3 + ساعي/أسبوعي/شهري) + حاسبة الهدف الذكية -->
-      <section id="quick-summary-planner" class="holo-prism" style="margin-bottom:10px;padding:11px 13px;border-color:rgba(201, 206, 214,0.42);">
+      <!-- لوحة الملخص الفوري (اشتر 1-2-3 / بع 1-2-3 + ساعي/أسبوعي/شهري) + حاسبة الهدف الذكية (قابلة للفتح بضغطة واحدة) -->
+      <section id="quick-summary-planner" class="holo-prism hidden" style="margin-bottom:10px;padding:11px 13px;border-color:rgba(201, 206, 214,0.38);">
         <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(310px, 1fr));gap:12px;">
           <!-- 1. ملخص الانطلاق الفوري: اشتر 1-2-3 / بع 1-2-3 -->
-          <div class="holo-chamber" style="padding:10px 12px;border-radius:12px;border-color:rgba(56,189,248,0.32);">
+          <div class="holo-chamber" style="padding:10px 12px;border-radius:12px;border-color:rgba(201,206,214,0.28);">
             <div class="row-between" style="margin-bottom:7px;flex-wrap:wrap;gap:6px;">
-              <strong style="font-size:13px;color:#38bdf8;">⚡ ملخص الانطلاق السريع (اشتر 1-2-3 / بع 1-2-3)</strong>
+              <strong style="font-size:13px;color:#FFFFFF;">⚡ ملخص الانطلاق السريع (اشتر 1-2-3 / بع 1-2-3)</strong>
               <div style="display:flex;gap:4px;">
                 <button type="button" class="btn-3d btn-3d-sm btn-3d-gold qhz-btn" data-qhz="hourly" onclick="ui.setQuickHorizon('hourly')">⚡ ساعية</button>
                 <button type="button" class="btn-3d btn-3d-sm qhz-btn" data-qhz="weekly" onclick="ui.setQuickHorizon('weekly')">📅 أسبوعية</button>
@@ -2216,7 +2294,7 @@
                 <div id="quick-buy-123" style="display:flex;flex-direction:column;gap:5px;"></div>
               </div>
               <div>
-                <div style="font-size:11px;font-weight:900;color:#ff6b8b;margin-bottom:4px;">🔴 بِع / اجنِ ربحاً (1 • 2 • 3):</div>
+                <div style="font-size:11px;font-weight:900;color:#E52546;margin-bottom:4px;">🔴 بِع / اجنِ ربحاً (1 • 2 • 3):</div>
                 <div id="quick-sell-123" style="display:flex;flex-direction:column;gap:5px;"></div>
               </div>
             </div>
@@ -5838,6 +5916,81 @@
             </div>
           </div>
         `;
+
+        // تحديث شريط الخطوات الـ 3 التفاعلي أعلى قاعة التداول لحظياً
+        const s1Desc = document.getElementById('guided-s1-desc');
+        const s2Desc = document.getElementById('guided-s2-desc');
+        const s3Desc = document.getElementById('guided-s3-desc');
+        const s3Btn = document.getElementById('guided-s3-btn');
+        const s1Card = document.getElementById('guided-step-1');
+        const s2Card = document.getElementById('guided-step-2');
+        const s3Card = document.getElementById('guided-step-3');
+        const investLabel = m.invest > 0 ? `$${m.invest.toLocaleString()}` : '—';
+        if (s1Desc) {
+          s1Desc.innerHTML = `المختارة الآن: <strong style="color:#FFFFFF;">صفقة #${evNo} (${d.sym})</strong> • السعر <strong class="num" style="color:#00E65B;">$${d.price.toLocaleString()}</strong>`;
+        }
+        if (s2Desc) {
+          s2Desc.innerHTML = `إجماع الوكلاء: <strong style="color:${approvedByCouncil ? '#00E65B' : '#E52546'};">${greenCnt}/5 أخضر (${avgScoreTxt})</strong> • مقترح <strong class="num" style="color:#FFFFFF;">${investLabel}</strong>`;
+        }
+        if (s3Desc) {
+          s3Desc.innerHTML = pendingCnt === 0
+            ? `<strong style="color:#00E65B;">🎉 اكتملت الـ ${top5.length} صفقات اليوم</strong> — راقب البيع وجني الربح.`
+            : (alreadyBought
+              ? `<strong style="color:#00E65B;">تم تنفيذ صفقة #${evNo} اليوم ✓</strong> — انتقل للصفقة التالية.`
+              : `المتبقي اليوم: <strong class="num" style="color:#FFFFFF;">${pendingCnt} / ${top5.length}</strong> • هدف الربح <strong class="num text-ok">$${m.tp1}</strong>.`);
+        }
+        if (s3Btn) {
+          if (pendingCnt === 0) {
+            s3Btn.textContent = '🎉 اكتملت الـ 10 صفقات اليوم ✓';
+            s3Btn.disabled = true;
+            s3Btn.style.opacity = '0.6';
+            s3Btn.style.cursor = 'not-allowed';
+          } else if (alreadyBought) {
+            s3Btn.textContent = 'تم التنفيذ ✓ — اختر التالية';
+            s3Btn.disabled = true;
+            s3Btn.style.opacity = '0.6';
+            s3Btn.style.cursor = 'not-allowed';
+          } else {
+            s3Btn.textContent = `✅ شراء صفقة #${evNo} (${d.sym.replace('USDT', '')}) الآن`;
+            s3Btn.disabled = false;
+            s3Btn.style.opacity = '1';
+            s3Btn.style.cursor = 'pointer';
+            s3Btn.onclick = () => this.approveCouncilDeal(d.id);
+          }
+        }
+        if (s1Card && s2Card && s3Card) {
+          s1Card.classList.toggle('step-active', !!alreadyBought && pendingCnt > 0);
+          s2Card.classList.toggle('step-active', !alreadyBought && !approvedByCouncil && pendingCnt > 0);
+          s3Card.classList.toggle('step-active', !alreadyBought && approvedByCouncil && pendingCnt > 0);
+        }
+      },
+
+      toggleGuidedDrawer(drawerId, btn) {
+        const el = document.getElementById(drawerId);
+        if (!el) return;
+        const willOpen = el.classList.contains('hidden');
+        el.classList.toggle('hidden', !willOpen);
+        if (btn) {
+          btn.textContent = btn.textContent.replace(/[▾▴]/g, '') + (willOpen ? '▴' : '▾');
+          btn.classList.toggle('btn-3d-gold', willOpen);
+        }
+      },
+
+      selectNextPendingDeal() {
+        const top = this.getTop5DailyDeals();
+        const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+        const rejected = state.rejectedDealIds || {};
+        const pending = top.filter((x) => !rejected[x.id] && !todayLog.some((t) => t.dealId === x.id || t.sym === x.sym));
+        if (!pending.length) {
+          this.toast('🎉 اكتملت جميع صفقات اليوم — يمكنك متابعة البيع وجني الربح من المحفظة');
+          return;
+        }
+        const curIdx = pending.findIndex((x) => x.id === state.heroDealId);
+        const nextDeal = pending[(curIdx + 1) % pending.length];
+        if (nextDeal) {
+          this.selectHeroDeal(nextDeal.id);
+          this.toast(`🎯 تم اختيار صفقة #${nextDeal._evalNo} (${nextDeal.sym})`);
+        }
       },
 
       renderTodayExecutedBox() {
