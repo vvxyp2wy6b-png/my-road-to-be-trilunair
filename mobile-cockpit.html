@@ -1236,11 +1236,41 @@
     .val-emerald,.text-ok{color:#16B853 !important}
     .text-err{color:#E52546 !important}
     .text-sec,.val-cyan{color:#C9CED6 !important}
-    .mob-brand-lockup{display:inline-flex;align-items:center;gap:7px}
-    .mob-brand-words{display:flex;flex-direction:column;line-height:1.05;font-weight:900;letter-spacing:0.08em}
-    .mob-brand-words .sd-w1{font-size:11px;color:#16B853}
-    .mob-brand-words .sd-w2{font-size:11px;color:#F2F4F7}
+    /* === SUDANESE TRILLIONAIRE — LUXURY MOBILE LAYOUT (390px) === */
+    .mob-brand-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 2px 6px;border-bottom:1px solid rgba(255,255,255,0.08)}
+    .mob-brand-lockup{display:inline-flex;align-items:center;gap:9px;min-width:0}
+    .mob-logo-svg{width:44px;height:40px;flex:none;display:block;filter:drop-shadow(0 0 8px rgba(22,184,83,0.35))}
+    .mob-brand-words{display:flex;flex-direction:column;line-height:1.08;font-weight:900;letter-spacing:0.12em}
+    .mob-brand-words .sd-w1{font-size:13px;color:#16B853;text-shadow:0 0 10px rgba(0,154,56,0.45)}
+    .mob-brand-words .sd-w2{font-size:12.5px;background:linear-gradient(180deg,#FFFFFF 0%,#C9CED6 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .mob-status-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0 6px}
+    .mob-desk-btn{padding:4px 10px !important;font-size:10.5px !important;border-radius:8px !important;white-space:nowrap}
+    .mob-cluster{display:flex;flex-direction:column;gap:0;border-radius:11px;overflow:hidden;border:1px solid rgba(201,206,214,0.34);background:#090B0C;box-shadow:0 4px 12px rgba(0,0,0,0.55)}
+    .mob-crow{display:grid;gap:0;align-items:stretch}
+    .mob-crow-2{grid-template-columns:1fr 1.35fr}
+    .mob-crow-3{grid-template-columns:1fr 1fr 1fr;border-top:1px solid rgba(255,255,255,0.16)}
+    .mob-key{height:36px;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 6px;margin:0;border:0;border-radius:0 !important;
+      border-inline-start:1px solid rgba(255,255,255,0.16);background:linear-gradient(180deg,#1B2026,#111417);color:#F2F4F7;
+      font:700 11px/1 'Cairo','Tajawal',sans-serif;white-space:nowrap;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,0.12),inset 0 -2px 0 rgba(0,0,0,0.45)}
+    .mob-crow > :first-child{border-inline-start:0}
+    .mob-key.mob-key-green{background:linear-gradient(180deg,#12A845,#007229);color:#FFFFFF}
+    .mob-key.mob-key-red{background:linear-gradient(180deg,#E52546,#A80D29);color:#FFFFFF;font-weight:800}
+    .mob-key-music{height:36px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 8px;border-inline-start:1px solid rgba(255,255,255,0.16);
+      background:linear-gradient(180deg,#171B1F,#111417)}
+    .mob-key-music button{background:transparent !important;border:0 !important;box-shadow:none !important;padding:0 !important;color:#F2F4F7 !important;font:700 10.5px/1 'Cairo','Tajawal',sans-serif !important;white-space:nowrap;cursor:pointer}
+    .mob-key-music input[type="range"]{width:52px;accent-color:#16B853;margin:0}
+    #mob-trading-subnav.mob-subnav-strip{display:grid !important;grid-template-columns:repeat(4,1fr);gap:0 !important;padding:0 !important;border-radius:11px;overflow:hidden;
+      border:1px solid rgba(201,206,214,0.32);background:#090B0C}
+    #mob-trading-subnav .mob-sub-btn{border-radius:0 !important;border:0 !important;border-inline-start:1px solid rgba(255,255,255,0.14) !important;
+      height:36px;padding:0 4px !important;font-size:11px !important;white-space:nowrap;background:linear-gradient(180deg,#171B1F,#111417) !important;color:#F2F4F7 !important;box-shadow:none !important}
+    #mob-trading-subnav .mob-sub-btn:first-child{border-inline-start:0 !important}
+    #mob-trading-subnav .mob-sub-btn.btn-3d-gold{background:linear-gradient(180deg,#12A845,#007229) !important;color:#FFFFFF !important}
     .mob-tab-btn.active{background:linear-gradient(180deg,#12A845 0%,#007229 100%) !important;color:#FFFFFF !important;border-color:rgba(22,184,83,0.75) !important}
+    @media (max-width: 820px){
+      .lux-sec-heading{flex-direction:column !important;align-items:stretch !important;gap:6px !important}
+      .lux-sec-heading .lux-sec-title{white-space:nowrap;font-size:14px !important}
+    }
+    html[data-layout="mobile"] .lux-sec-heading{flex-direction:column !important;align-items:stretch !important;gap:6px !important}
 
     /* === توسيط المحتوى والمبالغ وفصل ألوان العناوين عن الأرقام في جميع الحاويات === */
     .lux-kpi-five-grid {
@@ -1749,11 +1779,11 @@
       </div>
     </header>
 
-    <!-- 1B. هيدر الجوال مع زر العودة لسطح المكتب وزر موسيقى التركيز وأسماء كافة الأزرار -->
+    <!-- 1B. هيدر الجوال الاحترافي (SUDANESE TRILLIONAIRE) -->
     <header class="mob-bridge mobile-only">
-      <div class="row-between">
-        <div class="mob-brand-lockup" dir="ltr">
-          <svg class="logo-svg" viewBox="18 4 148 126" width="32" height="28" role="img" aria-label="SUDANESE TRILLIONAIRE">
+      <div class="mob-brand-bar" dir="ltr">
+        <div class="mob-brand-lockup">
+          <svg class="mob-logo-svg" viewBox="18 4 148 126" width="44" height="40" role="img" aria-label="SUDANESE TRILLIONAIRE">
             <defs>
               <linearGradient id="sd-chr-M" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#FFFFFF"/>
@@ -1762,8 +1792,8 @@
               </linearGradient>
               <linearGradient id="sd-t-M" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#FFFFFF"/>
-                <stop offset="55%" stop-color="#D7DCE3"/>
-                <stop offset="100%" stop-color="#9AA3AE"/>
+                <stop offset="55%" stop-color="#E6EBF2"/>
+                <stop offset="100%" stop-color="#A6B0BC"/>
               </linearGradient>
               <linearGradient id="sd-rim-M" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#FFFFFF"/>
@@ -1771,54 +1801,49 @@
                 <stop offset="68%" stop-color="#16B853"/>
                 <stop offset="100%" stop-color="#FFFFFF"/>
               </linearGradient>
-              <filter id="sd-glow-M" x="-18%" y="-18%" width="136%" height="136%">
-                <feDropShadow dx="0" dy="0" stdDeviation="3.2" flood-color="#16B853" flood-opacity="0.32"/>
-              </filter>
             </defs>
-            <g filter="url(#sd-glow-M)">
-              <polygon points="92,8 148,38 148,96 92,126 36,96 36,38" fill="#090B0C" stroke="url(#sd-rim-M)" stroke-width="4.5" stroke-linejoin="round"/>
-              <polygon points="92,16 141,42 141,92 92,118 43,92 43,42" fill="#111417" stroke="rgba(255,255,255,0.28)" stroke-width="1.4" stroke-linejoin="round"/>
-              <!-- شارة مثلث علم السودان المصغّرة أعلى حرف T -->
-              <polygon points="78,34 92,24 106,34 101,37 92,30 83,37" fill="#16B853"/>
-              <!-- حرف T المجسم بالكروم الفضي -->
-              <path d="M56,43 L128,43 L120,57 L99,57 L99,106 L92,112 L85,106 L85,57 L64,57 Z" fill="url(#sd-t-M)" stroke="#FFFFFF" stroke-width="1.2" stroke-linejoin="round"/>
-              <path d="M92,43 L128,43 L120,57 L99,57 L99,106 L92,112 Z" fill="rgba(0,0,0,0.22)"/>
-              <line x1="65" y1="48" x2="119" y2="48" stroke="#FFFFFF" stroke-width="1.4" stroke-opacity="0.75"/>
-              <!-- لمسة ألوان العلم أسفل السداسي -->
-              <rect x="70" y="114" width="11" height="2.4" rx="1" fill="#D21034"/>
-              <rect x="81" y="114" width="11" height="2.4" rx="1" fill="#FFFFFF"/>
-              <rect x="92" y="114" width="11" height="2.4" rx="1" fill="#090B0C"/>
-              <rect x="103" y="114" width="11" height="2.4" rx="1" fill="#007229"/>
-            </g>
-            
+            <polygon points="92,8 148,38 148,96 92,126 36,96 36,38" fill="#090B0C" stroke="url(#sd-rim-M)" stroke-width="5.5" stroke-linejoin="round"/>
+            <polygon points="92,17 140,42 140,92 92,117 44,92 44,42" fill="#111417" stroke="rgba(255,255,255,0.34)" stroke-width="1.6" stroke-linejoin="round"/>
+            <polygon points="78,34 92,23 106,34 101,37 92,30 83,37" fill="#16B853"/>
+            <path d="M55,42 L129,42 L121,57 L99,57 L99,106 L92,112 L85,106 L85,57 L63,57 Z" fill="url(#sd-t-M)" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M92,42 L129,42 L121,57 L99,57 L99,106 L92,112 Z" fill="rgba(0,0,0,0.20)"/>
+            <rect x="70" y="114" width="11" height="2.8" rx="1" fill="#D21034"/>
+            <rect x="81" y="114" width="11" height="2.8" rx="1" fill="#FFFFFF"/>
+            <rect x="92" y="114" width="11" height="2.8" rx="1" fill="#090B0C"/>
+            <rect x="103" y="114" width="11" height="2.8" rx="1" fill="#007229"/>
           </svg>
           <div class="mob-brand-words">
             <span class="sd-w1">SUDANESE</span>
             <span class="sd-w2">TRILLIONAIRE</span>
           </div>
-          <span class="sd-flag sd-flag-sm" dir="ltr" role="img" aria-label="علم السودان">
-                <svg class="sd-flag-svg" viewBox="0 0 60 30" preserveAspectRatio="none">
-                  <rect x="0" y="0" width="60" height="10" fill="#D21034"/>
-                  <rect x="0" y="10" width="60" height="10" fill="#FFFFFF"/>
-                  <rect x="0" y="20" width="60" height="10" fill="#090B0C"/>
-                  <polygon points="0,0 24,15 0,30" fill="#007229"/>
-                </svg>
-              </span>
         </div>
-        <div style="display:flex;align-items:center;gap:4px;">
-          <span id="live-feed-badge-mob" class="hex-shield num" style="font-size:9px;color:var(--ok);border-color:var(--ok);">TESTNET•28/11</span>
-          <button type="button" class="btn-3d btn-3d-sm btn-3d-gold" style="padding:2px 8px;font-size:10px;" onclick="ui.exitMobileLayout()">🖥️ سطح المكتب</button>
-        </div>
+        <span class="sd-flag sd-flag-sm" dir="ltr" role="img" aria-label="علم السودان" style="width:42px;height:21px;">
+          <svg class="sd-flag-svg" viewBox="0 0 60 30" preserveAspectRatio="none">
+            <rect x="0" y="0" width="60" height="10" fill="#D21034"/>
+            <rect x="0" y="10" width="60" height="10" fill="#FFFFFF"/>
+            <rect x="0" y="20" width="60" height="10" fill="#090B0C"/>
+            <polygon points="0,0 24,15 0,30" fill="#007229"/>
+          </svg>
+        </span>
       </div>
-      <div class="row-between" style="flex-wrap:wrap;gap:4px;">
-        <div class="music-ctrl-pill" style="padding:2px 6px;">
-          <button type="button" id="btn-next-hr-mob" class="btn-3d btn-3d-sm btn-3d-buy" onclick="ui.openNextHourBriefModal()">⏱️ الساعة القادمة</button><button type="button" id="btn-ambient-music-mob" class="btn-3d btn-3d-sm" style="padding:3px 7px;font-size:10.5px;" onclick="ui.toggleAmbientMusic()">🎵 موسيقى: إيقاف</button>
-          <input id="ambient-vol-slider-mob" type="range" min="0" max="100" value="65" class="music-vol-range" style="width:48px;" aria-label="صوت الموسيقى" oninput="ui.setAmbientVolume(this.value)" />
+
+      <div class="mob-status-bar">
+        <span id="live-feed-badge-mob" class="hex-shield num" style="font-size:9.5px;padding:2px 8px;color:#16B853;border-color:rgba(22,184,83,0.45);">TESTNET • تجريبي</span>
+        <button type="button" class="btn-3d btn-3d-sm mob-desk-btn" onclick="ui.exitMobileLayout()">🖥️ سطح المكتب</button>
+      </div>
+
+      <div class="mob-cluster" aria-label="أدوات الجوال السريعة">
+        <div class="mob-crow mob-crow-2">
+          <button type="button" id="btn-next-hr-mob" class="mob-key mob-key-green" onclick="ui.openNextHourBriefModal()">⏱️ الساعة القادمة</button>
+          <div class="mob-key-music">
+            <button type="button" id="btn-ambient-music-mob" onclick="ui.toggleAmbientMusic()">🎵 موسيقى</button>
+            <input id="ambient-vol-slider-mob" type="range" min="0" max="100" value="65" class="music-vol-range" aria-label="صوت الموسيقى" oninput="ui.setAmbientVolume(this.value)" />
+          </div>
         </div>
-        <div style="display:flex;gap:4px;flex-wrap:wrap;">
-          <button type="button" class="btn-3d btn-3d-sm" style="padding:3px 7px;font-size:10.5px;" onclick="ui.openBinanceModal()">🔑 مفاتيح</button>
-          <button type="button" id="btn-kill-switch-mob" class="btn-3d btn-3d-sm kill-btn-3d" style="padding:3px 7px;font-size:10.5px;" onclick="ui.triggerKillSwitch()">🛑 إيقاف</button>
-          <button type="button" class="btn-3d btn-3d-sm btn-3d-sell" style="padding:3px 7px;font-size:10.5px;" onclick="ui.lockCockpit()">🔒 خروج</button>
+        <div class="mob-crow mob-crow-3">
+          <button type="button" class="mob-key" onclick="ui.openBinanceModal()">🔑 مفاتيح</button>
+          <button type="button" class="mob-key" onclick="ui.lockCockpit()">🔒 خروج</button>
+          <button type="button" id="btn-kill-switch-mob" class="mob-key mob-key-red" onclick="ui.triggerKillSwitch()">🛑 طوارئ</button>
         </div>
       </div>
     </header>
@@ -1828,10 +1853,10 @@
          ================================================================ -->
     <!-- شريط التداول الفرعي للجوال -->
     <div id="mob-trading-subnav" class="mob-subnav-strip show-in-trading">
-      <button type="button" class="btn-3d btn-3d-sm btn-3d-gold mob-sub-btn" data-subtab="elite90" style="flex:1;" onclick="ui.tab('elite90')">🏛️ <span dir="ltr">&ge;75%</span></button>
-      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="charts3d" style="flex:1;" onclick="ui.tab('charts3d')">🕯️ 3D</button>
-      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="stocks" style="flex:1;" onclick="ui.tab('stocks')">📈 الأسهم</button>
-      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="testnet14" style="flex:1;" onclick="ui.tab('testnet14')">🧪 المعايرة 28/11</button>
+      <button type="button" class="btn-3d btn-3d-sm btn-3d-gold mob-sub-btn" data-subtab="elite90" onclick="ui.tab('elite90')">🏛️ <span dir="ltr">&ge;75%</span></button>
+      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="charts3d" onclick="ui.tab('charts3d')">🕯️ 3D</button>
+      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="stocks" onclick="ui.tab('stocks')">📈 الأسهم</button>
+      <button type="button" class="btn-3d btn-3d-sm mob-sub-btn" data-subtab="testnet14" onclick="ui.tab('testnet14')">🧪 المعايرة</button>
     </div>
 
     <!-- 2A. لوحة المؤشرات المتمركزة (عناوين وأرقام بألوان متمايزة وخط القاهرة) + منصة الوكيل المتحدث «ترليورين» -->
