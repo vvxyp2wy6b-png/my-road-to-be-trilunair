@@ -1434,6 +1434,74 @@
     @media (max-width: 540px){
       .capital-clarity-grid{grid-template-columns:1fr}
     }
+    /* === EXECUTIVE QUICK DECISION FLOW (ادخل -> قرّر -> اربح) === */
+    .qdf-overlay{
+      position:fixed;inset:0;z-index:9990;
+      background:radial-gradient(circle at 50% 0%,rgba(0,230,91,0.12),rgba(9,11,12,0.97) 58%);
+      backdrop-filter:blur(12px);
+      display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;
+    }
+    .qdf-overlay.hidden{display:none !important}
+    .qdf-shell{
+      position:relative;width:100%;max-width:760px;border-radius:16px;overflow:hidden;
+      background:linear-gradient(175deg,#151B22 0%,#0E1216 58%,#090B0C 100%);
+      border:1px solid rgba(255,255,255,0.16);
+      box-shadow:0 24px 60px rgba(0,0,0,0.8),0 0 36px rgba(0,230,91,0.14);
+      padding:18px 20px;display:flex;flex-direction:column;gap:14px;
+    }
+    .qdf-shell::before{
+      content:"";position:absolute;top:0;left:0;right:0;height:3.5px;
+      background:linear-gradient(90deg,#E52546 0%,#D21034 18%,#FFFFFF 36%,#090B0C 54%,#007229 74%,#00E65B 90%,#E52546 100%);
+      background-size:220% 100%;animation:sdElectricFlow 5s linear infinite;
+      box-shadow:0 0 14px rgba(0,230,91,0.6),0 0 14px rgba(229,37,70,0.5);
+    }
+    .qdf-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .qdf-prog-track{width:100%;height:7px;border-radius:999px;background:#090B0C;border:1px solid rgba(255,255,255,0.12);overflow:hidden}
+    .qdf-prog-fill{height:100%;border-radius:999px;transition:width 0.35s ease;background:linear-gradient(90deg,#E52546 0%,#FFFFFF 35%,#00E65B 100%);box-shadow:0 0 12px rgba(0,230,91,0.55)}
+    .qdf-wallet-strip{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;
+    }
+    .qdf-wallet-pill{
+      padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);
+      display:flex;flex-direction:column;gap:2px;text-align:center;
+    }
+    .qdf-deal-box{
+      padding:14px 16px;border-radius:13px;
+      background:linear-gradient(165deg,#181F27 0%,#0D1115 100%);
+      border:1px solid rgba(0,230,91,0.38);
+      display:flex;flex-direction:column;gap:12px;
+    }
+    .qdf-metrics-row{
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;
+    }
+    .qdf-metric{
+      padding:8px;border-radius:9px;background:#0A0D10;border:1px solid rgba(255,255,255,0.09);text-align:center;
+    }
+    .qdf-agents-row{
+      display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;
+    }
+    .qdf-agent-mini{
+      padding:7px 6px;border-radius:9px;background:#0B0F13;border:1px solid rgba(255,255,255,0.12);
+      display:flex;flex-direction:column;gap:3px;text-align:center;position:relative;overflow:hidden;
+    }
+    .qdf-agent-mini::before{
+      content:"";position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,#E52546 0%,#FFFFFF 35%,#00E65B 100%);
+    }
+    .qdf-actions{
+      display:grid;grid-template-columns:1.6fr 1fr;gap:10px;
+    }
+    .qdf-btn-big{
+      height:48px;width:100%;font-size:14px !important;font-weight:900 !important;border-radius:11px !important;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+    }
+    @media (max-width: 680px){
+      .qdf-shell{padding:14px 12px;gap:10px}
+      .qdf-wallet-strip{grid-template-columns:1fr}
+      .qdf-metrics-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .qdf-agents-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .qdf-actions{grid-template-columns:1fr}
+    }
     .lux-kpi-card{position:relative;overflow:hidden;background:linear-gradient(170deg,#171B1F,#111417) !important;border:1px solid rgba(255,255,255,0.12) !important}
     .lux-kpi-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:#C9CED6}
     .lux-kpi-card.kpi-sd-green::before{background:linear-gradient(90deg,#007229,#00E65B)}
@@ -2224,7 +2292,10 @@
          ================================================================ -->
     <main id="sec-elite90" style="margin-top:4px;">
       <div class="lux-sec-heading">
-        <span class="lux-sec-title">قاعة التداول</span>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span class="lux-sec-title">قاعة التداول</span>
+          <button type="button" id="btn-open-quick-flow" class="btn-3d btn-sd-electric-flag" style="padding:6px 14px;font-size:12px;font-weight:900;border-radius:10px;" onclick="ui.openQuickDecisionFlow()">⚡ جلسة القرار السريع (ادخل ← قرّر ← اربح)</button>
+        </div>
         <div style="display:flex;gap:5px;flex-wrap:wrap;">
           <button type="button" class="btn-3d btn-3d-sm btn-3d-gold round-filter-btn" data-rf="all" onclick="ui.filterDealsRound('all')">الكل <span dir="ltr">&ge;75%</span></button>
           <button type="button" class="btn-3d btn-3d-sm round-filter-btn" data-rf="1h" onclick="ui.filterDealsRound('1h')">⚡ 1 ساعة</button>
@@ -3154,6 +3225,40 @@
     <button type="button" class="mob-tab-btn" data-mob-group="cfo" data-mob-tab="cfo" onclick="ui.tab('cfo')"><span>💼</span><span>المدير المالي</span></button>
     <button type="button" class="mob-tab-btn" data-mob-group="settings" data-mob-tab="settings" onclick="ui.tab('settings')"><span>⚙️</span><span>الإعدادات والصوت</span></button>
   </nav>
+
+  <!-- جلسة القرار السريع (مسار آلي 1-بـ-1: ادخل ← شاهد رأي الـ 5 وكلاء ← قرّر ← اربح) -->
+  <div id="quick-decision-flow-overlay" class="qdf-overlay hidden" role="dialog" aria-modal="true" aria-label="جلسة القرار السريع">
+    <div class="qdf-shell">
+      <div class="qdf-topbar">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <strong style="font-size:15.5px;color:#FFFFFF;">⚡ جلسة القرار السريع</strong>
+          <span id="qdf-step-badge" class="hex-shield num" style="font-size:11px;padding:2px 9px;color:#00E65B;border-color:rgba(0,230,91,0.55);background:rgba(0,230,91,0.12);">الصفقة 1 من 10</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button type="button" class="btn-3d btn-3d-sm" style="padding:5px 11px;font-size:11px;border-color:rgba(201,206,214,0.38);color:#F2F4F7;" onclick="ui.closeQuickDecisionFlow()">📊 الوضع المتقدم الكامل</button>
+        </div>
+      </div>
+
+      <div class="qdf-prog-track"><div id="qdf-prog-fill" class="qdf-prog-fill" style="width:10%;"></div></div>
+
+      <div class="qdf-wallet-strip">
+        <div class="qdf-wallet-pill">
+          <span class="muted" style="font-size:10px;">💵 الكاش الحر المتاح للشراء</span>
+          <strong id="qdf-free-cash" class="num" dir="ltr" style="font-size:14px;color:#00E65B;">$0 USDT</strong>
+        </div>
+        <div class="qdf-wallet-pill">
+          <span class="muted" style="font-size:10px;">🪙 العملات المملوكة (للمراقبة/البيع)</span>
+          <strong id="qdf-held-val" class="num" dir="ltr" style="font-size:14px;color:#FFFFFF;">$0</strong>
+        </div>
+        <div class="qdf-wallet-pill">
+          <span class="muted" style="font-size:10px;">✅ الأرباح المحققة الصافية</span>
+          <strong id="qdf-realized-pnl" class="num" dir="ltr" style="font-size:14px;color:#16B853;">+$0</strong>
+        </div>
+      </div>
+
+      <div id="qdf-body"></div>
+    </div>
+  </div>
 
   <!-- إيصال تأكيد الشراء أو البيع الفوري -->
   <div id="modal-exec-receipt" class="holo-modal-bg hidden" onclick="if(event.target===this)ui.closeModals()">
@@ -8656,6 +8761,273 @@
         } catch (err) {
           box.textContent = `❌ تعذّر الاتصال بالوكيل: ${err?.message || err}`;
         }
+      },
+
+      _buildQuickFlowQueue() {
+        const skipped = state.qdfSkippedKeys || {};
+        const queue = [];
+        // 1) أولوية قصوى: فرص البيع / جني الربح للعملات المملوكة فعلياً فقط (qty > 0)
+        const sellRecs = typeof this.buildOwnedSellRecommendations === 'function' ? this.buildOwnedSellRecommendations() : [];
+        sellRecs.forEach((s) => {
+          if (Number(s.qty || 0) > 0 && !skipped[`SELL_${s.sym}`]) {
+            queue.push({ key: `SELL_${s.sym}`, kind: 'SELL', sell: s });
+          }
+        });
+        // 2) تليها الصفقات اليومية المتبقية للشراء بالتتابع
+        const topDeals = this.getTop5DailyDeals();
+        const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+        const rejected = state.rejectedDealIds || {};
+        topDeals.forEach((d) => {
+          const done = todayLog.some((t) => t.dealId === d.id || t.sym === d.sym);
+          if (!done && !rejected[d.id] && !skipped[`BUY_${d.id}`]) {
+            queue.push({ key: `BUY_${d.id}`, kind: 'BUY', deal: d });
+          }
+        });
+        return queue;
+      },
+
+      openQuickDecisionFlow() {
+        state.qdfSkippedKeys = {};
+        state.qdfExecutedCount = 0;
+        state.qdfSessionTotal = Math.max(1, this._buildQuickFlowQueue().length);
+        document.getElementById('quick-decision-flow-overlay')?.classList.remove('hidden');
+        this.renderQuickDecisionCard(true);
+      },
+
+      closeQuickDecisionFlow() {
+        document.getElementById('quick-decision-flow-overlay')?.classList.add('hidden');
+      },
+
+      qdfAdjustUsd(dealId, delta) {
+        this.adjustDealQty(dealId, delta);
+        this.renderQuickDecisionCard(false);
+      },
+
+      async _qdfFetchLiveCouncil(d, availUsdt, investUsd) {
+        try {
+          const m = computeDealMetrics(d);
+          const hz = state.councilHorizon || '1H';
+          const key = `${d.id}_${hz}`;
+          if (state.liveCouncilByDeal && state.liveCouncilByDeal[key]) return;
+          const r = await fetch('/api/executive/ai-providers/deliberate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sym: d.sym,
+              name: d.name,
+              price: Number(d.price || 0),
+              tp1: Number(m.tp1 || 0),
+              sl: Number(m.sl || 0),
+              horizon: hz,
+              availUsdt,
+              investUsd,
+              confPct: Number(d.conf || 75),
+              aiScores: (d.aiScores || []).map((v) => Number.isFinite(Number(v)) ? Number(v) : 75)
+            })
+          });
+          if (!r.ok) return;
+          const j = await r.json();
+          if (j.ok && Array.isArray(j.agents)) {
+            state.liveCouncilByDeal = state.liveCouncilByDeal || {};
+            state.liveCouncilByDeal[key] = j;
+            if (!document.getElementById('quick-decision-flow-overlay')?.classList.contains('hidden')) {
+              this.renderQuickDecisionCard(false);
+            }
+          }
+        } catch (_) {}
+      },
+
+      renderQuickDecisionCard(triggerDeliberate) {
+        const body = document.getElementById('qdf-body');
+        const stepBadge = document.getElementById('qdf-step-badge');
+        const progFill = document.getElementById('qdf-prog-fill');
+        if (!body) return;
+
+        // حساب السيولة الحقيقية
+        const priceMap = {};
+        ALL_CANDIDATE_DEALS.forEach((x) => { priceMap[x.sym] = Number(x.price || 0); });
+        let heldVal = 0;
+        Object.entries(state.spotHoldings || {}).forEach(([s, q]) => { heldVal += Number(q || 0) * (priceMap[s] || 0); });
+        const availUsdt = Math.max(0, Math.round(Number(state.equity || 0) - heldVal));
+        const realized = Number(state.netProfit || 0);
+
+        const elFree = document.getElementById('qdf-free-cash');
+        const elHeld = document.getElementById('qdf-held-val');
+        const elReal = document.getElementById('qdf-realized-pnl');
+        if (elFree) elFree.textContent = `$${availUsdt.toLocaleString()} USDT`;
+        if (elHeld) elHeld.textContent = `$${Math.round(heldVal).toLocaleString()}`;
+        if (elReal) elReal.textContent = `${realized >= 0 ? '+' : '-'}$${Math.abs(Math.round(realized)).toLocaleString()}`;
+
+        const queue = this._buildQuickFlowQueue();
+        const total = Math.max(state.qdfSessionTotal || 1, queue.length + (state.qdfExecutedCount || 0));
+        const doneSoFar = Math.max(0, total - queue.length);
+        const pct = Math.min(100, Math.round(((doneSoFar + (queue.length ? 1 : 0)) / total) * 100));
+        if (progFill) progFill.style.width = `${pct}%`;
+
+        if (!queue.length) {
+          if (stepBadge) stepBadge.textContent = `✅ اكتملت الجلسة (${doneSoFar}/${total})`;
+          const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+          const totalInvested = todayLog.reduce((s, r) => s + Number(r.invest || 0), 0);
+          body.innerHTML = `
+            <div class="qdf-deal-box" style="text-align:center;padding:22px 16px;">
+              <div style="font-size:28px;">🎉</div>
+              <strong style="font-size:18px;color:#00E65B;">اكتملت جلسة القرار السريع بنجاح!</strong>
+              <p class="muted" style="margin:0;font-size:12.5px;line-height:1.6;">
+                نفّذت <strong style="color:#FFFFFF;">${todayLog.length} صفقة اليوم</strong> بإجمالي استثمار <strong class="num" style="color:#FFFFFF;">$${totalInvested.toLocaleString()}</strong> • الكاش الحر المتبقي <strong class="num" style="color:#00E65B;">$${availUsdt.toLocaleString()} USDT</strong>.
+              </p>
+              <div class="qdf-actions" style="margin-top:6px;">
+                <button type="button" class="btn-3d btn-3d-buy qdf-btn-big" onclick="ui.closeQuickDecisionFlow()">📊 العودة للوحة المتابعة</button>
+                <button type="button" class="btn-3d btn-sd-electric-flag qdf-btn-big" onclick="ui.openQuickDecisionFlow()">🔄 إعادة مراجعة المتبقي</button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        const item = queue[0];
+        state._qdfCurrentItem = item;
+        if (stepBadge) {
+          stepBadge.textContent = item.kind === 'SELL'
+            ? `🔴 فرصة بيع وجني ربح (${doneSoFar + 1} من ${total})`
+            : `🟢 صفقة شراء #${item.deal._evalNo} (${doneSoFar + 1} من ${total})`;
+        }
+
+        if (item.kind === 'SELL') {
+          const s = item.sell;
+          const curPx = Number(s.curPrice || s.price || priceMap[s.sym] || 0);
+          const entryPx = Number(s.entryPrice || curPx || 0);
+          const freedCash = Math.round(Number(s.qty || 0) * curPx);
+          const pnlCol = s.pnlUsd >= 0 ? '#00E65B' : '#E52546';
+          body.innerHTML = `
+            <div class="qdf-deal-box" style="border-color:rgba(229,37,70,0.62);">
+              <div class="row-between" style="flex-wrap:wrap;gap:8px;">
+                <div>
+                  <span class="hex-shield" style="font-size:10.5px;color:#E52546;border-color:rgba(229,37,70,0.6);background:rgba(210,16,52,0.16);">🔻 عملة مملوكة جاهزة للبيع / جني الربح</span>
+                  <h3 style="margin:6px 0 0;font-size:19px;color:#FFFFFF;">${s.sym} — رصيدك المملوك: <span class="num" style="color:#00E65B;">${s.qty}</span></h3>
+                </div>
+                <div style="text-align:left;">
+                  <div class="muted" style="font-size:10.5px;">الربح / الخسارة المتوقعة عند البيع</div>
+                  <strong class="num" dir="ltr" style="font-size:20px;color:${pnlCol};">${s.pnlUsd >= 0 ? '+' : '-'}$${Math.abs(Math.round(s.pnlUsd)).toLocaleString()} (${s.pnlPct >= 0 ? '+' : ''}${s.pnlPct.toFixed(2)}%)</strong>
+                </div>
+              </div>
+              <div class="qdf-metrics-row">
+                <div class="qdf-metric"><div class="muted" style="font-size:10px;">سعر الشراء</div><strong class="num" dir="ltr" style="font-size:13px;color:#FFFFFF;">$${entryPx.toLocaleString()}</strong></div>
+                <div class="qdf-metric"><div class="muted" style="font-size:10px;">السعر الحالي</div><strong class="num" dir="ltr" style="font-size:13px;color:#00E65B;">$${curPx.toLocaleString()}</strong></div>
+                <div class="qdf-metric"><div class="muted" style="font-size:10px;">القيمة المحرّرة للكاش</div><strong class="num" dir="ltr" style="font-size:13px;color:#FFFFFF;">$${freedCash.toLocaleString()}</strong></div>
+                <div class="qdf-metric"><div class="muted" style="font-size:10px;">الأثر على محفظتك</div><strong style="font-size:11.5px;color:#00E65B;">يُضاف للكاش الحر</strong></div>
+              </div>
+              <div class="muted" style="font-size:11.5px;line-height:1.55;">📌 ${s.reasonAr || 'العملة مملوكة في محفظتك — عند البيع تتحول قيمتها + الربح مباشرة إلى كاش USDT حر لتمويل صفقاتك الجديدة.'}</div>
+              <div class="qdf-actions">
+                <button type="button" id="qdf-btn-approve" class="btn-3d btn-3d-sell qdf-btn-big" onclick="ui.qdfApproveAndNext()">🔻 بِع الآن وحوّل الربح للكاش ← التالية</button>
+                <button type="button" id="qdf-btn-skip" class="btn-3d qdf-btn-big" style="border-color:rgba(201,206,214,0.38);color:#F2F4F7;" onclick="ui.qdfSkipAndNext()">⏭️ احتفظ بها وانتقل للتالية</button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        // بطاقة صفقة شراء واحدة واضحة مع آراء الـ 5 وكلاء في نفس اللحظة
+        const d = item.deal;
+        const m = computeDealMetrics(d);
+        const arName = (d.name.split('•')[1] || d.name).trim();
+        const unitSym = d.sym.replace('USDT', '');
+        const hz = state.councilHorizon || '1H';
+        const livePack = (state.liveCouncilByDeal && state.liveCouncilByDeal[`${d.id}_${hz}`]) || null;
+        const bindings = (Array.isArray(state.agentBindings) && state.agentBindings.length === 5)
+          ? state.agentBindings
+          : this._getDefaultAgentBindings();
+        const hasValidAlloc = Number.isFinite(m.invest) && m.invest > 0 && m.invest <= availUsdt;
+        const sharePctNum = availUsdt > 0 && m.invest > 0 ? (m.invest / availUsdt) * 100 : null;
+        const sharePct = sharePctNum !== null ? sharePctNum.toFixed(1) : '—';
+        const mizanFallbackScore = hasValidAlloc
+          ? Math.round(quantClip(sharePctNum <= 15 ? (80 + (d.quant?.kellyPct || 5) * 1.1) : (74 - (sharePctNum - 15)), 40, 97))
+          : null;
+
+        const miniAgents = bindings.map((b, idx) => {
+          const liveA = livePack && Array.isArray(livePack.agents) ? livePack.agents.find((x) => Number(x.agentIndex) === idx) : null;
+          let sc = liveA && Number.isFinite(Number(liveA.score))
+            ? Math.round(Number(liveA.score))
+            : (idx === 3 ? mizanFallbackScore : (Number.isFinite(Number((d.aiScores || [])[idx])) ? Math.round(Number(d.aiScores[idx])) : null));
+          if (idx === 3 && !hasValidAlloc) sc = null;
+          const ok = sc !== null && sc >= 75;
+          const col = ok ? '#00E65B' : (sc !== null && sc >= 60 ? '#FFFFFF' : '#E52546');
+          return `
+            <div class="qdf-agent-mini" style="border-color:${ok ? 'rgba(0,230,91,0.45)' : 'rgba(229,37,70,0.45)'};">
+              <div style="font-size:10.5px;font-weight:900;color:#FFFFFF;">${b.icon} ${b.agentName.split('(')[0].trim()}</div>
+              <div style="font-size:9px;color:#9EA7B3;">${b.providerShort}</div>
+              <strong class="num" style="font-size:13px;color:${col};">${sc !== null ? sc + '%' : '—'}</strong>
+            </div>
+          `;
+        }).join('');
+
+        body.innerHTML = `
+          <div class="qdf-deal-box">
+            <div class="row-between" style="flex-wrap:wrap;gap:8px;">
+              <div>
+                <span class="hex-shield" style="font-size:10.5px;color:#00E65B;border-color:rgba(0,230,91,0.55);background:rgba(0,230,91,0.12);">🟢 صفقة شراء مقترحة #${d._evalNo} • ${d.round || '1H'}</span>
+                <h3 style="margin:6px 0 0;font-size:20px;color:#FFFFFF;">${d.sym} <span class="muted" style="font-size:13px;font-weight:700;">(${arName})</span></h3>
+              </div>
+              <div style="text-align:left;">
+                <div class="muted" style="font-size:10.5px;">السعر الحالي</div>
+                <strong class="num" dir="ltr" style="font-size:21px;color:#FFFFFF;">$${d.price.toLocaleString()}</strong>
+              </div>
+            </div>
+
+            <div class="qdf-metrics-row">
+              <div class="qdf-metric"><div class="muted" style="font-size:10px;">🎯 هدف الربح (TP)</div><strong class="num" dir="ltr" style="font-size:13px;color:#00E65B;">$${m.tp1} (+${(d.tpPct * 100).toFixed(2)}%)</strong></div>
+              <div class="qdf-metric"><div class="muted" style="font-size:10px;">🛡️ وقف الخسارة (SL)</div><strong class="num" dir="ltr" style="font-size:13px;color:#E52546;">$${m.sl} (-${(d.slPct * 100).toFixed(2)}%)</strong></div>
+              <div class="qdf-metric"><div class="muted" style="font-size:10px;">💰 الربح المتوقع</div><strong class="num" dir="ltr" style="font-size:13px;color:#00E65B;">+$${Math.round(m.invest * d.tpPct).toLocaleString()}</strong></div>
+              <div class="qdf-metric">
+                <div class="muted" style="font-size:10px;">مبلغ الشراء (${sharePct}%)</div>
+                <div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:2px;">
+                  <button type="button" class="admin-amt-btn" onclick="ui.qdfAdjustUsd('${d.id}', -1)">−</button>
+                  <strong class="num" dir="ltr" style="font-size:13px;color:#FFFFFF;">${m.invest > 0 ? '$' + m.invest.toLocaleString() : '—'}</strong>
+                  <button type="button" class="admin-amt-btn" onclick="ui.qdfAdjustUsd('${d.id}', 1)">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="row-between" style="margin-bottom:5px;">
+                <span style="font-size:11px;font-weight:800;color:#F2F4F7;">🤖 رأي الـ 5 وكلاء في هذه اللحظة:</span>
+                <span class="muted" style="font-size:10px;">${livePack ? '✅ مداولة محدثة الآن' : '⏳ جاري تحديث رأي الـ 5 وكلاء...'}</span>
+              </div>
+              <div class="qdf-agents-row">${miniAgents}</div>
+            </div>
+
+            <div class="qdf-actions">
+              <button type="button" id="qdf-btn-approve" class="btn-3d btn-3d-buy qdf-btn-big" ${hasValidAlloc ? '' : 'disabled'} style="${hasValidAlloc ? '' : 'opacity:0.45;cursor:not-allowed;'}" onclick="ui.qdfApproveAndNext()">✅ موافق — اشترِ ${unitSym} بـ $${m.invest.toLocaleString()} ← التالية</button>
+              <button type="button" id="qdf-btn-skip" class="btn-3d btn-3d-sell qdf-btn-big" onclick="ui.qdfSkipAndNext()">⏭️ تخطي وانتقل للتالية</button>
+            </div>
+          </div>
+        `;
+
+        if (triggerDeliberate) {
+          this._qdfFetchLiveCouncil(d, availUsdt, Number(m.invest || 0));
+        }
+      },
+
+      async qdfApproveAndNext() {
+        const item = state._qdfCurrentItem;
+        if (!item) return;
+        const btn = document.getElementById('qdf-btn-approve');
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري التنفيذ...'; }
+        if (item.kind === 'SELL') {
+          await this.executeSpotSellNow(item.sell.sym);
+        } else {
+          await this.executeEliteDeal(item.deal.id, 'BUY');
+          document.getElementById('modal-exec-receipt')?.classList.add('hidden');
+        }
+        state.qdfExecutedCount = (state.qdfExecutedCount || 0) + 1;
+        this.renderQuickDecisionCard(true);
+      },
+
+      qdfSkipAndNext() {
+        const item = state._qdfCurrentItem;
+        if (!item) return;
+        state.qdfSkippedKeys = state.qdfSkippedKeys || {};
+        state.qdfSkippedKeys[item.key] = true;
+        this.renderQuickDecisionCard(true);
       },
 
       closeModals() { ['modal-exec-receipt', 'modal-kpi-detail', 'modal-orbit-3d', 'modal-agent-trades', 'modal-passkey', 'modal-recovery', 'modal-ga-qr', 'modal-binance-vault'].forEach((id) => document.getElementById(id)?.classList.add('hidden')); }
