@@ -2197,7 +2197,8 @@
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <strong style="font-size:14.5px;color:#F2F4F7;">🤖 مجلس الوكلاء وتداول الآراء — <span id="council-deal-title" style="color:#ffffff;">صفقة #1 (SOLUSDT)</span></strong>
             <span id="council-verdict-badge" class="hex-shield num" style="font-size:11px;padding:2px 9px;background:rgba(22, 184, 83,0.14);color:#16B853;border-color:rgba(22, 184, 83,0.55);">🟢 موافقة بالإجماع 5/5</span>
-            <button type="button" id="council-ai-engine-pill" class="btn-3d btn-3d-sm" style="padding:3px 9px;font-size:10.5px;border-color:rgba(56,189,248,0.55);color:#38bdf8;" onclick="ui.tab('settings');setTimeout(()=>document.getElementById('ai-prov-key-inp')?.focus(),200)">🧠 محرك الوكلاء: كمّي محلي • اضغط لربط Gemini/GPT/Claude</button>
+            <button type="button" id="btn-live-5agents-deliberate" class="btn-3d btn-3d-buy btn-3d-sm" style="padding:3px 10px;font-size:10.5px;" onclick="ui.runLiveFiveAgentDeliberation()">⚡ مداولة الـ 5 وكلاء الحية</button>
+            <button type="button" id="council-ai-engine-pill" class="btn-3d btn-3d-sm" style="padding:3px 9px;font-size:10.5px;border-color:rgba(201,206,214,0.45);color:#F2F4F7;" onclick="ui.tab('settings');setTimeout(()=>document.getElementById('ai-prov-key-inp')?.focus(),200)">🤖 الوكلاء: 1/5 متصل (المحرك الكمي) • ربط المنصات</button>
           </div>
           <div id="council-horizon-bar" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
             <span class="muted" style="font-size:11px;">⏱️ الفترة الزمنية للاستثمار:</span>
@@ -2846,22 +2847,28 @@
           <div class="muted" style="font-size:10.8px;">صفحة «المدير المالي» وكافة مفاتيح المنصة محمية خلف بوابة الدخول السيادية ولا تُكشف على أي رابط عام (<span class="num">HTTP 401</span>).</div>
         </section>
 
-        <!-- 5. ربط مزودات الذكاء الاصطناعي والوكلاء (Gemini / OpenAI / Claude / Grok) داخل نفس التصميم الموحّد -->
-        <section class="holo-chamber" style="grid-column:1 / -1;display:flex;flex-direction:column;gap:9px;">
+        <!-- 5. ربط الوكلاء الخمسة بمنصاتهم (Gemini / Claude / OpenAI / Local Quant / Grok) -->
+        <section class="holo-chamber" id="ai-agents-bridge-section" style="grid-column:1 / -1;display:flex;flex-direction:column;gap:10px;border-color:rgba(0,154,56,0.42);">
           <div class="row-between" style="flex-wrap:wrap;gap:6px;">
-            <strong style="font-size:13.5px;color:var(--pri);">🤖 ربط مزودات الذكاء الاصطناعي والوكلاء (AI Agents Bridge)</strong>
-            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.refreshAiProvidersUI()">🔄 تحديث الحالة</button>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <strong style="font-size:13.5px;color:#FFFFFF;">🤖 ربط الـ 5 وكلاء بمنصاتهم (5-Agent Platform Bridge)</strong>
+              <span id="ai-agents-connected-badge" class="hex-shield num" style="font-size:10.5px;padding:2px 9px;color:#16B853;border-color:rgba(22,184,83,0.55);background:rgba(0,114,41,0.16);">متصل: 1/5 • المحرك الكمي جاهز</span>
+            </div>
+            <button type="button" class="btn-3d btn-3d-sm" onclick="ui.refreshAiProvidersUI()">🔄 تحديث حالة الـ 5 وكلاء</button>
           </div>
-          <div id="ai-providers-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:7px;"></div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-            <select id="ai-prov-sel" class="holo-inp" style="min-width:170px;">
-              <option value="gemini">Google Gemini (GEMINI_API_KEY)</option>
-              <option value="openai">OpenAI GPT (OPENAI_API_KEY)</option>
-              <option value="anthropic">Anthropic Claude (ANTHROPIC_API_KEY)</option>
-              <option value="xai">xAI Grok (XAI_API_KEY)</option>
+          <div class="muted" style="font-size:11px;line-height:1.55;">
+            كل وكيل من الـ 5 وكلاء مربوط بمنصته المخصصة؛ يُحفظ المفتاح محلياً في <code class="num">.env.local</code> فقط (لا يُرفع إلى GitHub)، وأي منصة غير مربوطة تعمل بشفافية على المحرك الكمي المحلي الاحتياطي حتى ربطها.
+          </div>
+          <div id="ai-providers-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:8px;"></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-top:4px;">
+            <select id="ai-prov-sel" class="holo-inp" style="min-width:240px;">
+              <option value="gemini">🎯 ترليورين (الزخم) → Google Gemini</option>
+              <option value="anthropic">🛡️ الحارس (المخاطر) → Anthropic Claude</option>
+              <option value="openai">📡 الرادار (السيولة) → OpenAI GPT</option>
+              <option value="xai">🌐 الاستراتيجي (السياق) → xAI Grok</option>
             </select>
-            <input id="ai-prov-key-inp" type="password" dir="ltr" class="holo-inp num" style="flex:1;min-width:210px;" placeholder="ألصق مفتاح الـ API الخاص بالمزود هنا للربط الفوري..." />
-            <button type="button" class="btn-3d btn-3d-buy btn-3d-sm" onclick="ui.connectAiProviderUI()">🔗 فحص وربط الوكلاء</button>
+            <input id="ai-prov-key-inp" type="password" dir="ltr" class="holo-inp num" style="flex:1;min-width:210px;" placeholder="ألصق مفتاح الـ API الخاص بمنصة الوكيل هنا للتحقق والربط الفوري..." />
+            <button type="button" class="btn-3d btn-3d-buy btn-3d-sm" onclick="ui.connectAiProviderUI()">🔗 فحص وربط المنصة</button>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);">
             <input id="ai-agent-ask-inp" type="text" class="holo-inp" style="flex:1;min-width:220px;" placeholder="اسأل الوكيل المتصل الآن (مثال: ما أفضل فرصة شراء الآن على Binance Testnet؟)..." />
@@ -5494,8 +5501,24 @@
 
         if (titleEl) titleEl.textContent = `صفقة #${evNo} — ${arName} (${d.sym}) • ${hzMeta.label}`;
 
+        const defaultBindings = [
+          { agentIndex: 0, providerId: 'gemini', providerShort: 'Google Gemini', mode: 'LOCAL_FALLBACK', connected: false },
+          { agentIndex: 1, providerId: 'anthropic', providerShort: 'Anthropic Claude', mode: 'LOCAL_FALLBACK', connected: false },
+          { agentIndex: 2, providerId: 'openai', providerShort: 'OpenAI GPT', mode: 'LOCAL_FALLBACK', connected: false },
+          { agentIndex: 3, providerId: 'local', providerShort: 'المحرك الكمي المحلي', mode: 'LOCAL_QUANT', connected: true },
+          { agentIndex: 4, providerId: 'xai', providerShort: 'xAI Grok', mode: 'LOCAL_FALLBACK', connected: false }
+        ];
+        const bindings = (Array.isArray(state.agentBindings) && state.agentBindings.length === 5) ? state.agentBindings : defaultBindings;
+        const liveKey = `${d.id}_${state.councilHorizon || '1H'}`;
+        const livePack = (state.liveCouncilByDeal && state.liveCouncilByDeal[liveKey]) || null;
+        const liveByIdx = {};
+        if (livePack && Array.isArray(livePack.agents)) {
+          livePack.agents.forEach((a) => { liveByIdx[Number(a.agentIndex)] = a; });
+        }
+
         const agentSpecs = [
           {
+            idx: 0,
             icon: '🎯',
             name: AI_AGENTS[0]?.name || 'ترليورين (الزخم الفني)',
             role: 'محلل الاتجاه والشموع',
@@ -5505,6 +5528,7 @@
               : `الزخم الفني غير مكتمل أو أضعف من المطلوب حالياً — يُفضّل التريث.`
           },
           {
+            idx: 1,
             icon: '🛡️',
             name: AI_AGENTS[1]?.name || 'الحارس (إدارة المخاطر)',
             role: 'فحص وقف الخسارة والأمان',
@@ -5516,6 +5540,7 @@
                 : `التذبذب مرتفع نسبياً أو بيانات المخاطر غير صالحة — يُنصح بتقليل المبلغ.`)
           },
           {
+            idx: 2,
             icon: '📡',
             name: AI_AGENTS[2]?.name || 'الرادار (السيولة والأوامر)',
             role: 'عمق السوق وتدفق السيولة',
@@ -5525,6 +5550,7 @@
               : `دفتر الأوامر يُظهر تباطؤاً مؤقتاً أو نقصاً في بيانات السيولة.`
           },
           {
+            idx: 3,
             icon: '⚖️',
             name: AI_AGENTS[3]?.name || 'الميزان (تخصيص المال)',
             role: 'مبني على رصيد محفظتك',
@@ -5534,6 +5560,7 @@
               : `حسبة التخصيص غير صالحة أو السيولة المتاحة غير كافية — تم حجب الموافقة التلقائية.`
           },
           {
+            idx: 4,
             icon: '🌐',
             name: AI_AGENTS[4]?.name || 'الاستراتيجي (السياق العام)',
             role: 'صورة السوق والأخبار',
@@ -5550,7 +5577,19 @@
         let validScoreCnt = 0;
 
         grid.innerHTML = agentSpecs.map((ag) => {
-          const rawNum = ag.score === null || ag.score === undefined ? NaN : Number(ag.score);
+          const bind = bindings[ag.idx] || defaultBindings[ag.idx];
+          const live = liveByIdx[ag.idx] || null;
+          let chosenScore = ag.score;
+          if (live && live.score !== null && live.score !== undefined && Number.isFinite(Number(live.score))) {
+            if (ag.idx === 3) {
+              chosenScore = hasValidAlloc && !state.killSwitch ? Number(live.score) : null;
+            } else if (ag.idx === 1 && state.killSwitch) {
+              chosenScore = 20;
+            } else {
+              chosenScore = Number(live.score);
+            }
+          }
+          const rawNum = chosenScore === null || chosenScore === undefined ? NaN : Number(chosenScore);
           const isValid = Number.isFinite(rawNum) && rawNum > 0;
           const sc = isValid ? Math.round(rawNum) : 0;
           if (isValid) {
@@ -5576,15 +5615,28 @@
             greenCnt++;
           }
           const scoreBadge = isValid ? `${sc}%` : '—';
+          const effectiveMode = (live && live.mode) || bind.mode || 'LOCAL_FALLBACK';
+          const isLiveCloud = effectiveMode === 'LIVE_CLOUD';
+          const isLocalQuant = effectiveMode === 'LOCAL_QUANT' || bind.providerId === 'local';
+          const platBadgeCol = isLiveCloud ? '#16B853' : (isLocalQuant ? '#F2F4F7' : '#C9CED6');
+          const platBadgeBg = isLiveCloud ? 'rgba(0,114,41,0.22)' : 'rgba(255,255,255,0.06)';
+          const platBadgeBorder = isLiveCloud ? 'rgba(22,184,83,0.5)' : 'rgba(201,206,214,0.28)';
+          const platModeTxt = isLiveCloud ? '🟢 حي' : (isLocalQuant ? '⚡ كمّي' : (bind.connected ? '🟢 مربوط' : '⚪ احتياطي'));
+          const reasonText = (live && live.reasonAr && !(ag.idx === 3 && !hasValidAlloc) && !(ag.idx === 1 && state.killSwitch))
+            ? live.reasonAr
+            : ag.reason(sc, isValid);
           return `
-            <div class="holo-chamber" style="padding:9px 10px;border-radius:11px;border:1px solid ${borderCol};background:rgba(7,17,32,0.9);display:flex;flex-direction:column;gap:5px;">
+            <div class="holo-chamber" data-agent-idx="${ag.idx}" data-provider-id="${bind.providerId}" style="padding:9px 10px;border-radius:11px;border:1px solid ${borderCol};background:rgba(17,20,23,0.94);display:flex;flex-direction:column;gap:5px;">
               <div class="row-between" style="gap:4px;">
-                <strong style="font-size:11.5px;color:#f8fafc;">${ag.icon} ${ag.name}</strong>
+                <strong style="font-size:11.5px;color:#FFFFFF;">${ag.icon} ${ag.name}</strong>
                 <span class="hex-shield num" style="font-size:9.5px;padding:1px 6px;color:${stCol};background:${stBg};border-color:${borderCol};">${scoreBadge}</span>
               </div>
-              <div style="font-size:10px;color:#94a3b8;">${ag.role}</div>
+              <div class="row-between" style="gap:4px;flex-wrap:wrap;">
+                <span style="font-size:10px;color:#9EA7B3;">${ag.role}</span>
+                <span class="agent-platform-pill" style="font-size:9.2px;font-weight:800;padding:1px 6px;border-radius:999px;color:${platBadgeCol};background:${platBadgeBg};border:1px solid ${platBadgeBorder};" title="${bind.providerName || bind.providerShort}">${bind.providerShort} • ${platModeTxt}</span>
+              </div>
               <div style="font-size:10.5px;font-weight:800;color:${stCol};">${stText}</div>
-              <p style="margin:0;font-size:10.5px;line-height:1.55;color:#cbd5e1;">${ag.reason(sc, isValid)}</p>
+              <p style="margin:0;font-size:10.5px;line-height:1.55;color:#C9CED6;">${reasonText}</p>
             </div>
           `;
         }).join('');
@@ -7979,43 +8031,111 @@
         } catch (_) {}
       },
 
+      _getDefaultAgentBindings() {
+        return [
+          { agentIndex: 0, agentId: 'AI-1', icon: '🎯', agentName: 'ترليورين (الزخم الفني)', roleAr: 'محلل الاتجاه والشموع', providerId: 'gemini', providerShort: 'Google Gemini', providerName: 'Google Gemini (gemini-2.5-flash)', model: 'gemini-2.5-flash', envKey: 'GEMINI_API_KEY', connected: false, masked: '', mode: 'LOCAL_FALLBACK' },
+          { agentIndex: 1, agentId: 'AI-2', icon: '🛡️', agentName: 'الحارس (إدارة المخاطر)', roleAr: 'فحص وقف الخسارة والأمان', providerId: 'anthropic', providerShort: 'Anthropic Claude', providerName: 'Anthropic Claude (claude-3-5-haiku)', model: 'claude-3-5-haiku-latest', envKey: 'ANTHROPIC_API_KEY', connected: false, masked: '', mode: 'LOCAL_FALLBACK' },
+          { agentIndex: 2, agentId: 'AI-3', icon: '📡', agentName: 'الرادار (السيولة والأوامر)', roleAr: 'عمق السوق وتدفق السيولة', providerId: 'openai', providerShort: 'OpenAI GPT', providerName: 'OpenAI GPT (gpt-4o-mini)', model: 'gpt-4o-mini', envKey: 'OPENAI_API_KEY', connected: false, masked: '', mode: 'LOCAL_FALLBACK' },
+          { agentIndex: 3, agentId: 'AI-4', icon: '⚖️', agentName: 'الميزان (تخصيص المال)', roleAr: 'تحجيم Kelly الكسري ورصيد المحفظة', providerId: 'local', providerShort: 'المحرك الكمي المحلي', providerName: 'Local Quantitative Engine', model: 'quant-kelly-pava-v1', envKey: '', connected: true, masked: '', mode: 'LOCAL_QUANT' },
+          { agentIndex: 4, agentId: 'AI-5', icon: '🌐', agentName: 'الاستراتيجي (السياق العام)', roleAr: 'صورة السوق والأخبار', providerId: 'xai', providerShort: 'xAI Grok', providerName: 'xAI Grok (grok-3-mini)', model: 'grok-3-mini', envKey: 'XAI_API_KEY', connected: false, masked: '', mode: 'LOCAL_FALLBACK' }
+        ];
+      },
+
+      selectAgentPlatformForConnect(providerId) {
+        const sel = document.getElementById('ai-prov-sel');
+        const inp = document.getElementById('ai-prov-key-inp');
+        if (sel && providerId && providerId !== 'local') sel.value = providerId;
+        if (inp) {
+          inp.focus();
+          inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      },
+
+      _renderFiveAgentBridgeGrid(bindings, isStaticHost) {
+        const grid = document.getElementById('ai-providers-grid');
+        if (!grid) return;
+        const list = (Array.isArray(bindings) && bindings.length === 5) ? bindings : this._getDefaultAgentBindings();
+        state.agentBindings = list;
+
+        const cloudConnected = list.filter((a) => a.providerId !== 'local' && a.connected);
+        const totalConn = list.filter((a) => a.connected).length;
+        state.connectedAiNames = cloudConnected.map((a) => a.providerShort);
+
+        const badge = document.getElementById('ai-agents-connected-badge');
+        if (badge) {
+          badge.textContent = cloudConnected.length
+            ? `متصل: ${totalConn}/5 (${cloudConnected.length} سحابي + المحرك الكمي)`
+            : `متصل: 1/5 • المحرك الكمي جاهز (اربط باقي المنصات)`;
+          badge.style.color = cloudConnected.length ? '#16B853' : '#F2F4F7';
+          badge.style.borderColor = cloudConnected.length ? 'rgba(22,184,83,0.6)' : 'rgba(201,206,214,0.45)';
+        }
+
+        const pill = document.getElementById('council-ai-engine-pill');
+        if (pill) {
+          if (cloudConnected.length) {
+            pill.textContent = `🟢 الوكلاء (${totalConn}/5): ${cloudConnected.map((a) => a.providerShort).join(' + ')}`;
+            pill.style.color = '#16B853';
+            pill.style.borderColor = 'rgba(22, 184, 83,0.6)';
+          } else {
+            pill.textContent = `🤖 الوكلاء: 1/5 متصل (المحرك الكمي) • اضغط لربط المنصات`;
+            pill.style.color = '#F2F4F7';
+            pill.style.borderColor = 'rgba(201, 206, 214,0.45)';
+          }
+        }
+
+        grid.innerHTML = list.map((ag) => {
+          const isLocal = ag.providerId === 'local';
+          const isConn = Boolean(ag.connected);
+          const statusTxt = isLocal ? '⚡ كمّي محلي دائماً' : (isConn ? '🟢 متصل سحابياً' : '⚪ غير مربوط');
+          const statusCol = isConn ? '#16B853' : '#C9CED6';
+          const borderCol = isConn ? 'rgba(22,184,83,0.52)' : 'rgba(201,206,214,0.22)';
+          const actionBtn = isLocal
+            ? `<span class="muted" style="font-size:9.8px;">مفعّل تلقائياً (PAVA + Kelly)</span>`
+            : (isConn
+              ? `<div style="display:flex;gap:5px;align-items:center;justify-content:space-between;margin-top:3px;">
+                   <span class="num muted" style="font-size:9.8px;">${ag.masked || 'مفتاح محفوظ'}</span>
+                   <button type="button" class="btn-3d btn-3d-sell btn-3d-sm" style="padding:2px 8px;font-size:9.8px;" onclick="ui.disconnectAiProviderUI('${ag.providerId}')">فصل</button>
+                 </div>`
+              : `<button type="button" class="btn-3d btn-3d-sm" style="padding:3px 9px;font-size:10px;margin-top:3px;border-color:rgba(22,184,83,0.45);color:#FFFFFF;" onclick="ui.selectAgentPlatformForConnect('${ag.providerId}')">🔗 ربط ${ag.providerShort}</button>`);
+          return `
+            <div class="holo-chamber" data-bridge-agent="${ag.agentId}" data-bridge-provider="${ag.providerId}" style="display:flex;flex-direction:column;gap:5px;padding:9px 10px;border-color:${borderCol};background:rgba(17,20,23,0.92);">
+              <div class="row-between" style="gap:4px;">
+                <strong style="font-size:11.5px;color:#FFFFFF;">${ag.icon} ${ag.agentName}</strong>
+                <span class="hex-shield" style="font-size:9.2px;padding:1px 6px;color:${statusCol};border-color:${borderCol};">${statusTxt}</span>
+              </div>
+              <div class="muted" style="font-size:10px;">${ag.roleAr}</div>
+              <div style="font-size:10.3px;color:#F2F4F7;font-weight:700;">المنصة: <span style="color:${isConn ? '#16B853' : '#C9CED6'};">${ag.providerShort}</span> <span class="num muted" style="font-size:9.5px;">(${ag.model})</span></div>
+              ${actionBtn}
+            </div>
+          `;
+        }).join('') + (isStaticHost
+          ? `<div class="muted" style="grid-column:1/-1;font-size:10.5px;padding-top:2px;">ملاحظة: لربط مفاتيح المنصات السحابية بشكل آمن، افتح الخادم المحلي أو خادمك الخاص (تُحفظ المفاتيح في .env.local فقط).</div>`
+          : '');
+      },
+
       async refreshAiProvidersUI() {
         const grid = document.getElementById('ai-providers-grid');
         if (!grid) return;
         const isStaticHost = !location.origin || location.origin === 'null' || location.hostname.endsWith('github.io');
         if (isStaticHost) {
-          grid.innerHTML = `<div class="holo-chamber" style="grid-column:1/-1;font-size:11.5px;color:var(--pri);">🤖 المحرك الكمي المحلي نشط. لربط مفاتيح Gemini / OpenAI / Claude / Grok بشكل آمن، افتح خادمك المحلي على <strong class="num">http://localhost:8000</strong>.</div>`;
+          this._renderFiveAgentBridgeGrid(this._getDefaultAgentBindings(), true);
           return;
         }
         try {
           const r = await fetch('/api/executive/ai-providers/status');
-          if (!r.ok) return;
-          const j = await r.json();
-          const list = j.providers || [];
-          const externalConnected = list.filter((p) => p.connected && p.id !== 'local_quant').map((p) => p.name);
-          state.connectedAiNames = externalConnected;
-          const pill = document.getElementById('council-ai-engine-pill');
-          if (pill) {
-            if (externalConnected.length) {
-              pill.textContent = `🟢 الوكلاء مربوطون بـ: ${externalConnected.join(' + ')}`;
-              pill.style.color = '#16B853';
-              pill.style.borderColor = 'rgba(22, 184, 83,0.6)';
-            } else {
-              pill.textContent = `🧠 محرك الوكلاء: كمّي محلي فقط • اضغط لربط Gemini / GPT / Claude / Grok`;
-              pill.style.color = '#38bdf8';
-              pill.style.borderColor = 'rgba(56,189,248,0.55)';
-            }
+          if (!r.ok) {
+            this._renderFiveAgentBridgeGrid(this._getDefaultAgentBindings(), false);
+            return;
           }
-          grid.innerHTML = list.map((p) => `
-            <div class="holo-chamber" style="display:flex;flex-direction:column;gap:4px;border-color:${p.connected ? 'var(--ok)' : 'var(--border-sec)'};">
-              <div class="row-between">
-                <strong style="font-size:11.5px;color:#fff;">${p.name}</strong>
-                <span class="hex-shield" style="font-size:9.5px;color:${p.connected ? 'var(--ok)' : '#C9CED6'};border-color:${p.connected ? 'var(--ok)' : '#C9CED6'};">${p.connected ? '🟢 متصل' : 'غير مربوط'}</span>
-              </div>
-              <div class="muted" style="font-size:10px;">${p.noteAr}${p.masked ? ` (<span class="num">${p.masked}</span>)` : ''}</div>
-            </div>
-          `).join('');
-        } catch (_) {}
+          const j = await r.json();
+          const bindings = (Array.isArray(j.agentBindings) && j.agentBindings.length === 5)
+            ? j.agentBindings
+            : this._getDefaultAgentBindings();
+          this._renderFiveAgentBridgeGrid(bindings, false);
+          this.renderHeroAgentsCouncil();
+        } catch (_) {
+          this._renderFiveAgentBridgeGrid(this._getDefaultAgentBindings(), false);
+        }
       },
 
       async connectAiProviderUI() {
@@ -8023,7 +8143,7 @@
         const apiKey = (document.getElementById('ai-prov-key-inp')?.value || '').trim();
         if (apiKey.length < 8) { this.toast('⚠️ أدخل مفتاح الـ API الصحيح للمزود أولاً', 'var(--hot)'); return; }
         const isStaticHost = !location.origin || location.origin === 'null' || location.hostname.endsWith('github.io');
-        if (isStaticHost) { this.toast('⚠️ اربط مفتاح الذكاء الاصطناعي من خادمك المحلي http://localhost:8000 لحماية مفتاحك.', 'var(--pri)'); return; }
+        if (isStaticHost) { this.toast('⚠️ اربط مفتاح المنصة من خادمك الخاص لحماية مفتاحك في .env.local.', 'var(--pri)'); return; }
         try {
           this.toast(`⏳ جاري فحص وربط ${provider.toUpperCase()}...`);
           const r = await fetch('/api/executive/ai-providers/connect', {
@@ -8035,11 +8155,89 @@
           if (!j.ok) { sfx.sellSuccess(); this.toast(j.messageAr || '❌ فشل ربط المزود', 'var(--hot)'); return; }
           document.getElementById('ai-prov-key-inp').value = '';
           sfx.buySuccess();
-          this.toast(j.messageAr || '✅ تم ربط المزود وتفعيل الوكلاء بنجاح!');
-          this.refreshAiProvidersUI();
+          this.toast(j.messageAr || '✅ تم ربط المنصة وتفعيل الوكيل بنجاح!');
+          if (j.status && Array.isArray(j.status.agentBindings)) {
+            this._renderFiveAgentBridgeGrid(j.status.agentBindings, false);
+            this.renderHeroAgentsCouncil();
+          } else {
+            this.refreshAiProvidersUI();
+          }
         } catch (err) {
           sfx.sellSuccess();
           this.toast(`❌ خطأ في الاتصال: ${err?.message || err}`, 'var(--hot)');
+        }
+      },
+
+      async disconnectAiProviderUI(provider) {
+        try {
+          const r = await fetch('/api/executive/ai-providers/disconnect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ provider })
+          });
+          const j = await r.json();
+          if (j.ok) {
+            this.toast(j.messageAr || '🔌 تم فصل المنصة');
+            if (j.status && Array.isArray(j.status.agentBindings)) {
+              this._renderFiveAgentBridgeGrid(j.status.agentBindings, false);
+              this.renderHeroAgentsCouncil();
+            } else {
+              this.refreshAiProvidersUI();
+            }
+          }
+        } catch (err) {
+          this.toast(`❌ تعذّر فصل المنصة: ${err?.message || err}`, 'var(--hot)');
+        }
+      },
+
+      async runLiveFiveAgentDeliberation() {
+        const d = ELITE_DEALS.find((x) => x.id === state.heroDealId) || ELITE_DEALS[0];
+        if (!d) return;
+        const btn = document.getElementById('btn-live-5agents-deliberate');
+        const origTxt = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري مداولة الـ 5 وكلاء...'; }
+        try {
+          const m = computeDealMetrics(d);
+          const priceMap = {};
+          ELITE_DEALS.forEach((x) => { priceMap[x.sym] = x.price; });
+          let heldVal = 0;
+          Object.entries(state.spotHoldings || {}).forEach(([sym, qv]) => { heldVal += Number(qv || 0) * (priceMap[sym] || 0); });
+          const availUsdt = Math.max(0, Math.round(state.equity - heldVal));
+          const hz = state.councilHorizon || '1H';
+          const payload = {
+            sym: d.sym,
+            name: d.name,
+            price: Number(d.price || 0),
+            tp1: Number(m.tp1 || 0),
+            sl: Number(m.sl || 0),
+            horizon: hz,
+            availUsdt,
+            investUsd: Number(m.invest || 0),
+            confPct: Number(d.conf || 75),
+            aiScores: (d.aiScores || []).map((v) => Number.isFinite(Number(v)) ? Number(v) : 75)
+          };
+          const r = await fetch('/api/executive/ai-providers/deliberate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const j = await r.json();
+          if (!j.ok || !Array.isArray(j.agents)) throw new Error('استجابة غير صالحة من الخادم');
+          state.liveCouncilByDeal = state.liveCouncilByDeal || {};
+          state.liveCouncilByDeal[`${d.id}_${hz}`] = j;
+          this.renderHeroAgentsCouncil(d);
+          sfx.buySuccess();
+          const liveCnt = Number(j.liveCloudAgentsCount || 0);
+          this.toast(
+            liveCnt > 0
+              ? `✅ اكتملت مداولة الـ 5 وكلاء لـ ${d.sym}: ${liveCnt} سحابي حي + ${5 - liveCnt} محرك كمي محلي`
+              : `⚡ اكتملت مداولة الـ 5 وكلاء لـ ${d.sym} بالمحرك الكمي المحلي (اربط مفاتيح المنصات للتحليل السحابي الحي)`
+          );
+        } catch (err) {
+          this.toast(`❌ تعذّر تشغيل المداولة الحية: ${err?.message || err}`, 'var(--hot)');
+        } finally {
+          if (btn) { btn.disabled = false; btn.textContent = origTxt || '⚡ مداولة الـ 5 وكلاء الحية'; }
         }
       },
 
