@@ -5984,14 +5984,48 @@
         }
       },
 
+      purgeZeroPositionsAndArchive() {
+        if (Array.isArray(state.managedPositions)) {
+          state.managedPositions = state.managedPositions.filter((p) => Number(p.investUsd || 0) > 0 && Number(p.qty || 0) > 0);
+        }
+        if (Array.isArray(state.closedArchive)) {
+          state.closedArchive = state.closedArchive.filter((a) => Number(a.investUsd || 0) > 0 && Number(a.qty || 0) > 0);
+        }
+        try {
+          safeStore.set('htb_managed_positions', JSON.stringify((state.managedPositions || []).slice(0, 60)));
+          safeStore.set('htb_learning_archive', JSON.stringify((state.closedArchive || []).slice(0, 120)));
+        } catch (_) {}
+      },
+
       async executeAutoSellPosition(posId, reasonAr) {
         if (!Array.isArray(state.managedPositions)) return;
         const pos = state.managedPositions.find((p) => p.posId === posId && p.status === 'OPEN');
         if (!pos) return;
-        pos.status = 'CLOSING';
+
+        // الحماية القاطعة #1: منع بيع أي صفقة صفرية ($0 أو كمية 0) وحذفها فوراً بدون أرشفة
+        if (!(Number(pos.investUsd) > 0) || !(Number(pos.qty) > 0) || !(Number(pos.entryPrice) > 0)) {
+          state.managedPositions = state.managedPositions.filter((p) => p.posId !== posId);
+          this.purgeZeroPositionsAndArchive();
+          this.renderElite90Page();
+          this.toast(`🚫 تم رفض وحذف صفقة صفرية ($0) على ${pos.sym} — يُمنع بيع الصفقات الصفرية نهائياً.`, 'var(--hot)');
+          return;
+        }
 
         const dealObj = ALL_CANDIDATE_DEALS.find((x) => x.sym === pos.sym);
-        const exitPrice = dealObj ? dealObj.price : pos.tpPrice;
+        const exitPrice = Number(dealObj?.price || pos.entryPrice);
+        const realDeltaRatio = (exitPrice - Number(pos.entryPrice)) / Number(pos.entryPrice);
+        const realPnlPct = realDeltaRatio * 100;
+
+        // الحماية القاطعة #2: لا يُسمح بالبيع الربحي إلا إذا تجاوز الربح الحقيقي +3.0% على الأقل (أو عند تفعيل وقف الخسارة <= -1.5%)
+        const isTakeProfitValid = realPnlPct >= 3.0;
+        const isStopLossValid = realPnlPct <= -1.5 || exitPrice <= Number(pos.slPrice || 0);
+        if (!isTakeProfitValid && !isStopLossValid) {
+          sfx.sellSuccess();
+          this.toast(`🚫 مرفوض: الربح الحقيقي لـ ${pos.sym} حالياً ${realPnlPct >= 0 ? '+' : ''}${realPnlPct.toFixed(2)}% (أقل من الحد الأدنى المعتمد +3.0%) — يُمنع البيع بربح صفري أو دون 3%.`, 'var(--hot)');
+          return;
+        }
+
+        pos.status = 'CLOSING';
         let realSold = false;
         let sellOrderId = 'AUTO-SELL-' + Math.floor(100000 + Math.random() * 899999);
 
@@ -6011,11 +6045,9 @@
           } catch (_) {}
         }
 
-        const priceDeltaRatio = (exitPrice - pos.entryPrice) / Math.max(1e-6, pos.entryPrice);
-        // عند البيع التلقائي الفوري أو عند تحقق الهدف نحتسب الربح المحقق بدقة بعد الرسوم
-        const effRatio = Math.abs(priceDeltaRatio) < 0.0005 ? (dealObj ? dealObj.tpPct * 0.45 : 0.015) : priceDeltaRatio;
-        const grossPnl = +(pos.investUsd * effRatio).toFixed(2);
-        const fees = +(pos.investUsd * 0.0015).toFixed(2);
+        // حساب الربح الحقيقي الصافي فقط من فرق السعر الفعلي بعد الرسوم (بدون أي نسبة ربح مصطنعة!)
+        const grossPnl = +(Number(pos.investUsd) * realDeltaRatio).toFixed(2);
+        const fees = +(Number(pos.investUsd) * 0.0015).toFixed(2);
         const profitUsd = +(grossPnl - fees).toFixed(2);
 
         if (!realSold) {
@@ -6031,38 +6063,35 @@
         pos.closedDate = new Date().toISOString().slice(0, 10);
         pos.exitPrice = exitPrice;
         pos.profitUsd = profitUsd;
-        pos.reasonAr = reasonAr || '🤖 بيع تلقائي بواسطة الوكيل';
+        pos.reasonAr = reasonAr || (isTakeProfitValid ? `🎯 جني ربح حقيقي (+${realPnlPct.toFixed(2)}% ≥ 3%)` : `🛡️ وقف خسارة (${realPnlPct.toFixed(2)}%)`);
         pos.sellOrderId = sellOrderId;
 
         if (!Array.isArray(state.closedArchive)) state.closedArchive = [];
         state.closedArchive.unshift({ ...pos });
-        try {
-          safeStore.set('htb_managed_positions', JSON.stringify(state.managedPositions.slice(0, 60)));
-          safeStore.set('htb_learning_archive', JSON.stringify(state.closedArchive.slice(0, 120)));
-        } catch (_) {}
+        this.purgeZeroPositionsAndArchive();
 
-        // تعزيز ذكاء وأوزان الوكلاء من الصفقة المؤرشفة
-        AI_AGENTS.forEach((b) => { b.acc = Math.min(99.5, +(Number(b.acc || 92) + (profitUsd >= 0 ? 0.15 : -0.05)).toFixed(2)); });
+        AI_AGENTS.forEach((b) => { b.acc = Math.min(99.5, +(Number(b.acc || 92) + (profitUsd > 0 ? 0.15 : -0.05)).toFixed(2)); });
 
         sfx.buySuccess();
         this.refreshKpis();
         this.renderElite90Page();
-        this.toast(`🤖 تم البيع التلقائي لـ ${pos.sym} (صفقة #${pos.dailySeqNo} بتاريخ ${pos.openedDate}) • أرباح ${profitUsd >= 0 ? '+' : '-'}$${Math.abs(profitUsd).toFixed(2)} أُضيفت للمحفظة وحُفظت بالأرشيف!`);
+        this.renderTodayPath();
+        this.toast(`✅ تم بيع ${pos.sym} (صفقة #${pos.dailySeqNo}) • صافي الربح الحقيقي: ${profitUsd >= 0 ? '+' : '-'}$${Math.abs(profitUsd).toFixed(2)} (${realPnlPct >= 0 ? '+' : ''}${realPnlPct.toFixed(2)}%)`);
       },
 
       checkManagedAutoSells() {
         if (state.killSwitch || !Array.isArray(state.managedPositions)) return;
-        const now = Date.now();
         for (const pos of state.managedPositions) {
           if (pos.status !== 'OPEN' || !pos.autoSellEnabled) continue;
+          if (!(Number(pos.investUsd) > 0) || !(Number(pos.qty) > 0) || !(Number(pos.entryPrice) > 0)) continue;
           const dealObj = ALL_CANDIDATE_DEALS.find((x) => x.sym === pos.sym);
-          const liveP = dealObj ? dealObj.price : pos.entryPrice;
-          if (liveP >= pos.tpPrice) {
-            this.executeAutoSellPosition(pos.posId, '🎯 تحقق هدف الربح (TP)');
-          } else if (liveP <= pos.slPrice) {
-            this.executeAutoSellPosition(pos.posId, '🛡️ حماية وقف الخسارة (SL)');
-          } else if (now >= pos.autoSellAt) {
-            this.executeAutoSellPosition(pos.posId, `⏱️ انتهاء الفترة الزمنية (${pos.horizon})`);
+          const liveP = Number(dealObj?.price || pos.entryPrice);
+          const realPnlPct = ((liveP - Number(pos.entryPrice)) / Number(pos.entryPrice)) * 100;
+          // لا بيع تلقائي أبداً إلا عند تحقيق ربح حقيقي >= +3.0% أو عند ملامسة وقف الخسارة SL (<= -1.5%)
+          if (realPnlPct >= 3.0 && liveP >= pos.tpPrice) {
+            this.executeAutoSellPosition(pos.posId, `🎯 تحقق هدف الربح الحقيقي (+${realPnlPct.toFixed(2)}% ≥ 3%)`);
+          } else if (realPnlPct <= -1.5 || liveP <= pos.slPrice) {
+            this.executeAutoSellPosition(pos.posId, `🛡️ حماية وقف الخسارة (${realPnlPct.toFixed(2)}%)`);
           }
         }
       },
@@ -9769,6 +9798,7 @@
 
     (function boot() {
       hydrateSigs();
+      ui.purgeZeroPositionsAndArchive();
       ui.applyHoloTheme(state.holoTheme || 'gold', true);
       startVocalHologramLoop();
       ui.renderCrest();
