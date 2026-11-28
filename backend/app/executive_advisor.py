@@ -2290,23 +2290,95 @@ def _evaluate_single_agent_deliberation(
 
 @executive_router.post("/ai-providers/deliberate")
 def deliberate_five_agents(payload: AiCouncilDeliberateInput) -> dict[str, Any]:
-    """تشغيل مداولة الوكلاء الخمسة بالتوازي (كل وكيل عبر منصته المربوطة + الميزان بالمحرك الكمي المحلي)."""
+    """تشغيل مداولة الوكلاء الخمسة بالتوازي مع قياس زمن الاستجابة الحقيقي وطابع التحقق."""
     from concurrent.futures import ThreadPoolExecutor
+    from datetime import datetime, timezone
+    import time as _time
 
+    t0 = _time.perf_counter()
     with ThreadPoolExecutor(max_workers=5) as pool:
-        futures = [pool.submit(_evaluate_single_agent_deliberation, ag, payload) for ag in _AGENT_PLATFORM_MAP]
+        def _timed(ag_item: dict[str, Any]) -> dict[str, Any]:
+            st = _time.perf_counter()
+            res = _evaluate_single_agent_deliberation(ag_item, payload)
+            res["latencyMs"] = round((_time.perf_counter() - st) * 1000.0, 1)
+            res["verifiedAtIso"] = datetime.now(timezone.utc).isoformat()
+            res["verifiedLiveCloud"] = res.get("mode") == "LIVE_CLOUD"
+            return res
+
+        futures = [pool.submit(_timed, ag) for ag in _AGENT_PLATFORM_MAP]
         results = [f.result() for f in futures]
 
     results.sort(key=lambda x: x["agentIndex"])
     live_cloud_count = sum(1 for r in results if r["mode"] == "LIVE_CLOUD")
+    total_ms = round((_time.perf_counter() - t0) * 1000.0, 1)
     return {
         "ok": True,
         "sym": payload.sym.upper().strip(),
         "horizon": payload.horizon,
         "liveCloudAgentsCount": live_cloud_count,
         "totalAgents": len(results),
+        "totalLatencyMs": total_ms,
+        "verifiedAtIso": datetime.now(timezone.utc).isoformat(),
         "agents": results,
     }
+
+
+@executive_router.get("/latency/ping")
+def check_tokyo_binance_latency() -> dict[str, Any]:
+    """فحص البينج الحقيقي (RTT بالملي ثانية) بين السيرفر (طوكيو/المحلي) وBinance Testnet للتحقق من جاهزية الصفقات قصيرة الأجل."""
+    from datetime import datetime, timezone
+    import time as _time
+    import httpx
+
+    endpoint = f"{_TESTNET_BASE}/api/v3/ping"
+    region = (os.getenv("TRILUNAIR_REGION") or "Tokyo-JP / Server").strip()
+    t0 = _time.perf_counter()
+    reachable = False
+    http_status = 0
+    rtt_ms: float | None = None
+    note_ar = ""
+
+    try:
+        with httpx.Client(timeout=4.5) as client:
+            r = client.get(endpoint)
+            elapsed = round((_time.perf_counter() - t0) * 1000.0, 1)
+            http_status = int(r.status_code)
+            if r.status_code == 200:
+                reachable = True
+                rtt_ms = elapsed
+            elif r.status_code == 451:
+                note_ar = f"محجوب جغرافياً من هذه المنطقة (HTTP 451 — {elapsed}ms) — يعمل على سيرفر طوكيو مباشرة."
+            else:
+                note_ar = f"استجابة غير مكتملة من Binance Testnet (HTTP {r.status_code} — {elapsed}ms)."
+    except Exception as exc:
+        note_ar = f"تعذّر قياس البينج مع Binance Testnet: {exc}"
+
+    if reachable and rtt_ms is not None:
+        if rtt_ms < 80:
+            quality = "EXCELLENT"
+            note_ar = f"اتصال فائق السرعة ({rtt_ms}ms) — مثالي للصفقات قصيرة الأجل والتنفيذ اللحظي."
+        elif rtt_ms < 220:
+            quality = "GOOD"
+            note_ar = f"اتصال مستقر وجيد ({rtt_ms}ms) — مناسب للتنفيذ قصير ومتوسط الأجل."
+        else:
+            quality = "DEGRADED"
+            note_ar = f"تأخير مرتفع ({rtt_ms}ms) — يُنصح بتفضيل الصفقات متوسطة أو طويلة الأجل."
+    else:
+        quality = "OFFLINE"
+
+    return {
+        "ok": True,
+        "reachable": reachable,
+        "rttMs": rtt_ms,
+        "httpStatus": http_status,
+        "quality": quality,
+        "shortTermReady": bool(reachable and rtt_ms is not None and rtt_ms < 250),
+        "endpoint": "testnet.binance.vision",
+        "serverRegion": region,
+        "checkedAtIso": datetime.now(timezone.utc).isoformat(),
+        "noteAr": note_ar,
+    }
+
 
 
 

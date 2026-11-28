@@ -1502,6 +1502,133 @@
       .qdf-agents-row{grid-template-columns:repeat(2,minmax(0,1fr))}
       .qdf-actions{grid-template-columns:1fr}
     }
+    /* === LUXURY 3D OBSIDIAN & BRUSHED PLATINUM INSTITUTIONAL FINISH === */
+    .btn-3d-gold,.btn-3d-buy{
+      background:linear-gradient(180deg,#148A45 0%,#0B6630 58%,#064821 100%) !important;
+      color:#F8FAFC !important;
+      border:1px solid rgba(255,255,255,0.18) !important;
+      box-shadow:0 4px 12px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.26),inset 0 -2px 0 rgba(0,0,0,0.38) !important;
+      text-shadow:0 1px 2px rgba(0,0,0,0.6) !important;
+    }
+    .btn-3d-gold:hover:not(:disabled),.btn-3d-buy:hover:not(:disabled){
+      background:linear-gradient(180deg,#18A152 0%,#0E7A3A 58%,#085628 100%) !important;
+      box-shadow:0 6px 16px rgba(0,0,0,0.65),0 0 12px rgba(20,138,69,0.28),inset 0 1px 0 rgba(255,255,255,0.32) !important;
+    }
+    .btn-3d-sell,.kill-btn-3d{
+      background:linear-gradient(180deg,#C81434 0%,#940C24 60%,#680718 100%) !important;
+      color:#F8FAFC !important;
+      border:1px solid rgba(255,255,255,0.16) !important;
+      box-shadow:0 4px 12px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.24),inset 0 -2px 0 rgba(0,0,0,0.4) !important;
+      text-shadow:0 1px 2px rgba(0,0,0,0.6) !important;
+    }
+    .btn-sd-electric-flag{
+      background:linear-gradient(180deg,#1D232B 0%,#12161C 62%,#0B0E12 100%) !important;
+      box-shadow:0 6px 16px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.22) !important;
+    }
+    .btn-sd-electric-flag::after{
+      background:linear-gradient(95deg,#C81434 0%,#E5E9F0 35%,#1B2129 56%,#148A45 100%) !important;
+    }
+    /* Sculpted 3D Metallic Icon Medallions */
+    .ico3d{
+      width:34px;height:34px;border-radius:10px;flex:none;
+      display:inline-flex;align-items:center;justify-content:center;
+      background:linear-gradient(145deg,#252C36 0%,#12161C 58%,#0A0D11 100%);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 6px 14px rgba(0,0,0,0.62),inset 0 1px 0 rgba(255,255,255,0.22),inset 0 -2px 3px rgba(0,0,0,0.55);
+      color:#E6ECF2;
+    }
+    .ico3d.ico-emerald{border-color:rgba(20,138,69,0.45);color:#22C55E}
+    .ico3d.ico-crimson{border-color:rgba(200,20,52,0.48);color:#E52546}
+    .ico3d.ico-platinum{border-color:rgba(226,232,240,0.34);color:#F1F5F9}
+    /* 3D Workspace Mode Switcher (مسار اليوم | طويلة الأجل | القاعة المتقدمة) */
+    .exec-mode-bar{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px;
+      padding:6px;border-radius:13px;
+      background:linear-gradient(180deg,#0E1217,#080A0D);
+      border:1px solid rgba(255,255,255,0.11);
+      box-shadow:inset 0 2px 6px rgba(0,0,0,0.7),0 8px 20px rgba(0,0,0,0.45);
+    }
+    .exec-mode-tab{
+      height:44px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);
+      background:linear-gradient(180deg,#171C23 0%,#10141A 100%);
+      color:#B8C1CC;font:800 12.5px/1 'Cairo','Tajawal',sans-serif;
+      display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
+      box-shadow:0 3px 8px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.08);
+      transition:all 0.2s ease;
+    }
+    .exec-mode-tab:hover{color:#FFFFFF;border-color:rgba(255,255,255,0.22)}
+    .exec-mode-tab.active{
+      background:linear-gradient(180deg,#1F2630 0%,#12171D 100%);
+      color:#FFFFFF;border-color:rgba(255,255,255,0.28);
+      box-shadow:0 6px 16px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,255,255,0.24),inset 0 -2px 0 #148A45;
+    }
+    /* Luxury 3D Elevated Panel */
+    .lux3d-panel{
+      position:relative;overflow:hidden;border-radius:14px;padding:14px 16px;
+      background:linear-gradient(168deg,#161B22 0%,#0E1217 58%,#090B0E 100%);
+      border:1px solid rgba(255,255,255,0.11);
+      box-shadow:0 14px 34px rgba(0,0,0,0.62),inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+    .lux3d-panel::before{
+      content:"";position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,#C81434 0%,#E5E9F0 35%,#141920 56%,#148A45 100%);
+    }
+    .tp-telemetry-grid{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px;
+    }
+    .tp-tele-card{
+      padding:11px 13px;border-radius:12px;
+      background:linear-gradient(165deg,#181E26 0%,#0E1217 100%);
+      border:1px solid rgba(255,255,255,0.10);
+      box-shadow:0 8px 20px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.11);
+      display:flex;align-items:flex-start;gap:10px;
+    }
+    .tp-deals-grid{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px;
+    }
+    .tp-deal-card{
+      position:relative;overflow:hidden;padding:14px 15px;border-radius:13px;
+      background:linear-gradient(168deg,#171D25 0%,#0F1318 62%,#0A0D11 100%);
+      border:1px solid rgba(255,255,255,0.11);
+      box-shadow:0 12px 26px rgba(0,0,0,0.56),inset 0 1px 0 rgba(255,255,255,0.12);
+      display:flex;flex-direction:column;gap:10px;
+    }
+    .tp-deal-card.is-sell-alert{border-color:rgba(200,20,52,0.55)}
+    .tp-agents-verify-strip{
+      display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;
+    }
+    .tp-ag-chip{
+      padding:6px 4px;border-radius:8px;text-align:center;
+      background:#0B0E12;border:1px solid rgba(255,255,255,0.09);
+      display:flex;flex-direction:column;gap:2px;
+    }
+    /* Staged Wealth Progression Ladder */
+    .wealth-stages-bar{
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;width:100%;margin-top:6px;
+    }
+    .wealth-stage-pill{
+      padding:6px 8px;border-radius:9px;text-align:center;cursor:pointer;
+      background:linear-gradient(180deg,#141920,#0B0E12);
+      border:1px solid rgba(255,255,255,0.10);color:#94A3B8;font-size:10.5px;font-weight:800;
+      transition:all 0.2s ease;
+    }
+    .wealth-stage-pill.stage-active{
+      background:linear-gradient(180deg,#1C252E,#10161C);
+      border-color:rgba(20,138,69,0.7);color:#FFFFFF;
+      box-shadow:0 4px 12px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+    .wealth-ticks-row{
+      display:flex;justify-content:space-between;width:100%;font-size:10.5px;font-weight:800;color:#9EA7B3;margin-top:2px;
+    }
+    @media (max-width: 960px){
+      .tp-telemetry-grid{grid-template-columns:1fr}
+      .wealth-stages-bar{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media (max-width: 640px){
+      .exec-mode-bar{grid-template-columns:1fr;gap:6px}
+      .tp-deals-grid{grid-template-columns:1fr}
+      .tp-agents-verify-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
     .lux-kpi-card{position:relative;overflow:hidden;background:linear-gradient(170deg,#171B1F,#111417) !important;border:1px solid rgba(255,255,255,0.12) !important}
     .lux-kpi-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:#C9CED6}
     .lux-kpi-card.kpi-sd-green::before{background:linear-gradient(90deg,#007229,#00E65B)}
@@ -2270,11 +2397,18 @@
         </div>
 
         <div class="lux-1t-track" style="width:100%;">
-          <div id="ribbon-1t-fill" class="lux-1t-fill" style="width:50.02%;"></div>
+          <div id="ribbon-1t-fill" class="lux-1t-fill" style="width:12%;"></div>
         </div>
 
-        <div class="row-between num" dir="ltr" style="width:100%;font-size:10.5px;font-weight:700;color:#94a3b8;">
-          <span>$1</span><span>$1K</span><span style="color:#F2F4F7;font-weight:900;">$1M ●</span><span>$1B</span><span>$1T</span>
+        <div id="staged-wealth-ticks" class="wealth-ticks-row num" dir="ltr">
+          <span>$0</span><span>$1K</span><span>$10K</span><span>$20K</span><span>$50K</span><span>$100K</span>
+        </div>
+
+        <div id="wealth-stages-bar" class="wealth-stages-bar" role="tablist" aria-label="مراحل مسار الثروة">
+          <button type="button" class="wealth-stage-pill stage-active" data-wstage="0" onclick="ui.selectWealthStage(0)">المرحلة 1 • $0 ← $100K</button>
+          <button type="button" class="wealth-stage-pill" data-wstage="1" onclick="ui.selectWealthStage(1)">المرحلة 2 • $100K ← $1M</button>
+          <button type="button" class="wealth-stage-pill" data-wstage="2" onclick="ui.selectWealthStage(2)">المرحلة 3 • $1M ← $100M</button>
+          <button type="button" class="wealth-stage-pill" data-wstage="3" onclick="ui.selectWealthStage(3)">المرحلة 4 • $100M ← $1B+</button>
         </div>
 
         <div id="voice-proposal-bar" class="voice-proposal-bar hidden" style="width:100%;">
@@ -2288,9 +2422,172 @@
     </section>
 
     <!-- ================================================================
-         التبويب 1: قاعة التداول المنحنية ثلاثية الأبعاد (يمين مقترحة | منتصف أعلى ربحية | يسار مقترحة)
+         التبويب 1: مسار اليوم + الصفقات طويلة الأجل + قاعة التداول المتقدمة
          ================================================================ -->
-    <main id="sec-elite90" style="margin-top:4px;">
+    <main id="sec-elite90" style="margin-top:6px;">
+      <!-- شريط التبديل الثلاثي ثلاثي الأبعاد (مسار اليوم | الصفقات طويلة الأجل | القاعة المتقدمة) -->
+      <nav class="exec-mode-bar" aria-label="أوضاع التداول الرئيسية">
+        <button type="button" id="mode-btn-today" class="exec-mode-tab active" onclick="ui.setExecWorkspaceMode('today')">
+          <span class="ico3d ico-emerald" style="width:26px;height:26px;border-radius:7px;" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          </span>
+          <span>مسار اليوم (الفرص الحية)</span>
+          <span id="tp-alert-count-badge" class="hex-shield num" style="font-size:10px;padding:1px 7px;color:#E52546;border-color:rgba(200,20,52,0.5);">0 تنبيه</span>
+        </button>
+        <button type="button" id="mode-btn-longterm" class="exec-mode-tab" onclick="ui.setExecWorkspaceMode('longterm')">
+          <span class="ico3d ico-platinum" style="width:26px;height:26px;border-radius:7px;" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+          </span>
+          <span>الصفقات طويلة الأجل (7D / 30D / 90D)</span>
+        </button>
+        <button type="button" id="mode-btn-advanced" class="exec-mode-tab" onclick="ui.setExecWorkspaceMode('advanced')">
+          <span class="ico3d" style="width:26px;height:26px;border-radius:7px;" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </span>
+          <span>قاعة التداول المتقدمة والشارت</span>
+        </button>
+      </nav>
+
+      <!-- ==============================================================
+           صفحة «مسار اليوم» — فرص السوق الفعلية (1..20) + بينج طوكيو/بينانس + تنبيهات + حارس الخسارة
+           ============================================================== -->
+      <section id="today-path-view" class="lux3d-panel" style="margin-bottom:12px;">
+        <div class="row-between" style="margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="ico3d ico-emerald" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </span>
+            <div>
+              <h2 style="margin:0;font-size:16px;font-weight:900;color:#FFFFFF;">مسار اليوم — التداول الذكي حسب وضع السوق الفعلي</h2>
+              <div id="tp-market-subtitle" class="muted" style="font-size:11px;">يعرض الفرص الحقيقية المتاحة الآن فقط (قد تكون صفقة واحدة أو 2 أو حتى 20 حسب توقع الربح وحالة السوق).</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+            <button type="button" id="btn-tp-ping-now" class="btn-3d btn-3d-sm" style="padding:6px 11px;font-size:11px;" onclick="ui.checkTokyoBinancePing(true)">فحص بينج طوكيو ↔ Binance</button>
+            <button type="button" id="btn-open-quick-flow-tp" class="btn-3d btn-sd-electric-flag btn-3d-sm" style="padding:6px 13px;font-size:11.5px;font-weight:900;" onclick="ui.openQuickDecisionFlow()">جلسة القرار السريع (1-بـ-1)</button>
+          </div>
+        </div>
+
+        <!-- 3 بطاقات قياس حية: البينج الحقيقي | مركز التنبيهات | حارس إيقاف الخسارة التلقائي -->
+        <div class="tp-telemetry-grid">
+          <!-- 1. فحص البينج الحقيقي بين سيرفر طوكيو وBinance -->
+          <div id="tp-ping-card" class="tp-tele-card">
+            <span class="ico3d ico-platinum" aria-hidden="true">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg>
+            </span>
+            <div style="flex:1;min-width:0;">
+              <div class="row-between" style="gap:6px;">
+                <strong style="font-size:11.8px;color:#F8FAFC;">بينج طوكيو ↔ Binance</strong>
+                <span id="tp-ping-badge" class="hex-shield num" style="font-size:10px;padding:1px 7px;color:#C9CED6;">جاري الفحص...</span>
+              </div>
+              <div id="tp-ping-detail" class="muted" style="font-size:10.5px;margin-top:4px;line-height:1.45;">يقيس زمن الاستجابة الحقيقي (RTT) للتحقق من دقة التنبؤ قصير الأجل.</div>
+            </div>
+          </div>
+
+          <!-- 2. مركز التنبيهات الحية (فرص الربح + الوصول لأعلى ربح TP أو خطر خسارة SL) -->
+          <div id="tp-alerts-card" class="tp-tele-card">
+            <span class="ico3d ico-crimson" aria-hidden="true">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </span>
+            <div style="flex:1;min-width:0;">
+              <div class="row-between" style="gap:6px;">
+                <strong style="font-size:11.8px;color:#F8FAFC;">التنبيهات الحية للفرص والمخاطر</strong>
+                <span id="tp-alerts-pill" class="hex-shield num" style="font-size:10px;padding:1px 7px;color:#E52546;border-color:rgba(200,20,52,0.5);">0 نشط</span>
+              </div>
+              <div id="tp-alerts-list" style="margin-top:5px;display:flex;flex-direction:column;gap:4px;font-size:10.5px;color:#CBD5E1;"></div>
+            </div>
+          </div>
+
+          <!-- 3. حارس إيقاف التداول التلقائي عند تجاوز حد الخسارة -->
+          <div id="tp-loss-guard-card" class="tp-tele-card">
+            <span class="ico3d ico-emerald" aria-hidden="true">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            <div style="flex:1;min-width:0;">
+              <div class="row-between" style="gap:6px;">
+                <strong style="font-size:11.8px;color:#F8FAFC;">حارس إيقاف الخسارة التلقائي</strong>
+                <span id="tp-loss-guard-badge" class="hex-shield num" style="font-size:10px;padding:1px 7px;color:#22C55E;border-color:rgba(20,138,69,0.5);">آمن • التداول مفعّل</span>
+              </div>
+              <div id="tp-loss-guard-detail" class="muted" style="font-size:10.5px;margin-top:4px;line-height:1.45;">يوقف الشراء تلقائياً إذا تجاوزت الخسارة اليومية الحد المسموح (-2.5%).</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ملخص الحافظة والمبلغ المسموح بالتداول فيه الآن -->
+        <div id="tp-wallet-strip" class="capital-clarity-grid" style="margin-bottom:12px;">
+          <div class="capital-clarity-card cap-free">
+            <span class="cap-lbl">الكاش الحر المسموح بالتداول فيه الآن</span>
+            <strong id="tp-free-cash" class="cap-val num" dir="ltr" style="color:#22C55E;">$0 USDT</strong>
+            <span class="cap-hint">متاح فوراً في حافظة Binance Testnet لشراء صفقات جديدة.</span>
+          </div>
+          <div class="capital-clarity-card cap-held">
+            <span class="cap-lbl">إجمالي الحافظة + العملات المملوكة</span>
+            <strong id="tp-total-held" class="cap-val num" dir="ltr">$0</strong>
+            <span id="tp-held-summary" class="cap-hint">عملات مملوكة حالياً قيد المراقبة للبيع وجني الربح.</span>
+          </div>
+          <div class="capital-clarity-card cap-unreal">
+            <span class="cap-lbl">الفرص الحية المؤهلة الآن (ديناميكي)</span>
+            <strong id="tp-dyn-count" class="cap-val num">0 فرصة</strong>
+            <span class="cap-hint">يتغيّر تلقائياً (1 إلى 20) حسب وضع السوق الفعلي وليس عدداً ثابتاً.</span>
+          </div>
+          <div class="capital-clarity-card cap-real">
+            <span class="cap-lbl">الأرباح المحققة الصافية</span>
+            <strong id="tp-realized-val" class="cap-val num" dir="ltr" style="color:#22C55E;">+$0</strong>
+            <span class="cap-hint">أرباح مُحصَّلة فعلياً ومضافة لرصيدك القابل للاستثمار.</span>
+          </div>
+        </div>
+
+        <!-- مخطّط الجلسة التفاعلي: حدد مبلغ الاستثمار والربح المستهدف لتحديث صافي الربح ورأي الوكيل لحظياً -->
+        <div id="tp-session-planner" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:9px;margin-bottom:12px;padding:10px 12px;border-radius:11px;background:rgba(11,14,18,0.9);border:1px solid rgba(255,255,255,0.10);align-items:end;">
+          <div>
+            <label for="tp-session-budget-inp" style="display:block;font-size:10.5px;font-weight:800;color:#CBD5E1;margin-bottom:4px;">مبلغ الاستثمار المخصص لهذه الجلسة (USDT):</label>
+            <input id="tp-session-budget-inp" type="number" min="50" step="500" value="25000" class="holo-inp num" style="width:100%;height:34px;font-size:13px;" oninput="ui.onTodaySessionPlanChange()" />
+          </div>
+          <div>
+            <label for="tp-session-target-inp" style="display:block;font-size:10.5px;font-weight:800;color:#CBD5E1;margin-bottom:4px;">الربح الصافي المستهدف للجلسة (≥ 3% للصفقة):</label>
+            <input id="tp-session-target-inp" type="number" min="10" step="100" value="1000" class="holo-inp num" style="width:100%;height:34px;font-size:13px;" oninput="ui.onTodaySessionPlanChange()" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;">
+            <span style="font-size:10.5px;font-weight:800;color:#94A3B8;">تقدير خطة الجلسة الحية:</span>
+            <strong id="tp-session-plan-summary" class="num" style="font-size:11.8px;color:#22C55E;">صافي متوقع: +$1,088 (عائد 4.35%)</strong>
+          </div>
+        </div>
+
+        <!-- بانر إيقاف التداول التلقائي (يظهر فقط إذا تجاوزت الخسارة الحد المسموح) -->
+        <div id="tp-loss-halt-banner" class="hidden" style="margin-bottom:12px;padding:11px 14px;border-radius:10px;background:rgba(200,20,52,0.16);border:1px solid rgba(200,20,52,0.6);color:#F8FAFC;font-size:12px;font-weight:800;"></div>
+
+        <!-- قائمة الفرص الحية (أولاً فرص البيع المؤهلة ≥ +3% ربح أو SL، ثم فرص الشراء المرتّبة من الأهم للأقل) -->
+        <div id="tp-live-deals-grid" class="tp-deals-grid"></div>
+      </section>
+
+      <!-- ==============================================================
+           صفحة «الصفقات طويلة الأجل» (7D / 30D / 90D) — منفصلة عن التداول قصير الأجل
+           ============================================================== -->
+      <section id="long-term-view" class="lux3d-panel hidden" style="margin-bottom:12px;">
+        <div class="row-between" style="margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="ico3d ico-platinum" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+            </span>
+            <div>
+              <h2 style="margin:0;font-size:16px;font-weight:900;color:#FFFFFF;">الصفقات طويلة الأجل (استثمار استراتيجي هادئ)</h2>
+              <div class="muted" style="font-size:11px;">مخصصة للصفقات الأسبوعية والشهرية والفصلية (7D / 30D / 90D) — معزولة تماماً عن الصفقات الساعية السريعة.</div>
+            </div>
+          </div>
+          <div class="council-hz-seg" role="group" aria-label="المدة الزمنية طويلة الأجل">
+            <button type="button" class="btn-3d btn-3d-sm btn-3d-gold lt-hz-btn" data-lthz="7D" onclick="ui.setLongTermHorizon('7D')">أسبوعي 7D</button>
+            <button type="button" class="btn-3d btn-3d-sm lt-hz-btn" data-lthz="30D" onclick="ui.setLongTermHorizon('30D')">شهري 30D</button>
+            <button type="button" class="btn-3d btn-3d-sm lt-hz-btn" data-lthz="90D" onclick="ui.setLongTermHorizon('90D')">فصلي 90D</button>
+            <button type="button" class="btn-3d btn-3d-sm lt-hz-btn" data-lthz="ALL" onclick="ui.setLongTermHorizon('ALL')">الكل</button>
+          </div>
+        </div>
+        <div id="lt-deals-grid" class="tp-deals-grid"></div>
+      </section>
+
+      <!-- ==============================================================
+           قاعة التداول المتقدمة الكاملة (الشارت + البطاقات + مجلس الوكلاء + السجل)
+           ============================================================== -->
+      <div id="advanced-hall-view" class="hidden">
       <div class="lux-sec-heading">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <span class="lux-sec-title">قاعة التداول</span>
@@ -2612,6 +2909,7 @@
           </div>
         </div>
       </section>
+      </div><!-- /#advanced-hall-view -->
     </main>
 
     <!-- ================================================================
@@ -4519,10 +4817,7 @@
         const log12Pct = Math.max(1, Math.min(100, (Math.log10(Math.max(10, state.equity)) / 12) * 100));
         const elLog = document.getElementById('kpi-1t-log-pct');
         if (elLog) elLog.textContent = `${log12Pct.toFixed(1)}%`;
-        const elRibPct = document.getElementById('ribbon-1t-pct');
-        if (elRibPct) elRibPct.textContent = `${log12Pct.toFixed(1)}%`;
-        const elRibFill = document.getElementById('ribbon-1t-fill');
-        if (elRibFill) elRibFill.style.width = `${log12Pct.toFixed(2)}%`;
+        if (typeof this.renderStagedWealthBar === 'function') this.renderStagedWealthBar();
 
         const approvedCnt = ALL_CANDIDATE_DEALS.filter((d) => d.quant && d.quant.approved).length;
         const elCnt = document.getElementById('kpi-elite-count');
@@ -5375,32 +5670,29 @@
           const curUsd = livePrice * qty;
           const pnlUsd = curUsd - costUsd;
           const pnlPct = costUsd > 0 ? (pnlUsd / costUsd) * 100 : 0;
-          const tp1 = Number(managed?.tpPrice || (entryPrice * (1 + (deal?.tpPct || 0.03) * 0.65)));
-          const tp2 = entryPrice * (1 + (deal?.tpPct || 0.035));
-          const sl = Number(managed?.slPrice || (entryPrice * (1 - (deal?.slPct || 0.012))));
-          let signalText = '📊 مركز مفتوح — مراقبة الزخم';
-          let signalCol = '#38bdf8';
-          let priority = 3;
-          if (livePrice >= tp2) {
-            signalText = '🎯 تحقق TP2 — جني ربح قوي';
-            signalCol = '#16B853';
+          const tpMin3 = entryPrice * 1.03; // الحد الأدنى الإلزامي للربح (+3.0% على الأقل — وبلا سقف أعلى)
+          const tp1 = Math.max(tpMin3, Number(managed?.tpPrice || (entryPrice * (1 + Math.max(0.03, deal?.tpPct || 0.035)))));
+          const tp2 = Math.max(entryPrice * 1.05, entryPrice * (1 + Math.max(0.05, deal?.tpPct || 0.05)));
+          const sl = Number(managed?.slPrice || (entryPrice * (1 - (deal?.slPct || 0.015))));
+          const eligibleForTakeProfit = pnlPct >= 3.0;
+          const eligibleForStopLoss = (livePrice <= sl) || (pnlPct <= -1.5);
+          const sellRecommended = eligibleForTakeProfit || eligibleForStopLoss;
+
+          let signalText = `⏳ قيد الانتظار (${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}% — أقل من الحد الأدنى +3.0%)`;
+          let signalCol = '#94A3B8';
+          let priority = 4;
+          if (eligibleForTakeProfit && pnlPct >= 5.0) {
+            signalText = `🎯 ربح مرتفع مؤهل للبيع (+${pnlPct.toFixed(2)}% ≥ 3%)`;
+            signalCol = '#22C55E';
             priority = 1;
-          } else if (livePrice >= tp1) {
-            signalText = '🎯 تحقق TP1 — جني ربح مقترح';
-            signalCol = '#16B853';
+          } else if (eligibleForTakeProfit) {
+            signalText = `✅ تحقق الحد الأدنى للربح (+${pnlPct.toFixed(2)}% ≥ 3%) — متاح لجني الربح`;
+            signalCol = '#22C55E';
             priority = 1;
-          } else if (livePrice <= sl) {
-            signalText = '🛡️ ملامسة SL — حماية رأس المال';
+          } else if (eligibleForStopLoss) {
+            signalText = `🛡️ تحذير وقف خسارة (${pnlPct.toFixed(2)}%) — حماية رأس المال`;
             signalCol = '#E52546';
             priority = 1;
-          } else if (pnlPct >= 0.5) {
-            signalText = '💰 ربح عائم إيجابي — متاح لجني الربح';
-            signalCol = '#FFFFFF';
-            priority = 2;
-          } else if (deal && deal.quant && !deal.quant.approved) {
-            signalText = '⚠️ ضعف زخم من الوكلاء — مراجعة خروج';
-            signalCol = '#C9CED6';
-            priority = 2;
           }
           recs.push({
             sym,
@@ -5409,12 +5701,16 @@
             qty,
             entryPrice,
             livePrice,
+            curPrice: livePrice,
             curUsd,
             pnlUsd,
             pnlPct,
             tp1,
             tp2,
             sl,
+            eligibleForTakeProfit,
+            eligibleForStopLoss,
+            sellRecommended,
             signalText,
             signalCol,
             priority,
@@ -8766,10 +9062,10 @@
       _buildQuickFlowQueue() {
         const skipped = state.qdfSkippedKeys || {};
         const queue = [];
-        // 1) أولوية قصوى: فرص البيع / جني الربح للعملات المملوكة فعلياً فقط (qty > 0)
+        // 1) أولوية قصوى: فرص البيع المؤهلة فقط (ربح ≥ +3.0% أو تحذير وقف خسارة SL — ممنوع البيع الفوري بربح صفري!)
         const sellRecs = typeof this.buildOwnedSellRecommendations === 'function' ? this.buildOwnedSellRecommendations() : [];
         sellRecs.forEach((s) => {
-          if (Number(s.qty || 0) > 0 && !skipped[`SELL_${s.sym}`]) {
+          if (Number(s.qty || 0) > 0 && s.sellRecommended && !skipped[`SELL_${s.sym}`]) {
             queue.push({ key: `SELL_${s.sym}`, kind: 'SELL', sell: s });
           }
         });
@@ -9030,6 +9326,440 @@
         this.renderQuickDecisionCard(true);
       },
 
+      setExecWorkspaceMode(mode) {
+        const m = ['today', 'longterm', 'advanced'].includes(mode) ? mode : 'today';
+        state.execWorkspaceMode = m;
+        document.getElementById('today-path-view')?.classList.toggle('hidden', m !== 'today');
+        document.getElementById('long-term-view')?.classList.toggle('hidden', m !== 'longterm');
+        document.getElementById('advanced-hall-view')?.classList.toggle('hidden', m !== 'advanced');
+        document.getElementById('mode-btn-today')?.classList.toggle('active', m === 'today');
+        document.getElementById('mode-btn-longterm')?.classList.toggle('active', m === 'longterm');
+        document.getElementById('mode-btn-advanced')?.classList.toggle('active', m === 'advanced');
+        if (m === 'today') this.renderTodayPath();
+        if (m === 'longterm') this.renderLongTermDeals();
+        if (m === 'advanced') {
+          this.renderElite90Page();
+          setTimeout(() => { if (typeof this.drawHeroShortTermChart === 'function') this.drawHeroShortTermChart(); }, 60);
+        }
+      },
+
+      selectWealthStage(idx) {
+        state.selectedWealthStage = Math.max(0, Math.min(3, Number(idx) || 0));
+        this.renderStagedWealthBar();
+      },
+
+      renderStagedWealthBar() {
+        const STAGES = [
+          { idx: 0, label: 'المرحلة 1 (التأسيس)', min: 0, max: 100000, ticks: ['$0', '$1K', '$10K', '$20K', '$50K', '$100K'] },
+          { idx: 1, label: 'المرحلة 2 (التوسع)', min: 100000, max: 1000000, ticks: ['$100K', '$200K', '$300K', '$500K', '$1M'] },
+          { idx: 2, label: 'المرحلة 3 (الملايين)', min: 1000000, max: 100000000, ticks: ['$1M', '$10M', '$25M', '$50M', '$100M'] },
+          { idx: 3, label: 'المرحلة 4 (المليار والتريليون)', min: 100000000, max: 1000000000, ticks: ['$100M', '$250M', '$500M', '$1B', '$1T'] }
+        ];
+        const realIncome = Math.max(0, Number(state.netProfit || 0));
+        const activeIdx = realIncome < 100000 ? 0 : (realIncome < 1000000 ? 1 : (realIncome < 100000000 ? 2 : 3));
+        const viewIdx = Number.isInteger(state.selectedWealthStage) ? state.selectedWealthStage : activeIdx;
+        const st = STAGES[viewIdx] || STAGES[0];
+        const span = Math.max(1, st.max - st.min);
+        const pct = realIncome <= st.min ? (viewIdx === activeIdx ? Math.max(2, (realIncome / st.max) * 100) : 0)
+          : (realIncome >= st.max ? 100 : ((realIncome - st.min) / span) * 100);
+
+        const elFill = document.getElementById('ribbon-1t-fill');
+        const elPct = document.getElementById('ribbon-1t-pct');
+        const elTicks = document.getElementById('staged-wealth-ticks');
+        if (elFill) elFill.style.width = `${Math.max(0, Math.min(100, pct)).toFixed(2)}%`;
+        if (elPct) elPct.textContent = `${st.label} • ${pct.toFixed(1)}% (الدخل المحقق: $${Math.round(realIncome).toLocaleString()})`;
+        if (elTicks) {
+          elTicks.innerHTML = st.ticks.map((t, i) => `<span style="${i === st.ticks.length - 1 ? 'color:#F8FAFC;font-weight:900;' : ''}">${t}</span>`).join('');
+        }
+        document.querySelectorAll('#wealth-stages-bar .wealth-stage-pill').forEach((btn) => {
+          const bi = Number(btn.dataset.wstage);
+          btn.classList.toggle('stage-active', bi === viewIdx);
+          if (bi === activeIdx && !btn.textContent.includes('★')) {
+            btn.textContent = btn.textContent + ' ★';
+          }
+        });
+      },
+
+      async checkTokyoBinancePing(showToast) {
+        const badge = document.getElementById('tp-ping-badge');
+        const detail = document.getElementById('tp-ping-detail');
+        if (badge) badge.textContent = 'جاري القياس...';
+        try {
+          const r = await fetch('/api/executive/latency/ping');
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const j = await r.json();
+          state.tokyoBinancePing = j;
+          if (badge) {
+            if (j.reachable && Number.isFinite(j.rttMs)) {
+              badge.textContent = `${j.rttMs}ms • ${j.shortTermReady ? 'جاهز للقصير' : 'مرتفع'}`;
+              badge.style.color = j.shortTermReady ? '#22C55E' : '#F59E0B';
+              badge.style.borderColor = j.shortTermReady ? 'rgba(20,138,69,0.6)' : 'rgba(245,158,11,0.55)';
+            } else {
+              badge.textContent = `غير متاح (${j.httpStatus || 'OFFLINE'})`;
+              badge.style.color = '#E52546';
+              badge.style.borderColor = 'rgba(200,20,52,0.6)';
+            }
+          }
+          if (detail) detail.textContent = `${j.serverRegion || 'Tokyo'} ↔ ${j.endpoint}: ${j.noteAr || ''}`;
+          if (showToast) this.toast(j.noteAr || 'تم فحص البينج');
+        } catch (_) {
+          state.tokyoBinancePing = { reachable: false, shortTermReady: false, quality: 'OFFLINE' };
+          if (badge) {
+            badge.textContent = 'تعذر القياس';
+            badge.style.color = '#E52546';
+            badge.style.borderColor = 'rgba(200,20,52,0.55)';
+          }
+          if (detail) detail.textContent = 'لا يمكن قياس البينج من هذا الوضع — افتح الخادم (طوكيو/المحلي) لقياس زمن الاستجابة الحقيقي.';
+        }
+      },
+
+      async verifyDealFiveAgentsLive(dealId) {
+        const d = ALL_CANDIDATE_DEALS.find((x) => x.id === dealId);
+        if (!d) return;
+        const btn = document.getElementById(`tp-verify-btn-${dealId}`);
+        if (btn) { btn.disabled = true; btn.textContent = 'جاري التحقق من الـ 5 وكلاء...'; }
+        try {
+          const m = computeDealMetrics(d);
+          const priceMap = {};
+          ALL_CANDIDATE_DEALS.forEach((x) => { priceMap[x.sym] = Number(x.price || 0); });
+          let heldVal = 0;
+          Object.entries(state.spotHoldings || {}).forEach(([s, q]) => { heldVal += Number(q || 0) * (priceMap[s] || 0); });
+          const availUsdt = Math.max(0, Math.round(Number(state.equity || 0) - heldVal));
+          const r = await fetch('/api/executive/ai-providers/deliberate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sym: d.sym, name: d.name, price: Number(d.price || 0),
+              tp1: Number(m.tp1 || 0), sl: Number(m.sl || 0), horizon: d.round || '1H',
+              availUsdt, investUsd: Number(m.invest || 0), confPct: Number(d.conf || 75),
+              aiScores: (d.aiScores || []).map((v) => Number.isFinite(Number(v)) ? Number(v) : 75)
+            })
+          });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const j = await r.json();
+          if (j.ok && Array.isArray(j.agents)) {
+            state.liveCouncilByDeal = state.liveCouncilByDeal || {};
+            state.liveCouncilByDeal[`${d.id}_TODAY`] = j;
+            this.renderTodayPath();
+            this.renderLongTermDeals();
+            this.toast(`تم توثيق رأي الـ 5 وكلاء لـ ${d.sym} (${j.liveCloudAgentsCount}/4 سحابي حي + المحرك الكمي • ${j.totalLatencyMs || 0}ms)`);
+          }
+        } catch (err) {
+          this.toast(`تعذّر توثيق رأي الوكلاء: ${err?.message || err}`, 'var(--hot)');
+        } finally {
+          if (btn) { btn.disabled = false; btn.textContent = 'توثيق رأي الـ 5 وكلاء الآن'; }
+        }
+      },
+
+      onTodaySessionPlanChange() {
+        const budget = Math.max(0, Number(document.getElementById('tp-session-budget-inp')?.value || 0));
+        const target = Math.max(0, Number(document.getElementById('tp-session-target-inp')?.value || 0));
+        state.todaySessionBudget = budget;
+        state.todaySessionTarget = target;
+        this.renderTodayPath();
+      },
+
+      setTodayDealInvest(dealId, usdVal) {
+        const val = Math.max(0, Math.round(Number(usdVal) || 0));
+        if (val > 0 && typeof this.setDealUsd === 'function') {
+          this.setDealUsd(dealId, val);
+        }
+        this.renderTodayPath();
+      },
+
+      openDealChart(dealId) {
+        this.selectHeroDeal(dealId);
+        this.setExecWorkspaceMode('advanced');
+        setTimeout(() => {
+          document.getElementById('lux-center-hero')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 120);
+      },
+
+      renderTodayPath() {
+        const grid = document.getElementById('tp-live-deals-grid');
+        if (!grid) return;
+
+        const priceMap = {};
+        ALL_CANDIDATE_DEALS.forEach((x) => { priceMap[x.sym] = Number(x.price || 0); });
+        let heldVal = 0;
+        const ownedSyms = [];
+        Object.entries(state.spotHoldings || {}).forEach(([s, q]) => {
+          const qty = Number(q || 0);
+          if (qty > 0) {
+            heldVal += qty * (priceMap[s] || 0);
+            ownedSyms.push(s.replace('USDT', ''));
+          }
+        });
+        const totalEquity = Number(state.equity || 0);
+        const availUsdt = Math.max(0, Math.round(totalEquity - heldVal));
+        const realized = Number(state.netProfit || 0);
+
+        const allSellRecs = typeof this.buildOwnedSellRecommendations === 'function' ? this.buildOwnedSellRecommendations() : [];
+        // القاعدة الصارمة: لا يُعرض البيع كصفقة رابحة إلا إذا تجاوز صافي الربح +3.0% (أو عند تحذير وقف الخسارة SL)
+        const eligibleSells = allSellRecs.filter((s) => Number(s.qty || 0) > 0 && s.sellRecommended);
+        const waitingSells = allSellRecs.filter((s) => Number(s.qty || 0) > 0 && !s.sellRecommended);
+        const unrealizedPnl = allSellRecs.reduce((acc, s) => acc + Number(s.pnlUsd || 0), 0);
+        const maxLossPct = 2.5;
+        const drawdownPct = totalEquity > 0 ? Math.max(0, (-(realized + unrealizedPnl) / totalEquity) * 100) : 0;
+        const lossHalted = drawdownPct >= maxLossPct || Boolean(state.killSwitch);
+
+        const elLgBadge = document.getElementById('tp-loss-guard-badge');
+        const elLgDetail = document.getElementById('tp-loss-guard-detail');
+        const elHaltBanner = document.getElementById('tp-loss-halt-banner');
+        if (elLgBadge) {
+          elLgBadge.textContent = lossHalted ? `متوقف تلقائياً (-${drawdownPct.toFixed(2)}%)` : `آمن (-${drawdownPct.toFixed(2)}% / -${maxLossPct}%)`;
+          elLgBadge.style.color = lossHalted ? '#E52546' : '#22C55E';
+          elLgBadge.style.borderColor = lossHalted ? 'rgba(200,20,52,0.6)' : 'rgba(20,138,69,0.5)';
+        }
+        if (elLgDetail) {
+          elLgDetail.textContent = lossHalted
+            ? 'تم إيقاف الشراء تلقائياً لحماية رأس المال بعد تجاوز حد الخسارة المسموح أو تفعيل الطوارئ.'
+            : `الحد الأقصى للخسارة المسموح بها -${maxLossPct}% — والحد الأدنى لجني الربح +3.0% فأكثر.`;
+        }
+        if (elHaltBanner) {
+          elHaltBanner.classList.toggle('hidden', !lossHalted);
+          elHaltBanner.textContent = 'تم إيقاف التداول تلقائياً لحماية رأس المال — معدل الخسارة تجاوز الحد المسموح أو تم تفعيل قاطع الطوارئ.';
+        }
+
+        // ترتيب الفرص من الأهم إلى الأقل حسب (الثقة × نسبة الربح المتوقع) وبحد أدنى 3% لهدف الربح
+        const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+        const dynamicBuyDeals = ALL_CANDIDATE_DEALS
+          .filter((d) => d.quant && d.quant.approved && Number(d.conf || 0) >= 75 && Number(d.tpPct || 0) >= 0.03)
+          .sort((a, b) => (Number(b.conf || 0) * Number(b.tpPct || 0)) - (Number(a.conf || 0) * Number(a.tpPct || 0)))
+          .slice(0, 20);
+
+        // تحديث ملخص خطة الجلسة التفاعلية
+        const sessBudget = Math.min(availUsdt, Math.max(0, Number(document.getElementById('tp-session-budget-inp')?.value || state.todaySessionBudget || 25000)));
+        const sessTarget = Math.max(0, Number(document.getElementById('tp-session-target-inp')?.value || state.todaySessionTarget || 1000));
+        const avgTpPct = dynamicBuyDeals.length ? (dynamicBuyDeals.slice(0, 3).reduce((s, d) => s + Number(d.tpPct || 0.035), 0) / Math.min(3, dynamicBuyDeals.length)) : 0.035;
+        const estSessNet = Math.max(0, Math.round(sessBudget * avgTpPct - sessBudget * 0.0015));
+        const elPlanSum = document.getElementById('tp-session-plan-summary');
+        if (elPlanSum) {
+          const reachesGoal = estSessNet >= sessTarget && sessBudget > 0;
+          elPlanSum.textContent = sessBudget > 0
+            ? `صافي متوقع: +$${estSessNet.toLocaleString()} (${(avgTpPct * 100).toFixed(2)}%) ${reachesGoal ? '• يحقق هدفك ✓' : `• يحتاج زيادة المبلغ لبلوغ $${sessTarget.toLocaleString()}`}`
+            : 'أدخل مبلغ الاستثمار للجلسة لحساب صافي الربح المتوقع';
+          elPlanSum.style.color = reachesGoal ? '#22C55E' : '#F8FAFC';
+        }
+
+        // التنبيهات الحية: فقط المراكز التي تجاوزت +3% ربح أو لامست SL + أقوى فرص الشراء
+        const alerts = [];
+        eligibleSells.forEach((s) => {
+          const isRisk = Boolean(s.eligibleForStopLoss);
+          alerts.push({
+            kind: isRisk ? 'SL_RISK' : 'TP_READY',
+            label: isRisk
+              ? `تحذير خسارة: ${s.sym} (${s.pnlPct.toFixed(2)}%) — راجع البيع لحماية رأس المال`
+              : `جني ربح مؤهل (≥3%): ${s.sym} (+${s.pnlPct.toFixed(2)}% • +$${Math.round(s.pnlUsd).toLocaleString()})`,
+            targetId: `tp-sell-${s.sym}`
+          });
+        });
+        dynamicBuyDeals.slice(0, 3).forEach((d, i) => {
+          alerts.push({
+            kind: 'BUY_WINDOW',
+            label: `الأولوية #${i + 1}: ${d.sym} (المدة ${d.round || '1H'} • هدف +${(d.tpPct * 100).toFixed(2)}% • ثقة ${d.conf}%)`,
+            targetId: `tp-buy-${d.id}`
+          });
+        });
+
+        const alertCntBadge = document.getElementById('tp-alert-count-badge');
+        const alertPill = document.getElementById('tp-alerts-pill');
+        const alertListEl = document.getElementById('tp-alerts-list');
+        if (alertCntBadge) alertCntBadge.textContent = `${alerts.length} تنبيه`;
+        if (alertPill) alertPill.textContent = `${alerts.length} نشط`;
+        if (alertListEl) {
+          alertListEl.innerHTML = alerts.length
+            ? alerts.slice(0, 3).map((a) => `
+                <button type="button" style="text-align:right;background:rgba(255,255,255,0.04);border:1px solid ${a.kind === 'BUY_WINDOW' ? 'rgba(20,138,69,0.4)' : 'rgba(200,20,52,0.5)'};border-radius:7px;padding:4px 8px;color:#F8FAFC;font-size:10.3px;cursor:pointer;" onclick="document.getElementById('${a.targetId}')?.scrollIntoView({behavior:'smooth',block:'center'})">${a.label}</button>
+              `).join('')
+            : '<span class="muted">لا توجد تنبيهات بيع أو شراء عاجلة حالياً — المراكز أقل من +3% قيد الانتظار.</span>';
+        }
+
+        const elFree = document.getElementById('tp-free-cash');
+        const elHeld = document.getElementById('tp-total-held');
+        const elHeldSum = document.getElementById('tp-held-summary');
+        const elDyn = document.getElementById('tp-dyn-count');
+        const elReal = document.getElementById('tp-realized-val');
+        if (elFree) elFree.textContent = `$${availUsdt.toLocaleString()} USDT`;
+        if (elHeld) elHeld.textContent = `$${Math.round(totalEquity).toLocaleString()} (مملوك $${Math.round(heldVal).toLocaleString()})`;
+        if (elHeldSum) elHeldSum.textContent = ownedSyms.length ? `المملوك: ${ownedSyms.join(' • ')} (${waitingSells.length} قيد انتظار ≥3% ربح)` : 'لا توجد عملات مملوكة حالياً.';
+        if (elDyn) elDyn.textContent = `${eligibleSells.length + dynamicBuyDeals.length} فرصة (${eligibleSells.length} بيع ≥3% + ${dynamicBuyDeals.length} شراء)`;
+        if (elReal) elReal.textContent = `${realized >= 0 ? '+' : '-'}$${Math.abs(Math.round(realized)).toLocaleString()}`;
+
+        const bindings = (Array.isArray(state.agentBindings) && state.agentBindings.length === 5)
+          ? state.agentBindings
+          : this._getDefaultAgentBindings();
+
+        const sellCardsHtml = eligibleSells.map((s) => {
+          const curPx = Number(s.curPrice || s.price || priceMap[s.sym] || 0);
+          const freed = Math.round(Number(s.qty) * curPx);
+          const isLoss = Boolean(s.eligibleForStopLoss);
+          return `
+            <article id="tp-sell-${s.sym}" class="tp-deal-card is-sell-alert">
+              <div class="row-between" style="gap:8px;">
+                <div>
+                  <span class="hex-shield" style="font-size:10px;color:${isLoss ? '#E52546' : '#22C55E'};border-color:${isLoss ? 'rgba(200,20,52,0.55)' : 'rgba(20,138,69,0.55)'};">${isLoss ? 'تنبيه حماية من الخسارة (SL)' : 'جني ربح مؤهل (≥ +3.0%)'}</span>
+                  <h3 style="margin:5px 0 0;font-size:16px;color:#FFFFFF;">${s.sym} • رصيدك: <span class="num">${s.qty}</span></h3>
+                </div>
+                <div style="text-align:left;">
+                  <div class="muted" style="font-size:10px;">صافي الربح / الخسارة</div>
+                  <strong class="num" dir="ltr" style="font-size:16px;color:${isLoss ? '#E52546' : '#22C55E'};">${s.pnlUsd >= 0 ? '+' : '-'}$${Math.abs(Math.round(s.pnlUsd)).toLocaleString()} (${s.pnlPct >= 0 ? '+' : ''}${s.pnlPct.toFixed(2)}%)</strong>
+                </div>
+              </div>
+              <div class="qdf-metrics-row" style="grid-template-columns:repeat(3,minmax(0,1fr));">
+                <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">سعر الشراء</div><strong class="num" dir="ltr" style="font-size:12px;">$${Number(s.entryPrice || curPx).toLocaleString()}</strong></div>
+                <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">السعر الحالي</div><strong class="num" dir="ltr" style="font-size:12px;color:#22C55E;">$${curPx.toLocaleString()}</strong></div>
+                <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">الكاش المحرّر</div><strong class="num" dir="ltr" style="font-size:12px;">$${freed.toLocaleString()}</strong></div>
+              </div>
+              <button type="button" class="btn-3d btn-3d-sell" style="height:38px;width:100%;font-size:12px;font-weight:800;" onclick="ui.executeSpotSellNow('${s.sym}')">تنفيذ البيع الآن وتحويل القيمة للكاش الحر</button>
+            </article>
+          `;
+        }).join('');
+
+        const buyCardsHtml = dynamicBuyDeals.map((d, rankIdx) => {
+          const m = computeDealMetrics(d);
+          const investAmt = Number(m.invest || 0);
+          const feesEst = +(investAmt * 0.0015).toFixed(2);
+          const netExpProfit = Math.max(0, Math.round(investAmt * Number(d.tpPct || 0.03) - feesEst));
+          const sharePct = availUsdt > 0 ? (investAmt / availUsdt) * 100 : 100;
+          const doneToday = todayLog.find((t) => t.dealId === d.id || t.sym === d.sym);
+          const verifiedPack = (state.liveCouncilByDeal && (state.liveCouncilByDeal[`${d.id}_TODAY`] || state.liveCouncilByDeal[`${d.id}_1H`])) || null;
+
+          // تقييم ديناميكي لوكيل «الميزان» يتغيّر لحظياً كلما غيّر المستخدم مبلغ الاستثمار!
+          const mizanValid = investAmt > 0 && investAmt <= availUsdt;
+          const mizanScoreDyn = !mizanValid ? null
+            : (sharePct <= 15 ? Math.round(quantClip(92 - sharePct * 0.6, 78, 96))
+              : (sharePct <= 25 ? Math.round(quantClip(74 - (sharePct - 15) * 1.2, 60, 74)) : 48));
+          const mizanStatusDyn = !mizanValid ? 'مبلغ غير صالح'
+            : (sharePct <= 15 ? `موافق (${sharePct.toFixed(1)}%)`
+              : (sharePct <= 25 ? `حذر (${sharePct.toFixed(1)}%)` : `رافض (${sharePct.toFixed(1)}%)`));
+          const mizanColDyn = !mizanValid || sharePct > 25 ? '#E52546' : (sharePct <= 15 ? '#22C55E' : '#F59E0B');
+
+          const canBuy = !lossHalted && !doneToday && mizanValid;
+          const prefTimeLabel = { '1m': 'دقيقة (1m)', '15m': 'ربع ساعة (15m)', '1H': 'ساعة (1H)', '2H': 'ساعتان (2H)', '4H': '4 ساعات (4H)', '24H': 'يوم (24H)' }[d.round] || (d.round || 'ساعة (1H)');
+
+          const agentChips = bindings.map((b, idx) => {
+            if (idx === 3) {
+              return `
+                <div class="tp-ag-chip" style="border-color:${mizanColDyn === '#22C55E' ? 'rgba(20,138,69,0.5)' : 'rgba(200,20,52,0.5)'};">
+                  <span style="font-size:9.5px;font-weight:800;color:#F1F5F9;">${b.agentName.split('(')[0].trim()}</span>
+                  <span style="font-size:8.5px;color:#94A3B8;">كمّي محلي</span>
+                  <strong class="num" style="font-size:11.5px;color:${mizanColDyn};">${mizanScoreDyn !== null ? mizanScoreDyn + '%' : '—'}</strong>
+                  <span style="font-size:8.2px;color:${mizanColDyn};">${mizanStatusDyn}</span>
+                </div>
+              `;
+            }
+            const va = verifiedPack && Array.isArray(verifiedPack.agents) ? verifiedPack.agents.find((x) => Number(x.agentIndex) === idx) : null;
+            const isCloudLive = va && va.mode === 'LIVE_CLOUD';
+            const statusLbl = isCloudLive
+              ? `حي ${va.latencyMs || 0}ms`
+              : (b.connected ? 'مربوط (اضغط توثيق)' : 'غير مفعّل');
+            const scoreTxt = va && Number.isFinite(Number(va.score)) ? `${Math.round(Number(va.score))}%` : '—';
+            const chipCol = isCloudLive ? '#22C55E' : '#94A3B8';
+            return `
+              <div class="tp-ag-chip" style="border-color:${isCloudLive ? 'rgba(20,138,69,0.55)' : 'rgba(255,255,255,0.09)'};">
+                <span style="font-size:9.5px;font-weight:800;color:#F1F5F9;">${b.agentName.split('(')[0].trim()}</span>
+                <span style="font-size:8.5px;color:#94A3B8;">${b.providerShort}</span>
+                <strong class="num" style="font-size:11.5px;color:${chipCol};">${scoreTxt}</strong>
+                <span style="font-size:8.2px;color:${chipCol};">${statusLbl}</span>
+              </div>
+            `;
+          }).join('');
+
+          return `
+            <article id="tp-buy-${d.id}" class="tp-deal-card">
+              <div class="row-between" style="gap:8px;">
+                <div>
+                  <span class="hex-shield num" style="font-size:10px;color:#22C55E;border-color:rgba(20,138,69,0.5);">الأولوية #${rankIdx + 1} • الوقت المفضّل: ${prefTimeLabel}</span>
+                  <h3 style="margin:5px 0 0;font-size:16px;color:#FFFFFF;">${d.sym} <span class="muted" style="font-size:12px;">(${(d.name.split('•')[1] || d.name).trim()})</span></h3>
+                </div>
+                <div style="text-align:left;">
+                  <div class="muted" style="font-size:10px;">السعر الحالي</div>
+                  <strong class="num" dir="ltr" style="font-size:16.5px;color:#FFFFFF;">$${Number(d.price || 0).toLocaleString()}</strong>
+                </div>
+              </div>
+              <div class="qdf-metrics-row" style="grid-template-columns:repeat(3,minmax(0,1fr));">
+                <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">هدف الربح (≥ 3%)</div><strong class="num" dir="ltr" style="font-size:12px;color:#22C55E;">$${m.tp1} (+${(d.tpPct * 100).toFixed(2)}%)</strong></div>
+                <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">وقف الخسارة SL</div><strong class="num" dir="ltr" style="font-size:12px;color:#E52546;">$${m.sl} (-${(d.slPct * 100).toFixed(2)}%)</strong></div>
+                <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">صافي الربح المتوقع</div><strong class="num" dir="ltr" style="font-size:12.5px;color:#22C55E;">+$${netExpProfit.toLocaleString()}</strong></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 9px;border-radius:8px;background:#0A0D10;border:1px solid rgba(255,255,255,0.08);">
+                <span style="font-size:10.5px;font-weight:800;color:#CBD5E1;">مبلغ الاستثمار (عدّل لترى الربح ورأي الميزان):</span>
+                <div style="display:flex;align-items:center;gap:4px;">
+                  <button type="button" class="admin-amt-btn" onclick="ui.setTodayDealInvest('${d.id}', ${Math.max(100, investAmt - 1000)})">−</button>
+                  <input type="number" class="admin-amt-inp num" value="${investAmt}" min="50" step="500" style="width:82px;font-size:12px;" onchange="ui.setTodayDealInvest('${d.id}', this.value)" />
+                  <button type="button" class="admin-amt-btn" onclick="ui.setTodayDealInvest('${d.id}', ${investAmt + 1000})">+</button>
+                </div>
+              </div>
+              <div>
+                <div class="row-between" style="margin-bottom:4px;">
+                  <span style="font-size:10.3px;font-weight:800;color:#CBD5E1;">رأي الـ 5 وكلاء (موثّق بوقت البينج — يتغيّر الميزان مع المبلغ):</span>
+                </div>
+                <div class="tp-agents-verify-strip">${agentChips}</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1.2fr 1fr 0.75fr;gap:6px;">
+                ${doneToday
+                  ? `<button type="button" class="btn-3d" disabled style="height:36px;opacity:0.55;cursor:not-allowed;">تم التنفيذ اليوم ✓</button>`
+                  : `<button type="button" class="btn-3d btn-3d-buy" ${canBuy ? '' : 'disabled'} style="height:36px;font-size:11px;font-weight:800;${canBuy ? '' : 'opacity:0.45;cursor:not-allowed;'}" onclick="ui.executeEliteDeal('${d.id}','BUY')">شراء ($${investAmt.toLocaleString()})</button>`}
+                <button type="button" id="tp-verify-btn-${d.id}" class="btn-3d btn-sd-electric-flag" style="height:36px;font-size:10.5px;font-weight:800;" onclick="ui.verifyDealFiveAgentsLive('${d.id}')">توثيق الـ 5 وكلاء</button>
+                <button type="button" class="btn-3d" style="height:36px;font-size:10.5px;font-weight:800;" onclick="ui.openDealChart('${d.id}')">الشموع</button>
+              </div>
+            </article>
+          `;
+        }).join('');
+
+        grid.innerHTML = (sellCardsHtml + buyCardsHtml) || `<div class="muted" style="grid-column:1/-1;text-align:center;padding:24px;">لا توجد فرص مؤهلة حالياً حسب شروط السوق (≥ +3.0% ربح متوقع) — سيصلك تنبيه فور ظهور فرصة مرتفعة.</div>`;
+      },
+
+      setLongTermHorizon(hz) {
+        state.longTermHorizon = hz || '7D';
+        document.querySelectorAll('.lt-hz-btn').forEach((b) => b.classList.toggle('btn-3d-gold', b.dataset.lthz === state.longTermHorizon));
+        this.renderLongTermDeals();
+      },
+
+      renderLongTermDeals() {
+        const grid = document.getElementById('lt-deals-grid');
+        if (!grid) return;
+        const hz = state.longTermHorizon || '7D';
+        const multMap = { '7D': 2.6, '30D': 5.2, '90D': 11.5, 'ALL': 5.2 };
+        const mult = multMap[hz] || 2.6;
+        const deals = ALL_CANDIDATE_DEALS.filter((d) => d.quant && d.quant.approved).slice(0, 8);
+        const todayLog = Array.isArray(state.todayExecutedLog) ? state.todayExecutedLog : [];
+        grid.innerHTML = deals.map((d) => {
+          const m = computeDealMetrics(d);
+          const ltTpPct = +(d.tpPct * 100 * mult).toFixed(2);
+          const ltTpPrice = +(d.price * (1 + ltTpPct / 100)).toFixed(d.price < 10 ? 3 : 2);
+          const ltSlPrice = +(d.price * (1 - d.slPct * 1.6)).toFixed(d.price < 10 ? 3 : 2);
+          const estProf = Math.round(m.invest * (ltTpPct / 100));
+          const doneToday = todayLog.find((t) => t.dealId === d.id || t.sym === d.sym);
+          const owned = Number((state.spotHoldings || {})[d.sym] || 0);
+          return `
+            <article class="tp-deal-card">
+              <div class="row-between" style="gap:8px;">
+                <div>
+                  <span class="hex-shield num" style="font-size:10px;color:#F1F5F9;border-color:rgba(226,232,240,0.38);">استثمار طويل الأجل • ${hz === 'ALL' ? '30D' : hz}</span>
+                  <h3 style="margin:5px 0 0;font-size:16px;color:#FFFFFF;">${d.sym} <span class="muted" style="font-size:12px;">(${(d.name.split('•')[1] || d.name).trim()})</span></h3>
+                </div>
+                <strong class="num" dir="ltr" style="font-size:16px;color:#FFFFFF;">$${Number(d.price || 0).toLocaleString()}</strong>
+              </div>
+              <div class="qdf-metrics-row" style="grid-template-columns:repeat(3,minmax(0,1fr));">
+                <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">هدف طويل الأجل</div><strong class="num" dir="ltr" style="font-size:12px;color:#22C55E;">$${ltTpPrice} (+${ltTpPct}%)</strong></div>
+                <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">حماية رأس المال SL</div><strong class="num" dir="ltr" style="font-size:12px;color:#E52546;">$${ltSlPrice}</strong></div>
+                <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">الربح المتوقع</div><strong class="num" dir="ltr" style="font-size:12px;color:#22C55E;">+$${estProf.toLocaleString()}</strong></div>
+              </div>
+              <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:7px;">
+                ${doneToday
+                  ? `<button type="button" class="btn-3d" disabled style="height:36px;opacity:0.55;cursor:not-allowed;">تم التنفيذ ✓</button>`
+                  : `<button type="button" class="btn-3d btn-3d-buy" ${m.invest > 0 ? '' : 'disabled'} style="height:36px;font-size:11.5px;font-weight:800;" onclick="ui.executeEliteDeal('${d.id}','BUY')">استثمار طويل الأجل ($${m.invest.toLocaleString()})</button>`}
+                ${owned > 0
+                  ? `<button type="button" class="btn-3d btn-3d-sell" style="height:36px;font-size:11px;font-weight:800;" onclick="ui.executeSpotSellNow('${d.sym}')">بيع المملوك (${owned})</button>`
+                  : `<button type="button" class="btn-3d" disabled style="height:36px;font-size:10.5px;opacity:0.42;cursor:not-allowed;">غير مملوك (0)</button>`}
+              </div>
+            </article>
+          `;
+        }).join('');
+      },
+
       closeModals() { ['modal-exec-receipt', 'modal-kpi-detail', 'modal-orbit-3d', 'modal-agent-trades', 'modal-passkey', 'modal-recovery', 'modal-ga-qr', 'modal-binance-vault'].forEach((id) => document.getElementById(id)?.classList.add('hidden')); }
     };
     window.ui = ui;
@@ -9051,6 +9781,9 @@
       ui.renderDailyPage();
       ui.connectLiveBackendStream();
       ui.refreshAiProvidersUI();
+      ui.renderStagedWealthBar();
+      ui.setExecWorkspaceMode('today');
+      ui.checkTokyoBinancePing(false);
       setInterval(() => ui.checkManagedAutoSells(), 5000);
       if (location.hash && location.hash.toLowerCase().includes('cfo')) {
         try { history.replaceState(null, '', location.pathname); } catch (_) {}
