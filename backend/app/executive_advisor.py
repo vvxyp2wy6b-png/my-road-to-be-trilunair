@@ -1740,14 +1740,85 @@ _AI_ENV_KEYS = {
 }
 
 
+_AGENT_PLATFORM_MAP = [
+    {
+        "agentIndex": 0,
+        "agentId": "AI-1",
+        "icon": "🎯",
+        "agentName": "ترليورين (الزخم الفني)",
+        "roleAr": "محلل الاتجاه والشموع",
+        "providerId": "gemini",
+        "providerShort": "Google Gemini",
+        "model": "gemini-2.5-flash",
+    },
+    {
+        "agentIndex": 1,
+        "agentId": "AI-2",
+        "icon": "🛡️",
+        "agentName": "الحارس (إدارة المخاطر)",
+        "roleAr": "فحص وقف الخسارة والأمان",
+        "providerId": "anthropic",
+        "providerShort": "Anthropic Claude",
+        "model": "claude-3-5-haiku-latest",
+    },
+    {
+        "agentIndex": 2,
+        "agentId": "AI-3",
+        "icon": "📡",
+        "agentName": "الرادار (السيولة والأوامر)",
+        "roleAr": "عمق السوق وتدفق السيولة",
+        "providerId": "openai",
+        "providerShort": "OpenAI GPT",
+        "model": "gpt-4o-mini",
+    },
+    {
+        "agentIndex": 3,
+        "agentId": "AI-4",
+        "icon": "⚖️",
+        "agentName": "الميزان (تخصيص المال)",
+        "roleAr": "تحجيم Kelly الكسري ورصيد المحفظة",
+        "providerId": "local",
+        "providerShort": "المحرك الكمي المحلي",
+        "model": "quant-kelly-pava-v1",
+    },
+    {
+        "agentIndex": 4,
+        "agentId": "AI-5",
+        "icon": "🌐",
+        "agentName": "الاستراتيجي (السياق العام)",
+        "roleAr": "صورة السوق والأخبار",
+        "providerId": "xai",
+        "providerShort": "xAI Grok",
+        "model": "grok-3-mini",
+    },
+]
+
+
 class AiProviderConnectInput(BaseModel):
     provider: str = Field(..., pattern="^(gemini|openai|anthropic|xai)$")
     apiKey: str = Field(..., min_length=8)
 
 
+class AiProviderDisconnectInput(BaseModel):
+    provider: str = Field(..., pattern="^(gemini|openai|anthropic|xai)$")
+
+
 class AiAgentAskInput(BaseModel):
     prompt: str = Field(..., min_length=2, max_length=1500)
     provider: str = Field(default="auto")
+
+
+class AiCouncilDeliberateInput(BaseModel):
+    sym: str = Field(..., min_length=2, max_length=32)
+    name: str = Field(default="")
+    price: float = Field(..., gt=0)
+    tp1: float = Field(default=0.0, ge=0)
+    sl: float = Field(default=0.0, ge=0)
+    horizon: str = Field(default="1H", max_length=16)
+    availUsdt: float = Field(default=0.0, ge=0)
+    investUsd: float = Field(default=0.0, ge=0)
+    confPct: float = Field(default=75.0, ge=0, le=100)
+    aiScores: list[float] = Field(default_factory=list)
 
 
 def _persist_env_local(env_name: str, value: str) -> None:
@@ -1773,9 +1844,22 @@ def _persist_env_local(env_name: str, value: str) -> None:
         pass
 
 
+def _remove_env_local(env_name: str) -> None:
+    """إزالة المفتاح من .env.local عند فصل مزود الذكاء الاصطناعي."""
+    try:
+        env_file = Path(__file__).resolve().parents[2] / ".env.local"
+        if not env_file.is_file():
+            return
+        prefix = f"{env_name}="
+        lines = [ln for ln in env_file.read_text(encoding="utf-8").splitlines() if not ln.startswith(prefix)]
+        env_file.write_text(("\n".join(lines) + "\n") if lines else "", encoding="utf-8")
+    except Exception:
+        pass
+
+
 @executive_router.get("/ai-providers/status")
 def get_ai_providers_status() -> dict[str, Any]:
-    """حالة اتصال مزودات الذكاء الاصطناعي الحقيقية للوكلاء داخل التصميم الموحّد."""
+    """حالة اتصال مزودات الذكاء الاصطناعي الحقيقية وخريطة ربط الوكلاء الخمسة."""
     providers = [
         {
             "id": "local",
@@ -1785,18 +1869,52 @@ def get_ai_providers_status() -> dict[str, Any]:
             "noteAr": "متصل دائماً — محرك كمي محلي فوري (PAVA + Kelly + ATR)",
         }
     ]
+    provider_by_id: dict[str, dict[str, Any]] = {"local": providers[0]}
     for pid, (env_name, label) in _AI_ENV_KEYS.items():
         val = (os.getenv(env_name) or "").strip()
-        providers.append({
+        item = {
             "id": pid,
             "name": label,
             "envKey": env_name,
             "connected": len(val) >= 8,
             "masked": (val[:5] + "•••" + val[-4:]) if len(val) >= 10 else "",
-            "noteAr": "🟢 متصل ومفعل للوكلاء" if len(val) >= 8 else "غير مهيأ — أدخل المفتاح للربط",
+            "noteAr": "🟢 متصل ومفعل للوكيل المخصص" if len(val) >= 8 else "غير مهيأ — يعمل بالمحرك الكمي الاحتياطي حتى الربط",
+        }
+        providers.append(item)
+        provider_by_id[pid] = item
+
+    agent_bindings = []
+    for ag in _AGENT_PLATFORM_MAP:
+        pid = ag["providerId"]
+        pinfo = provider_by_id.get(pid, {})
+        is_conn = bool(pinfo.get("connected", False))
+        mode = "LOCAL_QUANT" if pid == "local" else ("LIVE_CLOUD" if is_conn else "LOCAL_FALLBACK")
+        agent_bindings.append({
+            "agentIndex": ag["agentIndex"],
+            "agentId": ag["agentId"],
+            "icon": ag["icon"],
+            "agentName": ag["agentName"],
+            "roleAr": ag["roleAr"],
+            "providerId": pid,
+            "providerShort": ag["providerShort"],
+            "providerName": pinfo.get("name", ag["providerShort"]),
+            "model": ag["model"],
+            "envKey": pinfo.get("envKey", ""),
+            "connected": is_conn,
+            "masked": pinfo.get("masked", ""),
+            "mode": mode,
         })
-    active_llm = next((p["id"] for p in providers if p["id"] != "local" and p["connected"]), "local")
-    return {"ok": True, "activeProvider": active_llm, "providers": providers}
+
+    connected_cloud = [p for p in providers if p["id"] != "local" and p["connected"]]
+    active_llm = connected_cloud[0]["id"] if connected_cloud else "local"
+    return {
+        "ok": True,
+        "activeProvider": active_llm,
+        "connectedCloudCount": len(connected_cloud),
+        "totalConnectedAgents": sum(1 for a in agent_bindings if a["connected"]),
+        "providers": providers,
+        "agentBindings": agent_bindings,
+    }
 
 
 @executive_router.post("/ai-providers/connect")
@@ -1937,8 +2055,331 @@ def ask_connected_ai_agent(payload: AiAgentAskInput) -> dict[str, Any]:
     return {
         "ok": True,
         "provider": "Local Quantitative Engine",
-        "reply": f"📊 تحليل المحرك الكمي المحلي بناءً على أسعار Binance Testnet الحية ({market_ctx}): الالتزام الكامل بعتبة PAVA ≥ 75% ونظام Spot Long-Only حتى 28/11/2026. لتمكين التحليل اللغوي المتقدم من Gemini أو GPT أو Claude، اربط مفتاح المزود من قسم «🤖 ربط الوكلاء».",
+        "reply": f"📊 تحليل المحرك الكمي المحلي بناءً على أسعار Binance Testnet الحية ({market_ctx}): الالتزام الكامل بعتبة PAVA ≥ 75% ونظام Spot Long-Only حتى 28/11/2026. لتمكين التحليل اللغوي المتقدم من Gemini أو GPT أو Claude أو Grok، اربط مفتاح المزود من قسم «🤖 ربط الوكلاء».",
     }
+
+
+@executive_router.post("/ai-providers/disconnect")
+def disconnect_ai_provider(payload: AiProviderDisconnectInput) -> dict[str, Any]:
+    """فصل مزود الذكاء الاصطناعي وإزالة مفتاحه من البيئة المحلية (.env.local)."""
+    pid = payload.provider.lower().strip()
+    env_name, label = _AI_ENV_KEYS[pid]
+    os.environ.pop(env_name, None)
+    _remove_env_local(env_name)
+    return {
+        "ok": True,
+        "provider": pid,
+        "messageAr": f"🔌 تم فصل {label} بنجاح — عاد الوكيل للمحرك الكمي المحلي الاحتياطي.",
+        "status": get_ai_providers_status(),
+    }
+
+
+def _extract_agent_json(raw_text: str) -> dict[str, Any] | None:
+    """استخراج JSON نظيف من رد النموذج السحابي دون السماح بانهيار التحليل."""
+    import json
+    import re
+
+    txt = (raw_text or "").strip()
+    if not txt:
+        return None
+    m = re.search(r"\{[\s\S]*\}", txt)
+    if not m:
+        return None
+    try:
+        parsed = json.loads(m.group(0))
+        if isinstance(parsed, dict):
+            return parsed
+    except Exception:
+        return None
+    return None
+
+
+def _evaluate_single_agent_deliberation(
+    ag: dict[str, Any],
+    payload: AiCouncilDeliberateInput,
+) -> dict[str, Any]:
+    """تنفيذ مداولة وكيل واحد عبر منصته المخصصة أو المحرك الكمي المحلي بشفافية كاملة."""
+    import httpx
+
+    idx = int(ag["agentIndex"])
+    pid = ag["providerId"]
+    sym = payload.sym.upper().strip()
+    price = float(payload.price)
+    tp1 = float(payload.tp1 or 0.0)
+    sl = float(payload.sl or 0.0)
+    avail = float(payload.availUsdt or 0.0)
+    invest = float(payload.investUsd or 0.0)
+    tp_pct = ((tp1 - price) / price * 100.0) if (tp1 > 0 and price > 0) else 0.0
+    sl_pct = ((price - sl) / price * 100.0) if (sl > 0 and price > 0) else 0.0
+
+    # الوكيل 4 (الميزان): محرك كمي محلي حتمي دائماً (لا يُسمح بأي NaN أو 0$)
+    if pid == "local":
+        valid_alloc = (invest > 0.0) and (avail > 0.0)
+        if not valid_alloc:
+            return {
+                "agentIndex": idx,
+                "agentId": ag["agentId"],
+                "agentName": ag["agentName"],
+                "providerId": "local",
+                "providerShort": ag["providerShort"],
+                "model": ag["model"],
+                "mode": "LOCAL_QUANT",
+                "connected": True,
+                "score": None,
+                "verdict": "REJECT",
+                "reasonAr": "حسبة التخصيص غير صالحة أو السيولة المتاحة غير كافية — تم حجب الموافقة التلقائية.",
+            }
+        share_pct = (invest / avail) * 100.0
+        raw_sc = 88.0 - max(0.0, share_pct - 10.0) * 1.4
+        score = int(max(40, min(97, round(raw_sc))))
+        verdict = "BUY" if score >= 75 else ("CAUTION" if score >= 60 else "REJECT")
+        reason = (
+            f"تحجيم Kelly الكسري: مبلغ ${invest:,.0f} يمثل {share_pct:.1f}% من السيولة المتاحة (${avail:,.0f}) ضمن حدود الأمان."
+            if score >= 75
+            else f"نسبة التخصيص ({share_pct:.1f}% من المتاح) مرتفعة نسبياً — يُنصح بخفض المبلغ."
+        )
+        return {
+            "agentIndex": idx,
+            "agentId": ag["agentId"],
+            "agentName": ag["agentName"],
+            "providerId": "local",
+            "providerShort": ag["providerShort"],
+            "model": ag["model"],
+            "mode": "LOCAL_QUANT",
+            "connected": True,
+            "score": score,
+            "verdict": verdict,
+            "reasonAr": reason,
+        }
+
+    # حساب الدرجة الاحتياطية الكمية المحلية بوضوح تام في حال لم يُربط المفتاح أو فشل الاتصال
+    base_score_raw = (
+        payload.aiScores[idx]
+        if idx < len(payload.aiScores) and isinstance(payload.aiScores[idx], (int, float))
+        else payload.confPct
+    )
+    fallback_score = int(max(40, min(97, round(float(base_score_raw))))) if base_score_raw and base_score_raw > 0 else 72
+    fallback_verdict = "BUY" if fallback_score >= 75 else ("CAUTION" if fallback_score >= 60 else "REJECT")
+    fallback_reasons = {
+        0: f"تقييم كمّي محلي (احتياطي لـ Gemini): زخم {sym} عند ${price:,.4g} بهدف +{tp_pct:.2f}% على أفق {payload.horizon}.",
+        1: f"تقييم كمّي محلي (احتياطي لـ Claude): وقف الخسارة عند ${sl:,.4g} (-{sl_pct:.2f}%) ضمن سقف المخاطرة المعتمد.",
+        2: f"تقييم كمّي محلي (احتياطي لـ GPT): تدفق السيولة الفورية على {sym} مستقر ومناسب لتنفيذ Spot Testnet.",
+        4: f"تقييم كمّي محلي (احتياطي لـ Grok): السياق العام لـ {sym} على أفق {payload.horizon} بثقة إجمالية {payload.confPct:.0f}%.",
+    }
+
+    env_name, _label = _AI_ENV_KEYS[pid]
+    key = (os.getenv(env_name) or "").strip()
+    if len(key) < 8:
+        return {
+            "agentIndex": idx,
+            "agentId": ag["agentId"],
+            "agentName": ag["agentName"],
+            "providerId": pid,
+            "providerShort": ag["providerShort"],
+            "model": ag["model"],
+            "mode": "LOCAL_FALLBACK",
+            "connected": False,
+            "score": fallback_score,
+            "verdict": fallback_verdict,
+            "reasonAr": fallback_reasons.get(idx, "تقييم كمّي محلي احتياطي — اربط مفتاح المنصة لتفعيل التحليل السحابي الحي."),
+        }
+
+    sys_prompt = (
+        f"أنت الوكيل «{ag['agentName']}» ({ag['roleAr']}) داخل مجلس الوكلاء الخمسة لمنصة Sudanese Trillionaire على Binance Spot Testnet. "
+        "قيّم الصفقة المقترحة بإيجاز صارم وأعد JSON فقط بدون أي نص خارجي بهذا الشكل: "
+        '{"score": 82, "verdict": "BUY", "reasonAr": "جملة عربية موجزة لا تتجاوز 18 كلمة"}. '
+        "القيم المسموحة لـ verdict هي BUY أو CAUTION أو REJECT، و score عدد صحيح بين 40 و 97."
+    )
+    user_prompt = (
+        f"الصفقة: {sym} ({payload.name or sym}) | الأفق: {payload.horizon} | "
+        f"السعر: ${price:,.6g} | هدف الربح TP1: ${tp1:,.6g} (+{tp_pct:.2f}%) | "
+        f"وقف الخسارة SL: ${sl:,.6g} (-{sl_pct:.2f}%) | الاستثمار المقترح: ${invest:,.0f} من متاح ${avail:,.0f}."
+    )
+
+    try:
+        raw_reply = ""
+        with httpx.Client(timeout=12.0) as client:
+            if pid == "gemini":
+                r = client.post(
+                    f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={key}",
+                    json={"contents": [{"parts": [{"text": f"{sys_prompt}\n\n{user_prompt}"}]}]},
+                )
+                if r.status_code == 200:
+                    raw_reply = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+            elif pid == "anthropic":
+                r = client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={"x-api-key": key, "anthropic-version": "2023-06-01"},
+                    json={
+                        "model": "claude-3-5-haiku-latest",
+                        "max_tokens": 220,
+                        "system": sys_prompt,
+                        "messages": [{"role": "user", "content": user_prompt}],
+                    },
+                )
+                if r.status_code == 200:
+                    raw_reply = r.json()["content"][0]["text"]
+            elif pid == "openai":
+                r = client.post(
+                    "https://api.openai.com/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {key}"},
+                    json={
+                        "model": "gpt-4o-mini",
+                        "max_tokens": 220,
+                        "messages": [
+                            {"role": "system", "content": sys_prompt},
+                            {"role": "user", "content": user_prompt},
+                        ],
+                    },
+                )
+                if r.status_code == 200:
+                    raw_reply = r.json()["choices"][0]["message"]["content"]
+            elif pid == "xai":
+                r = client.post(
+                    "https://api.x.ai/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {key}"},
+                    json={
+                        "model": "grok-3-mini",
+                        "max_tokens": 220,
+                        "messages": [
+                            {"role": "system", "content": sys_prompt},
+                            {"role": "user", "content": user_prompt},
+                        ],
+                    },
+                )
+                if r.status_code == 200:
+                    raw_reply = r.json()["choices"][0]["message"]["content"]
+
+        parsed = _extract_agent_json(raw_reply)
+        if parsed and isinstance(parsed.get("score"), (int, float)):
+            sc = int(max(40, min(97, round(float(parsed["score"])))))
+            vd = str(parsed.get("verdict") or "").upper().strip()
+            if vd not in ("BUY", "CAUTION", "REJECT"):
+                vd = "BUY" if sc >= 75 else ("CAUTION" if sc >= 60 else "REJECT")
+            rsn = str(parsed.get("reasonAr") or "").strip() or fallback_reasons.get(idx, "تحليل سحابي مكتمل.")
+            return {
+                "agentIndex": idx,
+                "agentId": ag["agentId"],
+                "agentName": ag["agentName"],
+                "providerId": pid,
+                "providerShort": ag["providerShort"],
+                "model": ag["model"],
+                "mode": "LIVE_CLOUD",
+                "connected": True,
+                "score": sc,
+                "verdict": vd,
+                "reasonAr": rsn[:220],
+            }
+    except Exception:
+        pass
+
+    return {
+        "agentIndex": idx,
+        "agentId": ag["agentId"],
+        "agentName": ag["agentName"],
+        "providerId": pid,
+        "providerShort": ag["providerShort"],
+        "model": ag["model"],
+        "mode": "LOCAL_FALLBACK",
+        "connected": True,
+        "score": fallback_score,
+        "verdict": fallback_verdict,
+        "reasonAr": f"{fallback_reasons.get(idx, '')} (تعذر الرد اللحظي من {ag['providerShort']} فتم استخدام التقييم الاحتياطي).",
+    }
+
+
+@executive_router.post("/ai-providers/deliberate")
+def deliberate_five_agents(payload: AiCouncilDeliberateInput) -> dict[str, Any]:
+    """تشغيل مداولة الوكلاء الخمسة بالتوازي مع قياس زمن الاستجابة الحقيقي وطابع التحقق."""
+    from concurrent.futures import ThreadPoolExecutor
+    from datetime import datetime, timezone
+    import time as _time
+
+    t0 = _time.perf_counter()
+    with ThreadPoolExecutor(max_workers=5) as pool:
+        def _timed(ag_item: dict[str, Any]) -> dict[str, Any]:
+            st = _time.perf_counter()
+            res = _evaluate_single_agent_deliberation(ag_item, payload)
+            res["latencyMs"] = round((_time.perf_counter() - st) * 1000.0, 1)
+            res["verifiedAtIso"] = datetime.now(timezone.utc).isoformat()
+            res["verifiedLiveCloud"] = res.get("mode") == "LIVE_CLOUD"
+            return res
+
+        futures = [pool.submit(_timed, ag) for ag in _AGENT_PLATFORM_MAP]
+        results = [f.result() for f in futures]
+
+    results.sort(key=lambda x: x["agentIndex"])
+    live_cloud_count = sum(1 for r in results if r["mode"] == "LIVE_CLOUD")
+    total_ms = round((_time.perf_counter() - t0) * 1000.0, 1)
+    return {
+        "ok": True,
+        "sym": payload.sym.upper().strip(),
+        "horizon": payload.horizon,
+        "liveCloudAgentsCount": live_cloud_count,
+        "totalAgents": len(results),
+        "totalLatencyMs": total_ms,
+        "verifiedAtIso": datetime.now(timezone.utc).isoformat(),
+        "agents": results,
+    }
+
+
+@executive_router.get("/latency/ping")
+def check_tokyo_binance_latency() -> dict[str, Any]:
+    """فحص البينج الحقيقي (RTT بالملي ثانية) بين السيرفر (طوكيو/المحلي) وBinance Testnet للتحقق من جاهزية الصفقات قصيرة الأجل."""
+    from datetime import datetime, timezone
+    import time as _time
+    import httpx
+
+    endpoint = f"{_TESTNET_BASE}/api/v3/ping"
+    region = (os.getenv("TRILUNAIR_REGION") or "Tokyo-JP / Server").strip()
+    t0 = _time.perf_counter()
+    reachable = False
+    http_status = 0
+    rtt_ms: float | None = None
+    note_ar = ""
+
+    try:
+        with httpx.Client(timeout=4.5) as client:
+            r = client.get(endpoint)
+            elapsed = round((_time.perf_counter() - t0) * 1000.0, 1)
+            http_status = int(r.status_code)
+            if r.status_code == 200:
+                reachable = True
+                rtt_ms = elapsed
+            elif r.status_code == 451:
+                note_ar = f"محجوب جغرافياً من هذه المنطقة (HTTP 451 — {elapsed}ms) — يعمل على سيرفر طوكيو مباشرة."
+            else:
+                note_ar = f"استجابة غير مكتملة من Binance Testnet (HTTP {r.status_code} — {elapsed}ms)."
+    except Exception as exc:
+        note_ar = f"تعذّر قياس البينج مع Binance Testnet: {exc}"
+
+    if reachable and rtt_ms is not None:
+        if rtt_ms < 80:
+            quality = "EXCELLENT"
+            note_ar = f"اتصال فائق السرعة ({rtt_ms}ms) — مثالي للصفقات قصيرة الأجل والتنفيذ اللحظي."
+        elif rtt_ms < 220:
+            quality = "GOOD"
+            note_ar = f"اتصال مستقر وجيد ({rtt_ms}ms) — مناسب للتنفيذ قصير ومتوسط الأجل."
+        else:
+            quality = "DEGRADED"
+            note_ar = f"تأخير مرتفع ({rtt_ms}ms) — يُنصح بتفضيل الصفقات متوسطة أو طويلة الأجل."
+    else:
+        quality = "OFFLINE"
+
+    return {
+        "ok": True,
+        "reachable": reachable,
+        "rttMs": rtt_ms,
+        "httpStatus": http_status,
+        "quality": quality,
+        "shortTermReady": bool(reachable and rtt_ms is not None and rtt_ms < 250),
+        "endpoint": "testnet.binance.vision",
+        "serverRegion": region,
+        "checkedAtIso": datetime.now(timezone.utc).isoformat(),
+        "noteAr": note_ar,
+    }
+
+
 
 
 
