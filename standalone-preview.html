@@ -2468,6 +2468,39 @@
           </div>
         </div>
 
+        <!-- بوابة جاهزية بدء التداول اليوم: ربط Binance Testnet + ربط الـ 5 وكلاء + تحديد فترة التداول الموحدة -->
+        <div id="session-readiness-launchpad" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:9px;margin-bottom:12px;padding:11px 13px;border-radius:12px;background:linear-gradient(170deg,#12171E,#090C10);border:1px solid rgba(255,255,255,0.12);">
+          <!-- 1. تأكيد ربط Binance Spot Testnet -->
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:9px;background:#0B0E12;border:1px solid rgba(255,255,255,0.09);">
+            <div style="min-width:0;">
+              <div style="font-size:10.5px;font-weight:800;color:#CBD5E1;">① منصة Binance التجريبية (Testnet)</div>
+              <strong id="tp-ready-binance-txt" style="font-size:11.5px;color:#E52546;">غير مربوط — اضغط للتفعيل</strong>
+            </div>
+            <button type="button" id="btn-tp-connect-binance" class="btn-3d btn-3d-sm" style="padding:5px 10px;font-size:10.5px;white-space:nowrap;" onclick="ui.openBinanceModal()">ربط Binance</button>
+          </div>
+
+          <!-- 2. مسار ربط الوكلاء الخمسة قبل بدء التداول -->
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:9px;background:#0B0E12;border:1px solid rgba(255,255,255,0.09);">
+            <div style="min-width:0;">
+              <div style="font-size:10.5px;font-weight:800;color:#CBD5E1;">② ربط الـ 5 وكلاء بمنصاتهم</div>
+              <strong id="tp-ready-agents-txt" style="font-size:11.5px;color:#F8FAFC;">1/5 متصل (المحرك الكمي)</strong>
+            </div>
+            <button type="button" id="btn-tp-connect-agents" class="btn-3d btn-sd-electric-flag btn-3d-sm" style="padding:5px 10px;font-size:10.5px;white-space:nowrap;" onclick="ui.tab('settings');setTimeout(()=>document.getElementById('ai-agents-bridge-section')?.scrollIntoView({behavior:'smooth',block:'start'}),160)">ربط الوكلاء</button>
+          </div>
+
+          <!-- 3. تحديد فترة التداول الموحدة للجلسة (تربط الشارت والصفقات والوكلاء معاً) -->
+          <div style="display:flex;flex-direction:column;gap:5px;padding:7px 10px;border-radius:9px;background:#0B0E12;border:1px solid rgba(20,138,69,0.35);">
+            <div style="font-size:10.5px;font-weight:800;color:#CBD5E1;">③ فترة التداول للجلسة (تُحدّث الشارت والصفقات معاً):</div>
+            <div class="council-hz-seg" style="grid-template-columns:repeat(5,minmax(0,1fr));width:100%;" role="group" aria-label="فترة التداول الموحدة">
+              <button type="button" class="btn-3d btn-3d-sm btn-3d-gold ghz-btn" data-ghz="1H" onclick="ui.setGlobalSessionHorizon('1H')" style="padding:0 4px !important;font-size:10.2px !important;">ساعي 1H</button>
+              <button type="button" class="btn-3d btn-3d-sm ghz-btn" data-ghz="24H" onclick="ui.setGlobalSessionHorizon('24H')" style="padding:0 4px !important;font-size:10.2px !important;">يومي 24H</button>
+              <button type="button" class="btn-3d btn-3d-sm ghz-btn" data-ghz="7D" onclick="ui.setGlobalSessionHorizon('7D')" style="padding:0 4px !important;font-size:10.2px !important;">أسبوعي 7D</button>
+              <button type="button" class="btn-3d btn-3d-sm ghz-btn" data-ghz="30D" onclick="ui.setGlobalSessionHorizon('30D')" style="padding:0 4px !important;font-size:10.2px !important;">شهري 30D</button>
+              <button type="button" class="btn-3d btn-3d-sm ghz-btn" data-ghz="1Y" onclick="ui.setGlobalSessionHorizon('1Y')" style="padding:0 4px !important;font-size:10.2px !important;">سنوي 1Y</button>
+            </div>
+          </div>
+        </div>
+
         <!-- 3 بطاقات قياس حية: البينج الحقيقي | مركز التنبيهات | حارس إيقاف الخسارة التلقائي -->
         <div class="tp-telemetry-grid">
           <!-- 1. فحص البينج الحقيقي بين سيرفر طوكيو وBinance -->
@@ -9480,6 +9513,25 @@
         }
       },
 
+      setGlobalSessionHorizon(hz) {
+        const valid = ['1H', '24H', '7D', '30D', '1Y'].includes(hz) ? hz : '1H';
+        state.globalSessionHorizon = valid;
+        state.councilHorizon = valid === '1Y' ? '30D' : valid;
+        if (valid === '7D' || valid === '30D') state.longTermHorizon = valid;
+        else if (valid === '1Y') state.longTermHorizon = '90D';
+
+        document.querySelectorAll('.ghz-btn').forEach((b) => b.classList.toggle('btn-3d-gold', b.dataset.ghz === valid));
+        // مزامنة الإطار الزمني لشارت الشموع الحقيقي تلقائياً مع فترة الجلسة!
+        const chartTf = valid === '1H' ? '1H' : (valid === '24H' ? '4H' : '1D');
+        if (typeof this.setHeroTimeframe === 'function') {
+          try { this.setHeroTimeframe(chartTf); } catch (_) {}
+        }
+        this.renderTodayPath();
+        this.renderLongTermDeals();
+        const hzNames = { '1H': 'ساعي (1H)', '24H': 'يومي (24H)', '7D': 'أسبوعي (7D)', '30D': 'شهري (30D)', '1Y': 'سنوي (1Y)' };
+        this.toast(`تمت مزامنة الشارت والصفقات والوكلاء على الإطار: ${hzNames[valid]}`);
+      },
+
       onTodaySessionPlanChange() {
         const budget = Math.max(0, Number(document.getElementById('tp-session-budget-inp')?.value || 0));
         const target = Math.max(0, Number(document.getElementById('tp-session-target-inp')?.value || 0));
@@ -9507,6 +9559,38 @@
       renderTodayPath() {
         const grid = document.getElementById('tp-live-deals-grid');
         if (!grid) return;
+
+        // تحديث بوابة الجاهزية (Binance Testnet + الـ 5 وكلاء + الإطار الزمني الموحد)
+        const elReadyBin = document.getElementById('tp-ready-binance-txt');
+        const elReadyAg = document.getElementById('tp-ready-agents-txt');
+        if (elReadyBin) {
+          if (state.testnetConnected) {
+            elReadyBin.textContent = 'متصل ومفعّل (Binance Spot Testnet) ✓';
+            elReadyBin.style.color = '#22C55E';
+          } else {
+            elReadyBin.textContent = 'غير مربوط — اضغط لربط Binance Testnet';
+            elReadyBin.style.color = '#E52546';
+          }
+        }
+        const curBindings = (Array.isArray(state.agentBindings) && state.agentBindings.length === 5)
+          ? state.agentBindings
+          : this._getDefaultAgentBindings();
+        const connAgCnt = curBindings.filter((a) => a.connected).length;
+        if (elReadyAg) {
+          elReadyAg.textContent = connAgCnt > 1
+            ? `${connAgCnt}/5 متصل (سحابي + المحرك الكمي) ✓`
+            : '1/5 متصل (المحرك الكمي) — اربط الـ 4 منصات';
+          elReadyAg.style.color = connAgCnt > 1 ? '#22C55E' : '#F8FAFC';
+        }
+
+        const activeGHz = state.globalSessionHorizon || '1H';
+        const ghzMeta = {
+          '1H': { label: 'ساعي (1H)', mult: 1.0, slMult: 1.0 },
+          '24H': { label: 'يومي (24H)', mult: 1.45, slMult: 1.15 },
+          '7D': { label: 'أسبوعي (7D)', mult: 2.6, slMult: 1.4 },
+          '30D': { label: 'شهري (30D)', mult: 5.2, slMult: 1.8 },
+          '1Y': { label: 'سنوي (1Y)', mult: 16.0, slMult: 2.5 }
+        }[activeGHz] || { label: 'ساعي (1H)', mult: 1.0, slMult: 1.0 };
 
         const priceMap = {};
         ALL_CANDIDATE_DEALS.forEach((x) => { priceMap[x.sym] = Number(x.price || 0); });
@@ -9648,8 +9732,12 @@
         const buyCardsHtml = dynamicBuyDeals.map((d, rankIdx) => {
           const m = computeDealMetrics(d);
           const investAmt = Number(m.invest || 0);
+          const adjTpPct = Math.max(0.03, Number(d.tpPct || 0.03) * ghzMeta.mult);
+          const adjSlPct = Number(d.slPct || 0.012) * ghzMeta.slMult;
+          const adjTpPrice = +(Number(d.price || 0) * (1 + adjTpPct)).toFixed(d.price < 10 ? 3 : 2);
+          const adjSlPrice = +(Number(d.price || 0) * (1 - adjSlPct)).toFixed(d.price < 10 ? 3 : 2);
           const feesEst = +(investAmt * 0.0015).toFixed(2);
-          const netExpProfit = Math.max(0, Math.round(investAmt * Number(d.tpPct || 0.03) - feesEst));
+          const netExpProfit = Math.max(0, Math.round(investAmt * adjTpPct - feesEst));
           const sharePct = availUsdt > 0 ? (investAmt / availUsdt) * 100 : 100;
           const doneToday = todayLog.find((t) => t.dealId === d.id || t.sym === d.sym);
           const verifiedPack = (state.liveCouncilByDeal && (state.liveCouncilByDeal[`${d.id}_TODAY`] || state.liveCouncilByDeal[`${d.id}_1H`])) || null;
@@ -9665,7 +9753,7 @@
           const mizanColDyn = !mizanValid || sharePct > 25 ? '#E52546' : (sharePct <= 15 ? '#22C55E' : '#F59E0B');
 
           const canBuy = !lossHalted && !doneToday && mizanValid;
-          const prefTimeLabel = { '1m': 'دقيقة (1m)', '15m': 'ربع ساعة (15m)', '1H': 'ساعة (1H)', '2H': 'ساعتان (2H)', '4H': '4 ساعات (4H)', '24H': 'يوم (24H)' }[d.round] || (d.round || 'ساعة (1H)');
+          const prefTimeLabel = ghzMeta.label;
 
           const agentChips = bindings.map((b, idx) => {
             if (idx === 3) {
@@ -9699,7 +9787,7 @@
             <article id="tp-buy-${d.id}" class="tp-deal-card">
               <div class="row-between" style="gap:8px;">
                 <div>
-                  <span class="hex-shield num" style="font-size:10px;color:#22C55E;border-color:rgba(20,138,69,0.5);">الأولوية #${rankIdx + 1} • الوقت المفضّل: ${prefTimeLabel}</span>
+                  <span class="hex-shield num" style="font-size:10px;color:#22C55E;border-color:rgba(20,138,69,0.5);">الأولوية #${rankIdx + 1} • الإطار: ${prefTimeLabel}</span>
                   <h3 style="margin:5px 0 0;font-size:16px;color:#FFFFFF;">${d.sym} <span class="muted" style="font-size:12px;">(${(d.name.split('•')[1] || d.name).trim()})</span></h3>
                 </div>
                 <div style="text-align:left;">
@@ -9708,8 +9796,8 @@
                 </div>
               </div>
               <div class="qdf-metrics-row" style="grid-template-columns:repeat(3,minmax(0,1fr));">
-                <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">هدف الربح (≥ 3%)</div><strong class="num" dir="ltr" style="font-size:12px;color:#22C55E;">$${m.tp1} (+${(d.tpPct * 100).toFixed(2)}%)</strong></div>
-                <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">وقف الخسارة SL</div><strong class="num" dir="ltr" style="font-size:12px;color:#E52546;">$${m.sl} (-${(d.slPct * 100).toFixed(2)}%)</strong></div>
+                <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">هدف الربح (≥ 3%)</div><strong class="num" dir="ltr" style="font-size:12px;color:#22C55E;">$${adjTpPrice} (+${(adjTpPct * 100).toFixed(2)}%)</strong></div>
+                <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">وقف الخسارة SL</div><strong class="num" dir="ltr" style="font-size:12px;color:#E52546;">$${adjSlPrice} (-${(adjSlPct * 100).toFixed(2)}%)</strong></div>
                 <div class="qdf-metric"><div class="muted" style="font-size:9.8px;">صافي الربح المتوقع</div><strong class="num" dir="ltr" style="font-size:12.5px;color:#22C55E;">+$${netExpProfit.toLocaleString()}</strong></div>
               </div>
               <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 9px;border-radius:8px;background:#0A0D10;border:1px solid rgba(255,255,255,0.08);">
